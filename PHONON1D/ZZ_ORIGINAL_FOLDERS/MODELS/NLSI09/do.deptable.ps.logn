@@ -1,0 +1,33 @@
+deptable_moon << !
+vzf.logn
+9999           !max depth (9999 for none)
+1              !source depths:  (1) range, (2) exact
+0 1700 50      !source dep1,dep2,dep3
+0 1.111   1000   !pmin, pmax, nump
+0              !min p at long range (.133 = no Pn, .238 = no Sn)
+none
+1              ! 1=P, 2=S, 3=quit
+2              ! (1) del in km, t in s  or  (2) del in deg., t in min
+0 178 2        ! del1,del2,del3
+tt_logn.p
+ang_logn.p
+3              ! 1=P, 2=S, 3=quit
+!
+
+which sac
+ 
+deptable_moon << !
+vzf.logn
+9999           !max depth (9999 for none)
+1              !source depths:  (1) range, (2) exact
+0 1700 50      !source dep1,dep2,dep3
+0 2.000 1000   !pmin pmax nump
+0              !min p at long range (.133 = no Pn, .238 = no Sn)
+none
+2
+2
+0 178 2        !del1,del2,del3
+tt_logn.s
+ang_logn.s
+3              ! 1=P, 2=S, 3=quit
+! 

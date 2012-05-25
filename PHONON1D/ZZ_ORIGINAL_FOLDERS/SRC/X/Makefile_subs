@@ -1,0 +1,16 @@
+.SUFFIXES: .r
+.r.f:
+	ratfor -C $< > $@
+SUBS   = ezxplot.o
+
+all: ezxplotlib.o clean
+
+ezxplotlib.o: $(SUBS)
+	ar cr ezxplotlib.a $(SUBS)
+	ranlib ezxplotlib.a
+
+clean:
+	rm *.o
+
+ezxplot.o:
+	$(FCOMP) -c   ezxplot.f

@@ -1,0 +1,7 @@
+#! /bin/csh
+# This makes the leolib.o file found in the distribution.
+cc  -c leolib.c -I/sw/include -L/sw/lib -lX11 -lm
+g77 -c psscreendump.f
+ar cr leolib.a leolib.o psscreendump.o 
+ranlib leolib.a
+rm leolib.o psscreendump.o

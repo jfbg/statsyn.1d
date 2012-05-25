@@ -1,0 +1,159 @@
+edit leLeoLibDraw: Drawing routines for use with LeoLib Version 0.9
+
+OVERVIEW
+LeoLib gives the fortran programmer a reasonable range of control over X
+Window's Graphics Context (GC).  All drawing commands are considered to
+be in the context of the GC.  Most of this is transparent to the
+programmer.  It has the effect that once a drawing attribute is changed
+(such as the present color), it effects all subsequent drawing commands.
+The command lreset will return the GC to a sensible value.
+
+When specifying a coordinate for leolib, values are always considered to
+be in pixels, with the upper left hand corner of the window to be the
+origin.  When specifying rectangles, the four values are always the
+upper left hand corner of the rectangle, and the width, and height, all
+in pixels.
+
+The commands in this document are separated by purpose into the
+following categories: control, line drawing, and shape drawing. 
+
+THE DRAWING CONTROL COMMANDS
+
+lclearwindow -- no arguments
+This erases the entire window, essentially just filling it with White.
+
+lclearpartwindow(x, y, width, height)
+This erases a rectangular section of the window.
+
+lsetcolor(index)
+This selects a color for drawing.  By default, there are the following
+12 colors:
+0= White
+1= Black
+2= Red
+3= Blue
+4= Yellow
+5= Green
+6= Orange
+7= Purple
+8= Cyan
+9= Magenta
+10= Gray
+11= Brown
+Note that on Black and White screens, all colors will be drawn as black
+except for color 0.
+
+llinestyle(width, dash, join, cap)
+This sets the style for all future lines to be drawn in.
+Width is the width of the line, in pixels.  If the width is set to 0,
+then lines will be drawn with a thickness of 1, using a faster, less
+precise algorithm.
+Set Dash to 0 for solid lines.  If dash is positive, then the line will
+be dashed, with alternating drawn and not drawn areas, each dash pixels
+long.
+Join has three options: 0 for beveled joints (default)  
+			1 for rounded joints  
+			2 for mitered joints
+Cap also has three options: 0 for a butt cap (default)
+			    1 to not draw the last row of pixels
+			    2 to round the ends of lines (extending
+			      beyond the endpoints of the drawn line)
+			    3 for a projecting square cap
+So, for a simple, solid line, of width 3 use llinestyle(3,0,0,0)
+
+lclipbox(x,y,width,height)
+Creates a clipping region in the specified rectangle.  All subsequent
+graphics calls will be handled normally, except that only parts that
+would appear within the specified rectangle actually get drawn.
+
+lnoclip -- no arguments
+Turns off clipping, so that all graphics requests are drawn.  This has
+the same effect as creating a clipping region the size of the entire
+window.
+
+lsetrasterops(code)
+Selects the raster operation to be used for all graphics requests.
+The raster operation is a logical function between the pixel value being
+placed on the screen, and the pixel value already there, to determine
+what actually happens.  There are 16 possible raster operations, 
+numbered 0-15.  (Note that these are the same codes as used in the 
+Apollo graphics primitives package.)
+0: 0
+1: new AND old
+2: new AND (NOT old)
+3: new -- Default
+4: (NOT new) AND old
+5: old -- Does nothing
+6: new XOR old
+7: new OR old
+8: (NOT new) AND (NOT old)
+9: (NOT new) XOR old
+10: NOT old
+11: new OR (NOT old)
+12: NOT new
+13: (NOT new) OR old
+14: (NOT new) OR (NOT old)
+15: 1
+Note that on color displays, changing the raster operation may have
+unexpected effects on screen colors.  (The indices used in lsetcolor are
+not the binary values used in with the logical function.)
+
+lreset -- no arguments
+Resets the Graphics Context to something sensible.
+
+THE LINE DRAWING COMMANDS
+
+lmoveto(x,y)
+Moves the Current Pointer (CP) to the specified location.  Doesn't draw
+anything.
+
+llineto(x,y)
+Draws a line from the CP to the specified location.  Then moves the CP
+to the specified location.
+
+lline(x1, y1, x2, y2)
+Draws a line from (x1,y1) to (x2,y2).  Doesn't move the CP.
+
+llines(x,y,num)
+This draws many connected lines all at once.  Here, x and y are arrays 
+of 32 bit integers.  Num specifies the size of these arrays.  A line is
+drawn from the first point, to the second, to the third, all the way to
+the end.
+
+lbitblt(x1,y1,width,height,x2,y2)
+This copies part of the window to another part of the window, a so
+called BLock Transfer (bitblt).  The source is specified as a rectangle
+with x1,y1,width,height, and the destination of the upper left corner of
+this rectangle is given by x2,y2.
+Note that bitblt's like everything else, are effected by the present 
+clipping region, and raster operation.
+
+THE SHAPE DRAWING COMMANDS
+
+ldrawhollowbox(x,y,width,height)
+Draws four lines which form the outline of the specified rectangle.
+
+ldrawfilledbox(x,y,width,height)
+Fills in the specified rectangle with the selected color.
+
+ldrawhollowcircle(x,y,radius)
+Draws a line around the perimeter of the circle with the specified
+center and radius.  (All parameters must still be integers, in units 
+of pixels.)
+
+ldrawfilledcircle(x,y,radius)
+Fills in the circle with the specified center and radius with the
+selected color.  (All parameters must still be integers, in units 
+of pixels.)
+
+lfillpolygon(x, y, npoints, shape, mode)   ***added by rshearer, 8/04***
+Fills a polygon - the region closed by a specified path.  Here, x and y are arrays of 32 bit integers that refer to the coordinates (x and y) of the points used to draw the polygon and npoints specifies the number of points.  Shape specifies the configuration of the area and mode specifies the setup of the points.  The path will be closed automatically if the last point does not coincide with the first point.  
+Shape has three options: 0 if the path may self-intersect
+			 1 if the path has concave parts (default)
+			 2 if the path is always convex
+Mode has two options: 0 if all points are relative to the origin (default)
+		      1 if all points after the first are relative to the previous point
+
+
+SEE ALSO
+leolib for control routines

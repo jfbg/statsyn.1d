@@ -1,0 +1,3 @@
+g77 -c ezxplot.f -o ezxplot.o
+ar cr ezxplotlib.a ezxplot.o
+ranlib ezxplotlib.a

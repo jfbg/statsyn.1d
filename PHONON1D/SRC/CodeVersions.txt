@@ -1,0 +1,11 @@
+statsyn_TRACK_old01.f90
+
+J00 up to J021 were done with this one.
+
+
+current statsun_TRACK.f90
+
+changes compare to old versions:
+- Change ratio of P vs S energy at source from 1/3 P to 1/10 P.
+
+ 

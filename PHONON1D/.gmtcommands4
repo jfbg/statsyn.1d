@@ -1,0 +1,8 @@
+# GMT common arguments shelf
+-B1:.Bacias Hidrograficas:.
+-Jm.11i
+-R-145/-40/-24/-21
+-X8
+-Y8
+-jm.11i
+EOF

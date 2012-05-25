@@ -1,0 +1,49 @@
+KEW SVN Repository: For Earthquake Seismology (ES) codes
+
+Host: 		kew.stanford.edu
+
+Repository: 	/usr/svn/es_src
+
+Access to repository through: svn+ssh://kew.stanford.edu/usr/svn/es_src
+
+Major Directories:
+	es_sac  - Sac I/O subroutines and modules
+	es_ansp - Ambient Noise Signal Processing (dependant on es_sac)
+	es_fft  - Fast Fourier Transform, coherency, transfer function subs
+	es_tomo - Tomography codes
+
+COMMON SVN Commands:
+
+To upload new files/directories to a repository:
+	# svn import "new_dir" svn+ssh://kew.stanford.edu/usr/svn/es_src/"new_dir"
+
+To download the whole repository to your computer:
+	# svn checkout svn+ssh://kew.stanford.edu/usr/svn/es_src
+
+To download a directory of the repository to your computer:
+	# svn checkout svn+ssh://kew.stanford.edu/usr/svn/es_src/"directory"
+
+To upload an edited version of a versioned (previously uploaded) file:
+	# svn commit svn+ssh://kew.stanford.edu/usr/svn/es_src/"directory"
+
+To list files/direcories in the repository:
+	# svn list svn+ssh://kew.stanford.edu/usr/svn/es_src
+	
+To commit changes made to a repository:
+	# svn commit
+	
+To add a file to a local repository (will be uploaded when you use commit):
+	# svn add "file_or_directory"
+
+
+OTHER SVN Commands:
+
+To create new repository:
+	#svnadmin create svn+ssh://kew.stanford.edu/usr/svn/new_repos
+
+Initial upload of (unrevisioned) docs to a new repository:
+	# svn import "new_dir" svn+ssh://kew.stanford.edu/usr/svn/new_repos/"new_dir"
+
+To create new directory
+	# svn mkdir newdir
+
