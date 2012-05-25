@@ -1,4 +1,4 @@
-PROGRAM statsyn_TRACK
+PROGRAM statsyn_TRACK_iso
 !
 !	PROGRAM tracks phonon location and power at each time intervals (nttrack).
 ! nttrack is an INTEGER and divides the total ammount of time specified into
@@ -281,35 +281,6 @@ PROGRAM statsyn_TRACK
        END DO
       END DO
 !			^^^^^ Initialize stacks variable ^^^^^	
-
- 
- 
-!       ======================================================
-!			----- Q_i model (Intrinsic attenuation) -----			
-!			--- Based on choice of Earth (1) or Moon (2)
-
-!      Use this if Q(i) is not specified in the model file (last column)
-
-!      DO I = 1, nlay+5                      !BUILD Q(z) MODEL
-!       Q(I) = 10000.
-!       IF ((z_s(I) < 15.).AND.(z_s(i-1) /= 15.) ) THEN
-!        Q(I) = 3000.
-!       ELSE IF ((z_s(I) < 80.).AND.(z_s(i-1) /= 80.) ) THEN
-!        Q(I) = 3000.
-!       ELSE IF ((z_s(I) < 220.).AND.(z_s(i-1) /= 220.) ) THEN
-!        Q(I) = 3000.
-!       ELSE IF ((z_s(I) < 670.).AND.(z_s(i-1) /= 670.) ) THEN
-!        Q(I) = 3000.
-!       ELSE IF ((z_s(I) < 5149.5).AND.(z_s(i-1) /= 5149.5) ) THEN
-!        Q(I) = 3000.
-!       ELSE
-!        Q(I) = 3000.
-!       END IF
-!       IF (EorM  ==  2) Q(I) = 10000       !FOR MOON Q IS HIGH UNTIL ??CORE??
-!      END DO
-!			^^^^^ Q_i model (Intrinsic attenuation) ^^^^^
-
-
 
 
 
@@ -999,7 +970,7 @@ PROGRAM statsyn_TRACK
 
 
 			STOP
-			END PROGRAM statsyn_TRACK
+			END PROGRAM statsyn_TRACK_iso
 !     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 !     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 !     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
