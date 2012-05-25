@@ -4,7 +4,11 @@ PROGRAM statsyn_TRACK
 ! nttrack is an INTEGER and divides the total ammount of time specified into
 ! "nttrack" equal length time windows.
 !
-! Version tries to create isotropic scattering (Edit this when done).
+! 
+!
+! $Revision$
+!	$Date$
+!	$Author$
 !
 !
 
