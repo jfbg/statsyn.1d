@@ -50,6 +50,7 @@ PROGRAM statsyn_TRACK_iso
 			REAL          ds_scat               !Distance between scatterers
 			REAL					dz										!Distance between actual depth and base of layer
 			REAL					ds_SL									!Distance between phonon and next velocity layer
+			REAL          dh										!Vertical Distance between phonon and next vel layer.
 			
 			! ENERGY TRACKING
 			CHARACTER*100 :: tfile
@@ -560,9 +561,11 @@ PROGRAM statsyn_TRACK_iso
 								
 									! Find up or down direction   (ud)					!JSCAT
 									! Get actual depth (z_act = z_s(iz) + ud*dz))
+											z_act = z_s(iz) + ud*dz
+														
 									! Get depth of next layer (z_s(iz-ud))
 									! Get h (vertical distance to next layer)
-										! h = abs(z_act - z_s(iz-ud))
+										  dh = abs(z_act - z_s(iz-ud))
 									! IF h == 0, scatter
 									! ELSE
 										! Calculate distance to next velocity layer for current p (ds_SL)
