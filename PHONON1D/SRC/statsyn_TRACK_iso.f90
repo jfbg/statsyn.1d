@@ -557,81 +557,83 @@ PROGRAM statsyn_TRACK_iso
 	!!!!! BEING EDITED ==================================================
 	! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv !
 									
-								! Calculate distance to next velocity layer for current p
-							
-								! SCENARIO WHEN PHONON COMES FROM BENEATH SL
-										
-									! Find up or down direction   (ud, should be 1)					!JSCAT
-										
-									! Get depth of next layer (z_s(iz-ud))
-									! Get dh (vertical distance to next layer)
-											z_act = z_s(iz)
-										  dh = abs(z_act - z_s(iz-ud))
-										! Calculate distance to next velocity layer for current p (ds_SL)
-															
-										IF (abs(vf(iz-1,iwave)) > 0.) THEN
-											utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
-										ELSE
-											utop = 0.
-										END IF 
-							
-										IF (abs(vf(iz,iwave)) > 0.) THEN
-											ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
-										ELSE
-											ubot = 0.
-										END IF
-										
-										imth = 2
-										
-										CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
-										ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
-										
-                  ! If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
-                  if ds_SL < ds_scat
-                     !Calculare what would dh be if phonon only travelled ds_scat km
-                     dh = ds*abs(cos(asin(p*vf(iz,iwave))))
-                     !Make phonon travel to  next scatterer
-										
-					
-					!! JFBG_EDIT ==> Now you have ds_SL (distance between phonon and next layer, need to assess if it
-					!! is less than ds_scat, if it is not, then you need to travel ds_scat m , scatter (or not), and
-					!! redo the whole thing until you reach a velocity layer, or leave the scatterinf layer.
-													
-													
-													! Get actual depth (z_act = z_s(iz) + ud*dz))
-											z_act = z_s(iz) + ud*dz
+		! Calculate distance to next velocity layer for current p
 	
-	! ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ !
-	!!!!! BEING EDITED ==================================================
+		! SCENARIO WHEN PHONON COMES FROM BENEATH SL (ud == 1)
+				
+			! Find up or down direction   (ud, should be 1)					!JSCAT
+				
+			! Get depth of next layer (z_s(iz-ud))
+			! Get dh (vertical distance to next layer)
+				z_act = z_s(iz)
+				dh = abs(z_act - z_s(iz-ud))
+				
+				! Calculate distance to next velocity layer for current p (ds_SL)
+									
+				IF (abs(vf(iz-1,iwave)) > 0.) THEN
+					utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
+				ELSE
+					utop = 0.
+				END IF 
 	
-
-                  r0 = rand()
-                  IF (r0 < scat_prob) THEN
-                    r0 = rand()
-                    IF (r0 < 0.5) x_sign=-x_sign
-			
-                    r0 = rand()
-                    IF (r0 < scat_prob) ud = -ud
-	  
-                    r0 = rand()
-                    r0 = ( r0 - 0.5 )
-                    p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
-            
-                  DO WHILE ((p < p1).OR.(p >= 1./vf(iz,iwave)) ) !p2(iwave)))
-                    r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
-                    ang1 = angst*r0
-                    p = abs(sin(ang1))/vf(iz,iwave)
-                  END DO
-          
-                  r0 = rand()                        !
-                  r1 = rand()                        !
-                  IF (r1 < 0.5) az = az - pi
-                    az = az + asin(r0**2)                  !
-                    IF (az < -pi) az = az + 2.*pi
-                    IF (az >  pi) az = az - 2.*pi
-                  END IF 
-                
+				IF (abs(vf(iz,iwave)) > 0.) THEN
+					ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
+				ELSE
+					ubot = 0.
 				END IF
+				
+				imth = 2
+				
+				CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
+				ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
+								
+		  	!If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
+		 		WHILE ds_SL < ds_scat
+			 
+					!Calculare what would dh be if phonon only travelled ds_scat km
+					dh = ds*abs(cos(asin(p*vf(iz,iwave))))  ! CHECK THIS
+			 
+					!Make phonon travel to  next scatterer
+						CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
+						dtstr1 = dt1/Q(iz)
+						d = d + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
+						t = t + dt1                    !TRAVEL TIME
+						x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
+						s = s + dtstr1                 !CUMULATIVE t*
+					
+					!Calculate new z_act
+						z_act = z_act + dh*ud
+						
+					!Scatter the phonon
+				  	r0 = rand()
+				  	IF (r0 < scat_prob) THEN
+						r0 = rand()
+						IF (r0 < 0.5) x_sign=-x_sign		
+						r0 = rand()
+						IF (r0 < scat_prob) ud = -ud
+		
+						r0 = rand()
+						r0 = ( r0 - 0.5 )
+						p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
+			
+				  		DO WHILE ((p < p1).OR.(p >= 1./vf(iz,iwave)) ) !p2(iwave)))
+							r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
+							ang1 = angst*r0
+							p = abs(sin(ang1))/vf(iz,iwave)
+				  		END DO
+		  
+				  		r0 = rand()                        !
+				  		r1 = rand()                        !
+				  		IF (r1 < 0.5) az = az - pi
+							az = az + asin(r0**2)                  !
+							IF (az < -pi) az = az + 2.*pi
+							IF (az >  pi) az = az - 2.*pi
+				 	 	END IF 
+					END IF                  
+  ! ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ !
+	!!!!! BEING EDITED ==================================================
+                
+
 				! SCATTERING LAYER
 				! ============ <<
 				
