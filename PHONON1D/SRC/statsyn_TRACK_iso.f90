@@ -7,8 +7,8 @@ PROGRAM statsyn_TRACK_iso
 ! 
 !
 ! $Revision$
-!	$Date$
-!	$Author$
+! $Date$
+! $Author$
 !
 !
 
@@ -566,7 +566,8 @@ PROGRAM statsyn_TRACK_iso
 			! Get depth of next layer (z_s(iz-ud))
 			! Get dh (vertical distance to next layer)
 				z_act = z_s(iz)
-				dh = abs(z_act - z_s(iz-ud))
+				IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
+				IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
 				
 				! Calculate distance to next velocity layer for current p (ds_SL)
 									
@@ -588,7 +589,7 @@ PROGRAM statsyn_TRACK_iso
 				ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
 								
 		  	!If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
-		 		WHILE ds_SL < ds_scat
+		 		DO WHILE ds_SL < ds_scat
 			 
 					!Calculare what would dh be if phonon only travelled ds_scat km
 					dh = ds*abs(cos(asin(p*vf(iz,iwave))))  ! CHECK THIS
@@ -607,14 +608,14 @@ PROGRAM statsyn_TRACK_iso
 					!Scatter the phonon
 				  	r0 = rand()
 				  	IF (r0 < scat_prob) THEN
-						r0 = rand()
-						IF (r0 < 0.5) x_sign=-x_sign		
-						r0 = rand()
-						IF (r0 < scat_prob) ud = -ud
-		
-						r0 = rand()
-						r0 = ( r0 - 0.5 )
-						p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
+							r0 = rand()
+							IF (r0 < 0.5) x_sign=-x_sign		
+							r0 = rand()
+							IF (r0 < scat_prob) ud = -ud
+			
+							r0 = rand()
+							r0 = ( r0 - 0.5 )
+							p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
 			
 				  		DO WHILE ((p < p1).OR.(p >= 1./vf(iz,iwave)) ) !p2(iwave)))
 							r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
@@ -629,11 +630,22 @@ PROGRAM statsyn_TRACK_iso
 							IF (az < -pi) az = az + 2.*pi
 							IF (az >  pi) az = az - 2.*pi
 				 	 	END IF 
-					END IF                  
+
+					
+					! Calculate new ds_SL based on new ud (direction)
+						IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
+						IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
+						CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
+						ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
+					
+				END DO 
+				
+				!Leaves while loop when ds_SL < distance to next vel layer                
   ! ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ !
 	!!!!! BEING EDITED ==================================================
-                
-
+                					END IF !SCATTERING LAYER IF
+                					
+                					
 				! SCATTERING LAYER
 				! ============ <<
 				
@@ -1639,4 +1651,6 @@ REAL FUNCTION artan2(y,x)
       END IF
       RETURN
 END FUNCTION artan2
+
+
 
