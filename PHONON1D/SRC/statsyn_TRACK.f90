@@ -1348,7 +1348,7 @@ SUBROUTINE LAYERTRACE(p,h,utop,ubot,imth,dx,dt,irtr)
       dt=dtau+p*dx     !convert tau to t
 !
       RETURN
-END SUBROUTINE layertrace
+END SUBROUTINE LAYERTRACE
 
 
 
