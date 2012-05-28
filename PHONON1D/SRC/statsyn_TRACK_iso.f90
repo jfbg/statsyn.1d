@@ -559,18 +559,18 @@ PROGRAM statsyn_TRACK_iso
 									
 		! Calculate distance to next velocity layer for current p
 	
-		! SCENARIO WHEN PHONON COMES FROM BENEATH SL (ud == 1)
+		! SCENARIO WHEN PHONON COMES FROM BENEATH SL (ud == 1) OR ABOVE (ud == -1)
 				
 			! Find up or down direction   (ud, should be 1)					!JSCAT
 				
 			! Get depth of next layer (z_s(iz-ud))
 			! Get dh (vertical distance to next layer)
+
+			! Once you're on a layer:
 				z_act = z_s(iz)
-				IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
-				IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
+				dh = abs(z_act - z_s(iz-ud)) ! Vertical Distance to next vel layer
 				
 				! Calculate distance to next velocity layer for current p (ds_SL)
-									
 				IF (abs(vf(iz-1,iwave)) > 0.) THEN
 					utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
 				ELSE
@@ -583,7 +583,7 @@ PROGRAM statsyn_TRACK_iso
 					ubot = 0.
 				END IF
 				
-				imth = 2
+				imth = 2	!Interpolation method in Layer trace (2 is linear)
 				
 				CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
 				ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
@@ -592,7 +592,7 @@ PROGRAM statsyn_TRACK_iso
 		 		DO WHILE ds_SL < ds_scat
 			 
 					!Calculare what would dh be if phonon only travelled ds_scat km
-					dh = ds*abs(cos(asin(p*vf(iz,iwave))))  ! CHECK THIS
+					dh = ds*abs(cos(asin(p*vf(iz,iwave))))  ! DEBUG CHECK THIS
 			 
 					!Make phonon travel to  next scatterer
 						CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
@@ -634,7 +634,7 @@ PROGRAM statsyn_TRACK_iso
 					
 					! Calculate new ds_SL based on new ud (direction)
 						IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
-						IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
+						IF (ud == -1) dh = abs(z_act - z_s(iz+1))  ! Distance to vel layer below
 						CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
 						ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
 					
@@ -678,7 +678,7 @@ PROGRAM statsyn_TRACK_iso
 					dtstr1 = 0.
 				END IF
         
-        IF (irtr1 == 0) THEN
+        IF (irtr1 == 0) THEN			!JFBG_QUESTION_2
          ud = -ud
         ELSE IF (irtr1 >= 1) THEN
          d = d + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
