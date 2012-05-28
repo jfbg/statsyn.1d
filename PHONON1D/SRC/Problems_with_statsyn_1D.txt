@@ -1,3 +1,11 @@
 Impact:
 By setting the depth to 0.01, the code searches in which layer the source is, and the source depth becomes the top of the layer directly beneath 0.01, which is normally the first scatterer (0.05km or 0.5 or É). So, the impact are never really at the surface.
 	How could this affect the resulting synths?
+
+ud value:
+Is ud == -1, up?
+Is ud == 1, down?
+
+
+JFBG_QUESTION_2:
+If ray turned in layer, why do you not record change in position?
