@@ -564,7 +564,7 @@ PROGRAM statsyn_TRACK_iso
 				r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
        
 			 
-                IF (z_s(iz) <= scat_depth) THEN
+      IF (z_s(iz) <= scat_depth) THEN
 	
 	!!!!! BEING EDITED ==================================================
 	! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv !
@@ -611,62 +611,24 @@ PROGRAM statsyn_TRACK_iso
 		 		DO WHILE ds_SL < ds_scat
 			 
 					!Calculare what would dh be if phonon only travelled ds_scat km
-					dh = ds*abs(cos(asin(p*vf(iz,iwave))))  ! DEBUG CHECK THIS
+						dh = ds*abs(cos(asin(p*vf(iz,iwave))))  ! DEBUG CHECK THIS
 			 
 					!Make phonon travel to  next scatterer
 						CALL RAYTRACE_SCAT
-						
-							
-					!	CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
-					!	dtstr1 = dt1/Q(iz)
-					!	d = d + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
-					!	t = t + dt1                    !TRAVEL TIME
-					!	x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
-					!	s = s + dtstr1                 !CUMULATIVE t*
-					!
-					!Calculate new z_act
-					!	z_act = z_act + dh*ud
-					!	
-					!Scatter the phonon
-				  !	r0 = rand()
-				  !	IF (r0 < scat_prob) THEN
-					!		r0 = rand()
-					!		IF (r0 < 0.5) x_sign=-x_sign		
-					!		r0 = rand()
-					!		IF (r0 < scat_prob) ud = -ud
-					!
-					!		r0 = rand()
-					!		r0 = ( r0 - 0.5 )
-					!		p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
-					!
-				  !		DO WHILE ((p < p1).OR.(p >= 1./vf(iz,iwave)) ) !p2(iwave)))
-					!		r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
-					!		ang1 = angst*r0
-					!		p = abs(sin(ang1))/vf(iz,iwave)
-				  !		END DO
-		  		!
-				  !		r0 = rand()                        !
-				  !		r1 = rand()                        !
-				  !		IF (r1 < 0.5) az = az - pi
-					!		az = az + asin(r0**2)                  !
-					!		IF (az < -pi) az = az + 2.*pi
-					!		IF (az >  pi) az = az - 2.*pi
-				 	! 	END IF 
-
+					
+					!Is phonon scattered at scatterer or does it go through?
+						r0 = rand()
+						IF (r0 < scat_prob)  CALL INTERFACE_SCATTER
 					
 					! Calculate new ds_SL based on new ud (direction)
-						iz2 = 1
-						DO WHILE (z_act > z_s(iz2+1))               !FIND WHICH LAYER PHONON IS ON
-						 iz2 = iz2 +1															 ! FIRST LAYER IS ASSUMED TO BE AT 0km.
-						END DO
-						iz = iz2
 						IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
 						IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
 						CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
 						ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
 					
-				END DO 
-				
+				END DO
+							
+			
 				!Leaves while loop when ds_SL < distance to next vel layer
 				!Need to travel to next vel layer
 				!Already called LAYERTRACE to check ds_SL, can use this to make phonon travels.
@@ -679,7 +641,8 @@ PROGRAM statsyn_TRACK_iso
 					                
   ! ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ !
 	!!!!! BEING EDITED ==================================================
-                					END IF !SCATTERING LAYER IF
+      
+      END IF !SCATTERING LAYER IF
                 					
                 					
 				! SCATTERING LAYER
