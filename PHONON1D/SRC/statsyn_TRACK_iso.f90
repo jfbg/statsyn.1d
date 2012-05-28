@@ -570,7 +570,14 @@ PROGRAM statsyn_TRACK_iso
 	! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv !
 									
 		! Calculate distance to next velocity layer for current p
-	
+		
+		! DIFFERENT SCENARIOS:
+		! PHONON GOES UP TOWARD THE BASE DE THE SL (UD = 1) AND THE PHONON ISNT SCATTERED DOWN.
+		! PHONON GOES UP TOWARD BASE OF SL, PHONON IS SCATTERED AND GOES BACK DOWN.
+		! PHONON GOES DOWN TOWARD BASE OF SL, IS SCATTERED UP AND GOES BACK IN SL.
+		! PHONON GOES DOWN TOWARD BASE OF SL, IS NOT SCATTERED AND
+		
+		
 		! SCENARIO WHEN PHONON COMES FROM BENEATH SL (ud == 1) OR ABOVE (ud == -1)
 				
 			! Find up or down direction   (ud, should be 1)					!JSCAT
@@ -607,41 +614,44 @@ PROGRAM statsyn_TRACK_iso
 					dh = ds*abs(cos(asin(p*vf(iz,iwave))))  ! DEBUG CHECK THIS
 			 
 					!Make phonon travel to  next scatterer
-						CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
-						dtstr1 = dt1/Q(iz)
-						d = d + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
-						t = t + dt1                    !TRAVEL TIME
-						x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
-						s = s + dtstr1                 !CUMULATIVE t*
-					
-					!Calculate new z_act
-						z_act = z_act + dh*ud
+						CALL RAYTRACE_SCAT
 						
+							
+					!	CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
+					!	dtstr1 = dt1/Q(iz)
+					!	d = d + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
+					!	t = t + dt1                    !TRAVEL TIME
+					!	x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
+					!	s = s + dtstr1                 !CUMULATIVE t*
+					!
+					!Calculate new z_act
+					!	z_act = z_act + dh*ud
+					!	
 					!Scatter the phonon
-				  	r0 = rand()
-				  	IF (r0 < scat_prob) THEN
-							r0 = rand()
-							IF (r0 < 0.5) x_sign=-x_sign		
-							r0 = rand()
-							IF (r0 < scat_prob) ud = -ud
-			
-							r0 = rand()
-							r0 = ( r0 - 0.5 )
-							p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
-			
-				  		DO WHILE ((p < p1).OR.(p >= 1./vf(iz,iwave)) ) !p2(iwave)))
-							r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
-							ang1 = angst*r0
-							p = abs(sin(ang1))/vf(iz,iwave)
-				  		END DO
-		  
-				  		r0 = rand()                        !
-				  		r1 = rand()                        !
-				  		IF (r1 < 0.5) az = az - pi
-							az = az + asin(r0**2)                  !
-							IF (az < -pi) az = az + 2.*pi
-							IF (az >  pi) az = az - 2.*pi
-				 	 	END IF 
+				  !	r0 = rand()
+				  !	IF (r0 < scat_prob) THEN
+					!		r0 = rand()
+					!		IF (r0 < 0.5) x_sign=-x_sign		
+					!		r0 = rand()
+					!		IF (r0 < scat_prob) ud = -ud
+					!
+					!		r0 = rand()
+					!		r0 = ( r0 - 0.5 )
+					!		p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
+					!
+				  !		DO WHILE ((p < p1).OR.(p >= 1./vf(iz,iwave)) ) !p2(iwave)))
+					!		r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
+					!		ang1 = angst*r0
+					!		p = abs(sin(ang1))/vf(iz,iwave)
+				  !		END DO
+		  		!
+				  !		r0 = rand()                        !
+				  !		r1 = rand()                        !
+				  !		IF (r1 < 0.5) az = az - pi
+					!		az = az + asin(r0**2)                  !
+					!		IF (az < -pi) az = az + 2.*pi
+					!		IF (az >  pi) az = az - 2.*pi
+				 	! 	END IF 
 
 					
 					! Calculate new ds_SL based on new ud (direction)
