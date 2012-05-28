@@ -17,10 +17,10 @@ PROGRAM statsyn_TRACK_iso
 
 ! Add some line of characters here to test svn
 
-      IMPLICIT NONE
-
 			MODULE pho_vars			! Make variables global
 				save
+				
+				IMPLICIT NONE
 							
 				INTEGER, PARAMETER :: nlay0=1000, nt0=144000, nx0=91
 				REAL          z(nlay0),vf(nlay0,2),rh(nlay0)
@@ -119,7 +119,11 @@ PROGRAM statsyn_TRACK_iso
 				INTEGER (kind=8)     :: nclock,nclock1
 			END MODULE pho_vars
 			
-			USE
+					
+			USE pho_vars
+			
+			IMPLICIT NONE
+			
 !			^^^^^ DECLARATIONS ^^^^^
 
 
@@ -655,7 +659,14 @@ PROGRAM statsyn_TRACK_iso
 				
 				!Leaves while loop when ds_SL < distance to next vel layer
 				!Need to travel to next vel layer
-				!Already called LAYERTRACE to check ds_SL, can use this to make phonon travels.		                
+				!Already called LAYERTRACE to check ds_SL, can use this to make phonon travels.
+					dtstr1 = dt1/Q(iz)
+					d = d + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
+					t = t + dt1                    !TRAVEL TIME
+					x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
+					s = s + dtstr1                 !CUMULATIVE t*
+				  iz = iz - ud	!new iz
+					                
   ! ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ !
 	!!!!! BEING EDITED ==================================================
                 					END IF !SCATTERING LAYER IF
