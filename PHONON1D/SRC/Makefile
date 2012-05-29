@@ -2,6 +2,9 @@ GFORT = gfortran
 GSAC  = /Users/jf/src/sac/lib/sacio.a 
 
 
+trackiso.x:
+	$(GFORT) -m32 get_spec.f PHO_VARS.f90 statsyn_TRACK_iso.f90 $(GSAC) -o ../bin/statsyn_iso
+
 tracktime.x:	
 	$(GFORT) -m32 get_spec.f statsyn_1D_TIMETRACK.f90 $(GSAC) -o ../bin/statsyn_1D_track_time
 
