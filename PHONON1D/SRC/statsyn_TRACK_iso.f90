@@ -127,7 +127,7 @@ PROGRAM statsyn_TRACK_iso
 !			^^^^^ DECLARATIONS ^^^^^
 
 
-      write(*,*) 'Last Edited on May 19th 2012 by JFBG - ISOTROPIC Scattering'
+      write(*,*) 'Last Edited on May 28th 2012 by JFBG - ISOTROPIC Scattering'
 
 
 !       ======================================================
@@ -454,7 +454,7 @@ PROGRAM statsyn_TRACK_iso
         p    = abs(sin(ang1))/vf(iz,iwave)
         az   = 0.
         ! a    = cos(ang1*2.-pi/4.)              !SOURCE AMPLITUDE
-		a = 1.
+		    a = 1.
         ncaust = 0                             !# OF CAUSTICS STARS AT 0.
 				
         IF (ang1 < pi/2.) THEN
@@ -564,7 +564,7 @@ PROGRAM statsyn_TRACK_iso
 				r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
        
 			 
-      IF (z_s(iz) <= scat_depth) THEN
+
 	
 	!!!!! BEING EDITED ==================================================
 	! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv !
@@ -572,22 +572,29 @@ PROGRAM statsyn_TRACK_iso
 		! Calculate distance to next velocity layer for current p
 		
 		! DIFFERENT SCENARIOS:
-		! PHONON GOES UP TOWARD THE BASE DE THE SL (UD = 1) AND THE PHONON ISNT SCATTERED DOWN.
+		! PHONON GOES UP TOWARD THE BASE DE THE SL (UD = -1) AND THE PHONON ISNT SCATTERED DOWN.
 		! PHONON GOES UP TOWARD BASE OF SL, PHONON IS SCATTERED AND GOES BACK DOWN.
 		! PHONON GOES DOWN TOWARD BASE OF SL, IS SCATTERED UP AND GOES BACK IN SL.
 		! PHONON GOES DOWN TOWARD BASE OF SL, IS NOT SCATTERED AND
 		
 		
-		! SCENARIO WHEN PHONON COMES FROM BENEATH SL (ud == 1) OR ABOVE (ud == -1)
+		! SCENARIO WHEN PHONON COMES FROM BENEATH SL (ud == -1) OR ABOVE (ud == 1)
 				
-			! Find up or down direction   (ud, should be 1)					!JSCAT
+			! Find up or down direction   (ud, should be -1)					!JSCAT
 				
 			! Get depth of next layer (z_s(iz-ud))
 			! Get dh (vertical distance to next layer)
 
 			! Once you're on a layer:
+			  IF (z_s(iz) <= scat_depth) THEN
+			  
+			  !Check if your leaving the SL
+				 IF (z_s(iz) == scat_depth & ud == 1) THEN
+					! FILL THIS W
+				 END IF
+				 
 				z_act = z_s(iz)
-				dh = abs(z_act - z_s(iz-ud)) ! Vertical Distance to next vel layer
+				dh = abs(z_act - z_s(iz+ud)) ! Vertical Distance to next vel layer
 				
 				! Calculate distance to next velocity layer for current p (ds_SL)
 				IF (abs(vf(iz-1,iwave)) > 0.) THEN
@@ -615,6 +622,7 @@ PROGRAM statsyn_TRACK_iso
 			 
 					!Make phonon travel to  next scatterer
 						CALL RAYTRACE_SCAT
+						z_act = z_act + dh*ud
 					
 					!Is phonon scattered at scatterer or does it go through?
 						r0 = rand()
@@ -628,16 +636,15 @@ PROGRAM statsyn_TRACK_iso
 					
 				END DO
 							
-			
-				!Leaves while loop when ds_SL < distance to next vel layer
+				!Leaves WHILE loop when ds_SL < distance to next vel layer
 				!Need to travel to next vel layer
-				!Already called LAYERTRACE to check ds_SL, can use this to make phonon travels.
-					dtstr1 = dt1/Q(iz)
-					d = d + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
-					t = t + dt1                    !TRAVEL TIME
-					x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
-					s = s + dtstr1                 !CUMULATIVE t*
-				  iz = iz - ud	!new iz
+				  CALL RAYTRACE_SCAT
+				!Figure out in which layer the phonon is now into (iz or iz-1)
+					iz2 = 1
+          DO WHILE (z_act > z_s(iz1+1))               !FIND WHICH LAYER QUAKE STARTS IN
+            iz2 = iz2 +1															 ! FIRST LAYER IS ASSUMED TO BE AT 0km.
+          END DO
+					iz = iz2
 					                
   ! ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ !
 	!!!!! BEING EDITED ==================================================
@@ -649,132 +656,10 @@ PROGRAM statsyn_TRACK_iso
 				! ============ <<
 				
 			
-							
+							 
 				! ============ >>
 				! RAY TRACING IN LAYER			
-				IF (iz /= 1) THEN
-				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
-				    utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
-				  ELSE
-				    utop = 0.
-				  END IF 
-		
-					IF (abs(vf(iz,iwave)) > 0.) THEN
-						ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
-					ELSE
-						ubot = 0.
-					END IF
-         
-					h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
-					imth = 2                              !INTERPOLATION METHOD
-		
-					CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
-					dtstr1 = dt1/Q(iz)                    !t* = TIME/QUALITY FACTOR
-				ELSE
-					irtr1  = -1
-					dx1    = 0.
-					dt1    = 0.
-					dtstr1 = 0.
-				END IF
-        
-        IF (irtr1 == 0) THEN			!JFBG_QUESTION_2
-         ud = -ud
-        ELSE IF (irtr1 >= 1) THEN
-         d = d + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
-         
-         t = t + dt1                    !TRAVEL TIME
-         x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
-         s = s + dtstr1                 !CUMULATIVE t*
-        END IF
-        
-				IF ( (iz > 1).AND.(abs(irtr1) == 1).AND. &
-							(iz < nlay) ) THEN
-					IF ( (iz > 1).AND.(iz <= nlay) ) h = z_s(iz)-z_s(iz-1)
-
-          IF (ip  ==  2) THEN
-						IF ( (ud == 1) ) THEN               !IF downGOING SH WAVE
-							CALL REFTRAN_SH(p,vf(iz-1,2),vf(iz,2),rh(iz-1),rh(iz), &
-                           ar,at)
-						ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE
-							CALL REFTRAN_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1), &
-                           ar,at)
-						END IF
-          ELSE
-						IF ( (ud == 1) ) THEN               !IF downGOING P-SV WAVE
-							CALL RTCOEF2(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
-                          vf(iz  ,1),vf(iz  ,2),rh(iz), &
-                          ip,arp,ars,atp,ats)
-						ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE
-							CALL RTCOEF2(p,vf(iz  ,1),vf(iz  ,2),rh(iz  ), &
-                          vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
-                          ip,arp,ars,atp,ats)           
-!           WRITE(6,*) 'HI'
-						END IF
-          END IF
-          
-          r0 = rand()                       !RANDOM NUMBER FROM 0 TO 1
-
-          IF (ip  ==  2) THEN                   !IF SH-WAVE
-
-						IF (h > 0.) THEN                    !IF GRADIENT, THEN
-							IF (r0 < (abs(ar)/(abs(ar)+abs(at)))/P0**2) THEN!CHECK FOR REFLECTN
-								IF (ar < 0) a = -a                !OPPOSITE POLARITY
-								ud = -ud                           !downGOING/UPGOING
-							END IF                              !
-						ELSE                                 !IF INTERFACE THEN
-							IF (r0 < (abs(ar)/(abs(ar)+abs(at)))) THEN!CHECK FOR REFLECTION
-								IF (ar < 0) a = -a                !OPPOSITE POLARITY
-								ud = -ud                           !downGOING/UPGOING
-							END IF                              !
-						END IF                               !
-
-          ELSE                                  !IF P- OR SV-WAVE 
-          	IF (h <= 0.) THEN
-							rt_sum = abs(arp)+abs(atp)+abs(ars)+abs(ats)    !SUM OF REFL/TRAN COEFS
-
-							rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
-							rt_max = abs(arp)/rt_sum             !
-							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED P
-								IF (arp < 0) a = -a                 !REVERSE POLARITY
-								ud = -ud                            !UPGOING <-> downGOING
-								ip = 1                              !P WAVE
-							END IF                               !
-           
-!             IF (z_s(iz) == 137.) WRITE(6,*) arp,atp,r0,ud,ip,a
-
-							rt_min = rt_max                      !RANGE PROBABILITIES 4 SV REFL
-							rt_max = rt_max+abs(ars)/rt_sum      !
-							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED SV
-								IF (ars < 0) a = -a                 !REVERSE POLARITY
-								ud = -ud                            !UPGOING <-> downGOING
-								ip = 3                              !SV WAVE
-							END IF                               !
-
-							rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
-							rt_max = rt_max+abs(atp)/rt_sum      !
-							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRAMSITTED P
-								ip = 1                              !P WAVE
-							END IF                               !
-
-							rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
-							rt_max = rt_max+abs(ats)/rt_sum      !
-							IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV
-								ip = 3                              !SV WAVE
-							END IF                               !
-						END IF      
-          END IF                                !END IF: SH, OR P-SV
-         
-        ELSE IF (iz == nlay) THEN               !ONCE HIT OTHER SIDE OF CORE
-					ud = -ud
-					x = x + 180*deg2km
-				END IF
-	
-        
-				!FIX NEXT IF FOR DIFFRACTED WAVES: 
-				IF (irtr1 == 2) THEN             !RAY TURNS IN LAYER FOLLOW 1 LEN
-				ud = -ud
-				ncaust = ncaust + 1                   !# OF CAUSTICS
-				END IF
+				CALL RAYTRACE
 				! RAY TRACING IN LAYER	
   			! ============ <<
 
