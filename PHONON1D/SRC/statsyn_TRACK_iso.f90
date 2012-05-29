@@ -491,92 +491,94 @@ PROGRAM statsyn_TRACK_iso
 				
 				NITR = NITR + 1		!JFBG Why this?
 				r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
-				
-				!! MAYBE CHECK IF YOU'RE AT THE SURFACE HERE + RECORD
+
 
 				! ============ >>
 				! SCATTERING LAYER
 								       
 				! Check if the phonon is in the scattering layer
-			  IF (z_s(iz) <= scat_depth) THEN
+									!Check if your leaving the SL
+				IF ((z_s(iz) == scat_depth).AND.(ud == 1)) THEN
+						CALL RAYTRACE
+				    iz = iz + ud
+        ELSE
 					
-					!Check if scatter
-					CALL INTERFACE_SCATTER
-					if (iz == 1) ud = 1 !make it go down if at surface
-					
-					!Check if your leaving the SL
-					 IF ((z_s(iz) == scat_depth).AND.(ud == 1)) THEN
-						GO TO 401 !Goes toward Moon's center.
-					 END IF
-					 
-					z_act = z_s(iz)
-					IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
-					IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
-					
-					! Traveling above or below iz?
-					izfac = 0  !Above
-					IF (ud == 1) izfac = 1  !Below
-					
-					! Calculate linear distance to next velocity layer (ds_SL)
-						IF (abs(vf(iz+ud,iwave)) > 0.) THEN
-							utop = 1./vf(iz+ud,iwave)              !SLOWNESS AT TOP OF LAYER
-						ELSE
-							utop = 0.
-						END IF 
-			
-						IF (abs(vf(iz,iwave)) > 0.) THEN
-							ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
-						ELSE
-							ubot = 0.
-						END IF
+					IF (z_s(iz) <= scat_depth) THEN
 						
-						imth = 2	!Interpolation method in Layer trace (2 is linear)
+						!Check if scatter
+						CALL INTERFACE_SCATTER
+						if (iz == 1) ud = 1 !make it go down if at surface
 						
-						CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
-						ds_SL = ((z_s(iz)-z_s(iz+ud))**2+dx1**2)**0.5
-									
-					!If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
-					DO WHILE (ds_SL < ds_scat)
-				 
-						!Calculare what would dh be if phonon only travelled ds_scat km
-							dh = ds_scat*abs(cos(asin(p*vf(iz,iwave))))  ! DEBUG CHECK THIS
-				 
-						!Make phonon travel to  next scatterer
-							CALL RAYTRACE_SCAT
-							z_act = z_act + dh*ud
+	
+						 
+						z_act = z_s(iz)
+						IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
+						IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
 						
-						!Is phonon scattered at scatterer or does it go through?
-							CALL INTERFACE_SCATTER
+						! Traveling above or below iz?
+						izfac = 0  !Above
+						IF (ud == 1) izfac = 1  !Below
 						
-						! Calculate new ds_SL based on new ud and p (if it got scattered)
-							IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
-							IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
+						! Calculate linear distance to next velocity layer (ds_SL)
+							IF (abs(vf(iz+ud,iwave)) > 0.) THEN
+								utop = 1./vf(iz+ud,iwave)              !SLOWNESS AT TOP OF LAYER
+							ELSE
+								utop = 0.
+							END IF 
+				
+							IF (abs(vf(iz,iwave)) > 0.) THEN
+								ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
+							ELSE
+								ubot = 0.
+							END IF
+							
+							imth = 2	!Interpolation method in Layer trace (2 is linear)
+							
 							CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
-							ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
-						
-					END DO
-								
-					!Leaves WHILE loop when ds_SL < distance to next vel layer
-					!Need to travel to next vel layer
-						CALL RAYTRACE_SCAT !Already have dh
-					!Figure out in which layer the phonon is now into (iz or iz+-1)
-						iz2 = 1
-						DO WHILE (z_act > z_s(iz1+1))               !FIND WHICH LAYER QUAKE STARTS IN
-							iz2 = iz2 +1															 ! FIRST LAYER IS ASSUMED TO BE AT 0km.
+							ds_SL = ((z_s(iz)-z_s(iz+ud))**2+dx1**2)**0.5
+										
+						!If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
+						DO WHILE (ds_SL < ds_scat)
+					 
+							!Calculare what would dh be if phonon only travelled ds_scat km
+								dh = ds_scat*abs(cos(asin(p*vf(iz,iwave))))  ! DEBUG CHECK THIS
+					 
+							!Make phonon travel to  next scatterer
+								CALL RAYTRACE_SCAT
+								z_act = z_act + dh*ud
+							
+							!Is phonon scattered at scatterer or does it go through?
+								CALL INTERFACE_SCATTER
+							
+							! Calculate new ds_SL based on new ud and p (if it got scattered)
+								IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
+								IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
+								CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
+								ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
+							
 						END DO
-						iz = iz2
-														
-      ELSE !Not in scattering layer
-      
-				! ============ >>
-				! RAY TRACING IN LAYER			
-401     CALL RAYTRACE
-				iz = iz + ud   
-				! RAY TRACING IN LAYER	
-  			! ============ <<
-  			
-      END IF !SCATTERING LAYER IF
-                					
+									
+						!Leaves WHILE loop when ds_SL < distance to next vel layer
+						!Need to travel to next vel layer
+							CALL RAYTRACE_SCAT !Already have dh
+						!Figure out in which layer the phonon is now into (iz or iz+-1)
+							iz2 = 1
+							DO WHILE (z_act > z_s(iz1+1))               !FIND WHICH LAYER QUAKE STARTS IN
+								iz2 = iz2 +1															 ! FIRST LAYER IS ASSUMED TO BE AT 0km.
+							END DO
+							iz = iz2
+															
+				ELSE !Not in scattering layer
+				
+					! ============ >>
+					! RAY TRACING IN LAYER			
+					CALL RAYTRACE
+					iz = iz + ud   
+					! RAY TRACING IN LAYER	
+					! ============ <<
+					
+				END IF !SCATTERING LAYER IF
+      END IF         					
 				! SCATTERING LAYER
 				! ============ <<
 				
