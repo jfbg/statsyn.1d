@@ -9,3 +9,8 @@ Is ud == 1, down?
 
 JFBG_QUESTION_2:
 If ray turned in layer, why do you not record change in position?
+
+
+in _iso.f90:
+Am defining a new random seed each time I scatter, is this bad? Will this cause the distribution of random number to not follow anything in particular?
+--> HAVE COMMENTED THE NEW SEED PART IN SUBROUTINE TO SEE IF IT WORKS WITHOUT.
