@@ -17,46 +17,21 @@ PROGRAM statsyn_TRACK_iso
 
 ! Add some line of characters here to test svn
 
-			MODULE pho_vars			! Make variables global
-				save
+				USE PHO_VARS
 				
 				IMPLICIT NONE
 							
-				INTEGER, PARAMETER :: nlay0=1000, nt0=144000, nx0=91
-				REAL          z(nlay0),vf(nlay0,2),rh(nlay0)
-				REAL          z_s(nlay0),r_s(nlay0),vs(nlay0,2)
-				REAL          t,x,xo,a,w(nt0)
 				CHARACTER*100 IFile,ofile,ofile2
-				REAL          dx1,dt1
-				INTEGER       irtr1
-				INTEGER     :: iz,iz1,itt
-				REAL  			:: maxcount
-				INTEGER     :: IT,JT,I,J,ic,jj,k,kk,ll,mm
-				REAL          p,ang1
 				DOUBLE PRECISION wf(nx0,nt0,3)        !STACKED DATA
-				REAL          Q(nlay0)              !QUALITY FACTOR 
-				REAL          dtstr1                !ATTENUATION PER LAYER
-				REAL          mt(nt0)               !SOURCE-TIME FUNCTION 
-				COMPLEX       ms(nt0),ss(nx0,nt0)   !SOURCE & STACKED SPECTRA
-				REAL          nn(nx0,nt0)
-				REAL          pi,P0
-				INTEGER       n180,idelt1,idelt2
-				REAL       :: angst                 !! Starting angle for trace
-				INTEGER		 :: iztrack,ixtrack
-				
+
 				! SOURCE
 				REAL          mts(101,4,nt0)        !ATTENUATED SOURCE
 				REAL          b(nt0), e(nt0)        !HILBERT TRANSFORM & ENVELOPE
 				REAL          mtsc(nt0),datt,dtst1  !SCRATCH SPACE
 				INTEGER       ims
-				
-				! SCATTERING
-				REAL          ds_scat               !Distance between scatterers
-				REAL					dz										!Distance between actual depth and base of layer
-				REAL					ds_SL									!Distance between phonon and next velocity layer
-				REAL          dh										!Vertical Distance between phonon and next vel layer.
-				REAL					iz2										!Temp var to find location of phonon
-				INTEGER				izfac									!0 if traveling above iz, 1 if below
+				REAL          mt(nt0)               !SOURCE-TIME FUNCTION 
+				COMPLEX       ms(nt0),ss(nx0,nt0)   !SOURCE & STACKED SPECTRA
+				REAL          nn(nx0,nt0)
 				
 				! ENERGY TRACKING
 				CHARACTER*100 :: tfile
@@ -65,66 +40,10 @@ PROGRAM statsyn_TRACK_iso
 				INTEGER			:: nttrack		!track time points
 				INTEGER		::	nttrack_dt						!time interval for saving phonon position
 				REAL			::	normfactor						!Normalization factor for cell size
-	
-				
-				INTEGER       ncaust,icaust         !NUMBER OF CAUSTICS IN A RAY TRACE
-				INTEGER       ud
-				
-				REAL          d2r,re,rm,deg2km
+
+				REAL          d2r,re,rm
 				INTEGER       EorM                  !1=EARTH, 2=MOON
 				
-				REAL          frac
-				REAL          erad
-				
-				REAL          arp,ars,atp,ats,ar,at !P- & S-WAVE REFL & TRANS COEFS
-				REAL          rt_sum,rt_min,rt_max  !MAX & MIN REFL PROBABILITIES
-				
-				INTEGER       ip,ip0                !1=P, 2=SH, 3=SV
-				REAL          x_sign
-				
-				REAL          scat_depth,scat_prob
-				REAL          scat_thet,scat_phi
-				REAL          az
-				REAL          dp
-				REAL        :: d
-				REAL        :: delta
-				REAL        :: dxi
-				REAL        :: h     !! Layer thickness
-				INTEGER     :: idum
-				INTEGER     :: imth  !! Interpolation method (1 or 2)
-				INTEGER     :: iwave !! (P(2) or S(2))
-				INTEGER     :: ix,nx ,ixtemp,ixdeg   !! Index & number of distances
-				INTEGER     :: nfil  !! Number of filter values for hilbert transform
-				INTEGER     :: ntr   !! Number of traces
-				INTEGER     :: nts,nts1   !! Number of time series points for source
-				INTEGER     :: nitr  !! Number of ith trace (last)
-				INTEGER     :: nt    !! Number of time in output file
-				INTEGER     :: nlay  !! Number of layers in model
-				REAL        :: r0,r1    !! random number 0-1
-				REAL        :: pow2,pow1 !! Normalization factor for hilber transform
-				REAL        :: s,s1,s2     !! Attenuation & bounds on attenuation for distance
-				REAL        :: scr1,scr2,scr3,scr4 !! Flat earth approximation variables
-				REAL        :: t0,t1,t2,dti,t_last  !! Time variables (bounds & interval)
-				REAL        :: ubot, utop !! Bottom & Top slowness
-				REAL        :: x1, x2     !! Distance bounds
-				
-				REAL           c_mult(3)
-				CHARACTER*3    cmp(3)
-				REAL           p1,p2(2)              !Ray parameters
-				REAL           qdep
-				
-				INTEGER        status                !I/O ERROR (0=no READ error)
-				INTEGER        n_iter_last,it_last,ix_last
-				INTEGER     :: nseed
-				INTEGER     :: seed
-				INTEGER (kind=8)     :: nclock,nclock1
-			END MODULE pho_vars
-			
-					
-			USE pho_vars
-			
-			IMPLICIT NONE
-			
 !			^^^^^ DECLARATIONS ^^^^^
 
 
@@ -568,22 +487,25 @@ PROGRAM statsyn_TRACK_iso
 				! ============ <<
 
 
-				! ============ >>
-				! SCATTERING LAYER
+
 				
 				NITR = NITR + 1		!JFBG Why this?
 				r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
 				
 				!! MAYBE CHECK IF YOU'RE AT THE SURFACE HERE + RECORD
-				       
+
+				! ============ >>
+				! SCATTERING LAYER
+								       
 				! Check if the phonon is in the scattering layer
 			  IF (z_s(iz) <= scat_depth) THEN
 					
 					!Check if scatter
 					CALL INTERFACE_SCATTER
+					if (iz == 1) ud = 1 !make it go down if at surface
 					
 					!Check if your leaving the SL
-					 IF (z_s(iz) == scat_depth & ud == 1) THEN
+					 IF ((z_s(iz) == scat_depth).AND.(ud == 1)) THEN
 						GO TO 401 !Goes toward Moon's center.
 					 END IF
 					 
@@ -614,10 +536,10 @@ PROGRAM statsyn_TRACK_iso
 						ds_SL = ((z_s(iz)-z_s(iz+ud))**2+dx1**2)**0.5
 									
 					!If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
-					DO WHILE ds_SL < ds_scat
+					DO WHILE (ds_SL < ds_scat)
 				 
 						!Calculare what would dh be if phonon only travelled ds_scat km
-							dh = ds*abs(cos(asin(p*vf(iz,iwave))))  ! DEBUG CHECK THIS
+							dh = ds_scat*abs(cos(asin(p*vf(iz,iwave))))  ! DEBUG CHECK THIS
 				 
 						!Make phonon travel to  next scatterer
 							CALL RAYTRACE_SCAT
@@ -648,24 +570,18 @@ PROGRAM statsyn_TRACK_iso
       
 				! ============ >>
 				! RAY TRACING IN LAYER			
-				CALL RAYTRACE
+401     CALL RAYTRACE
+				iz = iz + ud   
 				! RAY TRACING IN LAYER	
   			! ============ <<
   			
       END IF !SCATTERING LAYER IF
                 					
-401   CONTINUE
-                					
 				! SCATTERING LAYER
 				! ============ <<
 				
-							 
-
-
-				
-				iz = iz + ud                           !GO TO NEXT DEPTH
         
-				IF (iz < 1) t = 999999.  !???
+				! IF (iz < 1) t = 999999.  !JFBG
 			 
 
 			 END DO		!CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
@@ -1439,5 +1355,317 @@ REAL FUNCTION artan2(y,x)
       RETURN
 END FUNCTION artan2
 
+!=======================================
+      SUBROUTINE INTERFACE_NORMAL
+      
+      USE pho_vars
+      
+      IMPLICIT NONE
+              
+				IF ( (iz > 1).AND.(abs(irtr1) == 1).AND. &
+							(iz < nlay) ) THEN
+					IF ( (iz > 1).AND.(iz <= nlay) ) h = z_s(iz)-z_s(iz-1)
+
+          IF (ip  ==  2) THEN
+						IF ( (ud == 1) ) THEN               !IF downGOING SH WAVE
+							CALL REFTRAN_SH(p,vf(iz-1,2),vf(iz,2),rh(iz-1),rh(iz), &
+                           ar,at)
+						ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE
+							CALL REFTRAN_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1), &
+                           ar,at)
+						END IF
+          ELSE
+						IF ( (ud == 1) ) THEN               !IF downGOING P-SV WAVE
+							CALL RTCOEF2(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
+                          vf(iz  ,1),vf(iz  ,2),rh(iz), &
+                          ip,arp,ars,atp,ats)
+						ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE
+							CALL RTCOEF2(p,vf(iz  ,1),vf(iz  ,2),rh(iz  ), &
+                          vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
+                          ip,arp,ars,atp,ats)           
+						END IF
+          END IF
+          
+          r0 = rand()                       !RANDOM NUMBER FROM 0 TO 1
+
+          IF (ip  ==  2) THEN                   !IF SH-WAVE
+
+						IF (h > 0.) THEN                    !IF GRADIENT, THEN
+							IF (r0 < (abs(ar)/(abs(ar)+abs(at)))/P0**2) THEN!CHECK FOR REFLECTN
+								IF (ar < 0) a = -a                !OPPOSITE POLARITY
+								ud = -ud                           !downGOING/UPGOING
+							END IF                              !
+						ELSE                                 !IF INTERFACE THEN
+							IF (r0 < (abs(ar)/(abs(ar)+abs(at)))) THEN!CHECK FOR REFLECTION
+								IF (ar < 0) a = -a                !OPPOSITE POLARITY
+								ud = -ud                           !downGOING/UPGOING
+							END IF                              !
+						END IF                               !
+
+          ELSE                                  !IF P- OR SV-WAVE 
+          	IF (h <= 0.) THEN
+							rt_sum = abs(arp)+abs(atp)+abs(ars)+abs(ats)    !SUM OF REFL/TRAN COEFS
+
+							rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
+							rt_max = abs(arp)/rt_sum             !
+							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED P
+								IF (arp < 0) a = -a                 !REVERSE POLARITY
+								ud = -ud                            !UPGOING <-> downGOING
+								ip = 1                              !P WAVE
+							END IF                               !
+           
+
+							rt_min = rt_max                      !RANGE PROBABILITIES 4 SV REFL
+							rt_max = rt_max+abs(ars)/rt_sum      !
+							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED SV
+								IF (ars < 0) a = -a                 !REVERSE POLARITY
+								ud = -ud                            !UPGOING <-> downGOING
+								ip = 3                              !SV WAVE
+							END IF                               !
+
+							rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
+							rt_max = rt_max+abs(atp)/rt_sum      !
+							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRAMSITTED P
+								ip = 1                              !P WAVE
+							END IF                               !
+
+							rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
+							rt_max = rt_max+abs(ats)/rt_sum      !
+							IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV
+								ip = 3                              !SV WAVE
+							END IF                               !
+						END IF      
+          END IF                                !END IF: SH, OR P-SV
+         
+        ELSE IF (iz == nlay) THEN               !ONCE HIT OTHER SIDE OF CORE
+					ud = -ud
+					x = x + 180*deg2km
+				END IF
+	
+        
+				!FIX NEXT IF FOR DIFFRACTED WAVES: 
+				IF (irtr1 == 2) THEN             !RAY TURNS IN LAYER FOLLOW 1 LEN
+				ud = -ud
+				ncaust = ncaust + 1                   !# OF CAUSTICS
+				END IF
+				
+      END SUBROUTINE INTERFACE_NORMAL
 
 
+      SUBROUTINE INTERFACE_SCATTER
+      
+      USE pho_vars
+      
+      IMPLICIT NONE
+    					
+      ! ----- Initialize Randomization -----			
+      ! CALL SYSTEM_CLOCK(COUNT=nclock)
+      ! seed = (nclock)! + 11 * (/ (k - 1, k = 1, nseed) /)
+      ! CALL srand(seed)
+      ! 
+	    ! r0 = rand()    !First rand output not random
+      !                  ! It is seed (clock) dependent
+      ! ============ <<
+      
+      !Check if scatter first
+      r0 = rand()
+      IF (r0 < scat_prob) THEN      
+				 r0 = rand()
+				 IF (r0 < 0.5) x_sign=-x_sign		
+				 r0 = rand()
+				 IF (r0 < scat_prob) ud = -ud
+		 
+				 r0 = rand()
+				 r0 = ( r0 - 0.5 )
+				 p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
+		 
+				 DO WHILE ((p < p1).OR.(p >= 1./vf(iz,iwave)) ) !p2(iwave)))
+				 r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
+				 ang1 = angst*r0
+				 p = abs(sin(ang1))/vf(iz,iwave)
+				 END DO
+		 
+				 r0 = rand()                        !
+				 r1 = rand()                        !
+				 IF (r1 < 0.5) az = az - pi
+				 az = az + asin(r0**2)                  !
+				 IF (az < -pi) az = az + 2.*pi
+				 IF (az >  pi) az = az - 2.*pi
+      END IF		 
+			
+			RETURN	
+      END SUBROUTINE INTERFACE_SCATTER
+      
+      SUBROUTINE RAYTRACE
+      
+      USE pho_vars
+		
+				IF (iz /= 1) THEN
+				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
+				    utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
+				  ELSE
+				    utop = 0.
+				  END IF 
+		
+					IF (abs(vf(iz,iwave)) > 0.) THEN
+						ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
+					ELSE
+						ubot = 0.
+					END IF
+         
+					h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
+					imth = 2                              !INTERPOLATION METHOD
+		
+					CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
+					dtstr1 = dt1/Q(iz)                    !t* = TIME/QUALITY FACTOR
+				ELSE
+					irtr1  = -1
+					dx1    = 0.
+					dt1    = 0.
+					dtstr1 = 0.
+				END IF
+        
+        IF (irtr1 == 0) THEN			!JFBG_QUESTION_2
+         ud = -ud
+        ELSE IF (irtr1 >= 1) THEN
+         d = d + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
+         
+         t = t + dt1                    !TRAVEL TIME
+         x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
+         s = s + dtstr1                 !CUMULATIVE t*
+        END IF
+        
+				IF ( (iz > 1).AND.(abs(irtr1) == 1).AND. &
+							(iz < nlay) ) THEN
+					IF ( (iz > 1).AND.(iz <= nlay) ) h = z_s(iz)-z_s(iz-1)
+
+          IF (ip  ==  2) THEN
+						IF ( (ud == 1) ) THEN               !IF downGOING SH WAVE
+							CALL REFTRAN_SH(p,vf(iz-1,2),vf(iz,2),rh(iz-1),rh(iz), &
+                           ar,at)
+						ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE
+							CALL REFTRAN_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1), &
+                           ar,at)
+						END IF
+          ELSE
+						IF ( (ud == 1) ) THEN               !IF downGOING P-SV WAVE
+							CALL RTCOEF2(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
+                          vf(iz  ,1),vf(iz  ,2),rh(iz), &
+                          ip,arp,ars,atp,ats)
+						ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE
+							CALL RTCOEF2(p,vf(iz  ,1),vf(iz  ,2),rh(iz  ), &
+                          vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
+                          ip,arp,ars,atp,ats)           
+!           WRITE(6,*) 'HI'
+						END IF
+          END IF
+          
+          r0 = rand()                       !RANDOM NUMBER FROM 0 TO 1
+
+          IF (ip  ==  2) THEN                   !IF SH-WAVE
+
+						IF (h > 0.) THEN                    !IF GRADIENT, THEN
+							IF (r0 < (abs(ar)/(abs(ar)+abs(at)))/P0**2) THEN!CHECK FOR REFLECTN
+								IF (ar < 0) a = -a                !OPPOSITE POLARITY
+								ud = -ud                           !downGOING/UPGOING
+							END IF                              !
+						ELSE                                 !IF INTERFACE THEN
+							IF (r0 < (abs(ar)/(abs(ar)+abs(at)))) THEN!CHECK FOR REFLECTION
+								IF (ar < 0) a = -a                !OPPOSITE POLARITY
+								ud = -ud                           !downGOING/UPGOING
+							END IF                              !
+						END IF                               !
+
+          ELSE                                  !IF P- OR SV-WAVE 
+          	IF (h <= 0.) THEN
+							rt_sum = abs(arp)+abs(atp)+abs(ars)+abs(ats)    !SUM OF REFL/TRAN COEFS
+
+							rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
+							rt_max = abs(arp)/rt_sum             !
+							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED P
+								IF (arp < 0) a = -a                 !REVERSE POLARITY
+								ud = -ud                            !UPGOING <-> downGOING
+								ip = 1                              !P WAVE
+							END IF                               !
+           
+!             IF (z_s(iz) == 137.) WRITE(6,*) arp,atp,r0,ud,ip,a
+
+							rt_min = rt_max                      !RANGE PROBABILITIES 4 SV REFL
+							rt_max = rt_max+abs(ars)/rt_sum      !
+							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED SV
+								IF (ars < 0) a = -a                 !REVERSE POLARITY
+								ud = -ud                            !UPGOING <-> downGOING
+								ip = 3                              !SV WAVE
+							END IF                               !
+
+							rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
+							rt_max = rt_max+abs(atp)/rt_sum      !
+							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRAMSITTED P
+								ip = 1                              !P WAVE
+							END IF                               !
+
+							rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
+							rt_max = rt_max+abs(ats)/rt_sum      !
+							IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV
+								ip = 3                              !SV WAVE
+							END IF                               !
+						END IF      
+          END IF                                !END IF: SH, OR P-SV
+         
+        ELSE IF (iz == nlay) THEN               !ONCE HIT OTHER SIDE OF CORE
+					ud = -ud
+					x = x + 180*deg2km
+				END IF
+	
+        
+				!FIX NEXT IF FOR DIFFRACTED WAVES: 
+				IF (irtr1 == 2) THEN             !RAY TURNS IN LAYER FOLLOW 1 LEN
+				ud = -ud
+				ncaust = ncaust + 1                   !# OF CAUSTICS
+				END IF
+				! RAY TRACING IN LAYER	
+  			! ============ <<
+  			
+  			END SUBROUTINE RAYTRACE
+
+      SUBROUTINE RAYTRACE_SCAT
+      
+      USE pho_vars
+
+	
+				IF (iz /= 1) THEN
+				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
+				    utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
+				  ELSE
+				    utop = 0.
+				  END IF 
+		
+					IF (abs(vf(iz,iwave)) > 0.) THEN
+						ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
+					ELSE
+						ubot = 0.
+					END IF
+         
+					h = dh                  !THICKNESS OF LAYER
+					imth = 2                              !INTERPOLATION METHOD
+		
+					CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
+					dtstr1 = dt1/Q(iz)                    !t* = TIME/QUALITY FACTOR
+				ELSE
+					irtr1  = -1
+					dx1    = 0.
+					dt1    = 0.
+					dtstr1 = 0.
+				END IF
+        
+        IF (irtr1 == 0) THEN
+         ud = -ud
+        ELSE IF (irtr1 >= 1) THEN
+         d = d + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
+         
+         t = t + dt1                    !TRAVEL TIME
+         x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
+         s = s + dtstr1                 !CUMULATIVE t*
+        END IF
+        
+      END SUBROUTINE RAYTRACE_SCAT
