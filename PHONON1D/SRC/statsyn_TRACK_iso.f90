@@ -478,219 +478,21 @@ PROGRAM statsyn_TRACK_iso
 			 ! Start single ray tracing while loop
 			 ! ====================== >>
 			 
-       DO WHILE ((t < t2).AND.(NITR < 100*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
+       DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
 			 
 				! ============ >>
 				! Track phonon's position
-				IF (I < 10000) THEN
-				IF (t-t_last > 0) THEN
-					ixdeg = nint((abs(x)/deg2km-x1))
-					ixtemp = ixdeg
-					!xo = x1 + float(ixdeg-1)*dxi
-					!IF ( abs(xo-abs(x)/deg2km) > 0.1) cycle
-
-					DO WHILE (ixdeg > 360) 
-						ixdeg = ixdeg - 360
-					END DO
-					IF (ixdeg > 180) ixdeg = 180 - (ixdeg-180)
-					IF (ixdeg < 0) ixdeg = -ixdeg 
-					
-					ixtrack = nint(ixdeg/dxi) + 1
-					
-					
-					itt = nint(t/REAL(nttrack_dt)+.5)
-					
-				
-					! Calculate attenuation
-					IT = nint((t       -t1)/dti) + 1		! Time index
-					
-					ims = int(s/datt)+1
-					IF (ims > 100) ims = 100
-					IF (ims <=   1) ims =   2
-					s1 = float(ims-1)*datt
-					s2 = float(ims  )*datt
-					frac = (s-s1)/(s2-s1)
-					IF (ncaust <= 1) THEN
-						icaust = 1
-					ELSE
-						icaust = ncaust
-						DO WHILE (icaust > 4)
-							icaust = icaust - 4
-						END DO
-					END IF
-					
-					
-					! Do total power/energy of attenuated source at time t
-					
-					attn = 0.
-					DO JJ = 1,nts
-						attn = attn + ((1.-frac)*mts(ims-1,icaust,JJ) &
-                          + (frac)*mts(ims  ,icaust,JJ) )**2 !Power
-					END DO
-					
-!					WRITE(6,*) t, attn, frac, ims, icaust !DEBUG
-					
-					IF (z_s(iz) - z_s(iz-1) == 0) THEN
-						iztrack = iz+1
-					ELSE
-						iztrack = iz
-					END IF
-					
-					IF (itt > nttrack) itt = nttrack
-					
-					!DEBUG
-					!IF ((iztrack > nlay).OR.(ixtrack > nx)) THEN
-					!	write(*,*) ixtrack,nx,iztrack,nlay,itt  !DEBUG
-					!END IF
-					
-					trackcount(ixtrack,iztrack,itt) = trackcount(ixtrack,iztrack,itt) + attn/minattn
-					
-
-					 
-				 
-				END IF
-				END IF
-
-				t_last = t
+				!
+				! CAN ADD TRACKING FROM statsyn_TRACK.f90 HERE
+				! 
 				! Track phonon's position
 				! ============ <<
-
-
-							
-
-							
-				! ============ >>
-				! SCATTERING LAYER
-				NITR = NITR + 1
-				r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
-       
-			 
-
-	
-	!!!!! BEING EDITED ==================================================
-	! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv !
-									
-		! Calculate distance to next velocity layer for current p
-		
-		! DIFFERENT SCENARIOS:
-		! PHONON GOES UP TOWARD THE BASE DE THE SL (UD = -1) AND THE PHONON ISNT SCATTERED DOWN.
-		! PHONON GOES UP TOWARD BASE OF SL, PHONON IS SCATTERED AND GOES BACK DOWN.
-		! PHONON GOES DOWN TOWARD BASE OF SL, IS SCATTERED UP AND GOES BACK IN SL.
-		! PHONON GOES DOWN TOWARD BASE OF SL, IS NOT SCATTERED AND
-		
-		
-		! SCENARIO WHEN PHONON COMES FROM BENEATH SL (ud == -1) OR ABOVE (ud == 1)
-				
-			! Find up or down direction   (ud, should be -1, or up)					!JSCAT
-				
-			! Get depth of next layer (z_s(iz-ud))
-			! Get dh (vertical distance to next layer)
-
-			! Once you're on a layer:
-			  IF (z_s(iz) <= scat_depth) THEN
-			  
-			  !Check if your leaving the SL
-				 IF (z_s(iz) == scat_depth & ud == 1) THEN
-					GO TO 401 !Goes toward Moon's center.
-				 END IF
-				 
-				z_act = z_s(iz)
-				dh = abs(z_act - z_s(iz+ud)) ! Vertical Distance to next vel layer
-				
-				! Traveling above or below iz?
-				izfac = 0  !Above
-				IF (ud == 1) izfac = 1  !Below
-				
-				
-				IF (abs(vf(iz+ud,iwave)) > 0.) THEN
-					utop = 1./vf(iz+ud,iwave)              !SLOWNESS AT TOP OF LAYER
-				ELSE
-					utop = 0.
-				END IF 
-	
-				IF (abs(vf(iz,iwave)) > 0.) THEN
-					ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
-				ELSE
-					ubot = 0.
-				END IF
-				
-				imth = 2	!Interpolation method in Layer trace (2 is linear)
-				
-				CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
-				ds_SL = ((z_s(iz)-z_s(iz+ud))**2+dx1**2)**0.5
-								
-		  	!If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
-		 		DO WHILE ds_SL < ds_scat
-			 
-					!Calculare what would dh be if phonon only travelled ds_scat km
-						dh = ds*abs(cos(asin(p*vf(iz,iwave))))  ! DEBUG CHECK THIS
-			 
-					!Make phonon travel to  next scatterer
-						CALL RAYTRACE_SCAT
-						z_act = z_act + dh*ud
-					
-					!Is phonon scattered at scatterer or does it go through?
-						r0 = rand()
-						IF (r0 < scat_prob)  CALL INTERFACE_SCATTER
-					
-					! Calculate new ds_SL based on new ud (direction)
-						IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
-						IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
-						CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
-						ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
-					
-				END DO
-							
-				!Leaves WHILE loop when ds_SL < distance to next vel layer
-				!Need to travel to next vel layer
-				  CALL RAYTRACE_SCAT
-				!Figure out in which layer the phonon is now into (iz or iz-1)
-					iz2 = 1
-          DO WHILE (z_act > z_s(iz1+1))               !FIND WHICH LAYER QUAKE STARTS IN
-            iz2 = iz2 +1															 ! FIRST LAYER IS ASSUMED TO BE AT 0km.
-          END DO
-					iz = iz2
-					                
-  ! ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ !
-	!!!!! BEING EDITED ==================================================
-      
-      END IF !SCATTERING LAYER IF
-                					
-401   CONTINUE
-                					
-				! SCATTERING LAYER
-				! ============ <<
-				
-							 
-				! ============ >>
-				! RAY TRACING IN LAYER			
-				CALL RAYTRACE
-				! RAY TRACING IN LAYER	
-  			! ============ <<
-
-      
-				r0 = rand()	!???
-        
 				
 				
 				! ============ >>
 				! RECORD IF PHONON IS AT SURFACE
 				IF (iz == 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
 					ud = 1                                !RAY NOW MUST TRAVEL down
-
-					
-					!!ix = nint((abs(x)/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
-					!!ixtemp = ix
-					!!xo = x1 + float(ix-1)*dxi
-!					!!WRITE(6,*) xo,abs(x)/deg2km,ix
-					!!IF ( abs(xo-abs(x)/deg2km) > 0.1) cycle
-
-					!!DO WHILE (ix > 2*n180)
-					!!	ix = ix - 2*n180
-					!!END DO
-					!!IF (abs(ix) > n180) ix = n180 - (ix-n180)
-					!!IF (ix < 1) ix = -ix + 1
-					
 					
 					
 					   ix = nint((abs(x)/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
@@ -764,6 +566,102 @@ PROGRAM statsyn_TRACK_iso
         END IF
 				! RECORD IF PHONON IS AT SURFACE
 				! ============ <<
+
+
+				! ============ >>
+				! SCATTERING LAYER
+				
+				NITR = NITR + 1		!JFBG Why this?
+				r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
+				
+				!! MAYBE CHECK IF YOU'RE AT THE SURFACE HERE + RECORD
+				       
+				! Check if the phonon is in the scattering layer
+			  IF (z_s(iz) <= scat_depth) THEN
+					
+					!Check if scatter
+					CALL INTERFACE_SCATTER
+					
+					!Check if your leaving the SL
+					 IF (z_s(iz) == scat_depth & ud == 1) THEN
+						GO TO 401 !Goes toward Moon's center.
+					 END IF
+					 
+					z_act = z_s(iz)
+					IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
+					IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
+					
+					! Traveling above or below iz?
+					izfac = 0  !Above
+					IF (ud == 1) izfac = 1  !Below
+					
+					! Calculate linear distance to next velocity layer (ds_SL)
+						IF (abs(vf(iz+ud,iwave)) > 0.) THEN
+							utop = 1./vf(iz+ud,iwave)              !SLOWNESS AT TOP OF LAYER
+						ELSE
+							utop = 0.
+						END IF 
+			
+						IF (abs(vf(iz,iwave)) > 0.) THEN
+							ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
+						ELSE
+							ubot = 0.
+						END IF
+						
+						imth = 2	!Interpolation method in Layer trace (2 is linear)
+						
+						CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
+						ds_SL = ((z_s(iz)-z_s(iz+ud))**2+dx1**2)**0.5
+									
+					!If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
+					DO WHILE ds_SL < ds_scat
+				 
+						!Calculare what would dh be if phonon only travelled ds_scat km
+							dh = ds*abs(cos(asin(p*vf(iz,iwave))))  ! DEBUG CHECK THIS
+				 
+						!Make phonon travel to  next scatterer
+							CALL RAYTRACE_SCAT
+							z_act = z_act + dh*ud
+						
+						!Is phonon scattered at scatterer or does it go through?
+							CALL INTERFACE_SCATTER
+						
+						! Calculate new ds_SL based on new ud and p (if it got scattered)
+							IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
+							IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
+							CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
+							ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
+						
+					END DO
+								
+					!Leaves WHILE loop when ds_SL < distance to next vel layer
+					!Need to travel to next vel layer
+						CALL RAYTRACE_SCAT !Already have dh
+					!Figure out in which layer the phonon is now into (iz or iz+-1)
+						iz2 = 1
+						DO WHILE (z_act > z_s(iz1+1))               !FIND WHICH LAYER QUAKE STARTS IN
+							iz2 = iz2 +1															 ! FIRST LAYER IS ASSUMED TO BE AT 0km.
+						END DO
+						iz = iz2
+														
+      ELSE !Not in scattering layer
+      
+				! ============ >>
+				! RAY TRACING IN LAYER			
+				CALL RAYTRACE
+				! RAY TRACING IN LAYER	
+  			! ============ <<
+  			
+      END IF !SCATTERING LAYER IF
+                					
+401   CONTINUE
+                					
+				! SCATTERING LAYER
+				! ============ <<
+				
+							 
+
+
 				
 				iz = iz + ud                           !GO TO NEXT DEPTH
         
