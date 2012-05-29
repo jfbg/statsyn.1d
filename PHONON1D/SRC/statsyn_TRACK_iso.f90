@@ -56,6 +56,7 @@ PROGRAM statsyn_TRACK_iso
 				REAL					ds_SL									!Distance between phonon and next velocity layer
 				REAL          dh										!Vertical Distance between phonon and next vel layer.
 				REAL					iz2										!Temp var to find location of phonon
+				INTEGER				izfac									!0 if traveling above iz, 1 if below
 				
 				! ENERGY TRACKING
 				CHARACTER*100 :: tfile
@@ -580,7 +581,7 @@ PROGRAM statsyn_TRACK_iso
 		
 		! SCENARIO WHEN PHONON COMES FROM BENEATH SL (ud == -1) OR ABOVE (ud == 1)
 				
-			! Find up or down direction   (ud, should be -1)					!JSCAT
+			! Find up or down direction   (ud, should be -1, or up)					!JSCAT
 				
 			! Get depth of next layer (z_s(iz-ud))
 			! Get dh (vertical distance to next layer)
@@ -590,15 +591,19 @@ PROGRAM statsyn_TRACK_iso
 			  
 			  !Check if your leaving the SL
 				 IF (z_s(iz) == scat_depth & ud == 1) THEN
-					! FILL THIS W
+					GO TO 401 !Goes toward Moon's center.
 				 END IF
 				 
 				z_act = z_s(iz)
 				dh = abs(z_act - z_s(iz+ud)) ! Vertical Distance to next vel layer
 				
-				! Calculate distance to next velocity layer for current p (ds_SL)
-				IF (abs(vf(iz-1,iwave)) > 0.) THEN
-					utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
+				! Traveling above or below iz?
+				izfac = 0  !Above
+				IF (ud == 1) izfac = 1  !Below
+				
+				
+				IF (abs(vf(iz+ud,iwave)) > 0.) THEN
+					utop = 1./vf(iz+ud,iwave)              !SLOWNESS AT TOP OF LAYER
 				ELSE
 					utop = 0.
 				END IF 
@@ -612,7 +617,7 @@ PROGRAM statsyn_TRACK_iso
 				imth = 2	!Interpolation method in Layer trace (2 is linear)
 				
 				CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
-				ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
+				ds_SL = ((z_s(iz)-z_s(iz+ud))**2+dx1**2)**0.5
 								
 		  	!If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
 		 		DO WHILE ds_SL < ds_scat
@@ -651,11 +656,11 @@ PROGRAM statsyn_TRACK_iso
       
       END IF !SCATTERING LAYER IF
                 					
+401   CONTINUE
                 					
 				! SCATTERING LAYER
 				! ============ <<
 				
-			
 							 
 				! ============ >>
 				! RAY TRACING IN LAYER			
