@@ -157,20 +157,17 @@ PROGRAM statsyn_TRACK_iso
       WRITE(6,*) 'NLAY:',nlay
       
       WRITE(6,*) ' '      
-      WRITE(6,'(A)')'************************* Table of Model Interfaces' &
-      ,'**********************'
-      WRITE(6,'(A)')' Depth  Top Velocities  Bot Velocities    -----Flat' & 
-      ,'Earth Slownesses-----'
-      WRITE(6,'(A)')'             vp1  vs1        vp2  vs2       p1     ' &  
-      ,' p2      s1      s2'
+      WRITE(6,'(A)')'************************* Table of Model Interfaces **********************'
+      WRITE(6,'(A)')' Depth  Top Velocities  Bot Velocities    -----FlatEarth Slownesses-----'
+      WRITE(6,'(A)')'             vp1  vs1        vp2  vs2       p1     p2      s1      s2'
       
-      DO I = 2, nlay 
+      DO i = 2, nlay 
        IF (z(i) == z(i-1)) THEN                !ZERO LAYER THICK=DISCONTINUITY
         scr1=1./vf(i-1,1)                      !P-VELOCITY UPPER
         scr2=1./vf(i,1)                        !P-VELOCITY LOWER 
-        scr3=999.                              !FLAG IF S VELOCITY = ZERO
+        scr3=.999                              !FLAG IF S VELOCITY = ZERO
         IF (vf(i-1,2) /= 0.) scr3=1./vf(i-1,2) !S-VELOCITY UPPER
-        scr4=999.                              !FLAG IF S VELOCITY = ZERO
+        scr4=.999                              !FLAG IF S VELOCITY = ZERO
         IF (vf(i  ,2) /= 0.) scr4=1./vf(i  ,2) !S-VELOCITY LOWER
          WRITE(6,FMT=22) z_s(i),i-1,vs(i-1,1),vs(i-1,2), &
                         i,vs(i,1),vs(i,2),scr1,scr2,scr3,scr4
@@ -185,20 +182,20 @@ PROGRAM statsyn_TRACK_iso
 			
 !       ======================================================
 !			----- INITIALIZE TRACKING PARAMETERS -----		
-			
-			WRITE(6,*) '!!!!!!!!!!!!!!!!!!!!!'	!DEBUG
-			WRITE(6,*) ' ',nx,nlay,nttrack			!DEBUG
-
-			!Allocate memory for tracking number of phonons in each area
-      ALLOCATE(trackcount(nx,nlay,nttrack))              
-			
-			DO kk = 1,nx
-				DO ll = 1,nlay
-					DO mm = 1,nttrack
-						trackcount(kk,ll,mm) = 0.
-					END DO
-				END DO
-			END DO	
+!			
+!			WRITE(6,*) '!!!!!!!!!!!!!!!!!!!!!'	!DEBUG
+!			WRITE(6,*) ' ',nx,nlay,nttrack			!DEBUG
+!
+!			!Allocate memory for tracking number of phonons in each area
+!     ALLOCATE(trackcount(nx,nlay,nttrack))              
+!			
+!			DO kk = 1,nx
+!				DO ll = 1,nlay
+!					DO mm = 1,nttrack
+!						trackcount(kk,ll,mm) = 0.
+!					END DO
+!				END DO
+!			END DO	
 !			^^^^^ INITIALIZE TRACKING PARAMETERS ^^^^^
 
 	
@@ -403,6 +400,9 @@ PROGRAM statsyn_TRACK_iso
 			 
        DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
 			 
+			 	NITR = NITR + 1		!JFBG Why this?
+				r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
+				
 				! ============ >>
 				! Track phonon's position
 				!
@@ -416,8 +416,7 @@ PROGRAM statsyn_TRACK_iso
 				! RECORD IF PHONON IS AT SURFACE
 				IF (iz == 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
 				
-				write(*,*) 'RECORDING' !DEBUG
-				
+					
 					ud = 1                                !RAY NOW MUST TRAVEL down
 					
 					
@@ -489,30 +488,26 @@ PROGRAM statsyn_TRACK_iso
 							END DO
 						END DO
 					END IF
+					iz = iz + ud
+					!write(*,*) I,NITR,iz,ud,d,'RECORDING' !DEBUG
         END IF
 				! RECORD IF PHONON IS AT SURFACE
 				! ============ <<
 
-
-
-				
-				NITR = NITR + 1		!JFBG Why this?
-				r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
-				
-
-
+		
 
 				! ============ >>
 				! SCATTERING LAYER
 								       
 				! Check if the phonon is in the scattering layer
 									!Check if your leaving the SL
-				IF ((z_s(iz) == scat_depth).AND.(ud == 1)) THEN
+				IF ((z_s(iz) == scat_depth).AND.(ud == 1).AND.(scat_prob > 0)) THEN
 						CALL RAYTRACE
 				    iz = iz + ud
         ELSE
 					
 					IF ((z_s(iz) <= scat_depth).AND.(scat_prob > 0)) THEN
+						write(*,*) 'Scattering' !DEBUG
 						
 						!Check if scatter
 						CALL INTERFACE_SCATTER
@@ -583,7 +578,7 @@ PROGRAM statsyn_TRACK_iso
 					! RAY TRACING IN LAYER			
 					CALL RAYTRACE
 					iz = iz + ud   
-				 write(*,*) I,NITR,iz,d,'Normal RAYTRACE' !DEBUG
+				 !write(*,*) I,NITR,iz,d,'Normal RAYTRACE' !DEBUG
 					! RAY TRACING IN LAYER	
 					! ============ <<
 					
@@ -640,7 +635,7 @@ PROGRAM statsyn_TRACK_iso
 
        OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
        
-       WRITE(22,*) nt,nx
+       ! WRITE(22,*) nt,nx !DEBUG 
        WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
       
 				DO I = 1, nt
