@@ -389,7 +389,11 @@ PROGRAM statsyn_TRACK_iso
         it_last = -999
         t_last = 0
         ! ============ <<
-			 
+        
+        ! ============ >>
+        ! Set scatterer scale-length
+        ds_scat = 1
+        ! ============ <<			 
 
 
 			 
@@ -411,6 +415,9 @@ PROGRAM statsyn_TRACK_iso
 				! ============ >>
 				! RECORD IF PHONON IS AT SURFACE
 				IF (iz == 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
+				
+				write(*,*) 'RECORDING' !DEBUG
+				
 					ud = 1                                !RAY NOW MUST TRAVEL down
 					
 					
@@ -491,6 +498,8 @@ PROGRAM statsyn_TRACK_iso
 				
 				NITR = NITR + 1		!JFBG Why this?
 				r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
+				
+
 
 
 				! ============ >>
@@ -503,7 +512,7 @@ PROGRAM statsyn_TRACK_iso
 				    iz = iz + ud
         ELSE
 					
-					IF (z_s(iz) <= scat_depth) THEN
+					IF ((z_s(iz) <= scat_depth).AND.(scat_prob > 0)) THEN
 						
 						!Check if scatter
 						CALL INTERFACE_SCATTER
@@ -574,6 +583,7 @@ PROGRAM statsyn_TRACK_iso
 					! RAY TRACING IN LAYER			
 					CALL RAYTRACE
 					iz = iz + ud   
+				 write(*,*) I,NITR,iz,d,'Normal RAYTRACE' !DEBUG
 					! RAY TRACING IN LAYER	
 					! ============ <<
 					
@@ -655,38 +665,7 @@ PROGRAM statsyn_TRACK_iso
 			
 !			======================================================
 !			----- Output Energy Tracking -----
-			
-			!! NORMALIZE trackcount for cell size ==========================
-			DO kk = 1,nlay-1																						   !
-																																		 !
-						normfactor = dxi*pi/360*((r_s(kk))**2-(r_s(kk+1))**2)    !
-																																		 !
-																																		 !
-					IF (normfactor == 0) cycle																 !													 																													 !	
-					trackcount(1:nx,kk,1:nttrack) =	 &												 !
-							trackcount(1:nx,kk,1:nttrack) / normfactor						 !
-			END DO																												 !	
-			!! =============================================================
-			
-			
-  		OPEN(17,FILE=tfile,STATUS='UNKNOWN')
-
-			DO kk = 1,nx
-					DO mm = 1,nttrack
-  						DO ll = 1,nlay
-							
-						IF (ll > 1) THEN
-							IF (z_s(ll) - z_s(ll-1) == 0) cycle
-						END IF
-						
-						WRITE(17,FMT=879) (x1+REAL(kk-1)*dxi),z_s(ll),mm*nttrack_dt,trackcount(kk,ll,mm)
-!						WRITE(17,FMT=878) (x1+REAL(kk-1)*dxi),z_s(ll),(trackcount(kk,ll))
-						
-					END DO
-				END DO
-			END DO
-					
-			CLOSE(17)
+			! ADD OUTPUT ENERGY TRACKING HERE FROM EARLIER VERSION 
 !			^^^^^ Output Energy Tracking ^^^^^
 
 			CLOSE(73) !DEBUG
