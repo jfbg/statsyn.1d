@@ -458,9 +458,9 @@ PROGRAM statsyn_TRACK
         ncaust = 0                             !# OF CAUSTICS STARS AT 0.
 				
         IF (ang1 < pi/2.) THEN
-         ud = 1	
+         ud = 1			!DOWN!
         ELSE
-         ud = -1
+         ud = -1		!UP!
         END IF
         NITR = 0
 
@@ -872,7 +872,7 @@ PROGRAM statsyn_TRACK
 
        OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
        
-       WRITE(22,*) nt,nx
+       !WRITE(22,*) nt,nx
        WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
       
 				DO I = 1, nt
