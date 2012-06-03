@@ -1475,13 +1475,30 @@ END FUNCTION artan2
       SUBROUTINE RAYTRACE
       
       USE pho_vars
+! ORIGINAL VERSION BY JFL
+!		
+!		    IF (iz /= 1) THEN
+!				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
+!				    utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
+!				  ELSE
+!				    utop = 0.
+!				  END IF 
+!		
+!					IF (abs(vf(iz,iwave)) > 0.) THEN
+!						ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
+!					ELSE
+!						ubot = 0.
+!					END IF
+!        
+!					h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
+!					imth = 2                              !INTERPOLATION METHOD
 		
-				IF (iz /= 1) THEN
-				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
-				    utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
-				  ELSE
-				    utop = 0.
-				  END IF 
+		     IF (iz /= 1) THEN
+					IF (abs(vf(iz+ud,iwave)) > 0.) THEN
+						utop = 1./vf(iz+ud,iwave)              !SLOWNESS AT TOP OF LAYER
+					ELSE
+						utop = 0.
+					END IF 
 		
 					IF (abs(vf(iz,iwave)) > 0.) THEN
 						ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
