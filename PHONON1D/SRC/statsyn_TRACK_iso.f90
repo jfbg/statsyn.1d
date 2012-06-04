@@ -457,19 +457,19 @@ PROGRAM statsyn_TRACK_iso
 					END IF
 
 					IF ( (IT > 1-nts).and.(IT <= nt0+nts) ) THEN
-						IF ( (ip == 1).or.(ip==3) ) THEN
-							c_mult(1) = cos(ang1)*cos(az)
-							c_mult(2) = sin(ang1)  *sin(az)*0.
-							c_mult(3) = sin(ang1)  *cos(az)*.1
+						IF ( (ip == 1) ) THEN
+							c_mult(1) = cos(ang1) * cos(az)  !! Vertical Amp from P wave
+							c_mult(2) = sin(ang1) * sin(az)  !! Tangential Amp from P wave
+              c_mult(3) = sin(ang1) * cos(az)  !! Radial Amp for P wave
 						ELSE IF (ip == 2) THEN
-							c_mult(1) = 0.!cos(asin(p*vf(iz,iwave)))*sin(az)
-							c_mult(2) = cos(ang1)*cos(az)
-							c_mult(3) = cos(ang1)*sin(az)
+							c_mult(1) = 0.!cos(ang1)*sin(az) !! Vertical Amp for SH
+							c_mult(2) = cos(az)              !! Tangential Amp for SH
+							c_mult(3) = sin(az)              !! Radial Amp for SH
 						ELSE IF (ip == 3) THEN
-							c_mult(3) = cos(ang1)*cos(az)
-							c_mult(2) = cos(ang1)*sin(az)
-							c_mult(1) = p*vf(iz,iwave)!*cos(az)
-          END IF
+							c_mult(1) = sin(ang1)*cos(az)    !! Vertical amp for SV
+							c_mult(2) = cos(ang1)*sin(az)    !! Tangential amp for SV
+							c_mult(3) = cos(ang1)*cos(az)    !! Radial amp for SV
+	          END IF
 					p    = abs(sin(ang1))/vf(iz,2)
 !         IF (it>1)WRITE(6,*) ip,iwave,ix,it,a,ang1*180/pi,c_mult(1),c_mult(2),c_mult(3)
 
