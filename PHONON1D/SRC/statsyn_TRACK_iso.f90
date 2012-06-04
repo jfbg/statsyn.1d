@@ -89,6 +89,10 @@ PROGRAM statsyn_TRACK_iso
       WRITE(6,'(A)') 'ENTER SCATTERING PROBABILITY:'
       READ (5,    *)  scat_prob
 			WRITE(6,*) 'SProb:',scat_prob
+			
+			WRITE(6,'(A)') 'ENTER SCATTERER LENGTH-SCALE:'
+      READ (5,    *)  ds_scat
+			WRITE(6,*) 'ds_scat:',ds_scat
 
       WRITE(6,'(A)') 'ENTER TRACK OUTPUT FILE:'
       READ (5,'(A)')  tfile 
@@ -389,7 +393,7 @@ PROGRAM statsyn_TRACK_iso
         
         ! ============ >>
         ! Set scatterer scale-length
-        ds_scat = 1
+        ! ds_scat = 1   !DEBUG
         ! ============ <<			 
 
 
