@@ -1,8 +1,10 @@
 PROGRAM statsyn_TRACK_iso
 !
-!	PROGRAM tracks phonon location and power at each time intervals (nttrack).
-! nttrack is an INTEGER and divides the total ammount of time specified into
-! "nttrack" equal length time windows.
+! Modified version from statsyn_TRACK:
+!
+! Scattering is now isotropic
+! Scattering length-scale follows power law (NOT YET)
+! Qi is frequency dependent (NOT YET)
 !
 ! 
 !
@@ -90,9 +92,9 @@ PROGRAM statsyn_TRACK_iso
       READ (5,    *)  scat_prob
 			WRITE(6,*) 'SProb:',scat_prob
 			
-			WRITE(6,'(A)') 'ENTER SCATTERER LENGTH-SCALE (km):'
-      READ (5,    *)  ds_scat
-			WRITE(6,*) 'ds_scat:',ds_scat
+			WRITE(6,'(A)') 'ENTER SCATTERER LENGTH-SCALES (km) (MIN, MAX, NPOW):'
+      READ (5,    *)  dsmin, dsmax, npow
+			WRITE(6,*) 'dsmin/dsmax/npow:',dsmin, dsmax, npow
 
       WRITE(6,'(A)') 'ENTER TRACK OUTPUT FILE:'
       READ (5,'(A)')  tfile 
@@ -546,6 +548,9 @@ PROGRAM statsyn_TRACK_iso
 							ds_SL = ((z_s(iz)-z_s(iz+ud))**2+dx1**2)**0.5
 										
 						!If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
+						  !Calculate first ds_scat
+						  ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
+						                         + dsmin**(npow+1))**(1/(npow+1))
 						DO WHILE (ds_SL < ds_scat)
 					 
 							!Calculare what would dh be if phonon only travelled ds_scat km
@@ -563,6 +568,10 @@ PROGRAM statsyn_TRACK_iso
 								IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
 								CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
 								ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
+
+            !New ds_scat
+            ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
+					                         + dsmin**(npow+1))**(1/(npow+1))
 							
 						END DO
 									
@@ -1475,6 +1484,7 @@ END FUNCTION artan2
 			
 			RETURN	
       END SUBROUTINE INTERFACE_SCATTER
+      
       
       SUBROUTINE RAYTRACE
       
