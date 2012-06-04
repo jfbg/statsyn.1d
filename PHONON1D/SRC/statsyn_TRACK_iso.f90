@@ -90,7 +90,7 @@ PROGRAM statsyn_TRACK_iso
       READ (5,    *)  scat_prob
 			WRITE(6,*) 'SProb:',scat_prob
 			
-			WRITE(6,'(A)') 'ENTER SCATTERER LENGTH-SCALE:'
+			WRITE(6,'(A)') 'ENTER SCATTERER LENGTH-SCALE (km):'
       READ (5,    *)  ds_scat
 			WRITE(6,*) 'ds_scat:',ds_scat
 
