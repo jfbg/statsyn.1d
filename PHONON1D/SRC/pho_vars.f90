@@ -23,7 +23,7 @@ MODULE PHO_VARS			! Make variables global
 
 				
 				! SCATTERING
-				REAL          ds_scat               !Distance between scatterers
+				REAL          ds_scat, dsmin, dsmax, npow  !Distance between scatterers and power law factor.
 				REAL					dz										!Distance between actual depth and base of layer
 				REAL					ds_SL									!Distance between phonon and next velocity layer
 				REAL          dh										!Vertical Distance between phonon and next vel layer.
