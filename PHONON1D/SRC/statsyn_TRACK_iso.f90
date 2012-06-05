@@ -3,8 +3,8 @@ PROGRAM statsyn_TRACK_iso
 ! Modified version from statsyn_TRACK:
 !
 ! Scattering is now isotropic
-! Scattering length-scale follows power law (NOT YET)
-! Qi is frequency dependent (NOT YET)
+! Scattering length-scale follows power law
+! Qi is frequency dependent
 !
 ! 
 !
@@ -34,6 +34,7 @@ PROGRAM statsyn_TRACK_iso
 				REAL          mt(nt0)               !SOURCE-TIME FUNCTION 
 				COMPLEX       ms(nt0),ss(nx0,nt0)   !SOURCE & STACKED SPECTRA
 				REAL          nn(nx0,nt0)
+				REAL					dQdf									!Frequency dependence of Qi
 				
 				! ENERGY TRACKING
 				CHARACTER*100 :: tfile
@@ -266,7 +267,7 @@ PROGRAM statsyn_TRACK_iso
       datt = 0.02		!  Why 0.02? JFBG
       DO I = 1, 101                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
-       CALL attenuate(mt,mtsc,nts1,dti,dtst1) !
+       CALL attenuate(mt,mtsc,nts1,dti,dtst1,dQdf) !
        pow1 = 0.
        DO J = 1, nts1                         !
         mts(I,1,J) =  mtsc(J)                 !
@@ -513,7 +514,7 @@ PROGRAM statsyn_TRACK_iso
         ELSE
 					
 					IF ((z_s(iz) <= scat_depth).AND.(scat_prob > 0)) THEN
-						write(*,*) 'Scattering' !DEBUG
+!						write(*,*) 'Scattering' !DEBUG
 						
 						!Check if scatter
 						CALL INTERFACE_SCATTER
@@ -722,12 +723,14 @@ SUBROUTINE init_random_seed()
 END SUBROUTINE init_random_seed
       
       
-SUBROUTINE attenuate(sin,sout,ndat,dt,tstar)
+SUBROUTINE attenuate(sin,sout,ndat,dt,tstar,dQdf)
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
 !   |THIS SUBROUTINE ATTENUATES AN INPUT SIGNAL (sin) BY A VALUE (tstar) !   !
 !   |                                                                    !   !
 !   |THIS SUBROUTINE WAS WRITTEN BY JESSE F. LAWRENCE.                   !   !
 !   |     CONTACT: jflawrence@stanford.edu                               !   !
+!   |                                                                    !   !
+!   |MODIFIED BY JFBG to include frequency dependence of Qi              !   !
 !   |                                                                    !   !
 !   |AS WITH ALL MY CODES, BEWARE OF THE BUG. NO GUARANTEES! SORRY!      !   !
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
@@ -742,6 +745,7 @@ SUBROUTINE attenuate(sin,sout,ndat,dt,tstar)
       REAL           pi                      !SET PI = 3.14....
       REAL           w,dw                    !FREQUCNEY VARIABLES
       REAL           damp
+      REAL					 dQdf										 !Frequency dependence of Q
       
       CALL np2(ndat,npts)                    !FIND POWER OF TWO, npts >= ndat
       IF (npts > MAXPTS) THEN               !CHECK THAT ARRAY IS NOT TOO BIG
