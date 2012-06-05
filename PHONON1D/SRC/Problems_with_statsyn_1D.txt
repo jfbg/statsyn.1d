@@ -7,8 +7,7 @@ Is ud == -1, up?
 Is ud == 1, down?
 
 
-JFBG_QUESTION_2:
-If ray turned in layer, why do you not record change in position?
+Why is  datt = 0.02?
 
 
 in _iso.f90:
