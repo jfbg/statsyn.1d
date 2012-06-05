@@ -12,10 +12,17 @@ set ray_par    = "0.0 0.1668 0.2931"
 @ t_max        = 4500			# 75 minutes
 set d_range    = "0 180 91"
 set model      = "2"	#2 for Moon
-set mx_scat_dp = "0"
-set n_phonon   = "500000"
-set prob_scat    = 0.0000
-set file_out   = "JXX_test_iso"
+set mx_scat_dp = "10"
+set n_phonon   = "500"
+
+# SCATTERING
+set prob_scat  = 0.5000
+set dsmin      = 0.05   # Min scaterrer length scale
+set dsmax      = 10     # Max scaterrer length scale
+set npow       = -0.5   # Power law factor for scatterer lengthscale
+
+
+set file_out   = "JXX_test_iso_withscat"
 #set model_name = "VPREMOON_Qp_nvlvl"
 set model_name = "VPREMOON_Qp_nvlvl"
 
@@ -106,6 +113,7 @@ echo "$model            \!1=EARTH, 2=MOON                 " >> $file_csh
 # echo "$p_or_s           \!1=P, 2=SH WAVES                 " >> $file_csh
 echo "$mx_scat_dp       \!MAX SCATTERING DEPTH            " >> $file_csh
 echo "$prob_scat          \!SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh
+echo "$dsmin $dsmax $npow \!SCATERER SCALE-LENGTHS"          >> $file_csh
 echo "$outTRACK_dir/$file_track"                            >> $file_csh
 echo "$out_dir/$file_whole"                                 >> $file_csh
 echo "EOF"                                                  >> $file_csh
@@ -120,7 +128,7 @@ if ($j < $n_kern) then
 csh $file_csh &
 endif
 
-\rm OUTPUT/*.lpt
+#\rm OUTPUT/*.lpt
 
 end
 echo end inner loop for many kernels
