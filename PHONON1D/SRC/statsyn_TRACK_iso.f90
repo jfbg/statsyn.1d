@@ -4,7 +4,7 @@ PROGRAM statsyn_TRACK_iso
 !
 ! Scattering is now isotropic
 ! Scattering length-scale follows power law
-! Qi is frequency dependent
+! Qi is frequency dependent (NOT YET)
 !
 ! 
 !
@@ -14,7 +14,7 @@ PROGRAM statsyn_TRACK_iso
 !
 !
 
-!       ======================================================
+!     ======================================================
 !			----- DECLARATIONS -----
 
 ! Add some line of characters here to test svn
@@ -53,8 +53,8 @@ PROGRAM statsyn_TRACK_iso
       write(*,*) 'Last Edited on May 28th 2012 by JFBG - ISOTROPIC Scattering'
 
 
-!       ======================================================
-!			----- GET INPUTS -----
+!     ======================================================
+!			----- GET INPUTS FROM USER-----
       
       WRITE(6,*) 'ENTER SEISMIC VELOCITY MODEL FILE NAME'
       READ (*,'(A)') ifile
@@ -106,7 +106,7 @@ PROGRAM statsyn_TRACK_iso
 !			^^^^^ GET INPUTS ^^^^^
 
 
-!       ======================================================
+!     ======================================================
 !			----- INITIALIZE PARAMETERS -----
 			
       cmp(1) = 'lpz'
@@ -123,13 +123,13 @@ PROGRAM statsyn_TRACK_iso
 			
       n180 = nint(180/dxi)
 	  
-	  CALL init_random_seed()
+      CALL init_random_seed()
 
 !			^^^^^ INITIALIZE PARAMETERS ^^^^^
 
 
 
-!       ======================================================
+!     ======================================================
 !			----- PICK MODEL (Earth & Moon) -----						   
       IF (EorM  ==  1) THEN
        deg2km = re*d2r
@@ -142,7 +142,7 @@ PROGRAM statsyn_TRACK_iso
 			
 			
 
-!       ======================================================
+!     ======================================================
 !			----- CONVERT VEL. MODEL TO FLAT EARTH -----
 
       OPEN(1,FILE=ifile,STATUS='OLD')    !OPEN SEISMIC VELOCITY MODEL
@@ -151,12 +151,10 @@ PROGRAM statsyn_TRACK_iso
       DO I = 1, nlay0                     !READ IN VELOCITY MODEL
        READ(1,*,IOSTAT=status) z_s(i),r_s(i),vs(i,1),vs(i,2),rh(i),Q(i)
 	   
-!	   write(*,*) z_s(I), Q(I) !JFBG
-	   
        IF (status /= 0) EXIT
-       CALL FLATTEN_NEW(z_s(i),vs(i,1),z(i),vf(i,1),erad)!FLATTEN VELOCITIES
-       CALL FLATTEN_NEW(z_s(i),vs(i,2),z(i),vf(i,2),erad)         
-       nlay = I                           !NUMBER OF LAYERS
+       CALL FLATTEN_NEW(z_s(i),vs(i,1),z(i),vf(i,1),erad)!FLATTEN P-WAVE VELOCITIES
+       CALL FLATTEN_NEW(z_s(i),vs(i,2),z(i),vf(i,2),erad)!FLATTEN S-WAVE VELOCITIES
+       nlay = I !NUMBER OF LAYERS
 111   END DO
 
       CLOSE (1)
@@ -187,7 +185,7 @@ PROGRAM statsyn_TRACK_iso
 			
 			
 			
-!       ======================================================
+!     ======================================================
 !			----- INITIALIZE TRACKING PARAMETERS -----		
 !			
 !			WRITE(6,*) '!!!!!!!!!!!!!!!!!!!!!'	!DEBUG
@@ -207,7 +205,7 @@ PROGRAM statsyn_TRACK_iso
 
 	
 
-!       ======================================================
+!     ======================================================
 !			----- Initialize stacks variable -----			
 !      WRITE(6,*) 'ZEROING STACKS:'            !ZERO STACKS
       DO I = 1, nx
@@ -221,7 +219,7 @@ PROGRAM statsyn_TRACK_iso
 
 
 
-!       ======================================================
+!     ======================================================
 !			----- Find Source Layer -----
       iz1 = 1
       DO WHILE (qdep > z_s(iz1+1))               !FIND WHICH LAYER QUAKE STARTS IN
@@ -233,7 +231,7 @@ PROGRAM statsyn_TRACK_iso
 
 		
 
-!       ======================================================
+!     ======================================================
 !			----- Generate Source Function -----		           
 !      WRITE(6,*) 'CALCULATING SOURCE:'        !CALCULATING SOURCE
       pi = atan(1.)*4.                        !
@@ -258,13 +256,13 @@ PROGRAM statsyn_TRACK_iso
         minattn = minattn + mt(JJ)**2
       END DO
 			 
-      WRITE(6,*) '!!!!!!!!!!!!!! MaxSourcePower==> ', minattn  !DEBUG
+!      WRITE(6,*) '! MaxSourcePower==> ', minattn  !DEBUG
 !     ^^^^^ Generate Source Function ^^^^^		           
 
 
-!       ======================================================
+!     ======================================================
 !			----- Attenuation + Attenuated source -----
-      datt = 0.02		!  Why 0.02? JFBG
+      datt = 0.02		! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
       DO I = 1, 101                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
        CALL attenuate(mt,mtsc,nts1,dti,dtst1,dQdf) !
@@ -310,7 +308,7 @@ PROGRAM statsyn_TRACK_iso
       
 			 
 			 
-!       ======================================================
+!     ======================================================
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !   	!!!!! START OF MAIN RAY TRACING LOOP
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -427,16 +425,13 @@ PROGRAM statsyn_TRACK_iso
 					ud = 1                                !RAY NOW MUST TRAVEL down
 					
 					
-					   ix = nint((abs(x)/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
-							ixtemp = ix
-							xo = x1 + float(ix-1)*dxi
-							!	 write(6,*) xo,abs(x)/deg2km,ix
-							if ( abs(xo-abs(x)/deg2km) > 0.1) cycle
-             if (ix > n180) ix = n180 - (ix-n180)
-							if (ix < 1) ix = -ix + 1
-					
-			
-
+					ix = nint((abs(x)/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
+					ixtemp = ix
+					xo = x1 + float(ix-1)*dxi
+					!	 write(6,*) xo,abs(x)/deg2km,ix
+					if ( abs(xo-abs(x)/deg2km) > 0.1) cycle
+					if (ix > n180) ix = n180 - (ix-n180)
+					if (ix < 1) ix = -ix + 1
 					IF (abs(x/deg2km)-abs(x1+dxi*float(ix-1)) > 0.2) CYCLE
 					
          
@@ -1495,37 +1490,22 @@ END FUNCTION artan2
       USE pho_vars
 ! ORIGINAL VERSION BY JFL
 !		
-!		    IF (iz /= 1) THEN
-!				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
-!				    utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
-!				  ELSE
-!				    utop = 0.
-!				  END IF 
-!		
-!					IF (abs(vf(iz,iwave)) > 0.) THEN
-!						ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
-!					ELSE
-!						ubot = 0.
-!					END IF
-!        
-!					h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
-!					imth = 2                              !INTERPOLATION METHOD
+		    IF (iz /= 1) THEN
+				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
+				    utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
+				  ELSE
+			    utop = 0.
+				  END IF 
 		
-		     IF (iz /= 1) THEN
-					IF (abs(vf(iz+ud,iwave)) > 0.) THEN
-						utop = 1./vf(iz+ud,iwave)              !SLOWNESS AT TOP OF LAYER
-					ELSE
-						utop = 0.
-					END IF 
-		
-					IF (abs(vf(iz,iwave)) > 0.) THEN
+				IF (abs(vf(iz,iwave)) > 0.) THEN
 						ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
 					ELSE
-						ubot = 0.
+					ubot = 0.
 					END IF
-         
+        
 					h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
 					imth = 2                              !INTERPOLATION METHOD
+
 		
 					CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
 					dtstr1 = dt1/Q(iz)                    !t* = TIME/QUALITY FACTOR
