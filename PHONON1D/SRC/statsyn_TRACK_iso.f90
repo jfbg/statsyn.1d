@@ -718,7 +718,7 @@ SUBROUTINE init_random_seed()
 END SUBROUTINE init_random_seed
       
       
-SUBROUTINE attenuate(sin,sout,ndat,dt,tstar,dQdf)
+SUBROUTINE attenuate(sin,sout,ndat,dt,tstar)
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
 !   |THIS SUBROUTINE ATTENUATES AN INPUT SIGNAL (sin) BY A VALUE (tstar) !   !
 !   |                                                                    !   !
@@ -740,7 +740,7 @@ SUBROUTINE attenuate(sin,sout,ndat,dt,tstar,dQdf)
       REAL           pi                      !SET PI = 3.14....
       REAL           w,dw                    !FREQUCNEY VARIABLES
       REAL           damp
-      REAL					 dQdf										 !Frequency dependence of Q
+
       
       CALL np2(ndat,npts)                    !FIND POWER OF TWO, npts >= ndat
       IF (npts > MAXPTS) THEN               !CHECK THAT ARRAY IS NOT TOO BIG
@@ -1488,8 +1488,7 @@ END FUNCTION artan2
       SUBROUTINE RAYTRACE
       
       USE pho_vars
-! ORIGINAL VERSION BY JFL
-!		
+	
 		    IF (iz /= 1) THEN
 				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
 				    utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
