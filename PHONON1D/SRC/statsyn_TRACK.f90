@@ -342,7 +342,7 @@ PROGRAM statsyn_TRACK
 
 !       ======================================================
 !			----- Attenuation + Attenuated source -----
-      datt = 0.02		!  Why 0.02? JFBG
+      datt = 0.02		!  Why 0.02? JFBG			!JFL
       DO I = 1, 101                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
        CALL attenuate(mt,mtsc,nts1,dti,dtst1) !
@@ -592,7 +592,7 @@ PROGRAM statsyn_TRACK
                     IF (az >  pi) az = az - 2.*pi
                   END IF 
                 
-				END IF
+			         	END IF
 				! SCATTERING LAYER
 				! ============ <<
 				
@@ -602,7 +602,7 @@ PROGRAM statsyn_TRACK
 				! RAY TRACING IN LAYER			
 				IF (iz /= 1) THEN
 				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
-				    utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
+				    utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER !JFL
 				  ELSE
 				    utop = 0.
 				  END IF 
@@ -784,19 +784,19 @@ PROGRAM statsyn_TRACK
 					END IF
 
 					IF ( (IT > 1-nts).and.(IT <= nt0+nts) ) THEN
-						IF ( (ip == 1).or.(ip==3) ) THEN
-							c_mult(1) = cos(ang1)*cos(az)
-							c_mult(2) = sin(ang1)  *sin(az)*0.
-							c_mult(3) = sin(ang1)  *cos(az)*.1
+						IF ( (ip == 1) ) THEN
+							c_mult(1) = cos(ang1) * cos(az)  !! Vertical Amp from P wave
+							c_mult(2) = sin(ang1) * sin(az)  !! Tangential Amp from P wave
+              c_mult(3) = sin(ang1) * cos(az)  !! Radial Amp for P wave
 						ELSE IF (ip == 2) THEN
-							c_mult(1) = 0.!cos(asin(p*vf(iz,iwave)))*sin(az)
-							c_mult(2) = cos(ang1)*cos(az)
-							c_mult(3) = cos(ang1)*sin(az)
+							c_mult(1) = 0.!cos(ang1)*sin(az) !! Vertical Amp for SH
+							c_mult(2) = cos(az)              !! Tangential Amp for SH
+							c_mult(3) = sin(az)              !! Radial Amp for SH
 						ELSE IF (ip == 3) THEN
-							c_mult(3) = cos(ang1)*cos(az)
-							c_mult(2) = cos(ang1)*sin(az)
-							c_mult(1) = p*vf(iz,iwave)!*cos(az)
-          END IF
+							c_mult(1) = sin(ang1)*cos(az)    !! Vertical amp for SV
+							c_mult(2) = cos(ang1)*sin(az)    !! Tangential amp for SV
+							c_mult(3) = cos(ang1)*cos(az)    !! Radial amp for SV
+	          END IF
 					p    = abs(sin(ang1))/vf(iz,2)
 !         IF (it>1)WRITE(6,*) ip,iwave,ix,it,a,ang1*180/pi,c_mult(1),c_mult(2),c_mult(3)
 
@@ -1015,8 +1015,8 @@ SUBROUTINE attenuate(sin,sout,ndat,dt,tstar)
        damp = exp(float(I-1)*dadw)
        w     = dw* float(I-1)                !ANGULAR FREQUENCY
        IF (damp < 0.) damp = 0.
-       yf(I) = xf(I)*cmplx(damp,0.)
-       yf(I) = yf(I)*exp( cmplx(0.,w*tstar))
+       yf(I) = xf(I)*cmplx(damp,0.)						!  AMPLITUDE DAMPING
+       yf(I) = yf(I)*exp( cmplx(0.,w*tstar))	! FREQUENCY DELAY !NOTE DAMP1
       END DO
 
       CALL GET_TS(yf,nfreq,df,0,sout,npts,dt) !GET TIME SERIES OF ATTENUATED SPEC
@@ -1239,6 +1239,8 @@ SUBROUTINE LAYERTRACE(p,h,utop,ubot,imth,dx,dt,irtr)
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
 !   ! LAYERTRACE calculates the travel time and range offset
 !   ! for ray tracing through a single layer.
+!   !
+!   ! CODE MODIFIED FROM SHEARER BOOK BY JFL   edit !JFBG
 !   !
 !   ! Input:    p     =  horizontal slowness
 !   !           h     =  layer thickness
