@@ -23,13 +23,15 @@ MODULE PHO_VARS			! Make variables global
 
 				
 				! SCATTERING
-				REAL          ds_scat, dsmin, dsmax, npow  !Distance between scatterers and power law factor.
+        REAL          ds_scat, dsmin, dsmax, npow  !Distance between scatterers and power law factor.
 				REAL					dz										!Distance between actual depth and base of layer
 				REAL					ds_SL									!Distance between phonon and next velocity layer
 				REAL          dh										!Vertical Distance between phonon and next vel layer.
 				REAL					iz2										!Temp var to find location of phonon
 				INTEGER				izfac									!0 if traveling above iz, 1 if below
 				REAL					z_act									!Depth when in between two vel layers
+				REAL          Q0										!Background Qi for frequency dependent Qi
+				REAL          dQdf									!Q gradient with f
 				
 				
 				INTEGER       ncaust,icaust         !NUMBER OF CAUSTICS IN A RAY TRACE
