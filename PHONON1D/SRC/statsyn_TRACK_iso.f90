@@ -6,6 +6,8 @@ PROGRAM statsyn_TRACK_iso
 ! Scattering length-scale follows power law
 ! Qi is frequency dependent (NOT YET)
 !
+! Need to add check to make sure there is a layer at the base of the SL
+!
 ! 
 !
 ! $Revision$
@@ -34,7 +36,7 @@ PROGRAM statsyn_TRACK_iso
 				REAL          mt(nt0)               !SOURCE-TIME FUNCTION 
 				COMPLEX       ms(nt0),ss(nx0,nt0)   !SOURCE & STACKED SPECTRA
 				REAL          nn(nx0,nt0)
-				REAL					dQdf									!Frequency dependence of Qi
+
 				
 				! ENERGY TRACKING
 				CHARACTER*100 :: tfile
@@ -503,7 +505,7 @@ PROGRAM statsyn_TRACK_iso
 								       
 				! Check if the phonon is in the scattering layer
 									!Check if your leaving the SL
-				IF ((z_s(iz) == scat_depth).AND.(ud == 1).AND.(scat_prob > 0)) THEN
+				IF ((z_s(iz+1) == scat_depth).AND.(ud == 1).AND.(scat_prob > 0)) THEN
 						CALL RAYTRACE
 				    iz = iz + ud
         ELSE
@@ -644,7 +646,7 @@ PROGRAM statsyn_TRACK_iso
 
        OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
        
-       WRITE(22,*) nt,nx
+       ! WRITE(22,*) nt,nx
        WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
       
 				DO I = 1, nt
@@ -1624,8 +1626,8 @@ END FUNCTION artan2
 
 	
 				IF (iz /= 1) THEN
-				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
-				    utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
+				  IF (abs(vf(iz,iwave)) > 0.) THEN
+				    utop = 1./vf(iz,iwave)              !SLOWNESS AT TOP OF LAYER
 				  ELSE
 				    utop = 0.
 				  END IF 
