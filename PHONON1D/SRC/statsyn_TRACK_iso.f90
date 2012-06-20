@@ -602,24 +602,24 @@ PROGRAM statsyn_TRACK_iso
 							
 						END DO
 						
-						!DEBUG vv
-						IF (ds_scat > ds_SL) THEN
-						  WRITE(77,*) NITR,'Back to layer', iz_scat,z_act,ds_scat,ds_SL,dh,ud,p
-					  END IF
-					  !DEBUG ^^									
+														
 									
 						!Leaves WHILE loop when ds_SL < distance to next vel layer
 						!Need to travel to next vel layer
 							CALL RAYTRACE_SCAT !Already have dh
-						!Figure out in which layer the phonon is now into (iz or iz+-1)
-							iz2 = 1
-							DO WHILE (z_act > z_s(iz1+1))               !FIND WHICH LAYER QUAKE STARTS IN
-								iz2 = iz2 +1															 ! FIRST LAYER IS ASSUMED TO BE AT 0km.
-							END DO
-							iz = iz2
+							z_act = z_act + dh*ud
+						!Figure out in which layer the phonon is now into
+							iz = iz_scat + ud
+							
+							!DEBUG vv
+						IF (ds_scat > ds_SL) THEN
+						  WRITE(77,*) NITR,'Back to layer',iz, iz_scat,z_act,ds_scat,ds_SL,dh,ud,p
+					  END IF
+					  !DEBUG ^^	
 															
 				ELSE !Not in scattering layer
 				
+				WRITE(77,*) NITR,'OUT',iz
 					! ============ >>
 					! RAY TRACING IN LAYER			
 					CALL RAYTRACE
