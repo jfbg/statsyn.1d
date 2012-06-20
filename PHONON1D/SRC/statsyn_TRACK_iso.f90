@@ -52,6 +52,7 @@ PROGRAM statsyn_TRACK_iso
 				
 				! DEBUGGING
 				CHARACTER*100 :: debugfile
+				REAL						 dh2, dhsmall
 						
 !			^^^^^ DECLARATIONS ^^^^^
 
@@ -421,7 +422,7 @@ PROGRAM statsyn_TRACK_iso
        !Debug ^^
        
 			 
-			 	NITR = NITR + 1		!JFBG Why this?
+			 	NITR = NITR + 1		
 				r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
 				
 				! ============ >>
@@ -437,15 +438,17 @@ PROGRAM statsyn_TRACK_iso
 				! RECORD IF PHONON IS AT SURFACE
 				IF (iz == 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
 				
-					
+       !debug
+				WRITE(77,*) NITR,'Surface', iz
+				
 					ud = 1                                !RAY NOW MUST TRAVEL down
-					
+					iz = iz + ud
 					
 					ix = nint((abs(x)/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
 					ixtemp = ix
 					xo = x1 + float(ix-1)*dxi
 					!	 write(6,*) xo,abs(x)/deg2km,ix
-					if ( abs(xo-abs(x)/deg2km) > 0.1) cycle
+					IF ( abs(xo-abs(x)/deg2km) > 0.1) CYCLE
 					if (ix > n180) ix = n180 - (ix-n180)
 					if (ix < 1) ix = -ix + 1
 					IF (abs(x/deg2km)-abs(x1+dxi*float(ix-1)) > 0.2) CYCLE
@@ -484,11 +487,11 @@ PROGRAM statsyn_TRACK_iso
 							c_mult(2) = cos(ang1)*sin(az)    !! Tangential amp for SV
 							c_mult(3) = cos(ang1)*cos(az)    !! Radial amp for SV
 	          END IF
-					p    = abs(sin(ang1))/vf(iz,2)
+					p    = abs(sin(ang1))/vf(1,2)	!vf(iz,2) but iz == 1 at surface
 !         IF (it>1)WRITE(6,*) ip,iwave,ix,it,a,ang1*180/pi,c_mult(1),c_mult(2),c_mult(3)
 
           IF((n_iter_last == nitr).and.(ix_last==ix) &
-	                           .and.(abs(it_last-it)<5.)) cycle
+	                           .and.(abs(it_last-it)<5.)) CYCLE
 
 						n_iter_last = nitr
 						ix_last = ix
@@ -506,8 +509,12 @@ PROGRAM statsyn_TRACK_iso
 							END DO
 						END DO
 					END IF
-					iz = iz + ud
+					
 					!write(*,*) I,NITR,iz,ud,d,'RECORDING' !DEBUG
+        
+        !debug
+				WRITE(77,*) NITR,'RECORDED AT SURFACE'
+        
         END IF
 				! RECORD IF PHONON IS AT SURFACE
 				! ============ <<
@@ -519,31 +526,30 @@ PROGRAM statsyn_TRACK_iso
 								       
 				! Check if the phonon is in the scattering layer
 									!Check if your leaving the SL
-				IF ((z_s(iz+1) == scat_depth).AND.(ud == 1).AND.(scat_prob > 0)) THEN
-						CALL RAYTRACE
-				    iz = iz + ud
+				IF (iz == -99) THEN !DEBUG  ~ Get rid of this IF LOOP.
+								!IF ((z_s(iz-1) == scat_depth).AND.(ud == 1).AND.(scat_prob > 0.)) THEN
+						!CALL RAYTRACE
+				    !iz = iz + ud
         ELSE
 					
-					IF ((z_s(iz) <= scat_depth).AND.(scat_prob > 0)) THEN
+					IF ((z_s(iz) <= scat_depth).AND.(scat_prob > 0.)) THEN
 						!~write(77,*) 'Scattering' !DEBUG
+						
+						iz_scat = iz ! Layer in which phonon travels
+						izfac = 0
+						IF (ud == 1) izfac = -1 
+						z_act = z_s(iz_scat+izfac)    !Depth of phonon while in SL
+
+						dh = abs(z_s(iz) - z_s(iz-1)) !First dh is thickness of layer
 						
 						!Check if scatter
 						CALL INTERFACE_SCATTER
-						if (iz == 1) ud = 1 !make it go down if at surface
 						
-						z_act = z_s(iz)
-						dh = abs(z_act - z_s(iz+ud))
-						!Debug
-						!IF (ud == -1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
-						!IF (ud == 1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
-						
-						! Traveling above or below iz?
-						izfac = 0  !Above
-						IF (ud == 1) izfac = 1  !Below
+						IF (z_act <= 0) ud = 1
 						
 						! Calculate linear distance to next velocity layer (ds_SL)
-							IF (abs(vf(iz+ud,iwave)) > 0.) THEN
-								utop = 1./vf(iz+ud,iwave)              !SLOWNESS AT TOP OF LAYER
+							IF (abs(vf(iz-1,iwave)) > 0.) THEN
+								utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
 							ELSE
 								utop = 0.
 							END IF 
@@ -557,43 +563,50 @@ PROGRAM statsyn_TRACK_iso
 							imth = 2	!Interpolation method in Layer trace (2 is linear)
 							
 							CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
-							ds_SL = ((z_s(iz)-z_s(iz+ud))**2+dx1**2)**0.5
+							ds_SL = (dh**2+dx1**2)**0.5
 										
-						!If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
+					 !If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
 						  !Calculate first ds_scat
 						  ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
 						                         + dsmin**(npow+1))**(1/(npow+1))
 						DO WHILE (ds_scat < ds_SL)
 					 
+					     !debug
+               dh2 = dh
+					 
+							 !Calculare what would dh be if phonon only travelled ds_scat km
+							 dh = ds_scat*abs(cos(asin(p*vf(iz,iwave))))  
+								
 					 !debug
-					 WRITE(77,*) 'in SL',ds_scat,ds_SL
-
+					 IF (dh < ds_scat) dhsmall = 1
+					 !WRITE(77,*) 'in SL',ds_scat,ds_SL,dh2,dh,z_act
+					 WRITE(77,*) NITR,'in SL',iz_scat,z_act,ds_scat,ds_SL,dh,ud,p
 					 
-							!Calculare what would dh be if phonon only travelled ds_scat km
-								dh = ds_scat*abs(cos(asin(p*vf(iz,iwave))))  ! DEBUG CHECK THIS
-					 
-							!Make phonon travel to  next scatterer
-								CALL RAYTRACE_SCAT
-								z_act = z_act + dh*ud
+							 !Make phonon travel to  next scatterer
+							 CALL RAYTRACE_SCAT
+							 z_act = z_act + dh*ud
 								
 							
 							!Is phonon scattered at scatterer or does it go through?
 								CALL INTERFACE_SCATTER
 							
 							! Calculate new ds_SL based on new ud and p (if it got scattered)
-								IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
-								IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
+								IF (ud == -1) dh = abs(z_act - z_s(iz_scat-1)) ! Distance to vel layer above
+								IF (ud == 1) dh = abs(z_act - z_s(iz_scat))  ! Distance to vel layer below
 								CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
-								ds_SL = ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5
+								ds_SL = (dh**2+dx1**2)**0.5
 
-            !New ds_scat
-            ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
+              !New ds_scat
+              ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
 					                         + dsmin**(npow+1))**(1/(npow+1))
-
-								!Debug
-								!~IF (I < 11) WRITE(77,*) z_act,iz,x,I,1,ud
 							
 						END DO
+						
+						!DEBUG vv
+						IF (ds_scat > ds_SL) THEN
+						  WRITE(77,*) NITR,'Back to layer', iz_scat,z_act,ds_scat,ds_SL,dh,ud,p
+					  END IF
+					  !DEBUG ^^									
 									
 						!Leaves WHILE loop when ds_SL < distance to next vel layer
 						!Need to travel to next vel layer
@@ -1482,7 +1495,11 @@ END FUNCTION artan2
       
       !Check if scatter first
       r0 = rand()
-      IF (r0 < scat_prob) THEN      
+      IF (r0 < scat_prob) THEN 
+      
+      	!DEBUG
+      	WRITE(77,*) 'Scatters'
+      	     
 				 r0 = rand()
 				 IF (r0 < 0.5) x_sign=-x_sign		
 				 r0 = rand()
@@ -1550,97 +1567,7 @@ END FUNCTION artan2
          s = s + dtstr1                 !CUMULATIVE t*
         END IF
         
-				IF ( (iz > 1).AND.(abs(irtr1) == 1).AND. &
-							(iz < nlay) ) THEN
-					IF ( (iz > 1).AND.(iz <= nlay) ) h = z_s(iz)-z_s(iz-1)
-
-          IF (ip  ==  2) THEN
-						IF ( (ud == 1) ) THEN               !IF downGOING SH WAVE
-							CALL REFTRAN_SH(p,vf(iz-1,2),vf(iz,2),rh(iz-1),rh(iz), &
-                           ar,at)
-						ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE
-							CALL REFTRAN_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1), &
-                           ar,at)
-						END IF
-          ELSE
-						IF ( (ud == 1) ) THEN               !IF downGOING P-SV WAVE
-							CALL RTCOEF2(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
-                          vf(iz  ,1),vf(iz  ,2),rh(iz), &
-                          ip,arp,ars,atp,ats)
-						ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE
-							CALL RTCOEF2(p,vf(iz  ,1),vf(iz  ,2),rh(iz  ), &
-                          vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
-                          ip,arp,ars,atp,ats)           
-!           WRITE(6,*) 'HI'
-						END IF
-          END IF
-          
-          r0 = rand()                       !RANDOM NUMBER FROM 0 TO 1
-
-          IF (ip  ==  2) THEN                   !IF SH-WAVE
-
-						IF (h > 0.) THEN                    !IF GRADIENT, THEN
-							IF (r0 < (abs(ar)/(abs(ar)+abs(at)))/P0**2) THEN!CHECK FOR REFLECTN
-								IF (ar < 0) a = -a                !OPPOSITE POLARITY
-								ud = -ud                           !downGOING/UPGOING
-							END IF                              !
-						ELSE                                 !IF INTERFACE THEN
-							IF (r0 < (abs(ar)/(abs(ar)+abs(at)))) THEN!CHECK FOR REFLECTION
-								IF (ar < 0) a = -a                !OPPOSITE POLARITY
-								ud = -ud                           !downGOING/UPGOING
-							END IF                              !
-						END IF                               !
-
-          ELSE                                  !IF P- OR SV-WAVE 
-          	IF (h <= 0.) THEN
-							rt_sum = abs(arp)+abs(atp)+abs(ars)+abs(ats)    !SUM OF REFL/TRAN COEFS
-
-							rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
-							rt_max = abs(arp)/rt_sum             !
-							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED P
-								IF (arp < 0) a = -a                 !REVERSE POLARITY
-								ud = -ud                            !UPGOING <-> downGOING
-								ip = 1                              !P WAVE
-							END IF                               !
-           
-!             IF (z_s(iz) == 137.) WRITE(6,*) arp,atp,r0,ud,ip,a
-
-							rt_min = rt_max                      !RANGE PROBABILITIES 4 SV REFL
-							rt_max = rt_max+abs(ars)/rt_sum      !
-							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED SV
-								IF (ars < 0) a = -a                 !REVERSE POLARITY
-								ud = -ud                            !UPGOING <-> downGOING
-								ip = 3                              !SV WAVE
-							END IF                               !
-
-							rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
-							rt_max = rt_max+abs(atp)/rt_sum      !
-							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRAMSITTED P
-								ip = 1                              !P WAVE
-							END IF                               !
-
-							rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
-							rt_max = rt_max+abs(ats)/rt_sum      !
-							IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV
-								ip = 3                              !SV WAVE
-							END IF                               !
-						END IF      
-          END IF                                !END IF: SH, OR P-SV
-         
-        ELSE IF (iz == nlay) THEN               !ONCE HIT OTHER SIDE OF CORE
-					ud = -ud
-					x = x + 180*deg2km
-				END IF
-	
-        
-				!FIX NEXT IF FOR DIFFRACTED WAVES: 
-				IF (irtr1 == 2) THEN             !RAY TURNS IN LAYER FOLLOW 1 LEN
-				ud = -ud
-				ncaust = ncaust + 1                   !# OF CAUSTICS
-				END IF
-				! RAY TRACING IN LAYER	
-  			! ============ <<
-  			
+				 			
   			END SUBROUTINE RAYTRACE
 
       SUBROUTINE RAYTRACE_SCAT
@@ -1649,14 +1576,14 @@ END FUNCTION artan2
 
 	
 				IF (iz /= 1) THEN
-				  IF (abs(vf(iz,iwave)) > 0.) THEN
-				    utop = 1./vf(iz,iwave)              !SLOWNESS AT TOP OF LAYER
+				  IF (abs(vf(iz_scat,iwave)) > 0.) THEN
+				    utop = 1./vf(iz_scat,iwave)              !SLOWNESS AT TOP OF LAYER
 				  ELSE
 				    utop = 0.
 				  END IF 
 		
-					IF (abs(vf(iz,iwave)) > 0.) THEN
-						ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
+					IF (abs(vf(iz_scat,iwave)) > 0.) THEN
+						ubot = 1./vf(iz_scat,iwave)                !SLOWNESS AT BOTTOM OF LAYER
 					ELSE
 						ubot = 0.
 					END IF
@@ -1676,7 +1603,7 @@ END FUNCTION artan2
         IF (irtr1 == 0) THEN
          ud = -ud
         ELSE IF (irtr1 >= 1) THEN
-         d = d + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
+         d = d + ds_scat !DISTANCE TRAVELED IN LAYER
          
          t = t + dt1                    !TRAVEL TIME
          x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
