@@ -49,6 +49,10 @@ PROGRAM statsyn_TRACK_iso
 				REAL          d2r,re,rm
 				INTEGER       EorM                  !1=EARTH, 2=MOON
 				
+				
+				! DEBUGGING
+				CHARACTER*100 :: debugfile
+						
 !			^^^^^ DECLARATIONS ^^^^^
 
 
@@ -314,8 +318,13 @@ PROGRAM statsyn_TRACK_iso
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !   	!!!!! START OF MAIN RAY TRACING LOOP
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      !Debug vv
+      OPEN(77,FILE='Track_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+
 			 
       DO I = 1, ntr   !FOR EACH TRACE -- DOLOOP_001
+      
       
 	  ! ============ >>
       ! ----- Initialize Randomization -----			
@@ -406,6 +415,11 @@ PROGRAM statsyn_TRACK_iso
 			 ! ====================== >>
 			 
        DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
+       
+       !Debug vv
+       !~IF (I < 11) WRITE(77,*) z_s(iz),iz,x,I,0,ud
+       !Debug ^^
+       
 			 
 			 	NITR = NITR + 1		!JFBG Why this?
 				r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
@@ -511,17 +525,17 @@ PROGRAM statsyn_TRACK_iso
         ELSE
 					
 					IF ((z_s(iz) <= scat_depth).AND.(scat_prob > 0)) THEN
-!						write(*,*) 'Scattering' !DEBUG
+						!~write(77,*) 'Scattering' !DEBUG
 						
 						!Check if scatter
 						CALL INTERFACE_SCATTER
 						if (iz == 1) ud = 1 !make it go down if at surface
 						
-	
-						 
 						z_act = z_s(iz)
-						IF (ud == 1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
-						IF (ud == -1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
+						dh = abs(z_act - z_s(iz+ud))
+						!Debug
+						!IF (ud == -1) dh = abs(z_act - z_s(iz-1)) ! Distance to vel layer above
+						!IF (ud == 1) dh = abs(z_act - z_s(iz))  ! Distance to vel layer below
 						
 						! Traveling above or below iz?
 						izfac = 0  !Above
@@ -549,7 +563,11 @@ PROGRAM statsyn_TRACK_iso
 						  !Calculate first ds_scat
 						  ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
 						                         + dsmin**(npow+1))**(1/(npow+1))
-						DO WHILE (ds_SL < ds_scat)
+						DO WHILE (ds_scat < ds_SL)
+					 
+					 !debug
+					 WRITE(77,*) 'in SL',ds_scat,ds_SL
+
 					 
 							!Calculare what would dh be if phonon only travelled ds_scat km
 								dh = ds_scat*abs(cos(asin(p*vf(iz,iwave))))  ! DEBUG CHECK THIS
@@ -557,6 +575,7 @@ PROGRAM statsyn_TRACK_iso
 							!Make phonon travel to  next scatterer
 								CALL RAYTRACE_SCAT
 								z_act = z_act + dh*ud
+								
 							
 							!Is phonon scattered at scatterer or does it go through?
 								CALL INTERFACE_SCATTER
@@ -570,6 +589,9 @@ PROGRAM statsyn_TRACK_iso
             !New ds_scat
             ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
 					                         + dsmin**(npow+1))**(1/(npow+1))
+
+								!Debug
+								!~IF (I < 11) WRITE(77,*) z_act,iz,x,I,1,ud
 							
 						END DO
 									
@@ -640,32 +662,33 @@ PROGRAM statsyn_TRACK_iso
 			wf(1,1,1) = 1.
       wf(1,1,2) = 1.
       wf(1,1,3) = 1.
-      
-      DO ic = 1, 3
-       ofile2 = trim(ofile)//'.'//cmp(ic)
+      !REBUG
+      !DO ic = 1, 3
+      ! ofile2 = trim(ofile)//'.'//cmp(ic)
 
-       OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+       !OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
        
-       WRITE(22,*) nt,nx
-       WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
+       !WRITE(22,*) nt,nx
+       !WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
       
-				DO I = 1, nt
-					DO J = 1, nx
-						IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
-					END DO
-					WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
-				END DO
+				!DO I = 1, nt
+				!	DO J = 1, nx
+				!		IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
+				!	END DO
+				!	WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
+				!END DO
 
       
-				CLOSE(22)
+				!CLOSE(22)
 				
 				
-      END DO
+      !END DO
       WRITE(6,*) 'Synthetic outputs done'
 !			^^^^^ Output Synthetics ^^^^^
 			
       
-
+      CLOSE(77)
+      !Debug ^^
 			
 			
 			
