@@ -32,6 +32,7 @@ MODULE PHO_VARS			! Make variables global
 				REAL					z_act									!Depth when in between two vel layers
 				REAL          Q0										!Background Qi for frequency dependent Qi
 				REAL          dQdf									!Q gradient with f
+				INTEGER       iz_scat								!Vel layer in which phonon is while it's scattered
 				
 				
 				INTEGER       ncaust,icaust         !NUMBER OF CAUSTICS IN A RAY TRACE
