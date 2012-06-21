@@ -65,8 +65,11 @@ PROGRAM statsyn_TRACK_iso
 			exTIME = 0
 			exNLAY = 0
 
-
-      write(*,*) 'Last Edited on May 28th 2012 by JFBG - ISOTROPIC Scattering'
+      write(*,*) 'ISOTROPIC Scattering'
+      write(*,*) 'Last Edited on $Date$'
+      write(*,*) 'Last Edited by $Author$'
+      write(*,*) '$Revision$'
+      
 
 
 !     ======================================================
