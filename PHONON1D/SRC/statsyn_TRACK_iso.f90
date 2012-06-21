@@ -53,8 +53,17 @@ PROGRAM statsyn_TRACK_iso
 				! DEBUGGING
 				CHARACTER*100 :: debugfile
 				REAL						 dh2, dhsmall
+				REAL             surfcount
+				REAL             surCYC1,surCYC2,surCYC3,exTIME,exNLAY
 						
 !			^^^^^ DECLARATIONS ^^^^^
+
+			!DEBUG
+			surCYC1 = 0
+			surCYC2 = 0
+			surCYC3 = 0
+			exTIME = 0
+			exNLAY = 0
 
 
       write(*,*) 'Last Edited on May 28th 2012 by JFBG - ISOTROPIC Scattering'
@@ -323,7 +332,9 @@ PROGRAM statsyn_TRACK_iso
       !Debug vv
       OPEN(77,FILE='Track_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
 
-			 
+			!Debug
+			surfcount = 0.
+			
       DO I = 1, ntr   !FOR EACH TRACE -- DOLOOP_001
       
       
@@ -446,12 +457,26 @@ PROGRAM statsyn_TRACK_iso
 					
 					ix = nint((abs(x)/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
 					ixtemp = ix
-					xo = x1 + float(ix-1)*dxi
-					!	 write(6,*) xo,abs(x)/deg2km,ix
-					IF ( abs(xo-abs(x)/deg2km) > 0.1) CYCLE
+
 					if (ix > n180) ix = n180 - (ix-n180)
 					if (ix < 1) ix = -ix + 1
-					IF (abs(x/deg2km)-abs(x1+dxi*float(ix-1)) > 0.2) CYCLE
+
+					xo = x1 + float(ix-1)*dxi
+					!	 write(6,*) xo,abs(x)/deg2km,ix
+					
+					IF ( abs(xo-abs(x)/deg2km) > 0.1) THEN		!CYCLE 1
+					! If the real phonon distance (x) is more than 0.1 deg from the seismogram at xo,
+					! do not record this surface hit (cycle).
+					      surCYC1 = surCYC1 +1
+					      CYCLE
+					END IF
+					
+				
+					IF (abs(x/deg2km)-abs(x1+dxi*float(ix-1)) > 0.2) THEN		!CYCLE 2
+					! Same as cycle 1 (??), but with a distance of 0.2deg
+					      surCYC2 = surCYC2 +1
+					      CYCLE
+					END IF
 					
          
 					!IF (x>0.001) WRITE(6,*) x/deg2km,x1+dxi*float(ix-1),ix,dxi
@@ -491,7 +516,10 @@ PROGRAM statsyn_TRACK_iso
 !         IF (it>1)WRITE(6,*) ip,iwave,ix,it,a,ang1*180/pi,c_mult(1),c_mult(2),c_mult(3)
 
           IF((n_iter_last == nitr).and.(ix_last==ix) &
-	                           .and.(abs(it_last-it)<5.)) CYCLE
+	                           .and.(abs(it_last-it)<5.)) THEN		!CYCLE 3
+					      surCYC3 = surCYC3 +1
+					      CYCLE
+					END IF
 
 						n_iter_last = nitr
 						ix_last = ix
@@ -508,7 +536,12 @@ PROGRAM statsyn_TRACK_iso
 								END IF
 							END DO
 						END DO
+					!Debug
+					surfcount = surfcount +1
+						
 					END IF
+					
+
 					
 					!write(*,*) I,NITR,iz,ud,d,'RECORDING' !DEBUG
         
@@ -677,9 +710,9 @@ PROGRAM statsyn_TRACK_iso
       wf(1,1,3) = 1.
       !REBUG
       !DO ic = 1, 3
-      ! ofile2 = trim(ofile)//'.'//cmp(ic)
+      !ofile2 = trim(ofile)//'.'//cmp(ic)
 
-       !OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+      !OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
        
        !WRITE(22,*) nt,nx
        !WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
@@ -696,7 +729,13 @@ PROGRAM statsyn_TRACK_iso
 				
 				
       !END DO
-      WRITE(6,*) 'Synthetic outputs done'
+      !WRITE(6,*) 'Synthetic outputs done'
+      
+      !Debug
+      WRITE(6,*) 'Total Surface count = ', surfcount
+      WRITE(6,*) 'CYCLE 1 = ', surCYC1
+      WRITE(6,*) 'CYCLE 2 = ', surCYC2
+      WRITE(6,*) 'CYCLE 3 = ', surCYC3
 !			^^^^^ Output Synthetics ^^^^^
 			
       
