@@ -120,7 +120,7 @@ echo "EOF"                                                  >> $file_csh
 
 echo " " >> $file_csh
 
-
+#
 if ($j == $n_kern)  then
 csh $file_csh
 endif
