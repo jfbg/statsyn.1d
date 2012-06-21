@@ -439,7 +439,7 @@ PROGRAM statsyn_TRACK_iso
 				IF (iz == 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
 				
        !debug
-				WRITE(77,*) NITR,'Surface', iz
+				!WRITE(77,*) NITR,'Surface', iz
 				
 					ud = 1                                !RAY NOW MUST TRAVEL down
 					iz = iz + ud
@@ -513,7 +513,7 @@ PROGRAM statsyn_TRACK_iso
 					!write(*,*) I,NITR,iz,ud,d,'RECORDING' !DEBUG
         
         !debug
-				WRITE(77,*) NITR,'RECORDED AT SURFACE'
+				!WRITE(77,*) NITR,'RECORDED AT SURFACE'
         
         END IF
 				! RECORD IF PHONON IS AT SURFACE
@@ -580,7 +580,7 @@ PROGRAM statsyn_TRACK_iso
 					 !debug
 					 IF (dh < ds_scat) dhsmall = 1
 					 !WRITE(77,*) 'in SL',ds_scat,ds_SL,dh2,dh,z_act
-					 WRITE(77,*) NITR,'in SL',iz_scat,z_act,ds_scat,ds_SL,dh,ud,p
+					 !WRITE(77,*) NITR,'in SL',iz_scat,z_act,ds_scat,ds_SL,dh,ud,p
 					 
 							 !Make phonon travel to  next scatterer
 							 CALL RAYTRACE_SCAT
@@ -613,13 +613,13 @@ PROGRAM statsyn_TRACK_iso
 							
 							!DEBUG vv
 						IF (ds_scat > ds_SL) THEN
-						  WRITE(77,*) NITR,'Back to layer',iz, iz_scat,z_act,ds_scat,ds_SL,dh,ud,p
+						  !WRITE(77,*) NITR,'Back to layer',iz, iz_scat,z_act,ds_scat,ds_SL,dh,ud,p
 					  END IF
 					  !DEBUG ^^	
 															
 				ELSE !Not in scattering layer
 				
-				WRITE(77,*) NITR,'OUT',iz
+				!WRITE(77,*) NITR,'OUT',iz
 					! ============ >>
 					! RAY TRACING IN LAYER			
 					CALL RAYTRACE
@@ -1498,7 +1498,7 @@ END FUNCTION artan2
       IF (r0 < scat_prob) THEN 
       
       	!DEBUG
-      	WRITE(77,*) 'Scatters'
+      	!WRITE(77,*) 'Scatters'
       	     
 				 r0 = rand()
 				 IF (r0 < 0.5) x_sign=-x_sign		
