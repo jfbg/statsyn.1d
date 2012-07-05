@@ -67,7 +67,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 0020 
 else if ($i == 1) then
- set q_depth = 1735
+ set q_depth = 500
 else
  set q_depth = 0.01
 endif
