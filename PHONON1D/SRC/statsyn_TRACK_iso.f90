@@ -448,7 +448,7 @@ PROGRAM statsyn_TRACK_iso
 			 izfac = 0
 			 IF (ud == 1) izfac = -1 
 			 z_act = z_s(iz_scat+izfac)    !Depth of phonon while in SL
-       IF (I < 11) WRITE(78,*) I,NITR,iz,z_s(iz),'0',z_act,x,ud
+       !IF (I < 11) WRITE(78,*) I,NITR,iz,z_s(iz),'0',z_act,x,ud
        !Debug ^^
        
        
@@ -664,7 +664,7 @@ PROGRAM statsyn_TRACK_iso
 																			
 								!WRITE(77,*) 'SCATTERING TRACING'
 								
-								       IF (I < 11) WRITE(78,*) I,NITR,iz,z_s(iz),'1',z_act,x,ud
+!								       IF (I < 11) WRITE(78,*) I,NITR,iz,z_s(iz),'1',z_act,x,ud
 								 
 							 END DO
 							 
@@ -749,28 +749,28 @@ PROGRAM statsyn_TRACK_iso
 			wf(1,1,1) = 1.
       wf(1,1,2) = 1.
       wf(1,1,3) = 1.
-      !REBUG
-      !DO ic = 1, 3
-      !ofile2 = trim(ofile)//'.'//cmp(ic)
+      
+      DO ic = 1, 3
+      ofile2 = trim(ofile)//'.'//cmp(ic)
 
-      !OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+      OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
        
-       !WRITE(22,*) nt,nx
-       !WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
+       WRITE(22,*) nt,nx
+       WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
       
-				!DO I = 1, nt
-				!	DO J = 1, nx
-				!		IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
-				!	END DO
-				!	WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
-				!END DO
+				DO I = 1, nt
+					DO J = 1, nx
+						IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
+					END DO
+					WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
+				END DO
 
       
-				!CLOSE(22)
+				CLOSE(22)
 				
 				
-      !END DO
-      !WRITE(6,*) 'Synthetic outputs done'
+      END DO
+      WRITE(6,*) 'Synthetic outputs done'
       
       !Debug
       WRITE(6,*) 'Total Surface count = ', surfcount
@@ -837,7 +837,7 @@ SUBROUTINE init_random_seed()
 END SUBROUTINE init_random_seed
       
       
-SUBROUTINE attenuate(sin,sout,ndat,dt,tstar)
+SUBROUTINE attenuate(sin,sout,ndat,dt,tstar,dQdf)
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
 !   |THIS SUBROUTINE ATTENUATES AN INPUT SIGNAL (sin) BY A VALUE (tstar) !   !
 !   |                                                                    !   !
