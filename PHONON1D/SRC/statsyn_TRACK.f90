@@ -97,8 +97,19 @@ PROGRAM statsyn_TRACK
       INTEGER     :: nseed
       INTEGER     :: seed
       INTEGER (kind=8)     :: nclock,nclock1
+      
+      
+      !DEBUGGING
+      INTEGER (kind=8) ::  surfcount
+			INTEGER (kind=8) ::  surCYC1,surCYC2,surCYC3,exTIME,exNLAY
 !			^^^^^ DECLARATIONS ^^^^^
 
+			!DEBUG
+			surCYC1 = 0
+			surCYC2 = 0
+			surCYC3 = 0
+			exTIME = 0
+			exNLAY = 0
 
       write(*,*) 'Last Edited on May 18th 2012 by JFBG'
 
@@ -393,6 +404,11 @@ PROGRAM statsyn_TRACK
 !   	!!!!! START OF MAIN RAY TRACING LOOP
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			 
+			 !Debug
+			surfcount = 0
+			!Debug vv
+      OPEN(77,FILE='Track_COMPnotiso.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+			 
       DO I = 1, ntr   !FOR EACH TRACE -- DOLOOP_001
       
 	  ! ============ >>
@@ -630,9 +646,14 @@ PROGRAM statsyn_TRACK
         ELSE IF (irtr1 >= 1) THEN
          d = d + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5!
          
+         !Debug
+         IF ((iz == 193).AND.(ud == 1)) WRITE(77,*) x,dx1,az,'STEP1'
+         
          t = t + dt1                    !TRAVEL TIME
          x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
+         
+         IF ((iz == 193).AND.(ud == 1)) WRITE(77,*) x,dx1,az,'STEP2'
         END IF
         
 				IF ( (iz > 1).AND.(abs(irtr1) == 1).AND. &
@@ -714,7 +735,9 @@ PROGRAM statsyn_TRACK
          
         ELSE IF (iz == nlay) THEN               !ONCE HIT OTHER SIDE OF CORE
 					ud = -ud
+					WRITE(77,*) 'Initial x = ',x
 					x = x + 180*deg2km
+					WRITE(77,*) 'CROSSED',x,180*deg2km
 				END IF
 	
         
@@ -753,15 +776,26 @@ PROGRAM statsyn_TRACK
 					
 					   ix = nint((abs(x)/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
 							ixtemp = ix
+							
+             if (ix > n180) ix = n180 - (ix-n180)
+						if (ix < 1) ix = -ix + 1
+
 							xo = x1 + float(ix-1)*dxi
 							!	 write(6,*) xo,abs(x)/deg2km,ix
-							if ( abs(xo-abs(x)/deg2km) > 0.1) cycle
-             if (ix > n180) ix = n180 - (ix-n180)
-							if (ix < 1) ix = -ix + 1
+					IF ( abs(xo-abs(x)/deg2km) > 0.1) THEN		!CYCLE 1
+					! If the real phonon distance (x) is more than 0.1 deg from the seismogram at xo,
+					! do not record this surface hit.
+					      surCYC1 = surCYC1 +1
+					      CYCLE
+					END IF
+
 					
 			
 
-					IF (abs(x/deg2km)-abs(x1+dxi*float(ix-1)) > 0.2) CYCLE
+					IF (abs(x/deg2km)-abs(x1+dxi*float(ix-1)) > 0.2) THEN		!CYCLE 2
+					      surCYC2 = surCYC2 +1
+					      CYCLE
+					END IF
 					
          
 					!IF (x>0.001) WRITE(6,*) x/deg2km,x1+dxi*float(ix-1),ix,dxi
@@ -801,7 +835,10 @@ PROGRAM statsyn_TRACK
 !         IF (it>1)WRITE(6,*) ip,iwave,ix,it,a,ang1*180/pi,c_mult(1),c_mult(2),c_mult(3)
 
           IF((n_iter_last == nitr).and.(ix_last==ix) &
-	                           .and.(abs(it_last-it)<5.)) cycle
+	                           .and.(abs(it_last-it)<5.)) THEN		!CYCLE 3
+					      surCYC3 = surCYC3 +1
+					      CYCLE
+					END IF
 
 						n_iter_last = nitr
 						ix_last = ix
@@ -819,6 +856,9 @@ PROGRAM statsyn_TRACK
 							END DO
 						END DO
 					END IF
+					!Debug
+					surfcount = surfcount +1
+					        
         END IF
 				! RECORD IF PHONON IS AT SURFACE
 				! ============ <<
@@ -827,6 +867,7 @@ PROGRAM statsyn_TRACK
         
 				IF (iz < 1) t = 999999.  !???
 			 
+			IF (I < 11) WRITE(77,*) I,NITR,iz,z_s(iz),x,ud,'NORMAL_END',irtr1
 
 			 END DO		!CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
 			 ! ====================== <<
@@ -867,27 +908,33 @@ PROGRAM statsyn_TRACK
       wf(1,1,2) = 1.
       wf(1,1,3) = 1.
       
-      DO ic = 1, 3
-       ofile2 = trim(ofile)//'.'//cmp(ic)
+      !DO ic = 1, 3
+       !ofile2 = trim(ofile)//'.'//cmp(ic)
 
-       OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+       !OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
        
-       WRITE(22,*) nt,nx
-       WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
+       !WRITE(22,*) nt,nx
+       !WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
       
-				DO I = 1, nt
-					DO J = 1, nx
-						IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
-					END DO
-					WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
-				END DO
+				!DO I = 1, nt
+				!	DO J = 1, nx
+				!		IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
+				!	END DO
+				!	WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
+				!END DO
 
       
-				CLOSE(22)
+				!CLOSE(22)
 				
 				
-      END DO
-      WRITE(6,*) 'Synthetic outputs done'
+      !END DO
+      !WRITE(6,*) 'Synthetic outputs done'
+      
+      !Debug
+      WRITE(6,*) 'Surf_count = ', surfcount
+      WRITE(6,*) 'CYCLE 1 = ', surCYC1
+      WRITE(6,*) 'CYCLE 2 = ', surCYC2
+      WRITE(6,*) 'CYCLE 3 = ', surCYC3
 !			^^^^^ Output Synthetics ^^^^^
 			
       
