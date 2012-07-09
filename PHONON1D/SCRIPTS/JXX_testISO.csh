@@ -13,7 +13,7 @@ set ray_par    = "0.0 0.1668 0.2931"
 set d_range    = "0 180 91"
 set model      = "2"	#2 for Moon
 set mx_scat_dp = "10"
-set n_phonon   = "1000000"
+set n_phonon   = "15"
 
 # SCATTERING
 set prob_scat  = 0.5000
@@ -28,12 +28,13 @@ set model_name = "VPREMOON_Qp_ori_debug"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 15     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 2     ## Number of iterations
+@ n_kern  = 1     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 1     ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
 set outTRACK_dir    = "./TRACKING"
+set log_dir    = "./LOG"
 
 
 # Compile statistical phonon code
@@ -90,13 +91,14 @@ while ($j < $n_kern)
 @ j = $j + 1
 
 
-sleep 1
+sleep 4
 
 ## 
 # Start phonon synthetics
 ##
 
 set file_whole = $file_out.$q_depth.$j.$k.$period
+set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
@@ -116,6 +118,7 @@ echo "$prob_scat          \!SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh
 echo "$dsmin $dsmax $npow \!SCATERER SCALE-LENGTHS"          >> $file_csh
 echo "$outTRACK_dir/$file_track"                            >> $file_csh
 echo "$out_dir/$file_whole"                                 >> $file_csh
+echo "$log_dir/$file_log"                                 >> $file_csh
 echo "EOF"                                                  >> $file_csh
 
 echo " " >> $file_csh
