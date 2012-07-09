@@ -25,7 +25,7 @@ PROGRAM statsyn_TRACK_iso
 				
 				IMPLICIT NONE
 							
-				CHARACTER*100 IFile,ofile,ofile2
+				CHARACTER*100 IFile,ofile,ofile2,logfile
 				DOUBLE PRECISION wf(nx0,nt0,3)        !STACKED DATA
 
 				! SOURCE
@@ -124,6 +124,9 @@ PROGRAM statsyn_TRACK_iso
 			
 			WRITE(6,'(A)') 'ENTER OUTPUT FILE NAME:'!REQUEST OUTPUT FILE NAME
       READ (5,'(A)')  ofile                   !
+      
+  		WRITE(6,'(A)') 'ENTER LOG FILE NAME:'!REQUEST LOG FILE NAME
+      READ (5,'(A)')  logfile                   !
 !			^^^^^ GET INPUTS ^^^^^
 
 
@@ -145,6 +148,8 @@ PROGRAM statsyn_TRACK_iso
       n180 = nint(180/dxi)
 	  
       CALL init_random_seed()
+      
+      OPEN(79,FILE=logfile,STATUS='UNKNOWN')    !OPEN LOG FILE
 
 !			^^^^^ INITIALIZE PARAMETERS ^^^^^
 
@@ -454,7 +459,7 @@ PROGRAM statsyn_TRACK_iso
        
        
 			 
-			 	NITR = NITR + 1		
+			 		
 				r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
 				
 				! ============ >>
@@ -710,7 +715,12 @@ PROGRAM statsyn_TRACK_iso
         
 				!DEBUG
 			 	!IF (I < 11) WRITE(77,*) I,NITR,iz,z_s(iz),x,ud,'NORMAL_END',irtr1
-
+			 
+			 
+		 
+			 NITR = NITR + 1		
+			 	 
+			 
 			 END DO		!CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
 			 ! ====================== <<
 			 ! Close single ray tracing while loop
@@ -737,12 +747,21 @@ PROGRAM statsyn_TRACK_iso
 
 !			WRITE(6,*) t		!DEBUG
 
+		 !LOG
+		 IF (NITR >= 200*nlay) THEN
+		    WRITE(79,*) I,NITR,surfcount,surCYC1,x,'NLAY'
+		 ELSEIF (t >= t2) THEN
+        WRITE(79,*) I,NITR,surfcount,surCYC1,x,'TIME'
+     END IF
+
 			END DO	!CLOSE MAIN RAY TRACING LOOP - DOLOOP_001
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !   	!!!!! CLOSE MAIN RAY TRACING LOOP
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !			======================================================
 
+			
+			CLOSE(79)
 			
 !			======================================================
 !			----- Output Synthetics -----	
