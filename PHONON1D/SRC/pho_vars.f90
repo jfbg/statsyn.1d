@@ -5,7 +5,7 @@ MODULE PHO_VARS			! Make variables global
 				INTEGER, PARAMETER :: nlay0=1000, nt0=144000, nx0=91
 				REAL          z(nlay0),vf(nlay0,2),rh(nlay0)
 				REAL          z_s(nlay0),r_s(nlay0),vs(nlay0,2)
-				REAL          t,x,xo,a,w(nt0)
+				REAL          t,x,xo,a,w(nt0),x_index
 				REAL          dx1,dt1
 				INTEGER       irtr1
 				INTEGER     :: iz,iz1,itt
