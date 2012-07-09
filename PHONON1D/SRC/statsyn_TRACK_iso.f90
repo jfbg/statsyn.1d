@@ -46,15 +46,17 @@ PROGRAM statsyn_TRACK_iso
 				INTEGER		::	nttrack_dt						!time interval for saving phonon position
 				REAL			::	normfactor						!Normalization factor for cell size
 
-				REAL          d2r,re,rm
+				REAL          d2r,re,rm,circum
 				INTEGER       EorM                  !1=EARTH, 2=MOON
 				
 				
 				! DEBUGGING
-				CHARACTER*100 :: debugfile
+				CHARACTER*100 :: debugfile,logend
 				REAL						 dh2, dhsmall
 				INTEGER (kind=8) ::  surfcount
 			  INTEGER (kind=8) ::  surCYC1,surCYC2,surCYC3,exTIME,exNLAY
+			  INTEGER 				 ::  logperc
+			  INTEGER (kind=8) ::  scat_time
  
 						
 !			^^^^^ DECLARATIONS ^^^^^
@@ -140,12 +142,14 @@ PROGRAM statsyn_TRACK_iso
       pi = atan(1.)*4.
       re = 6371.
       rm = 1737.
+      
       d2r = pi/180.
       
       nttrack = 5								!Set number of time intervals to track
       nttrack_dt = t2/nttrack
 			
-      n180 = nint(180/dxi)
+      n180 = nint(180/dxi)			!Number of intervals in 180deg
+     
 	  
       CALL init_random_seed()
       
@@ -164,6 +168,7 @@ PROGRAM statsyn_TRACK_iso
        deg2km = rm*d2r
        erad   = rm
       END IF
+      circum = 2*pi*erad
 !			^^^^^ PICK MODEL (Earth & Moon) ^^^^^				
 			
 			
@@ -436,6 +441,7 @@ PROGRAM statsyn_TRACK_iso
         ! ============ >>
         ! Set scatterer scale-length
         ! ds_scat = 1   !DEBUG
+        scat_time = 0
         ! ============ <<			 
 
 
@@ -446,14 +452,15 @@ PROGRAM statsyn_TRACK_iso
 			 
        DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
        
+       NITR = NITR + 1
        
 			 !	IF (I < 11) WRITE(77,*) I,NITR,iz,z_s(iz),x,ud,'NORMAL_START',irtr1
        !Debug vv
        iz_scat = iz ! Layer in which phonon travels
 			 izfac = 0
 			 IF (ud == 1) izfac = -1 
-			 z_act = z_s(iz_scat+izfac)    !Depth of phonon while in SL
-       !IF (I < 11) WRITE(78,*) I,NITR,iz,z_s(iz),'0',z_act,x,ud
+			 z_act = z_s(iz_scat+izfac)    !Depth of phonon
+       IF (I < 11) WRITE(78,*) 'S',I,NITR,iz,z_s(iz),'0',z_act,x,ud
        !Debug ^^
        
        
@@ -476,26 +483,32 @@ PROGRAM statsyn_TRACK_iso
 				IF (iz == 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
 				
 				!WRITE(77,*) '!!! IZ == 1 !!!'
-       !debug
+        !debug
 				!WRITE(77,*) NITR,'Surface', iz
 				
 					ud = 1                                !RAY NOW MUST TRAVEL down
 					iz = iz + ud
 					
-					ix = nint((abs(x)/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
-					ixtemp = ix
+					!Find index for distance
+					x_index = abs(x)
+					DO WHILE (x_index >= circum)
+					  x_index = x_index - circum
+					END DO
+					IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
+					ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
 
-					if (ix > n180) ix = n180 - (ix-n180)
-					if (ix < 1) ix = -ix + 1
 
-					xo = x1 + float(ix-1)*dxi
+					!if (ix > n180) ix = n180 - (ix-n180)
+					!if (ix < 1) ix = -ix + 1
+
+					xo = x1 + float(ix-1)*dxi					!Distance_index in km
 					!	 write(6,*) xo,abs(x)/deg2km,ix
 					
-					IF ( abs(xo-abs(x)/deg2km) > 0.1) THEN		!CYCLE 1
+					IF ( abs(xo-x_index/deg2km) > 0.1) THEN		!CYCLE 1
 					! If the real phonon distance (x) is more than 0.1 deg from the seismogram at xo,
 					! do not record this surface hit (cycle).
 					      surCYC1 = surCYC1 +1
-					      !WRITE(77,*) 'CYCLE 1'
+					      WRITE(78,*) 'CYCLE 1',abs(xo-x_index/deg2km),ix,xo,x_index,x
 					      CYCLE
 					END IF
 					
@@ -574,7 +587,8 @@ PROGRAM statsyn_TRACK_iso
 					!write(*,*) I,NITR,iz,ud,d,'RECORDING' !DEBUG
         
         !debug
-        !WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
+        WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
+        WRITE(78,*) 'RECRDED',abs(xo-x_index/deg2km),ix,xo,x_index,x
         END IF
 				! RECORD IF PHONON IS AT SURFACE
 				! ============ <<
@@ -635,6 +649,9 @@ PROGRAM statsyn_TRACK_iso
 								 ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
 																				+ dsmin**(npow+1))**(1/(npow+1))
 							 DO WHILE (ds_scat < ds_SL)
+							 
+							 !DEBUG
+							 scat_time = scat_time +1
 							
 									!debug
 									dh2 = dh
@@ -669,7 +686,7 @@ PROGRAM statsyn_TRACK_iso
 																			
 								!WRITE(77,*) 'SCATTERING TRACING'
 								
-!								       IF (I < 11) WRITE(78,*) I,NITR,iz,z_s(iz),'1',z_act,x,ud
+								       IF (I < 11) WRITE(78,*) 'O',I,NITR,iz,z_s(iz),'1',z_act,x,ud
 								 
 							 END DO
 							 
@@ -718,9 +735,9 @@ PROGRAM statsyn_TRACK_iso
 			 
 			 
 		 
-			 NITR = NITR + 1		
+		
 			 	 
-			 
+	     IF (I < 11) WRITE(78,*) 'E',I,NITR,iz,z_s(iz),'0',z_act,x,ud
 			 END DO		!CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
 			 ! ====================== <<
 			 ! Close single ray tracing while loop
@@ -748,11 +765,12 @@ PROGRAM statsyn_TRACK_iso
 !			WRITE(6,*) t		!DEBUG
 
 		 !LOG
-		 IF (NITR >= 200*nlay) THEN
-		    WRITE(79,*) I,NITR,surfcount,surCYC1,x,'NLAY'
-		 ELSEIF (t >= t2) THEN
-        WRITE(79,*) I,NITR,surfcount,surCYC1,x,'TIME'
-     END IF
+		 logperc = nint(float(I)/float(ntr)*100)
+		 IF (NITR >= 200*nlay) logend = 'NLAY'
+     IF (t >= t2) logend = 'TIME'
+    
+     WRITE(79,*) I,NITR,surfcount,surCYC1,x,iz,scat_time,logend,logperc
+
 
 			END DO	!CLOSE MAIN RAY TRACING LOOP - DOLOOP_001
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
