@@ -19,8 +19,6 @@ PROGRAM statsyn_TRACK_iso
 !     ======================================================
 !			----- DECLARATIONS -----
 
-! Add some line of characters here to test svn
-
 				USE PHO_VARS
 				
 				IMPLICIT NONE
@@ -454,20 +452,14 @@ PROGRAM statsyn_TRACK_iso
        
        NITR = NITR + 1
        
-			 !	IF (I < 11) WRITE(77,*) I,NITR,iz,z_s(iz),x,ud,'NORMAL_START',irtr1
-       !Debug vv
-       iz_scat = iz ! Layer in which phonon travels
-			 izfac = 0
+	     ! Calculate actual phonon depth
+       izfac = 0
 			 IF (ud == 1) izfac = -1 
-			 z_act = z_s(iz_scat+izfac)    !Depth of phonon
+			 z_act = z_s(iz+izfac)    !Depth of phonon
        IF (I < 11) WRITE(78,*) 'S',I,NITR,iz,z_s(iz),'0',z_act,x,ud
-       !Debug ^^
-       
-       
-       
-			 
+      
 			 		
-				r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
+				!r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
 				
 				! ============ >>
 				! Track phonon's position
@@ -482,10 +474,7 @@ PROGRAM statsyn_TRACK_iso
 				! RECORD IF PHONON IS AT SURFACE
 				IF (iz == 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
 				
-				!WRITE(77,*) '!!! IZ == 1 !!!'
-        !debug
-				!WRITE(77,*) NITR,'Surface', iz
-				
+			
 					ud = 1                                !RAY NOW MUST TRAVEL down
 					iz = iz + ud
 					
@@ -497,98 +486,95 @@ PROGRAM statsyn_TRACK_iso
 					IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
 					ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
 
-
-					!if (ix > n180) ix = n180 - (ix-n180)
-					!if (ix < 1) ix = -ix + 1
-
 					xo = x1 + float(ix-1)*dxi					!Distance_index in km
-					!	 write(6,*) xo,abs(x)/deg2km,ix
 					
-					IF ( abs(xo-x_index/deg2km) > 0.1) THEN		!CYCLE 1
+					IF ( abs(xo-x_index/deg2km) <= 0.1) THEN
+						! phonon is closer then 0.1 deg to a recorder, RECORD AT SURFACE		
+					
+										IT = nint((t       -t1)/dti) + 1 
+					
+										ims = int(s/datt)+1
+										IF (ims > 100) ims = 100
+										IF (ims <=   1) ims =   2
+										s1 = float(ims-1)*datt
+										s2 = float(ims  )*datt
+										frac = (s-s1)/(s2-s1)
+										IF (ncaust <= 1) THEN
+											icaust = 1
+										ELSE
+											icaust = ncaust
+											DO WHILE (icaust > 4)
+												icaust = icaust - 4
+											END DO
+										END IF
+					
+										IF ( (IT > 1-nts).and.(IT <= nt0+nts) ) THEN
+											IF ( (ip == 1) ) THEN
+												c_mult(1) = cos(ang1) * cos(az)  !! Vertical Amp from P wave
+												c_mult(2) = sin(ang1) * sin(az)  !! Tangential Amp from P wave
+												c_mult(3) = sin(ang1) * cos(az)  !! Radial Amp for P wave
+											ELSE IF (ip == 2) THEN
+												c_mult(1) = 0.!cos(ang1)*sin(az) !! Vertical Amp for SH
+												c_mult(2) = cos(az)              !! Tangential Amp for SH
+												c_mult(3) = sin(az)              !! Radial Amp for SH
+											ELSE IF (ip == 3) THEN
+												c_mult(1) = sin(ang1)*cos(az)    !! Vertical amp for SV
+												c_mult(2) = cos(ang1)*sin(az)    !! Tangential amp for SV
+												c_mult(3) = cos(ang1)*cos(az)    !! Radial amp for SV
+											END IF
+										p    = abs(sin(ang1))/vf(1,2)	!vf(iz,2) but iz == 1 at surface
+					!         IF (it>1)WRITE(6,*) ip,iwave,ix,it,a,ang1*180/pi,c_mult(1),c_mult(2),c_mult(3)
+					
+										IF((n_iter_last == nitr).and.(ix_last==ix) &
+																			 .and.(abs(it_last-it)<5.)) THEN		!CYCLE 3
+													surCYC3 = surCYC3 +1
+													CYCLE
+										END IF
+					
+											n_iter_last = nitr
+											ix_last = ix
+											it_last = it
+											
+							
+											DO ic = 1, 3
+												DO JJ = 1, nts
+													JT = IT + JJ - 1
+													IF ( (JT > 0).AND.(JT <= nt0).AND.(a /= 0.) ) THEN
+														wf(ix,JT,ic) = wf(ix,JT,ic) + a * c_mult(ic) &
+																* (   (1.-frac)*mts(ims-1,icaust,JJ) &
+																		+ (   frac)*mts(ims  ,icaust,JJ) )!ATTENUATION
+													END IF
+												END DO
+											END DO
+										!Debug
+										surfcount = surfcount +1
+											
+										END IF
+										
+					
+										
+										!write(*,*) I,NITR,iz,ud,d,'RECORDING' !DEBUG
+									
+									!debug
+									WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
+									WRITE(78,*) 'RECRDED',abs(xo-x_index/deg2km),ix,xo,x_index,x
+
+					
+					ELSE!CYCLE 1
 					! If the real phonon distance (x) is more than 0.1 deg from the seismogram at xo,
 					! do not record this surface hit (cycle).
 					      surCYC1 = surCYC1 +1
-					      WRITE(78,*) 'CYCLE 1',abs(xo-x_index/deg2km),ix,xo,x_index,x
-					      CYCLE
+					      WRITE(78,*) 'TOO FAR',abs(xo-x_index/deg2km),ix,xo,x_index,x      
 					END IF
 					
 				
-					IF (abs(x/deg2km)-abs(x1+dxi*float(ix-1)) > 0.2) THEN		!CYCLE 2
-					! Same as cycle 1 (??), but with a distance of 0.2deg
-					      surCYC2 = surCYC2 +1
-					      CYCLE
-					END IF
+!					IF (abs(x/deg2km)-abs(x1+dxi*float(ix-1)) > 0.2) THEN		!CYCLE 2
+!					! Same as cycle 1 (??), but with a distance of 0.2deg
+!					      surCYC2 = surCYC2 +1
+!					      CYCLE
+!					END IF
 					
          
-					!IF (x>0.001) WRITE(6,*) x/deg2km,x1+dxi*float(ix-1),ix,dxi
-					IT = nint((t       -t1)/dti) + 1 
-
-					ims = int(s/datt)+1
-					IF (ims > 100) ims = 100
-					IF (ims <=   1) ims =   2
-!         ims = 2
-					s1 = float(ims-1)*datt
-					s2 = float(ims  )*datt
-					frac = (s-s1)/(s2-s1)
-					IF (ncaust <= 1) THEN
-						icaust = 1
-					ELSE
-						icaust = ncaust
-						DO WHILE (icaust > 4)
-							icaust = icaust - 4
-						END DO
-					END IF
-
-					IF ( (IT > 1-nts).and.(IT <= nt0+nts) ) THEN
-						IF ( (ip == 1) ) THEN
-							c_mult(1) = cos(ang1) * cos(az)  !! Vertical Amp from P wave
-							c_mult(2) = sin(ang1) * sin(az)  !! Tangential Amp from P wave
-              c_mult(3) = sin(ang1) * cos(az)  !! Radial Amp for P wave
-						ELSE IF (ip == 2) THEN
-							c_mult(1) = 0.!cos(ang1)*sin(az) !! Vertical Amp for SH
-							c_mult(2) = cos(az)              !! Tangential Amp for SH
-							c_mult(3) = sin(az)              !! Radial Amp for SH
-						ELSE IF (ip == 3) THEN
-							c_mult(1) = sin(ang1)*cos(az)    !! Vertical amp for SV
-							c_mult(2) = cos(ang1)*sin(az)    !! Tangential amp for SV
-							c_mult(3) = cos(ang1)*cos(az)    !! Radial amp for SV
-	          END IF
-					p    = abs(sin(ang1))/vf(1,2)	!vf(iz,2) but iz == 1 at surface
-!         IF (it>1)WRITE(6,*) ip,iwave,ix,it,a,ang1*180/pi,c_mult(1),c_mult(2),c_mult(3)
-
-          IF((n_iter_last == nitr).and.(ix_last==ix) &
-	                           .and.(abs(it_last-it)<5.)) THEN		!CYCLE 3
-					      surCYC3 = surCYC3 +1
-					      CYCLE
-					END IF
-
-						n_iter_last = nitr
-						ix_last = ix
-						it_last = it
-						
-		
-						DO ic = 1, 3
-							DO JJ = 1, nts
-								JT = IT + JJ - 1
-								IF ( (JT > 0).AND.(JT <= nt0).AND.(a /= 0.) ) THEN
-									wf(ix,JT,ic) = wf(ix,JT,ic) + a * c_mult(ic) &
-                      * (   (1.-frac)*mts(ims-1,icaust,JJ) &
-                          + (   frac)*mts(ims  ,icaust,JJ) )!ATTENUATION
-								END IF
-							END DO
-						END DO
-					!Debug
-					surfcount = surfcount +1
-						
-					END IF
-					
-
-					
-					!write(*,*) I,NITR,iz,ud,d,'RECORDING' !DEBUG
-        
-        !debug
-        WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
-        WRITE(78,*) 'RECRDED',abs(xo-x_index/deg2km),ix,xo,x_index,x
         END IF
 				! RECORD IF PHONON IS AT SURFACE
 				! ============ <<
@@ -600,14 +586,14 @@ PROGRAM statsyn_TRACK_iso
 								       
 				! Check if the phonon is in the scattering layer
 									!Check if your leaving the SL
-				IF ((z_s(iz-1) == scat_depth).AND.(ud == 1).AND.(scat_prob > 0.)) THEN
+				IF ((z_act == scat_depth).AND.(ud == 1)) THEN !.AND.(scat_prob > 0.)) THEN
 					CALL RAYTRACE
 					CALL INTERFACE_NORMAL			
 					iz = iz + ud   
 					!IF (I < 11) WRITE(77,*) I,NITR,iz,z_s(iz),x,ud,'NORMAL'
         ELSE
 					
-					IF ((z_s(iz) <= scat_depth).AND.(scat_prob > 0.)) THEN
+					IF ((z_act <= scat_depth).AND.(scat_prob > 0.)) THEN
 						!~write(77,*) 'Scattering' !DEBUG
 						
 						iz_scat = iz ! Layer in which phonon travels
@@ -686,7 +672,7 @@ PROGRAM statsyn_TRACK_iso
 																			
 								!WRITE(77,*) 'SCATTERING TRACING'
 								
-								       IF (I < 11) WRITE(78,*) 'O',I,NITR,iz,z_s(iz),'1',z_act,x,ud
+							IF (I < 11) WRITE(78,*) 'O',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
 								 
 							 END DO
 							 
