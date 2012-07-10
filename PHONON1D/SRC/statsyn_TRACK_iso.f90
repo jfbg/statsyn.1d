@@ -541,8 +541,8 @@ PROGRAM statsyn_TRACK_iso
 										!write(*,*) I,NITR,iz,ud,d,'RECORDING' !DEBUG
 									
 									!debug
-									WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
-									WRITE(78,*) 'RECRDED',abs(xo-x_index/deg2km),ix,xo,x_index,x
+									!WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
+									IF (I < 11) WRITE(78,*) 'RECRDED',abs(xo-x_index/deg2km),ix,xo,x_index,x
 									IF (I < 11) WRITE(78,*) 'A ',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
 
 					
@@ -550,7 +550,7 @@ PROGRAM statsyn_TRACK_iso
 					! If the real phonon distance (x) is more than 0.1 deg from the seismogram at xo,
 					! do not record this surface hit (cycle).
 					      surCYC1 = surCYC1 +1
-					      WRITE(78,*) 'TOO FAR',abs(xo-x_index/deg2km),ix,xo,x_index,x 
+					      IF (I < 11) WRITE(78,*) 'TOO FAR',abs(xo-x_index/deg2km),ix,xo,x_index,x 
 					      IF (I < 11) WRITE(78,*) 'A ',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL     
 					END IF
 					
@@ -731,7 +731,7 @@ PROGRAM statsyn_TRACK_iso
 		 IF (NITR >= 200*nlay) logend = 'NLAY'
      IF (t >= t2) logend = 'TIME'
     
-     WRITE(79,*) I,NITR,surfcount,surCYC1,x,iz,scat_time,logend,logperc
+     !WRITE(79,*) I,NITR,surfcount,surCYC1,x,iz,scat_time,logend,logperc
 
 
 			END DO	!CLOSE MAIN RAY TRACING LOOP - DOLOOP_001
