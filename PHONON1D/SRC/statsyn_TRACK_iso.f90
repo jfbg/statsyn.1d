@@ -558,13 +558,15 @@ PROGRAM statsyn_TRACK_iso
 									!debug
 									WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
 									WRITE(78,*) 'RECRDED',abs(xo-x_index/deg2km),ix,xo,x_index,x
+									IF (I < 11) WRITE(78,*) 'A',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
 
 					
 					ELSE!CYCLE 1
 					! If the real phonon distance (x) is more than 0.1 deg from the seismogram at xo,
 					! do not record this surface hit (cycle).
 					      surCYC1 = surCYC1 +1
-					      WRITE(78,*) 'TOO FAR',abs(xo-x_index/deg2km),ix,xo,x_index,x      
+					      WRITE(78,*) 'TOO FAR',abs(xo-x_index/deg2km),ix,xo,x_index,x 
+					      IF (I < 11) WRITE(78,*) 'A',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL     
 					END IF
 					
 				
@@ -636,6 +638,9 @@ PROGRAM statsyn_TRACK_iso
 																				+ dsmin**(npow+1))**(1/(npow+1))
 							 DO WHILE (ds_scat < ds_SL)
 							 
+							 
+							 IF (I < 11) WRITE(78,*) 'O',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
+							 
 							 !DEBUG
 							 scat_time = scat_time +1
 							
@@ -672,7 +677,7 @@ PROGRAM statsyn_TRACK_iso
 																			
 								!WRITE(77,*) 'SCATTERING TRACING'
 								
-							IF (I < 11) WRITE(78,*) 'O',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
+							
 								 
 							 END DO
 							 
