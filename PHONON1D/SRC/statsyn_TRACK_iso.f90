@@ -523,13 +523,6 @@ PROGRAM statsyn_TRACK_iso
 												c_mult(3) = cos(ang1)*cos(az)    !! Radial amp for SV
 											END IF
 										p    = abs(sin(ang1))/vf(1,2)	!vf(iz,2) but iz == 1 at surface
-					!         IF (it>1)WRITE(6,*) ip,iwave,ix,it,a,ang1*180/pi,c_mult(1),c_mult(2),c_mult(3)
-					
-										IF((n_iter_last == nitr).and.(ix_last==ix) &
-																			 .and.(abs(it_last-it)<5.)) THEN		!CYCLE 3
-													surCYC3 = surCYC3 +1
-													CYCLE
-										END IF
 					
 											n_iter_last = nitr
 											ix_last = ix
@@ -569,14 +562,7 @@ PROGRAM statsyn_TRACK_iso
 					      IF (I < 11) WRITE(78,*) 'A',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL     
 					END IF
 					
-				
-!					IF (abs(x/deg2km)-abs(x1+dxi*float(ix-1)) > 0.2) THEN		!CYCLE 2
-!					! Same as cycle 1 (??), but with a distance of 0.2deg
-!					      surCYC2 = surCYC2 +1
-!					      CYCLE
-!					END IF
-					
-         
+        
         END IF
 				! RECORD IF PHONON IS AT SURFACE
 				! ============ <<
