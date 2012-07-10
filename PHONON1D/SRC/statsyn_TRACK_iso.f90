@@ -172,13 +172,10 @@ PROGRAM statsyn_TRACK_iso
 			
 
 !     ======================================================
-!			----- CONVERT VEL. MODEL TO FLAT EARTH -----
+!			----- APPLY FLATTENING TRANSFORMATION -----
 
       OPEN(1,FILE=ifile,STATUS='OLD')    !OPEN SEISMIC VELOCITY MODEL
 	  
-	  !DEBUG
-	  !OPEN(84,file='z.out',status='unknown')
-	
       DO I = 1, nlay0                     !READ IN VELOCITY MODEL
        READ(1,*,IOSTAT=status) z_s(i),r_s(i),vs(i,1),vs(i,2),rh(i),Q(i)
 	   
@@ -210,17 +207,14 @@ PROGRAM statsyn_TRACK_iso
            
         
        END IF
-       
-       !DEBUG
-        !WRITE(84,*) z_s(i),z(i),vf(i,1),vf(i,2)
+
+
       END DO
 22    FORMAT (f6.1,2(i5,f6.2,f5.2),2x,2f9.6,2x,2f9.6)
 
-!			^^^^^^ CONVERT VEL. MODEL TO FLAT EARTH ^^^^^^
+!			^^^^^^ APPLY FLATTENING TRANSFORMATION ^^^^^^
 			
-			!DEBUG
-			!CLOSE(24)			
-			
+		
 !     ======================================================
 !			----- INITIALIZE TRACKING PARAMETERS -----		
 !			
@@ -259,7 +253,7 @@ PROGRAM statsyn_TRACK_iso
 !			----- Find Source Layer -----
       iz1 = 1
       DO WHILE (qdep > z_s(iz1+1))               !FIND WHICH LAYER QUAKE STARTS IN
-       iz1 = iz1 +1															 ! FIRST LAYER IS ASSUMED TO BE AT 0km.
+       iz1 = iz1 +1															 !FIRST LAYER IS ASSUMED TO BE AT 0km.
       END DO
 		  WRITE(6,*) 'DEPTH:',iz1,z_s(iz1)
 !			^^^^^ Find Source Layer ^^^^^
@@ -291,8 +285,7 @@ PROGRAM statsyn_TRACK_iso
       DO JJ = 1,nts
         minattn = minattn + mt(JJ)**2
       END DO
-			 
-!      WRITE(6,*) '! MaxSourcePower==> ', minattn  !DEBUG
+
 !     ^^^^^ Generate Source Function ^^^^^		           
 
 
@@ -370,8 +363,6 @@ PROGRAM statsyn_TRACK_iso
       ! ============ <<
        
 
-								
-
 			iz = iz1		!iz1 is layer in which the source is.
 				 
 				! ============ >>
@@ -425,6 +416,7 @@ PROGRAM statsyn_TRACK_iso
 				
         IF (ang1 < pi/2.) THEN
          ud = 1	
+         iz = iz + 1 !Need this to make sure that source always stars at the same depth.
         ELSE
          ud = -1
         END IF
