@@ -52,7 +52,7 @@ PROGRAM statsyn_TRACK_iso
 				CHARACTER*100 :: debugfile,logend
 				REAL						 dh2, dhsmall
 				INTEGER (kind=8) ::  surfcount
-			  INTEGER (kind=8) ::  surCYC1,surCYC2,surCYC3,exTIME,exNLAY
+			  INTEGER (kind=8) ::  surCYC1,exTIME,exNLAY
 			  INTEGER 				 ::  logperc
 			  INTEGER (kind=8) ::  scat_time
  
@@ -61,8 +61,6 @@ PROGRAM statsyn_TRACK_iso
 
 			!DEBUG
 			surCYC1 = 0
-			surCYC2 = 0
-			surCYC3 = 0
 			exTIME = 0
 			exNLAY = 0
 
@@ -396,6 +394,8 @@ PROGRAM statsyn_TRACK_iso
  
         r0 = rand()                            !SELECT RANDOM RAY PARAMETER 
         ang1 = angst*r0                        !Randomly select angle
+        
+        angst = pi 			!Need a full range a angst for scattered ray parameter
         ! ============ <<
 				
 				
@@ -448,7 +448,7 @@ PROGRAM statsyn_TRACK_iso
        izfac = 0
 			 IF (ud == 1) izfac = -1 
 			 z_act = z_s(iz+izfac)    !Depth of phonon
-       IF (I < 11) WRITE(78,*) 'S',I,NITR,iz,z_s(iz),'0',z_act,x,ud
+       IF (I < 11) WRITE(78,*) 'S ',I,NITR,iz,z_s(iz),'0',z_act,x,ud
       
 			 		
 				!r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
@@ -543,7 +543,7 @@ PROGRAM statsyn_TRACK_iso
 									!debug
 									WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
 									WRITE(78,*) 'RECRDED',abs(xo-x_index/deg2km),ix,xo,x_index,x
-									IF (I < 11) WRITE(78,*) 'A',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
+									IF (I < 11) WRITE(78,*) 'A ',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
 
 					
 					ELSE!CYCLE 1
@@ -551,7 +551,7 @@ PROGRAM statsyn_TRACK_iso
 					! do not record this surface hit (cycle).
 					      surCYC1 = surCYC1 +1
 					      WRITE(78,*) 'TOO FAR',abs(xo-x_index/deg2km),ix,xo,x_index,x 
-					      IF (I < 11) WRITE(78,*) 'A',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL     
+					      IF (I < 11) WRITE(78,*) 'A ',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL     
 					END IF
 					
         
@@ -566,15 +566,21 @@ PROGRAM statsyn_TRACK_iso
 								       
 				! Check if the phonon is in the scattering layer
 									!Check if your leaving the SL
-				IF ((z_act == scat_depth).AND.(ud == 1)) THEN !.AND.(scat_prob > 0.)) THEN
-					CALL RAYTRACE
-					CALL INTERFACE_NORMAL			
-					iz = iz + ud   
-					!IF (I < 11) WRITE(77,*) I,NITR,iz,z_s(iz),x,ud,'NORMAL'
-        ELSE
+!				IF ((z_act == scat_depth).AND.(ud == 1)) THEN !.AND.(scat_prob > 0.)) THEN
+!					CALL RAYTRACE
+!					CALL INTERFACE_NORMAL			
+!					iz = iz + ud   
+!
+!        ELSE
 					
 					IF ((z_act <= scat_depth).AND.(scat_prob > 0.)) THEN
 						!~write(77,*) 'Scattering' !DEBUG
+						
+				
+						!Check if scatter
+						CALL INTERFACE_SCATTER
+						
+						IF (z_act <= 0.) ud = 1 !make sure you're going down if leaving surface
 						
 						iz_scat = iz ! Layer in which phonon travels
 						izfac = 0
@@ -583,16 +589,13 @@ PROGRAM statsyn_TRACK_iso
 
 						dh = abs(z_s(iz) - z_s(iz-1)) !First dh is thickness of layer
 						
-						!Check if scatter
-						CALL INTERFACE_SCATTER
-						
-						IF (z_act <= 0.) ud = 1 !make sure you're going down if leaving surface 
-						
+					
 						IF ((z_act == scat_depth).AND.(ud == 1)) THEN
 							!Skip scattering and do normal ray trace below
 						ELSE
 							 
 							 ! Calculate linear distance to next velocity layer (ds_SL)
+							 ! Can change this to much simpler one line trig !CHANGE1
 								 IF (abs(vf(iz-1,iwave)) > 0.) THEN
 									 utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
 								 ELSE
@@ -610,91 +613,78 @@ PROGRAM statsyn_TRACK_iso
 								 CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
 								 ds_SL = (dh**2+dx1**2)**0.5
 											 
-							!If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
-								 !Calculate first ds_scat
+							   !If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
+								 
+								 !Calculate first ds_scat (distance to next scatterer)
 								 ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
 																				+ dsmin**(npow+1))**(1/(npow+1))
-							 DO WHILE (ds_scat < ds_SL)
-							 
-							 
-							 IF (I < 11) WRITE(78,*) 'O',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
-							 
-							 !DEBUG
-							 scat_time = scat_time +1
-							
-									!debug
-									dh2 = dh
-							
-									!Calculare what would dh be if phonon only travelled ds_scat km
-									dh = ds_scat*abs(cos(asin(p*vf(iz,iwave))))  
-									 
-							!debug
-							IF (dh < ds_scat) dhsmall = 1
-							
-							!IF (I < 11) WRITE(77,*) I,NITR,iz,z_s(iz),x,ud,'WILLSCAT',iz_scat,z_act,ds_scat,ds_SL,dh,ud,p
-							!WRITE(77,*) 'in SL',ds_scat,ds_SL,dh2,dh,z_act
-							!WRITE(77,*) NITR,'in SL',iz_scat,z_act,ds_scat,ds_SL,dh,ud,p
-							
-									!Make phonon travel to  next scatterer
-									CALL RAYTRACE_SCAT
-									z_act = z_act + dh*ud
-									 
-								 
-								 !Is phonon scattered at scatterer or does it go through?
-									 CALL INTERFACE_SCATTER
-								 
-								 ! Calculate new ds_SL based on new ud and p (if it got scattered)
-									 IF (ud == -1) dh = abs(z_act - z_s(iz_scat-1)) ! Distance to vel layer above
-									 IF (ud == 1) dh = abs(z_act - z_s(iz_scat))  ! Distance to vel layer below
-									 CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
-									 ds_SL = (dh**2+dx1**2)**0.5
-	 
-								 !New ds_scat
-								 ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
-																			+ dsmin**(npow+1))**(1/(npow+1))
-																			
-								!WRITE(77,*) 'SCATTERING TRACING'
+																				
 								
-							
-								 
+							 DO WHILE ((ds_scat < ds_SL).AND.(irtr1 /= 0))
+
+									 IF (I < 11) WRITE(78,*) 'Oa',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL,dh,p
+									 
+									 !DEBUG
+									 scat_time = scat_time +1
+									 
+									 !debug
+									 dh2 = dh
+									 
+									 !Calculare what would dh be if phonon only travelled ds_scat km
+									 dh = ds_scat*abs(cos(asin(p*vf(iz,iwave)))) 
+									 
+									 		
+									 !Make phonon travel to  next scatterer
+									 CALL RAYTRACE_SCAT
+									 
+									 IF (irtr1 /= 0)  z_act = z_act + dh*ud
+										
+									 
+									 !Is phonon scattered at scatterer or does it go through?
+									 CALL INTERFACE_SCATTER
+									 
+									 !write(78,*) 'DH ====== ',irtr1,dh,ds_scat,p,vf(iz,iwave),p*vf(iz,iwave),abs(cos(asin(p*vf(iz,iwave))))
+									 
+									 ! Calculate new ds_SL based on new ud and p (if it got scattered)
+										IF (ud == -1) dh = abs(z_act - z_s(iz_scat-1)) ! Distance to vel layer above
+										IF (ud == 1) dh = abs(z_act - z_s(iz_scat))  ! Distance to vel layer below
+										CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
+										ds_SL = (dh**2+dx1**2)**0.5
+									 
+									 !New ds_scat
+									 ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
+																			 + dsmin**(npow+1))**(1/(npow+1))
+																			 
+ 
 							 END DO
-							 
-!							 IF (I < 11) WRITE(77,*) I,NITR,iz,z_s(iz),x,ud,'NOSCAT',iz_scat,z_act,ds_scat,ds_SL,dh,ud,p
+							 !IF (I < 11) WRITE(78,*) 'Ob',p,dh2,dh,vf(iz,iwave)
+							 IF (I < 11) WRITE(78,*) 'Ob',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL,dh
 						
 						END IF								
 									
 						!Leaves WHILE loop when ds_SL < distance to next vel layer
 						!Need to travel to next vel layer
 							CALL RAYTRACE_SCAT !Already have dh
-							CALL INTERFACE_NORMAL
-							!WRITE(77,*) 'RAY TRACING TO VEL LAYER'						
+
 							z_act = z_act + dh*ud
 						!Figure out in which layer the phonon is now into
 							iz = iz_scat + ud
 							
-							!DEBUG vv
-						IF (ds_scat > ds_SL) THEN
-						  !WRITE(77,*) NITR,'Back to layer',iz, iz_scat,z_act,ds_scat,ds_SL,dh,ud,p
-					  END IF
-					  !DEBUG ^^	
+							CALL INTERFACE_NORMAL
+							
 															
 				ELSE !Not in scattering layer
 				
-				!WRITE(77,*) NITR,'OUT',iz
 					! ============ >>
 					! RAY TRACING IN LAYER
 					CALL RAYTRACE
-					!WRITE(77,*) 'RAYTRACE -->',x
 					CALL INTERFACE_NORMAL			
-					!WRITE(77,*) 'INTER -->',x
-
 					iz = iz + ud  
-				  !write(77,*) I,NITR,iz,d,'Normal RAYTRACE' !DEBUG
 					! RAY TRACING IN LAYER	
 					! ============ <<
 					
 				END IF !SCATTERING LAYER IF
-      END IF         					
+!      END IF         					
 				! SCATTERING LAYER
 				! ============ <<
 				
@@ -704,9 +694,12 @@ PROGRAM statsyn_TRACK_iso
 			 
 			 
 		 
-		
+				iz_scat = iz ! Layer in which phonon travels
+				izfac = 0
+				IF (ud == 1) izfac = -1 
+				z_act = z_s(iz_scat+izfac)    !Depth of phonon while in SL
 			 	 
-	     IF (I < 11) WRITE(78,*) 'E',I,NITR,iz,z_s(iz),'0',z_act,x,ud
+	     IF (I < 11) WRITE(78,*) 'E ',I,NITR,iz,z_s(iz),'0',z_act,x,ud
 			 END DO		!CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
 			 ! ====================== <<
 			 ! Close single ray tracing while loop
@@ -779,10 +772,9 @@ PROGRAM statsyn_TRACK_iso
       WRITE(6,*) 'Synthetic outputs done'
       
       !Debug
-      WRITE(6,*) 'Total Surface count = ', surfcount
-      WRITE(6,*) 'CYCLE 1 = ', surCYC1
-      WRITE(6,*) 'CYCLE 2 = ', surCYC2
-      WRITE(6,*) 'CYCLE 3 = ', surCYC3
+      WRITE(6,*) 'Total Surface records = ', surfcount
+      WRITE(6,*) 'Too far from receiver = ', surCYC1
+
 !			^^^^^ Output Synthetics ^^^^^
 			
       
@@ -1575,22 +1567,12 @@ END FUNCTION artan2
       USE pho_vars
       
       IMPLICIT NONE
-    					
-      ! ----- Initialize Randomization -----			
-      ! CALL SYSTEM_CLOCK(COUNT=nclock)
-      ! seed = (nclock)! + 11 * (/ (k - 1, k = 1, nseed) /)
-      ! CALL srand(seed)
-      ! 
-	    ! r0 = rand()    !First rand output not random
-      !                  ! It is seed (clock) dependent
-      ! ============ <<
-      
+
       !Check if scatter first
       r0 = rand()
       IF (r0 < scat_prob) THEN 
       
-      	!DEBUG
-      	!WRITE(77,*) 'Scatters'
+				 IF (z_act == 0) angst = pi/2  !Goes down only
       	     
 				 r0 = rand()
 				 IF (r0 < 0.5) x_sign=-x_sign		
@@ -1600,8 +1582,9 @@ END FUNCTION artan2
 				 r0 = rand()
 				 r0 = ( r0 - 0.5 )
 				 p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
-		 
+
 				 DO WHILE ((p < p1).OR.(p >= 1./vf(iz,iwave)) ) !p2(iwave)))
+				 
 				 r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
 				 ang1 = angst*r0
 				 p = abs(sin(ang1))/vf(iz,iwave)
@@ -1613,6 +1596,8 @@ END FUNCTION artan2
 				 az = az + asin(r0**2)                  !
 				 IF (az < -pi) az = az + 2.*pi
 				 IF (az >  pi) az = az - 2.*pi
+				 
+				 angst = pi   !Reset full range of possible angles.
       END IF		 
 			
 			RETURN	
