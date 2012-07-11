@@ -448,7 +448,7 @@ PROGRAM statsyn_TRACK_iso
        izfac = 0
 			 IF (ud == 1) izfac = -1 
 			 z_act = z_s(iz+izfac)    !Depth of phonon
-       IF (I < 11) WRITE(78,*) 'S ',I,NITR,iz,z_s(iz),'0',z_act,x,ud
+       IF (I < 11) WRITE(78,*) 'S ',I,NITR,t,iz,z_s(iz),'0',z_act,x,ud
       
 			 		
 				!r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
@@ -543,7 +543,7 @@ PROGRAM statsyn_TRACK_iso
 									!debug
 									!WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
 									IF (I < 11) WRITE(78,*) 'RECRDED',abs(xo-x_index/deg2km),ix,xo,x_index,x
-									IF (I < 11) WRITE(78,*) 'A ',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
+									IF (I < 11) WRITE(78,*) 'A ',I,NITR,t,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
 
 					
 					ELSE!CYCLE 1
@@ -551,7 +551,7 @@ PROGRAM statsyn_TRACK_iso
 					! do not record this surface hit (cycle).
 					      surCYC1 = surCYC1 +1
 					      IF (I < 11) WRITE(78,*) 'TOO FAR',abs(xo-x_index/deg2km),ix,xo,x_index,x 
-					      IF (I < 11) WRITE(78,*) 'A ',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL     
+					      IF (I < 11) WRITE(78,*) 'A ',t,I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL     
 					END IF
 					
         
@@ -590,7 +590,7 @@ PROGRAM statsyn_TRACK_iso
 						dh = abs(z_s(iz) - z_s(iz-1)) !First dh is thickness of layer
 						
 					
-						IF ((z_act == scat_depth).AND.(ud == 1)) THEN
+						IF (((z_act == scat_depth).AND.(ud == 1)).OR.(dh == 0)) THEN
 							!Skip scattering and do normal ray trace below
 						ELSE
 							 
@@ -622,7 +622,7 @@ PROGRAM statsyn_TRACK_iso
 								
 							 DO WHILE ((ds_scat < ds_SL).AND.(irtr1 /= 0))
 
-									 IF (I < 11) WRITE(78,*) 'Oa',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL,dh,p
+									 IF (I < 11) WRITE(78,*) 'Oa',I,NITR,t,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL,dh,p
 									 
 									 !DEBUG
 									 scat_time = scat_time +1
@@ -658,7 +658,7 @@ PROGRAM statsyn_TRACK_iso
  
 							 END DO
 							 !IF (I < 11) WRITE(78,*) 'Ob',p,dh2,dh,vf(iz,iwave)
-							 IF (I < 11) WRITE(78,*) 'Ob',I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL,dh
+							 IF (I < 11) WRITE(78,*) 'Ob',I,NITR,t,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL,dh
 						
 						END IF								
 									
@@ -699,7 +699,7 @@ PROGRAM statsyn_TRACK_iso
 				IF (ud == 1) izfac = -1 
 				z_act = z_s(iz_scat+izfac)    !Depth of phonon while in SL
 			 	 
-	     IF (I < 11) WRITE(78,*) 'E ',I,NITR,iz,z_s(iz),'0',z_act,x,ud
+	     IF (I < 11) WRITE(78,*) 'E ',I,NITR,t,iz,z_s(iz),'0',z_act,x,ud,irtr1
 			 END DO		!CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
 			 ! ====================== <<
 			 ! Close single ray tracing while loop
@@ -1156,12 +1156,21 @@ SUBROUTINE LAYERTRACE(p,h,utop,ubot,imth,dx,dt,irtr)
           b=-alog(ubot/utop)/h
       END IF  
 !
+!      IF (b == 0.) THEN     !constant velocity layer
+!         b=-1./h
+!         etau=qs
+!         ex=p/qs
+!         go to 160
+!      END IF
+
       IF (b == 0.) THEN     !constant velocity layer
-         b=-1./h
+         b=1./h						! CORRECTED USING SHEARER'S BOOK.
          etau=qs
          ex=p/qs
          go to 160
       END IF
+
+
 !   !integral at upper limit, 1/b factor omitted until END
       IF (imth == 1) THEN
          etau=-q*qs/3.
@@ -1626,7 +1635,14 @@ END FUNCTION artan2
 					
 					!DEBUG
 					!WRITE(77,*) 'LAYER TRACE->', iz,p,h,utop,ubot,imth
+!					write(78,*) 'LAYER TRACE: p   = ',p
+!					write(78,*) 'LAYER TRACE: h   = ',h
+!					write(78,*) 'LAYER TRACE: ut  = ',utop
+!					write(78,*) 'LAYER TRACE: ub  = ',ubot
 					CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
+!					write(78,*) 'LAYER TRACE: dx1 = ',dx1
+!					write(78,*) 'LAYER TRACE: dt1 = ',dt1
+!					write(78,*) 'LAYER TRACE: ir1 = ',irtr1
 					dtstr1 = dt1/Q(iz)                    !t* = TIME/QUALITY FACTOR
 				ELSE
 					irtr1  = -1
@@ -1656,22 +1672,29 @@ END FUNCTION artan2
 
 	
 				IF (iz /= 1) THEN
-				  IF (abs(vf(iz_scat,iwave)) > 0.) THEN
-				    utop = 1./vf(iz_scat,iwave)              !SLOWNESS AT TOP OF LAYER
+				  IF (abs(vf(iz,iwave)) > 0.) THEN
+				    utop = 1./vf(iz,iwave)              !SLOWNESS AT TOP OF LAYER
 				  ELSE
 				    utop = 0.
 				  END IF 
 		
-					IF (abs(vf(iz_scat,iwave)) > 0.) THEN
-						ubot = 1./vf(iz_scat,iwave)                !SLOWNESS AT BOTTOM OF LAYER
+					IF (abs(vf(iz,iwave)) > 0.) THEN
+						ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
 					ELSE
 						ubot = 0.
 					END IF
          
 					h = dh                  !THICKNESS OF LAYER
 					imth = 2                              !INTERPOLATION METHOD
-		
+!					write(78,*) 'SCATTERING TRACE: p   = ',p
+!					write(78,*) 'SCATTERING TRACE: h   = ',h
+!					write(78,*) 'SCATTERING TRACE: ut  = ',utop
+!					write(78,*) 'SCATTERING TRACE: ub  = ',ubot
 					CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
+!					write(78,*) 'SCATTERING TRACE: dx1 = ',dx1
+!					write(78,*) 'SCATTERING TRACE: dt1 = ',dt1
+!					write(78,*) 'SCATTERING TRACE: ir1 = ',irtr1
+					
 					dtstr1 = dt1/Q(iz)                    !t* = TIME/QUALITY FACTOR
 				ELSE
 					irtr1  = -1
