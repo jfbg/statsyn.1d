@@ -49,7 +49,7 @@ PROGRAM statsyn_TRACK_iso
 				
 				! VELOCITY MODEL CHECKS
 				INTEGER       check_scat, check_core, check_scat2
-				REAL          corelayer
+				          
 				
 				! DEBUGGING
 				CHARACTER*100 :: debugfile,logend
