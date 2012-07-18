@@ -3,8 +3,9 @@ MODULE PHO_VARS			! Make variables global
 				IMPLICIT NONE
 							
 				INTEGER, PARAMETER :: nlay0=1000, nt0=144000, nx0=91
-				REAL          z(nlay0),vf(nlay0,2),rh(nlay0)
-				REAL          z_s(nlay0),r_s(nlay0),vs(nlay0,2)
+				REAL          z(nlay0),vf(nlay0,2)
+				REAL          z_st(nlay0),r_st(nlay0),vst(nlay0,2),rht(nlay0)
+				REAL          z_s(nlay0),r_s(nlay0),vs(nlay0,2),rh(nlay0)
 				REAL          t,x,xo,a,w(nt0),x_index
 				REAL          dx1,dt1
 				INTEGER       irtr1
@@ -12,14 +13,14 @@ MODULE PHO_VARS			! Make variables global
 				REAL  			:: maxcount
 				INTEGER     :: IT,JT,I,J,ic,jj,k,kk,ll,mm
 				REAL          p,ang1
-				REAL          Q(nlay0)              !QUALITY FACTOR 
+				REAL          Q(nlay0),Qt(nlay0)              !QUALITY FACTOR 
 				REAL          dtstr1                !ATTENUATION PER LAYER
 				REAL          pi,P0
 				INTEGER       n180,idelt1,idelt2
 				REAL       :: angst                 !! Starting angle for trace
 				INTEGER		 :: iztrack,ixtrack
 				REAL       :: deg2km
-				
+				REAL          corelayer
 
 				
 				! SCATTERING
