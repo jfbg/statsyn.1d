@@ -1678,11 +1678,13 @@ END FUNCTION artan2
 						END IF      																										!IF3d
           END IF                                !END IF: SH, OR P-SV				!IF2b
          
-        ELSE IF (iz == nlay) THEN               !ONCE HIT OTHER SIDE OF CORE  !IF1
-					!ud = -ud
+        ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE  !IF1
+					ud = -ud
+					dt1 = (2*corelayer)/vf(iz,iwave)
 					x = x + 180*deg2km
-					!DEBUG
-					!IF (I < 11) WRITE(77,*) I,NITR,iz,z_s(iz),x,ud,'OTHER SIDE OF CORE',irtr1
+					t = t + dt1
+					d = d + 2*corelayer
+					s = s + dt1/Q(iz)
 				END IF																																!IF1
 	
         
