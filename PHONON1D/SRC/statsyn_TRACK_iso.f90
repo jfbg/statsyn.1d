@@ -666,7 +666,7 @@ PROGRAM statsyn_TRACK_iso
 									
 									!debug
 									!WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
-									IF (I < 11) WRITE(78,*) 'RECRDED',abs(xo-x_index/deg2km),ix,xo,x_index,x
+									IF (I < 11) WRITE(78,*) 'RECRDED',s,abs(xo-x_index/deg2km),ix,xo,x_index,x
 									IF (I < 11) WRITE(78,*) 'A ',I,NITR,t,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
 
 					
@@ -1288,7 +1288,7 @@ SUBROUTINE LAYERTRACE(p,h,utop,ubot,imth,dx,dt,irtr)
 !      END IF
 
       IF (b == 0.) THEN     !constant velocity layer
-         b=1./h						! CORRECTED USING SHEARER'S BOOK.
+         b=1./h						! CORRECTED USING SHEARER'S BOOK. WAS -1./h !JFL
          etau=qs
          ex=p/qs
          go to 160
@@ -1812,14 +1812,9 @@ END FUNCTION artan2
          
 					h = dh                  !THICKNESS OF LAYER
 					imth = 2                              !INTERPOLATION METHOD
-!					write(78,*) 'SCATTERING TRACE: p   = ',p
-!					write(78,*) 'SCATTERING TRACE: h   = ',h
-!					write(78,*) 'SCATTERING TRACE: ut  = ',utop
-!					write(78,*) 'SCATTERING TRACE: ub  = ',ubot
+
 					CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
-!					write(78,*) 'SCATTERING TRACE: dx1 = ',dx1
-!					write(78,*) 'SCATTERING TRACE: dt1 = ',dt1
-!					write(78,*) 'SCATTERING TRACE: ir1 = ',irtr1
+
 					
 					dtstr1 = dt1/Q(iz)                    !t* = TIME/QUALITY FACTOR
 				ELSE
