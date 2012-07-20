@@ -2,11 +2,10 @@ PROGRAM statsyn_TRACK_iso
 !
 ! Modified version from statsyn_TRACK:
 !
-! Scattering is now isotropic
-! Scattering length-scale follows power law
-! Qi is frequency dependent (NOT YET)
-!
-! Need to add check to make sure there is a layer at the base of the SL
+! Scattering is isotropic
+! Scattering length-scale follows power law (declared in running shell)
+! Qi is frequency dependent (Need to change form of dQ/df accordingly
+!														(search for rdQdf to modify it)
 !
 ! 
 !
@@ -178,10 +177,10 @@ PROGRAM statsyn_TRACK_iso
 
 !     ======================================================
 !			----- CHECKS AND UPDATES ON VELOCITY MODEL -----						   
-!				--> One layer is directly at base of scattering layer
+!				--> One layer is directly at base of scattering layer (need this for scattering to work)
 !				--> Thin 100m layer at core to deal with singularity caused by flattening
 
-      corelayer = 0.1
+      corelayer = 0.1        ! Thickness of thin layer near core to deal with singularity
 
       OPEN(1,FILE=ifile,STATUS='OLD')    !OPEN SEISMIC VELOCITY MODEL
       
@@ -273,8 +272,7 @@ PROGRAM statsyn_TRACK_iso
 						Q(nlay)  = Qt(I)
 			 END IF
 						
-					!INSERT SCAT LAYER
-					 
+				 
 			ELSE
 				z_s = z_st
 				r_s = r_st
@@ -283,7 +281,7 @@ PROGRAM statsyn_TRACK_iso
 				Q = Qt
 			END IF
 			
-      OPEN(45,FILE='model_corrected.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL
+      OPEN(45,FILE='model_modified.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL
       
       DO I = 1,nlay
       	WRITE(45,*) z_s(I),vs(I,1),vs(I,2),rh(I),Q(i)
@@ -519,7 +517,7 @@ PROGRAM statsyn_TRACK_iso
         r0 = rand()                            !SELECT RANDOM RAY PARAMETER 
         ang1 = angst*r0                        !Randomly select angle
         
-        angst = pi 			!Need a full range a angst for scattered ray parameter
+        angst = pi 			!Need a full range angst for scattered ray parameter
         ! ============ <<
 				
 				
@@ -572,7 +570,7 @@ PROGRAM statsyn_TRACK_iso
        izfac = 0
 			 IF (ud == 1) izfac = -1 
 			 z_act = z_s(iz+izfac)    !Depth of phonon
-       IF (I < 11) WRITE(78,*) 'S ',I,NITR,t,iz,z_s(iz),'0',z_act,x,ud
+       IF (I < 11) WRITE(78,*) 'S ',I,NITR,t,iz,z_s(iz),'0',z_act,x,ud  !DEBUG
       
 			 		
 				!r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
@@ -959,7 +957,7 @@ SUBROUTINE init_random_seed()
 END SUBROUTINE init_random_seed
       
       
-SUBROUTINE attenuate(sin,sout,ndat,dt,tstar,dQdf)
+SUBROUTINE attenuate(sin,sout,ndat,dt,tstar,rdQdf)
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
 !   |THIS SUBROUTINE ATTENUATES AN INPUT SIGNAL (sin) BY A VALUE (tstar) !   !
 !   |                                                                    !   !
@@ -979,8 +977,13 @@ SUBROUTINE attenuate(sin,sout,ndat,dt,tstar,dQdf)
       COMPLEX        xf(16384),yf(16384)     !SCRATCH SPACE
       REAL           dt,df                   !TIME & FREQ SAMPLING INTERVAL
       REAL           pi                      !SET PI = 3.14....
-      REAL           w,dw                    !FREQUCNEY VARIABLES
+      REAL           w,dw                    !FREQUENCY VARIABLES
       REAL           damp
+      REAL           rdQdf
+      
+      
+       
+      
 
       
       CALL np2(ndat,npts)                    !FIND POWER OF TWO, npts >= ndat
@@ -994,14 +997,22 @@ SUBROUTINE attenuate(sin,sout,ndat,dt,tstar,dQdf)
       CALL GET_SPEC(xs,npts,dt,xf,nfreq,df) !GET SPECTRUM OF x
       pi = atan(1.)*4.                       !SET PI = 3.14....
       dw = 2.*pi*df                          !ANGULAR FREQUENCY SAMPLING INTERVAL
+      
+      !Build rdQdf
+      DO I = 1, nfreq
+      	!Can give rdQdf any form. 
+      	rdQdf(I) = 1      !Q constant at all frequencies
+      END DO
+      
       dadw = -tstar*dw                       !DERIVATIVE dA(w)di = -dt*dw
       
+            
       DO I = 1, nfreq                        !APPLY ATTENUATION FILTER
-       damp = exp(float(I-1)*dadw)
+       damp = exp(float(I-1)*dadw/rdQdf(I))
        w     = dw* float(I-1)                !ANGULAR FREQUENCY
        IF (damp < 0.) damp = 0.
        yf(I) = xf(I)*cmplx(damp,0.)
-       yf(I) = yf(I)*exp( cmplx(0.,w*tstar))
+       yf(I) = yf(I)*exp( cmplx(0.,w*tstar/rdQdf(I)))
       END DO
 
       CALL GET_TS(yf,nfreq,df,0,sout,npts,dt) !GET TIME SERIES OF ATTENUATED SPEC
