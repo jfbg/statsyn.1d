@@ -414,7 +414,7 @@ PROGRAM statsyn_TRACK_iso
       datt = 0.02		! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
       DO I = 1, 101                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
-       CALL attenuate(mt,mtsc,nts1,dti,dtst1,dQdf) !
+       CALL attenuate(mt,mtsc,nts1,dti,dtst1) !
        pow1 = 0.
        DO J = 1, nts1                         !
         mts(I,1,J) =  mtsc(J)                 !
@@ -957,7 +957,7 @@ SUBROUTINE init_random_seed()
 END SUBROUTINE init_random_seed
       
       
-SUBROUTINE attenuate(sin,sout,ndat,dt,tstar,rdQdf)
+SUBROUTINE attenuate(sin,sout,ndat,dt,tstar)
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
 !   |THIS SUBROUTINE ATTENUATES AN INPUT SIGNAL (sin) BY A VALUE (tstar) !   !
 !   |                                                                    !   !
@@ -979,7 +979,7 @@ SUBROUTINE attenuate(sin,sout,ndat,dt,tstar,rdQdf)
       REAL           pi                      !SET PI = 3.14....
       REAL           w,dw                    !FREQUENCY VARIABLES
       REAL           damp
-      REAL           rdQdf
+      REAL           rdQdf(16384)
       
       
        
@@ -1001,7 +1001,7 @@ SUBROUTINE attenuate(sin,sout,ndat,dt,tstar,rdQdf)
       !Build rdQdf
       DO I = 1, nfreq
       	!Can give rdQdf any form. 
-      	rdQdf(I) = 1      !Q constant at all frequencies
+      	rdQdf(I) = 1.      !Q constant at all frequencies
       END DO
       
       dadw = -tstar*dw                       !DERIVATIVE dA(w)di = -dt*dw
