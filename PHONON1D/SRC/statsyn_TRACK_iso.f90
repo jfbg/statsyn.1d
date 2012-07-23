@@ -621,6 +621,11 @@ PROGRAM statsyn_TRACK_iso
 												icaust = icaust - 4
 											END DO
 										END IF
+										
+										!JFL
+										! Calculate angle of incidence. This was not done before so the angle used
+										! was the last one from scattering or the initial take-off angle.
+										ang1 = asin(p*vf(iz,iwave))
 					
 										IF ( (IT > 1-nts).and.(IT <= nt0+nts) ) THEN
 											IF ( (ip == 1) ) THEN
@@ -636,7 +641,11 @@ PROGRAM statsyn_TRACK_iso
 												c_mult(2) = cos(ang1)*sin(az)    !! Tangential amp for SV
 												c_mult(3) = cos(ang1)*cos(az)    !! Radial amp for SV
 											END IF
-										p    = abs(sin(ang1))/vf(1,2)	!vf(iz,2) but iz == 1 at surface
+											
+										!JFL	Not sure why p was redefined here, for an s-wave iwave = 2 (??).
+										! p is set so it's ang1 that needs to be calculated before rotating
+										! the waveform.
+!										p    = abs(sin(ang1))/vf(1,2)	!vf(iz,2) but iz == 1 at surface
 					
 											n_iter_last = nitr
 											ix_last = ix
