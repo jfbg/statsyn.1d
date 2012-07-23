@@ -48,7 +48,7 @@ PROGRAM statsyn_TRACK_iso
 				
 				! VELOCITY MODEL CHECKS
 				INTEGER       check_scat, check_core, check_scat2
-				          
+				
 				
 				! DEBUGGING
 				CHARACTER*100 :: debugfile,logend
@@ -152,6 +152,8 @@ PROGRAM statsyn_TRACK_iso
       nttrack_dt = t2/nttrack
 			
       n180 = nint(180/dxi)			!Number of intervals in 180deg
+      
+      dreceiver = 0.05  !radius around receiver in which the phonons will be recorded (deg)
      
 	  
       CALL init_random_seed()
@@ -602,10 +604,13 @@ PROGRAM statsyn_TRACK_iso
 
 					xo = x1 + float(ix-1)*dxi					!Distance_index in km
 					
-					IF ( abs(xo-x_index/deg2km) <= 0.1) THEN
+					IF ( abs(xo-x_index/deg2km) <= dreceiver) THEN
 						! phonon is closer then 0.1 deg to a recorder, RECORD AT SURFACE		
 					
-										IT = nint((t       -t1)/dti) + 1 
+										dtsurf = dreceiver*deg2km*p !Time correction if phonon doesn't hit the surface
+																								! right on the receiver. Max time is when ang1 is 90.
+					
+										IT = nint((t +dtsurf      -t1)/dti) + 1 
 					
 										ims = int(s/datt)+1
 										IF (ims > 100) ims = 100
@@ -674,6 +679,7 @@ PROGRAM statsyn_TRACK_iso
 									!debug
 									!WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
 									IF (I < 11) WRITE(78,*) 'RECRDED',s,abs(xo-x_index/deg2km),ix,xo,x_index,x
+									IF (I < 11) WRITE(78,*) 'p = ',p,'dt = ',dtsurf
 									IF (I < 11) WRITE(78,*) 'A ',I,NITR,t,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
 
 					
