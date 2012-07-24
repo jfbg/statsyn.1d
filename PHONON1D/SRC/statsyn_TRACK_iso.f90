@@ -413,7 +413,7 @@ PROGRAM statsyn_TRACK_iso
 
 !     ======================================================
 !			----- Attenuation + Attenuated source -----
-      datt = 0.02		! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
+      datt = 2		! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
       							! 0.02 seems low, should change to 2? !JFL
       DO I = 1, 101                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
