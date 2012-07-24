@@ -21,7 +21,10 @@ MODULE PHO_VARS			! Make variables global
 				INTEGER		 :: iztrack,ixtrack
 				REAL       :: deg2km
 				REAL          corelayer
-
+				
+				! SURFACE HIT
+				REAL          dtsurf   !Time difference for phonon hitting some distance away from receiver 
+        REAL          dreceiver !radius around receiver in which the phonons will be recorded (deg)
 				
 				! SCATTERING
         REAL          ds_scat, dsmin, dsmax, npow  !Distance between scatterers and power law factor.
