@@ -91,7 +91,7 @@ while ($j < $n_kern)
 @ j = $j + 1
 
 
-sleep 1
+sleep 4
 
 ## 
 # Start phonon synthetics
