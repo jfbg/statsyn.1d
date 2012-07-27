@@ -679,8 +679,7 @@ PROGRAM statsyn_globalscat
 										
 					
 										
-										!write(*,*) I,NITR,iz,ud,d,'RECORDING' !DEBUG
-									
+								
 									!debug
 									!WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
 									IF (I < 11) WRITE(78,*) 'RECRDED',s,abs(xo-x_index/deg2km),ix,xo,x_index,x

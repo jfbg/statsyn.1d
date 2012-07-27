@@ -116,6 +116,7 @@ echo "$model            \!1=EARTH, 2=MOON                 " >> $file_csh
 # echo "$p_or_s           \!1=P, 2=SH WAVES                 " >> $file_csh
 echo "$mx_scat_dp       \!MAX SCATTERING DEPTH            " >> $file_csh
 echo "$prob_scat          \!SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh
+echo "$bg_scat          \!BACKGROUND SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh
 echo "$dsmin $dsmax $npow \!SCATERER SCALE-LENGTHS"          >> $file_csh
 echo "$outTRACK_dir/$file_track"                            >> $file_csh
 echo "$out_dir/$file_whole"                                 >> $file_csh
