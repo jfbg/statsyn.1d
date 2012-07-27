@@ -18,7 +18,7 @@ PROGRAM statsyn_globalscat
 ! $Author$
 !
 !
-
+!
 !     ======================================================
 !			----- DECLARATIONS -----
 
