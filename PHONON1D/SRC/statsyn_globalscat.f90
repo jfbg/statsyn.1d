@@ -15,7 +15,7 @@ PROGRAM statsyn_globalscat
 !
 ! $Revision: 100 $
 ! $Date: 2012-07-24 10:59:15 -0700 (Tue, 24 Jul 2012) $
-! $Author: jguertin $
+! $Author$
 !
 !
 
@@ -77,7 +77,7 @@ PROGRAM statsyn_globalscat
 
       write(*,*) 'ISOTROPIC Scattering'
       write(*,*) 'Last Edited on $Date: 2012-07-24 10:59:15 -0700 (Tue, 24 Jul 2012) $'
-      write(*,*) 'Last Edited by $Author: jguertin $'
+      write(*,*) 'Last Edited by $Author$'
       write(*,*) '$Revision: 100 $'
       
 
