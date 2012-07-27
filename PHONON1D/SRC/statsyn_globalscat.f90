@@ -13,8 +13,8 @@ PROGRAM statsyn_globalscat
 !
 ! 
 !
-! $Revision: 100 $
-! $Date: 2012-07-24 10:59:15 -0700 (Tue, 24 Jul 2012) $
+! $Revision$
+! $Date$
 ! $Author$
 !
 !
@@ -76,9 +76,9 @@ PROGRAM statsyn_globalscat
 			check_core = 1
 
       write(*,*) 'ISOTROPIC Scattering'
-      write(*,*) 'Last Edited on $Date: 2012-07-24 10:59:15 -0700 (Tue, 24 Jul 2012) $'
+      write(*,*) 'Last Edited on $Date$'
       write(*,*) 'Last Edited by $Author$'
-      write(*,*) '$Revision: 100 $'
+      write(*,*) '$Revision$'
       
 
 
