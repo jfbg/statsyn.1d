@@ -1877,6 +1877,10 @@ END FUNCTION artan2
       
       SUBROUTINE GET_DS_SCAT
       
+      USE pho_vars
+      
+      IMPLICIT NONE
+      
       !Subroutine is used to calculate ds_scat (distance between scatterers). The method
       ! depends on the depth of scattering.
       
@@ -1887,11 +1891,4 @@ END FUNCTION artan2
 			      ds_scat = 10
 			END IF
 			 
-      
-      USE pho_vars
-      
-      IMPLICIT NONE
-      
-      
-      
-      END GET_DS_SCAT
+      END SUBROUTINE GET_DS_SCAT
