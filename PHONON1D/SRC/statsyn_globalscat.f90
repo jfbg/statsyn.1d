@@ -11,6 +11,10 @@ PROGRAM statsyn_globalscat
 ! which occurs everywhere outside of the scattering layer and has a low scat probability.
 ! Both probabilities have to be declared in the running shell script.
 !
+! The distance between scatterers is calculated differently based on the depth. Global
+! scattering scale-lengths is constant (at this point) and set to 10km. This can be changed
+! in the GET_DS_SCAT subroutine.
+!
 ! 
 !
 ! $Revision$
@@ -120,12 +124,12 @@ PROGRAM statsyn_globalscat
       WRITE(6,*) 'HI2:',scat_depth
 
       WRITE(6,'(A)') 'ENTER SCATTERING PROBABILITY IN SCATTERING LAYER:'
-      READ (5,    *)  scat_prob
-			WRITE(6,*) 'SProb:',scat_prob
+      READ (5,    *)  SL_prob
+			WRITE(6,*) 'SProb:',SL_prob
 			
       WRITE(6,'(A)') 'ENTER BACKGROUND SCATTERING PROBABILITY:'
-      READ (5,    *)  globalsc_prob
-			WRITE(6,*) 'BG Prob:',globalsc_prob
+      READ (5,    *)  BG_prob
+			WRITE(6,*) 'BG Prob:',BG_prob
 			
 			WRITE(6,'(A)') 'ENTER SCATTERER LENGTH-SCALES (km) (MIN, MAX, NPOW):'
       READ (5,    *)  dsmin, dsmax, npow
@@ -709,18 +713,19 @@ PROGRAM statsyn_globalscat
 				! ============ >>
 				! SCATTERING LAYER
 								       
-				! Check if the phonon is in the scattering layer
-									!Check if your leaving the SL
-!				IF ((z_act == scat_depth).AND.(ud == 1)) THEN !.AND.(scat_prob > 0.)) THEN
-!					CALL RAYTRACE
-!					CALL INTERFACE_NORMAL			
-!					iz = iz + ud   
-!
-!        ELSE
 					
-					IF ((z_act <= scat_depth).AND.(scat_prob > 0.)) THEN
-						!~write(77,*) 'Scattering' !DEBUG
+						! THE PHONON ALWAYS HAS A CHANCE TO BE SCATTERED. THE ONLY THING THAT CHANGES
+						! IS THE SCATTERING PROBABILITY, WHICH DEPENDS ON THE PHONON DEPTHS.
 						
+						!Set depth-dependent scattering probability
+						IF (z_act <= scat_depth) THEN
+						     scat_prob = SL_prob			!Scattering layer probability
+						ELSEIF ((z_act > scat_depth).OR.((z_act == scat_depth).AND.(ud == 1))) THEN
+						      scat_prob = BG_prob			!Background probability
+						END IF
+					
+					IF (scat_prob > 0.) THEN
+				
 				
 						!Check if scatter
 						CALL INTERFACE_SCATTER
@@ -735,9 +740,10 @@ PROGRAM statsyn_globalscat
 						dh = abs(z_s(iz) - z_s(iz-1)) !First dh is thickness of layer
 						
 					
-						IF (((z_act == scat_depth).AND.(ud == 1)).OR.(dh == 0)) THEN
-							!Skip scattering and do normal ray trace below
-						ELSE
+					
+!						IF (((z_act == scat_depth).AND.(ud == 1)).OR.(dh == 0)) THEN
+!							!Skip scattering and do normal ray trace below
+!						ELSE
 							 
 							 ! Calculate linear distance to next velocity layer (ds_SL)
 							 ! Can change this to much simpler one line trig !CHANGE1
@@ -761,8 +767,7 @@ PROGRAM statsyn_globalscat
 							   !If ds_SL > ds_scat, then the phonon will scatter before reaching the next layer
 								 
 								 !Calculate first ds_scat (distance to next scatterer)
-								 ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
-																				+ dsmin**(npow+1))**(1/(npow+1))
+								 CALL GET_DS_SCAT
 																				
 								
 							 DO WHILE ((ds_scat < ds_SL).AND.(irtr1 /= 0))
@@ -782,7 +787,7 @@ PROGRAM statsyn_globalscat
 									 !Make phonon travel to  next scatterer
 									 CALL RAYTRACE_SCAT
 									 
-									 IF (irtr1 /= 0)  z_act = z_act + dh*ud
+									 IF (irtr1 /= 0)  z_act = z_act + dh*ud !Calculate new depth
 										
 									 
 									 !Is phonon scattered at scatterer or does it go through?
@@ -797,15 +802,14 @@ PROGRAM statsyn_globalscat
 										ds_SL = (dh**2+dx1**2)**0.5
 									 
 									 !New ds_scat
-									 ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
-																			 + dsmin**(npow+1))**(1/(npow+1))
+									 CALL GET_DS_SCAT
 																			 
  
 							 END DO
 							 !IF (I < 11) WRITE(78,*) 'Ob',p,dh2,dh,vf(iz,iwave)
 							 IF (I < 11) WRITE(78,*) 'Ob',I,NITR,t,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL,dh
 						
-						END IF								
+!						END IF								
 									
 						!Leaves WHILE loop when ds_SL < distance to next vel layer
 						!Need to travel to next vel layer
@@ -818,7 +822,7 @@ PROGRAM statsyn_globalscat
 							CALL INTERFACE_NORMAL
 							
 															
-				ELSE !Not in scattering layer
+				ELSE !Not scattering in layer (make it faster if scat_prob == 0.)
 				
 					! ============ >>
 					! RAY TRACING IN LAYER
@@ -1869,3 +1873,25 @@ END FUNCTION artan2
         END IF
         
       END SUBROUTINE RAYTRACE_SCAT
+      
+      
+      SUBROUTINE GET_DS_SCAT
+      
+      !Subroutine is used to calculate ds_scat (distance between scatterers). The method
+      ! depends on the depth of scattering.
+      
+      IF (z_act <= scat_depth) THEN
+            ds_scat = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
+																				+ dsmin**(npow+1))**(1/(npow+1))
+			ELSEIF (z_act > scat_depth) THEN
+			      ds_scat = 10
+			END IF
+			 
+      
+      USE pho_vars
+      
+      IMPLICIT NONE
+      
+      
+      
+      END GET_DS_SCAT
