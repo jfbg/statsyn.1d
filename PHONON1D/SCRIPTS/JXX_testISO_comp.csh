@@ -13,15 +13,15 @@ set ray_par    = "0.0 0.1668 0.2931"
 set d_range    = "0 180 91"
 set model      = "2"	#2 for Moon
 set mx_scat_dp = "10"
-set n_phonon   = "50000"
+set n_phonon   = "500000"
 set prob_scat    = 0.5000
 set file_out   = "JXX_test_reg"
-set model_name = "VPREMOON_Qp_nvlvl"
+set model_name = "VPREMOON_Qp_ori_10km_500m"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 9     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 2    ## Number of iterations
+@ n_kern  = 1     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 1    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -59,7 +59,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 0020 
 else if ($i == 1) then
- set q_depth = 1100
+ set q_depth = 1725
 else
  set q_depth = 0.01
 endif

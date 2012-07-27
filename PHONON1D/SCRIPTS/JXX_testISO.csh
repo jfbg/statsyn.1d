@@ -16,15 +16,15 @@ set mx_scat_dp = "10"
 set n_phonon   = "5"
 
 # SCATTERING
-set prob_scat  = 0.5000
+set prob_scat  = 0.0000
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 
 
-set file_out   = "JXX_test_iso4"
+set file_out   = "JXX_VP_nocrust_noscat"
 #set model_name = "VPREMOON_Qp_nvlvl"
-set model_name = "VPREMOON_Qp_ori_debug"
+set model_name = "VPREMOON_Qp_nocrust"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
@@ -68,7 +68,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 0020 
 else if ($i == 1) then
- set q_depth = 500
+ set q_depth = 20
 else
  set q_depth = 0.01
 endif
@@ -91,7 +91,7 @@ while ($j < $n_kern)
 @ j = $j + 1
 
 
-sleep 4
+sleep 1
 
 ## 
 # Start phonon synthetics
