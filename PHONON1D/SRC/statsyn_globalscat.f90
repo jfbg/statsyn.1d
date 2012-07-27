@@ -119,9 +119,13 @@ PROGRAM statsyn_globalscat
       READ (5,    *)  scat_depth
       WRITE(6,*) 'HI2:',scat_depth
 
-      WRITE(6,'(A)') 'ENTER SCATTERING PROBABILITY:'
+      WRITE(6,'(A)') 'ENTER SCATTERING PROBABILITY IN SCATTERING LAYER:'
       READ (5,    *)  scat_prob
 			WRITE(6,*) 'SProb:',scat_prob
+			
+      WRITE(6,'(A)') 'ENTER BACKGROUND SCATTERING PROBABILITY:'
+      READ (5,    *)  globalsc_prob
+			WRITE(6,*) 'BG Prob:',globalsc_prob
 			
 			WRITE(6,'(A)') 'ENTER SCATTERER LENGTH-SCALES (km) (MIN, MAX, NPOW):'
       READ (5,    *)  dsmin, dsmax, npow
