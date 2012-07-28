@@ -1,6 +1,6 @@
 #!/bin/csh
 
-# S001_VP
+# S002_VP
 
 #
 # Set synthetic parameters
@@ -21,10 +21,10 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 
 # Source attenuation
-set dQdfstyle  = 1
+set dQdfstyle  = 2
 
 
-set file_out   = "S001_VP"
+set file_out   = "S002_VP"
 set model_name = "S_VPREMOON_Qp_ori"
 
 @ n_depth = 3     ## Number of depths to use

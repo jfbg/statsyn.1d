@@ -1,0 +1,7 @@
+1:
+Q is constant over all frequencies.
+
+
+2:
+Q0 is set by user for f0 = 1Hz
+Then Q(f) = Q0 * (1 + (f-f0)*.3)     !Increasing Q for increasing f
