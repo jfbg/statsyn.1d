@@ -1,7 +1,6 @@
 #!/bin/csh
 
-# JXX_testISO
-
+# S001_VP
 
 #
 # Set synthetic parameters
@@ -13,24 +12,22 @@ set ray_par    = "0.0 0.1668 0.2931"
 set d_range    = "0 180 91"
 set model      = "2"	#2 for Moon
 set mx_scat_dp = "10"
-set n_phonon   = "100"
+set n_phonon   = "2000000"
 
 # SCATTERING
-set prob_scat  = 0.8
-set bg_scat    = 0.05
+set prob_scat  = 0.6
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 
 
-set file_out   = "JXX_VP_nocrust_noscat"
-#set model_name = "VPREMOON_Qp_nvlvl"
-set model_name = "VPREMOON_Qp_nocrust"
+set file_out   = "S001_VP"
+set model_name = "S_VPREMOON_Qp_ori"
 
-@ n_depth = 1     ## Number of depths to use
+@ n_depth = 3     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 1     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 1     ## Number of iterations
+@ n_kern  = 11     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 10     ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -40,7 +37,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 cd SRC
-make trackglobal.x
+make trackiso.x
 cd ..
 
 
@@ -67,9 +64,9 @@ endif
 while ($i < $n_depth)
 @ i = $i + 1
 if ($i == 2) then
- set q_depth = 0020 
+ set q_depth = 1100 
 else if ($i == 1) then
- set q_depth = 20
+ set q_depth = 0020
 else
  set q_depth = 0.01
 endif
@@ -92,7 +89,7 @@ while ($j < $n_kern)
 @ j = $j + 1
 
 
-sleep 1
+sleep 4
 
 ## 
 # Start phonon synthetics
@@ -103,7 +100,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsyn_global << EOF"                              >  $file_csh
+echo "./bin/statsyn_iso << EOF"                              >  $file_csh
 echo "./MODELS/$model_name"				>> $file_csh
 #echo "1"                                                    >> $file_csh
 echo "$ray_par          \!LIMIT THE RAY PARAMETER"          >> $file_csh
@@ -116,7 +113,6 @@ echo "$model            \!1=EARTH, 2=MOON                 " >> $file_csh
 # echo "$p_or_s           \!1=P, 2=SH WAVES                 " >> $file_csh
 echo "$mx_scat_dp       \!MAX SCATTERING DEPTH            " >> $file_csh
 echo "$prob_scat          \!SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh
-echo "$bg_scat          \!BACKGROUND SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh
 echo "$dsmin $dsmax $npow \!SCATERER SCALE-LENGTHS"          >> $file_csh
 echo "$outTRACK_dir/$file_track"                            >> $file_csh
 echo "$out_dir/$file_whole"                                 >> $file_csh
