@@ -122,6 +122,10 @@ PROGRAM statsyn_TRACK_iso
 			WRITE(6,'(A)') 'ENTER SCATTERER LENGTH-SCALES (km) (MIN, MAX, NPOW):'
       READ (5,    *)  dsmin, dsmax, npow
 			WRITE(6,*) 'dsmin/dsmax/npow:',dsmin, dsmax, npow
+			
+ 			WRITE(6,'(A)') 'ENTER dQdf STYLE (SEE dQdfSTYLES.txt)'
+      READ (5,    *)  dQdfSTYLE
+			WRITE(6,*) 'dQdf STYLE:',dQdfSTYLE			
 
       WRITE(6,'(A)') 'ENTER TRACK OUTPUT FILE:'
       READ (5,'(A)')  tfile 
@@ -1017,7 +1021,8 @@ SUBROUTINE attenuate(sin,sout,ndat,dt,tstar)
       !Build rdQdf
       DO I = 1, nfreq
       	!Can give rdQdf any form. 
-      	rdQdf(I) = 1.      !Q constant at all frequencies
+      	IF (dQdfSTYLE == 1) rdQdf(I) = 1.      !Q constant at all frequencies
+      	IF (dQdfSTYLE == 2) rdQdf(I) = 1. + (df*float(I-1)-1)*.3)
       END DO
       
       dadw = -tstar*dw                       !DERIVATIVE dA(w)di = -dt*dw

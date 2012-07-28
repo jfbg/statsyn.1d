@@ -20,6 +20,9 @@ set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 
+# Source attenuation
+set dQdfstyle  = 1
+
 
 set file_out   = "S001_VP"
 set model_name = "S_VPREMOON_Qp_ori"

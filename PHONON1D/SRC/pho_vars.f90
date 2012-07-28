@@ -38,7 +38,10 @@ MODULE PHO_VARS			! Make variables global
 				REAL          dQdf									!Q gradient with f
 				INTEGER       iz_scat								!Vel layer in which phonon is while it's scattered
 				REAL          scat_depth,scat_prob,BG_prob,SL_prob
-				REAL          scat_thet,scat_phi		
+				REAL          scat_thet,scat_phi
+				
+				! ATTENUATION
+				INTEGER       dQdfSTYLE				!Let user choose dQdf behaviour based on list.		
 				
 				INTEGER       ncaust,icaust         !NUMBER OF CAUSTICS IN A RAY TRACE
 				INTEGER       ud
