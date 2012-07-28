@@ -1022,7 +1022,7 @@ SUBROUTINE attenuate(sin,sout,ndat,dt,tstar)
       DO I = 1, nfreq
       	!Can give rdQdf any form. 
       	IF (dQdfSTYLE == 1) rdQdf(I) = 1.      !Q constant at all frequencies
-      	IF (dQdfSTYLE == 2) rdQdf(I) = 1. + (df*float(I-1)-1)*.3)
+      	IF (dQdfSTYLE == 2) rdQdf(I) = 1. + ((df*float(I-1)-1)*.3)
       END DO
       
       dadw = -tstar*dw                       !DERIVATIVE dA(w)di = -dt*dw
