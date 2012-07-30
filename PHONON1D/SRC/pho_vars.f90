@@ -1,15 +1,31 @@
 MODULE PHO_VARS			! Make variables global
 				
 				IMPLICIT NONE
-							
+				
+				
 				INTEGER, PARAMETER :: nlay0=1000, nt0=144000, nx0=91
+								
+				! ENERGY TRACKING
+				CHARACTER*100 :: tfile
+				DOUBLE PRECISION,ALLOCATABLE,DIMENSION(:,:,:) :: trackcount !Phonon Tracking array
+				REAL			::	attn, minattn
+				INTEGER			:: nttrack		!track time points
+				INTEGER		::	nttrack_dt						!time interval for saving phonon position
+				REAL			::	normfactor						!Normalization factor for cell size
+
+				REAL          d2r,re,rm,circum
+				INTEGER       EorM                  !1=EARTH, 2=MOON
+				
+				! VELOCITY MODEL CHECKS
+				INTEGER       check_scat, check_core, check_scat2, check_source
+				
+				REAL          t,x,xo,a,x_index
 				REAL          z(nlay0),vf(nlay0,2)
 				REAL          z_st(nlay0),r_st(nlay0),vst(nlay0,2),rht(nlay0)
 				REAL          z_s(nlay0),r_s(nlay0),vs(nlay0,2),rh(nlay0)
-				REAL          t,x,xo,a,w(nt0),x_index
 				REAL          dx1,dt1
 				INTEGER       irtr1
-				INTEGER     :: iz,iz1,itt
+				INTEGER     :: iz,iz1,itt,iz2
 				REAL  			:: maxcount
 				INTEGER     :: IT,JT,I,J,ic,jj,k,kk,ll,mm
 				REAL          p,ang1
@@ -22,16 +38,19 @@ MODULE PHO_VARS			! Make variables global
 				REAL       :: deg2km
 				REAL          corelayer
 				
+				CHARACTER*100 IFile,ofile,ofile2,logfile
+
+				
 				! SURFACE HIT
 				REAL          dtsurf   !Time difference for phonon hitting some distance away from receiver 
         REAL          dreceiver !radius around receiver in which the phonons will be recorded (deg)
 				
 				! SCATTERING
-        REAL          ds_scat, dsmin, dsmax, npow  !Distance between scatterers and power law factor.
+        REAL          dsmin, dsmax, npow    !power law factor for scatterer length-scales
+        REAL          ds_scat_nf,ds_scat    !scatterer length0scale(non-flattened + flattened)
 				REAL					dz										!Distance between actual depth and base of layer
 				REAL					ds_SL									!Distance between phonon and next velocity layer
 				REAL          dh										!Vertical Distance between phonon and next vel layer.
-				REAL					iz2										!Temp var to find location of phonon
 				INTEGER				izfac									!0 if traveling above iz, 1 if below
 				REAL					z_act									!Depth when in between two vel layers
 				REAL          Q0										!Background Qi for frequency dependent Qi
@@ -39,6 +58,7 @@ MODULE PHO_VARS			! Make variables global
 				INTEGER       iz_scat								!Vel layer in which phonon is while it's scattered
 				REAL          scat_depth,scat_prob,BG_prob,SL_prob
 				REAL          scat_thet,scat_phi
+				REAL          z_mid								!Mid depth of travel between two scatterers.
 				
 				! ATTENUATION
 				INTEGER       dQdfSTYLE				!Let user choose dQdf behaviour based on list.		

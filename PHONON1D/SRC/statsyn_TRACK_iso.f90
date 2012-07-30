@@ -21,11 +21,13 @@ PROGRAM statsyn_TRACK_iso
 				USE PHO_VARS
 				
 				IMPLICIT NONE
-							
-				CHARACTER*100 IFile,ofile,ofile2,logfile
+				
 				DOUBLE PRECISION wf(nx0,nt0,3)        !STACKED DATA
-
+				REAL             w(nt0)
+			
 				! SOURCE
+				! Leaving source declaration here (and not in pho_vars) speeds up the compilation
+				! time by a lot (nt0 is large).
 				REAL          mts(101,4,nt0)        !ATTENUATED SOURCE
 				REAL          b(nt0), e(nt0)        !HILBERT TRANSFORM & ENVELOPE
 				REAL          mtsc(nt0),datt,dtst1  !SCRATCH SPACE
@@ -33,22 +35,6 @@ PROGRAM statsyn_TRACK_iso
 				REAL          mt(nt0)               !SOURCE-TIME FUNCTION 
 				COMPLEX       ms(nt0),ss(nx0,nt0)   !SOURCE & STACKED SPECTRA
 				REAL          nn(nx0,nt0)
-
-				
-				! ENERGY TRACKING
-				CHARACTER*100 :: tfile
-				DOUBLE PRECISION,ALLOCATABLE,DIMENSION(:,:,:) :: trackcount !Phonon Tracking array
-				REAL			::	attn, minattn
-				INTEGER			:: nttrack		!track time points
-				INTEGER		::	nttrack_dt						!time interval for saving phonon position
-				REAL			::	normfactor						!Normalization factor for cell size
-
-				REAL          d2r,re,rm,circum
-				INTEGER       EorM                  !1=EARTH, 2=MOON
-				
-				! VELOCITY MODEL CHECKS
-				INTEGER       check_scat, check_core, check_scat2
-				
 				
 				! DEBUGGING
 				CHARACTER*100 :: debugfile,logend
@@ -66,10 +52,6 @@ PROGRAM statsyn_TRACK_iso
 			exTIME = 0
 			exNLAY = 0
 			
-			!MODEL CHECKS
-			check_scat = 1
-			check_scat2 = 0
-			check_core = 1
 
       write(*,*) 'ISOTROPIC Scattering'
       write(*,*) 'Last Edited on $Date$'
@@ -188,112 +170,7 @@ PROGRAM statsyn_TRACK_iso
 
       corelayer = 0.1        ! Thickness of thin layer near core to deal with singularity
 
-      OPEN(1,FILE=ifile,STATUS='OLD')    !OPEN SEISMIC VELOCITY MODEL
-      
-      DO I = 1, nlay0                     !READ IN VELOCITY MODEL
-       READ(1,*,IOSTAT=status) z_st(I),r_st(I),vst(I,1),vst(I,2),rht(I),Qt(I)
-       IF (z_st(I) == scat_depth) THEN
-          check_scat = 0		!Velocity layer depth is same as scattering layer.   
-       END IF
-       IF (status /= 0) EXIT
-      END DO
-      
-      I = I-1 ! Number of layers in input model.
-      
-      CLOSE (1)
-      
-			iz1 = 1
-			DO WHILE (scat_depth >= z_st(iz1+1))      !FIND WHICH LAYER THE SCAT LAYER IS ABOVE
-			 iz1 = iz1 +1														 !NEW VEL LAYER WILL BE AT (iz1 + 1)
-			END DO
-			WRITE(6,*) '!!! SCATLAYER ABOVE OR AT ==> ', iz1,I
-
-
-      
-      IF (z_st(I) - z_st(I-1) < .1) check_core = 0 !Last layer is small enough to ignore.
-
-      nlay = I + check_scat + check_core ! NUMBER OF LAYERS
-      																	 ! Layers are added if checks failed.
-      
-			IF (nlay > I) THEN																	 
-			! BUILD MODEL 
-				DO K = 1,nlay
-					IF (K <= iz1) THEN
-					 z_s(K) = z_st(K)
-					 r_s(K) = r_st(K)
-					 vs(K,1) = vst(K,1)
-					 vs(K,2) = vst(K,2)
-					 rh(K) = rht(K)
-					 Q(K) = Qt(K)
-					END IF
-				 
-					IF ((K == iz1 +1).AND.(check_scat == 1)) THEN
-					 WRITE(6,*) 'ADDING VELOCITY LAYER AT BASE OF SCATTERING LAYER'
-							z_s(K) = scat_depth
-							r_s(K) = erad-scat_depth
-							vs(K,1) = (vst(K,1)-vst(K-1,1))/(z_st(K) - z_st(K-1)) * (scat_depth - z_st(K-1)) + vst(K-1,1)
-							vs(K,2) = (vst(K,2)-vst(K-1,2))/(z_st(K) - z_st(K-1)) * (scat_depth - z_st(K-1)) + vst(K-1,2)
-							rh(K) = (rht(K)-rht(K-1))/(z_st(K) - z_st(K-1)) * (scat_depth - z_st(K)) + rht(K)
-							Q(K) = (Qt(K)-Qt(K-1))/(z_st(K) - z_st(K-1)) * (scat_depth - z_st(K)) + Qt(K)
-					ELSEIF ((K == iz1 +1).AND.(check_scat == 0)) THEN
-							z_s(K) = z_st(K)
-							r_s(K) = r_st(K)
-							vs(K,1) = vst(K,1)
-							vs(K,2) = vst(K,2)
-							rh(K) = rht(K)
-							Q(K) = Qt(K)
-					END IF
-						
-					IF ((K > iz1 + 1).AND.(K < nlay)) THEN
-							z_s(K) = z_st(K-check_scat)
-							r_s(K) = r_st(K-check_scat)
-							vs(K,1) = vst(K-check_scat,1)
-							vs(K,2) = vst(K-check_scat,2)
-							rh(K) = rht(K-check_scat)
-							Q(K) = Qt(K-check_scat)
-					END IF
-									
-				END DO
-					
-				IF (check_core == 0) THEN
-						z_s(nlay) = z_st(nlay-1)
-						r_s(nlay) = r_st(nlay-1)
-						vs(nlay,1) = vst(nlay-1,1)
-						vs(nlay,2) = vst(nlay-1,2)
-						rh(nlay) = rht(nlay-1)
-						Q(nlay) = Qt(nlay-1)    		  
-			 ELSE
-				 WRITE(6,*) 'ADDING THIN LAYER NEAR CORE'
-						z_s(nlay-1) = z_st(I) - corelayer
-						z_s(nlay)   = z_st(I)
-						r_s(nlay-1) = r_st(I) + corelayer
-						r_s(nlay)   = r_st(I)
-						vs(nlay-1,1)  = (vst(I,1)-vst(I-1,1))/(z_st(I) - z_st(I-1)) * (z_st(I) - corelayer - z_st(I-1)) + vst(I-1,1)
-						vs(nlay-1,2)  = (vst(I,2)-vst(I-1,2))/(z_st(I) - z_st(I-1)) * (z_st(I) - corelayer - z_st(I-1)) + vst(I-1,2)
-						vs(nlay,1)  = vst(I,1)
-						vs(nlay,2)  = vst(I,2)
-						rh(nlay-1)  = (rht(I)-rht(I-1))/(z_st(I) - z_st(I-1)) * (z_st(I) - corelayer - z_st(I-1)) + rht(I-1)
-						rh(nlay)  = rht(I)
-						Q(nlay-1)  = (Qt(I)-Qt(I-1))/(z_st(I) - z_st(I-1)) * (z_st(I) - corelayer - z_st(I-1)) + Qt(I-1)
-						Q(nlay)  = Qt(I)
-			 END IF
-						
-				 
-			ELSE
-				z_s = z_st
-				r_s = r_st
-				vs = vst
-				rh = rht
-				Q = Qt
-			END IF
-			
-      OPEN(45,FILE='model_modified.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL
-      
-      DO I = 1,nlay
-      	WRITE(45,*) z_s(I),vs(I,1),vs(I,2),rh(I),Q(i)
-      END DO
-      
-      CLOSE(45)
+      CALL VEL_MODEL_CHECKS
      	
 !			^^^^^ CHECKS ON VELOCITY MODEL ^^^^^				
 			
@@ -359,6 +236,8 @@ PROGRAM statsyn_TRACK_iso
 !			END DO	
 !			^^^^^ INITIALIZE TRACKING PARAMETERS ^^^^^
 
+
+
 	
 
 !     ======================================================
@@ -417,8 +296,7 @@ PROGRAM statsyn_TRACK_iso
 
 !     ======================================================
 !			----- Attenuation + Attenuated source -----
-      datt = 2		! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
-      							! 0.02 seems low, should change to 2? !JFL
+      datt = .02		! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
       DO I = 1, 101                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
        CALL attenuate(mt,mtsc,nts1,dti,dtst1) !
