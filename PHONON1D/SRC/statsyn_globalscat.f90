@@ -1,4 +1,4 @@
-PROGRAM statsyn_globalscat
+PROGRAM STATSYN_GLOBALSCAT
 !
 ! Modified version from statsyn_TRACK_iso:
 !
@@ -155,7 +155,7 @@ PROGRAM statsyn_globalscat
       dreceiver = 0.05  !radius around receiver in which the phonons will be recorded (deg)
      
 	  
-      CALL init_random_seed()
+      CALL INIT_RANDOM_SEED()
       
       OPEN(79,FILE=logfile,STATUS='UNKNOWN')    !OPEN LOG FILE
 
@@ -310,7 +310,7 @@ PROGRAM statsyn_globalscat
       							! This is datt, not max att. max att will be datt*(101-1) = 2.
      DO I = 1, 101                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
-       CALL attenuate(mt,mtsc,nts1,dti,dtst1) !
+       CALL ATTENUATE(mt,mtsc,nts1,dti,dtst1,dQdfSTYLE) !
        pow1 = 0.
        DO J = 1, nts1                         !
         mts(I,1,J) =  mtsc(J)                 !
@@ -849,7 +849,7 @@ PROGRAM statsyn_globalscat
 
 
 			STOP
-			END PROGRAM statsyn_globalscat
+			END PROGRAM STATSYN_GLOBALSCAT
 !     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 !     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 !     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -868,7 +868,7 @@ PROGRAM statsyn_globalscat
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-SUBROUTINE init_random_seed()
+SUBROUTINE INIT_RANDOM_SEED()
     INTEGER :: i, n, nclock
     INTEGER, DIMENSION(:), ALLOCATABLE :: seed
     n=100000
@@ -880,10 +880,10 @@ SUBROUTINE init_random_seed()
     CALL RANDOM_SEED(PUT = seed)
           
     DEALLOCATE(seed)
-END SUBROUTINE init_random_seed
+END SUBROUTINE INIT_RANDOM_SEED
       
       
-SUBROUTINE attenuate(sin,sout,ndat,dt,tstar)
+SUBROUTINE ATTENUATE(sin,sout,ndat,dt,tstar,dQdfSTYLE)
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
 !   |THIS SUBROUTINE ATTENUATES AN INPUT SIGNAL (sin) BY A VALUE (tstar) !   !
 !   |                                                                    !   !
@@ -906,13 +906,14 @@ SUBROUTINE attenuate(sin,sout,ndat,dt,tstar)
       REAL           w,dw                    !FREQUENCY VARIABLES
       REAL           damp
       REAL           rdQdf(16384)
+      INTEGER				 dQdfSTYLE
       
       
        
       
 
       
-      CALL np2(ndat,npts)                    !FIND POWER OF TWO, npts >= ndat
+      CALL NP2(ndat,npts)                    !FIND POWER OF TWO, npts >= ndat
       IF (npts > MAXPTS) THEN               !CHECK THAT ARRAY IS NOT TOO BIG
        WRITE(6,*) 'WARNING: SERIES TRUNCATED TO:',MAXPTS
        npts = MAXPTS
@@ -926,8 +927,13 @@ SUBROUTINE attenuate(sin,sout,ndat,dt,tstar)
       
       DO I = 1, nfreq
       	!Can give rdQdf any form. 
-      	IF (dQdfSTYLE == 1) rdQdf(I) = 1.      !Q constant at all frequencies
-      	IF (dQdfSTYLE == 2) rdQdf(I) = 1. + ((df*float(I-1)-1)*.3)
+      	IF (dQdfSTYLE == 1) THEN
+      	     rdQdf(I) = 1.      !Q constant at all frequencies
+      	ELSEIF (dQdfSTYLE == 2) THEN
+      	     rdQdf(I) = 1. + ((df*float(I-1)-1)*.3)
+      	ELSE
+      	     rdQdf(I) = 1.
+      	END IF
       END DO
       
       dadw = -tstar*dw                       !DERIVATIVE dA(w)di = -dt*dw
@@ -944,10 +950,10 @@ SUBROUTINE attenuate(sin,sout,ndat,dt,tstar)
       CALL GET_TS(yf,nfreq,df,0,sout,npts,dt) !GET TIME SERIES OF ATTENUATED SPEC
 
       RETURN
-END SUBROUTINE attenuate                      !END ATTENUATE
+END SUBROUTINE ATTENUATE                      !END ATTENUATE
       
 
-SUBROUTINE np2(npts,np)
+SUBROUTINE NP2(npts,np)
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
 !   |THIS SUBROUTINE FINES THE POWER OF TWO THAT IS GREATER THAN OR EQUAL!   !
 !   |     TO npts.                                                       !   !
@@ -963,7 +969,7 @@ SUBROUTINE np2(npts,np)
        np = np * 2                             !KEEP INCREASING SIZE*2 UNTIL BIG
       END DO
       RETURN
-      END SUBROUTINE np2                       !END np2
+      END SUBROUTINE NP2                       !END NP2
 
 
 SUBROUTINE COPYR(f1,f2,npts)
@@ -1385,7 +1391,7 @@ SUBROUTINE ZEROR(series,npts)
       RETURN
 END SUBROUTINE zeror
 
-SUBROUTINE usph2car(lon,lat,x1,y1,z1)
+SUBROUTINE USPH2CAR(lon,lat,x1,y1,z1)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
 !   !THIS SUBROUTINE CONVERTS SPHERICAL COORDINATES (LON,LAT) (RADIAN) TO!   !
 !   !     CARTESIAN COORDINATES (X,Y,Z), WITH RADIUS = 1.                !   !
@@ -1402,13 +1408,13 @@ SUBROUTINE usph2car(lon,lat,x1,y1,z1)
       z1 = sin(lat)                        !
       
       RETURN                               !
-END SUBROUTINE usph2car                    !END LON_LAT_X_Y_Z
+END SUBROUTINE USPH2CAR                    !END LON_LAT_X_Y_Z
       
       
       
       
       
-SUBROUTINE ucar2sphr(x1,x2,x3,lon,lat)
+SUBROUTINE UCAR2SPHR(x1,x2,x3,lon,lat)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
 !   !THIS SUBROUTINE CONVERSTS TO LATITUDE AND LONGITUDE.  THE SUB   !   !
 !   !     ASSUMES THAT THE COORDINATE IS AT THE SURFACE.             !   !
@@ -1431,10 +1437,10 @@ SUBROUTINE ucar2sphr(x1,x2,x3,lon,lat)
       END IF
       
       RETURN                                    !
-END SUBROUTINE ucar2sphr                                      !END UCAR2SPHD
+END SUBROUTINE UCAR2SPHR                                      !END UCAR2SPHD
       
 
-SUBROUTINE dist_two_angles(lon1,lat1,lon2,lat2,angdist)
+SUBROUTINE DIST_TWO_ANGLES(lon1,lat1,lon2,lat2,angdist)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
 !   !THIS SUBROUTINE USES angdis TO DETERMINE THE DISTANCE TWO POINTS    !   !
 !   !     GIVEN LONGITUDE, LATITUDE FOR EACH POINT ALL IN DEGREES.       !   !
@@ -1456,7 +1462,7 @@ SUBROUTINE dist_two_angles(lon1,lat1,lon2,lat2,angdist)
       angdist = abs(arcos(x1*y1 + x2*y2 + x3*y3))
 
       RETURN
-END SUBROUTINE dist_two_angles
+END SUBROUTINE DIST_TWO_ANGLES
 
       
    

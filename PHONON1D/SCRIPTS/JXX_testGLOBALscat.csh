@@ -1,6 +1,6 @@
 #!/bin/csh
 
-# JXX_testISO
+# GXXX_testISO
 
 
 #
@@ -25,7 +25,7 @@ set npow       = -0.5   # Power law factor for scatterer lengthscale
 # Source attenuation
 set dQdfstyle  = 2
 
-set file_out   = "JXX_VP_nocrust_noscat"
+set file_out   = "GXXX_test"
 #set model_name = "VPREMOON_Qp_nvlvl"
 set model_name = "VPREMOON_Qp_nocrust"
 
