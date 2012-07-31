@@ -14,7 +14,7 @@ set ray_par    = "0.0 0.1668 0.2931"
 set d_range    = "0 180 91"
 set model      = "2"	#2 for Moon
 set mx_scat_dp = "10"
-set n_phonon   = "1000000"
+set n_phonon   = "500000"
 
 # SCATTERING
 set bg_scat    = 0.0001
