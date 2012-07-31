@@ -599,9 +599,10 @@ PROGRAM STATSYN_GLOBALSCAT
 						! IS THE SCATTERING PROBABILITY, WHICH DEPENDS ON THE PHONON DEPTHS.
 						
 						!Set depth-dependent scattering probability
-						IF (z_act <= scat_depth) THEN
+						scat_prob = BG_prob			!Assume background probability at first.
+						IF ((z_act <= scat_depth).AND.(SL_prob > 0)) THEN
 						     scat_prob = SL_prob			!Scattering layer probability
-						ELSEIF ((z_act > scat_depth).OR.((z_act == scat_depth).AND.(ud == 1))) THEN
+						ELSEIF ((z_act == scat_depth).AND.(ud == 1)) THEN
 						      scat_prob = BG_prob			!Background probability
 						END IF
 						
@@ -1838,14 +1839,15 @@ END FUNCTION artan2
       
       USE pho_vars      
       IMPLICIT NONE
-      REAL     r,z_f     
-
-           
-      IF (z_act <= scat_depth) THEN
+      REAL     r,z_f  
+      
+      IF (BG_prob > 0) THEN
+            ds_scat_nf = 10   !background scatterer scale-length ~10km
+      END IF
+         
+      IF ((z_act <= scat_depth).AND.(SL_prob > 0)) THEN
             ds_scat_nf = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
 																				+ dsmin**(npow+1))**(1/(npow+1))
-			ELSEIF (z_act > scat_depth) THEN
-			      ds_scat_nf = 10
 			END IF
 			
 			!Find middle depth of travel so that we can find appropriate flatten ds_scat
