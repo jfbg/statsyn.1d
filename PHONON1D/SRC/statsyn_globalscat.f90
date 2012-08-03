@@ -395,24 +395,29 @@ PROGRAM STATSYN_GLOBALSCAT
 				! Pick P- ,SH- or SV- initial phonon state randomly.
 				! Ratios based on Hardebeck:2002
 				!
-				IF (iz == 1) iwave = 1         ! Surface impact = P-wave only
-																						 
+				IF (iz == 1)   ip = 1         ! Surface impact = P-wave only
+				
 				IF (iz /= 1) THEN
 					r0 = rand()
 					IF (r0 < 1./21.) THEN
-						iwave = 1 !P
+						ip = 1 !P
+						ip = 1
 					ELSE IF ((r0 >= 1./21.).and.(r0 < 6./21.)) THEN
-						iwave = 2 !SH
+						ip = 2 !SH
 					ELSE 
-						iwave = 3 !SV
+						ip = 3 !SV
 					END IF
 				END IF
+
+				IF (ip == 3) ip = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
+
+				CALL IP2IWAVE				
 				! ============ <<
 
 	   
 				! ============ >>
 				! Pick take-off angle					 			 
-				IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
+				
        
 				IF (iz == 1) THEN                       !IF QUAKE STARTS AT SURF GO down
 					angst = pi/2.                         !0 - 90 (0 = down)
@@ -1579,7 +1584,7 @@ SUBROUTINE INTERFACE_NORMAL
 							
 							!debug
   						IF (I < 11) WRITE(78,*) 'THICKNESS IS 0km',r0, &
-  											abs(arp)/rt_sum,abs(atp)/rt_sum,abs(ars)/rt_sum,abs(ats)/rt_sum
+  											abs(arp)/rt_sum,abs(atp)/rt_sum,abs(ars)/rt_sum,abs(ats)/rt_sum,p
 
 							rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
 							rt_max = abs(arp)/rt_sum             !
@@ -1587,6 +1592,7 @@ SUBROUTINE INTERFACE_NORMAL
 								IF (arp < 0) a = -a                 !REVERSE POLARITY
 								ud = -ud                            !UPGOING <-> downGOING
 								ip = 1                              !P WAVE			
+								CALL IP2IWAVE
 							END IF                               !														!IF4c
            
 
@@ -1596,18 +1602,21 @@ SUBROUTINE INTERFACE_NORMAL
 								IF (ars < 0) a = -a                 !REVERSE POLARITY
 								ud = -ud                            !UPGOING <-> downGOING
 								ip = 3                              !SV WAVE
+								CALL IP2IWAVE
 							END IF                               !															!IF4d
 
 							rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
 							rt_max = rt_max+abs(atp)/rt_sum      !
 							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRAMSITTED P	!IF4e
 								ip = 1                              !P WAVE
+								CALL IP2IWAVE
 							END IF                               !															!IF4e
 
 							rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
 							rt_max = rt_max+abs(ats)/rt_sum      !
 							IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV !IF4f
 								ip = 3                              !SV WAVE
+								CALL IP2IWAVE
 							END IF                               !																!IF4f
 						END IF      																										!IF3d
           END IF                                !END IF: SH, OR P-SV				!IF2b
@@ -1909,3 +1918,14 @@ SUBROUTINE GET_DS_SCAT
 			 ds_SL = (dh_temp**2+dx1**2)**0.5
       
 END SUBROUTINE GET_DS_SL
+
+SUBROUTINE IP2IWAVE
+
+      IF (ip == 1) THEN
+         iwave = 1
+      ELSEIF ((ip == 2).OR.(ip == 3)) THEN
+         iwave = 2
+      END IF
+      
+      RETURN      
+END SUBROUTINE IP2IWAVE
