@@ -433,7 +433,7 @@ PROGRAM STATSYN_GLOBALSCAT
         x = 0.                                 !START LOCATION = ZERO
         s = 0.                                 !SET START ATTENUATION = ZERO
         a = 1.                                 !START AMPLITUDE = 1.
-        d = 0.                                 !START AT ZERO KM TRAVELED
+        totald = 0.                                 !START AT ZERO KM TRAVELED
         x_sign = 1.                            !DISTANCE DIRECTION
        
         p    = abs(sin(ang1))/vf(iz,iwave)
@@ -726,7 +726,7 @@ PROGRAM STATSYN_GLOBALSCAT
 										 
 							 END IF
 															
-				ELSE !Not scattering in layer (make it faster if scat_prob == 0.)
+				ELSE !No scattering in layer (make it faster if scat_prob == 0.)
 				
 					! ============ >>
 					! RAY TRACING IN LAYER
@@ -737,7 +737,8 @@ PROGRAM STATSYN_GLOBALSCAT
 					! ============ <<
 					
 				END IF !SCATTERING LAYER IF
-!      END IF         					
+
+     					
 				! SCATTERING LAYER
 				! ============ <<
 				
@@ -1529,12 +1530,11 @@ SUBROUTINE INTERFACE_NORMAL
       
       IMPLICIT NONE
       
-      !Debug
-!        IF (iz == nlay) WRITE(77,*) iz,x,dx1,az,'STEP1'
-              
+            
 				IF ( (iz > 1).AND.(abs(irtr1) == 1).AND. &												!IF1
 							(iz < nlay) ) THEN
-					IF ( (iz > 1).AND.(iz <= nlay) ) h = z_s(iz)-z_s(iz-1)
+!					IF ( (iz > 1).AND.(iz <= nlay) ) h = z_s(iz)-z_s(iz-1)
+          IF ( (iz > 1).AND.(iz <= nlay) ) h = z(iz)-z(iz-1)
 
           IF (ip  ==  2) THEN																							!IF2a
 						IF ( (ud == 1) ) THEN               !IF downGOING SH WAVE			!IF3a
@@ -1574,7 +1574,12 @@ SUBROUTINE INTERFACE_NORMAL
 
           ELSE                                  !IF P- OR SV-WAVE 				!IF2b
           	IF (h <= 0.) THEN																							!IF3d
+          						        
 							rt_sum = abs(arp)+abs(atp)+abs(ars)+abs(ats)    !SUM OF REFL/TRAN COEFS
+							
+							!debug
+  						IF (I < 11) WRITE(78,*) 'THICKNESS IS 0km',r0, &
+  											abs(arp)/rt_sum,abs(atp)/rt_sum,abs(ars)/rt_sum,abs(ats)/rt_sum
 
 							rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
 							rt_max = abs(arp)/rt_sum             !
@@ -1612,8 +1617,8 @@ SUBROUTINE INTERFACE_NORMAL
 					dt1 = (2*corelayer)/vf(iz,iwave)
 					x = x + 180*deg2km
 					t = t + dt1
-					d = d + 2*corelayer
-					s = s + dt1/Q(iz)
+					totald = totald + 2*corelayer
+					s = s + dt1/Q(nlay)
 				END IF																																!IF1
 	
         
@@ -1756,7 +1761,9 @@ SUBROUTINE RAYTRACE
         IF (irtr1 == 0) THEN			
          ud = -ud
         ELSE IF (irtr1 >= 1) THEN
-         d = d + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
+         totald = totald + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
+         !JFL --> Should this be z(iz) (FLAT z), because dx1 was calculated in the flat model
+         ! totald isn't used anywhere though.
          t = t + dt1                    !TRAVEL TIME
          x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
@@ -1819,7 +1826,7 @@ SUBROUTINE RAYTRACE_SCAT
         IF (irtr1 == 0) THEN
          ud = -ud
         ELSE IF (irtr1 >= 1) THEN
-         d = d + ds_scat !DISTANCE TRAVELED IN LAYER
+         totald = totald + ds_scat !DISTANCE TRAVELED IN LAYER
          
          t = t + dt1                    !TRAVEL TIME
          x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km

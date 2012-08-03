@@ -77,7 +77,7 @@ MODULE PHO_VARS			! Make variables global
 				
 				REAL          az
 				REAL          dp
-				REAL        :: d
+				REAL        :: totald
 				REAL        :: delta
 				REAL        :: dxi
 				REAL        :: h     !! Layer thickness
