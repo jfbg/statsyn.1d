@@ -411,7 +411,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 				IF (ip == 3) ip = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
 
-				CALL IP2IWAVE				
+				iwave = ip				
 				! ============ <<
 
 	   
@@ -628,7 +628,8 @@ PROGRAM STATSYN_GLOBALSCAT
 				
 						!Check if scatter
 						CALL INTERFACE_SCATTER
-						
+						IF (ip == 3) ip = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
+						iwave = ip
 						
 						
 						izfac = 0
@@ -714,17 +715,21 @@ PROGRAM STATSYN_GLOBALSCAT
 								 !Leaves WHILE loop when ds_SL < distance to next vel layer
 								 !Need to travel to next vel layer
 									 CALL RAYTRACE_SCAT !Already have dh
+									 CALL INTERFACE_NORMAL
+									 IF (ip == 3) ip = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
+					    	   iwave = ip
 		 
 									 z_act = z_act + dh*ud
-								 !Figure out in which layer the phonon is now into
-									 iz = iz + ud
-									 
-									 CALL INTERFACE_NORMAL
+								  !Figure out in which layer the phonon is now into
+									 iz = iz + ud 
+
 							ELSE
   									 ! ============ >>
 										 ! RAY TRACING IN LAYER
 										 CALL RAYTRACE
-										 CALL INTERFACE_NORMAL			
+										 CALL INTERFACE_NORMAL
+							   	   IF (ip == 3) ip = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
+					    	     iwave = ip			
 										 iz = iz + ud  
 										 ! RAY TRACING IN LAYER	
 										 ! ============ <<
@@ -737,6 +742,8 @@ PROGRAM STATSYN_GLOBALSCAT
 					! RAY TRACING IN LAYER
 					CALL RAYTRACE
 					CALL INTERFACE_NORMAL			
+					IF (ip == 3) ip = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
+					iwave = ip
 					iz = iz + ud  
 					! RAY TRACING IN LAYER	
 					! ============ <<
@@ -1592,7 +1599,6 @@ SUBROUTINE INTERFACE_NORMAL
 								IF (arp < 0) a = -a                 !REVERSE POLARITY
 								ud = -ud                            !UPGOING <-> downGOING
 								ip = 1                              !P WAVE			
-								CALL IP2IWAVE
 							END IF                               !														!IF4c
            
 
@@ -1602,21 +1608,18 @@ SUBROUTINE INTERFACE_NORMAL
 								IF (ars < 0) a = -a                 !REVERSE POLARITY
 								ud = -ud                            !UPGOING <-> downGOING
 								ip = 3                              !SV WAVE
-								CALL IP2IWAVE
 							END IF                               !															!IF4d
 
 							rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
 							rt_max = rt_max+abs(atp)/rt_sum      !
 							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRAMSITTED P	!IF4e
 								ip = 1                              !P WAVE
-								CALL IP2IWAVE
 							END IF                               !															!IF4e
 
 							rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
 							rt_max = rt_max+abs(ats)/rt_sum      !
 							IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV !IF4f
 								ip = 3                              !SV WAVE
-								CALL IP2IWAVE
 							END IF                               !																!IF4f
 						END IF      																										!IF3d
           END IF                                !END IF: SH, OR P-SV				!IF2b
