@@ -11,8 +11,8 @@ PROGRAM STATSYN_GLOBALSCAT
 ! which occurs everywhere outside of the scattering layer and has a low scat probability.
 ! Both probabilities have to be declared in the running shell script.
 !
-! The distance between scatterers can calculated differently based on the location within
-! or without the scattering layer. Global scattering scale-lengths is constant 
+! The distance between scatterers can be calculated differently based on the location within
+! or without the scattering layer. Global background scattering scale-length is constant 
 ! (at this point) and set to 10km. This can be changed in the GET_DS_SCAT subroutine.
 !
 ! 
@@ -408,10 +408,10 @@ PROGRAM STATSYN_GLOBALSCAT
 						ip = 3 !SV
 					END IF
 				END IF
-
-				IF (ip == 3) ip = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
-
-				iwave = ip				
+        
+        iwave = ip
+				IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
+				
 				! ============ <<
 
 	   
@@ -628,8 +628,9 @@ PROGRAM STATSYN_GLOBALSCAT
 				
 						!Check if scatter
 						CALL INTERFACE_SCATTER
-						IF (ip == 3) ip = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
 						iwave = ip
+						IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
+
 						
 						
 						izfac = 0
@@ -716,8 +717,9 @@ PROGRAM STATSYN_GLOBALSCAT
 								 !Need to travel to next vel layer
 									 CALL RAYTRACE_SCAT !Already have dh
 									 CALL INTERFACE_NORMAL
-									 IF (ip == 3) ip = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
-					    	   iwave = ip
+									 iwave = ip
+									 IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
+					    	   
 		 
 									 z_act = z_act + dh*ud
 								  !Figure out in which layer the phonon is now into
@@ -728,8 +730,8 @@ PROGRAM STATSYN_GLOBALSCAT
 										 ! RAY TRACING IN LAYER
 										 CALL RAYTRACE
 										 CALL INTERFACE_NORMAL
-							   	   IF (ip == 3) ip = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
-					    	     iwave = ip			
+					    	     iwave = ip
+							   	   IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
 										 iz = iz + ud  
 										 ! RAY TRACING IN LAYER	
 										 ! ============ <<
@@ -742,8 +744,8 @@ PROGRAM STATSYN_GLOBALSCAT
 					! RAY TRACING IN LAYER
 					CALL RAYTRACE
 					CALL INTERFACE_NORMAL			
-					IF (ip == 3) ip = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
 					iwave = ip
+					IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
 					iz = iz + ud  
 					! RAY TRACING IN LAYER	
 					! ============ <<
@@ -1047,6 +1049,9 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
 
       ar   = (rh1*b1*cos(j1)-rh2*b2*cos(j2))/DD
       at   = 2.*rh1*b1*cos(j1)/DD
+      
+      !DEBUG
+!      WRITE(6,*) 'AR & AT ====>   ',ar,at
       
       RETURN
 END SUBROUTINE REFTRAN_SH
@@ -1591,7 +1596,7 @@ SUBROUTINE INTERFACE_NORMAL
 							
 							!debug
   						IF (I < 11) WRITE(78,*) 'THICKNESS IS 0km',r0, &
-  											abs(arp)/rt_sum,abs(atp)/rt_sum,abs(ars)/rt_sum,abs(ats)/rt_sum,p
+  											abs(arp)/rt_sum,abs(atp)/rt_sum,abs(ars)/rt_sum,abs(ats)/rt_sum,p,ip
 
 							rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
 							rt_max = abs(arp)/rt_sum             !
@@ -1631,7 +1636,11 @@ SUBROUTINE INTERFACE_NORMAL
 					t = t + dt1
 					totald = totald + 2*corelayer
 					s = s + dt1/Q(nlay)
-				END IF																																!IF1
+				END IF	
+				
+				!debug
+  						IF (I < 11) WRITE(78,*) 'COEFFICIENTS:',r0, &
+  											abs(arp)/rt_sum,abs(atp)/rt_sum,abs(ars)/rt_sum,abs(ats)/rt_sum,p,'WAVE',ip																															!IF1
 	
         
 				!FIX NEXT IF FOR DIFFRACTED WAVES: 
