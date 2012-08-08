@@ -263,7 +263,7 @@ PROGRAM STATSYN_GLOBALSCAT
 !     ======================================================
 !			----- Find Source Layer -----
       iz1 = 1
-      DO WHILE (qdep > z_s(iz1+1))               !FIND WHICH LAYER QUAKE STARTS IN
+      DO WHILE (qdep >= z_s(iz1+1))               !FIND WHICH LAYER QUAKE STARTS IN
        iz1 = iz1 +1															 !FIRST LAYER IS ASSUMED TO BE AT 0km.
       END DO
 		  WRITE(6,*) 'DEPTH:',iz1,z_s(iz1)
