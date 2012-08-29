@@ -91,7 +91,7 @@ MODULE PHO_VARS			! Make variables global
 				INTEGER     :: nitr  !! Number of ith trace (last)
 				INTEGER     :: nt    !! Number of time in output file
 				INTEGER     :: nlay  !! Number of layers in model
-				REAL        :: r0,r1    !! random number 0-1
+				REAL        :: r0,r1,r2s    !! random number 0-1
 				REAL        :: pow2,pow1 !! Normalization factor for hilber transform
 				REAL        :: s,s1,s2     !! Attenuation & bounds on attenuation for distance
 				REAL        :: scr1,scr2,scr3,scr4 !! Flat earth approximation variables

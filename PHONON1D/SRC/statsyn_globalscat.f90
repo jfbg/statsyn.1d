@@ -152,6 +152,7 @@ PROGRAM STATSYN_GLOBALSCAT
      
 	  
       CALL INIT_RANDOM_SEED()
+      CALL RANDOM_NUMBER(r2s)
       
       OPEN(79,FILE=logfile,STATUS='UNKNOWN')    !OPEN LOG FILE
 
@@ -218,10 +219,18 @@ PROGRAM STATSYN_GLOBALSCAT
            
         
        END IF
-
-
+       
       END DO
 22    FORMAT (f6.1,2(i5,f6.2,f5.2),2x,2f9.6,2x,2f9.6)
+
+      OPEN(15,FILE='model_flat.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL
+      !WRITE(15,*) 'z_s',vf(I,1),vs(I,2),rh(I),Q(i)
+      DO I = 1,nlay
+      	WRITE(15,*) z_s(I),z(I),vf(I,1),vf(I,2),rh(I),Q(i)
+      END DO
+      
+      CLOSE(15)
+
 
 !			^^^^^^ APPLY FLATTENING TRANSFORMATION ^^^^^^
 			
@@ -381,28 +390,32 @@ PROGRAM STATSYN_GLOBALSCAT
 	  ! ============ >>
       ! ----- Initialize Randomization -----			
        CALL SYSTEM_CLOCK(COUNT=nclock)
-       seed = (nclock)! + 11 * (/ (k - 1, k = 1, nseed) /)
-       CALL srand(seed)
-       
+       CALL RANDOM_NUMBER(r2s)
+       seed = (nclock*r2s)! + 11 * (/ (k - 1, k = 1, nseed) /)
+       CALL srand(seed)             
 	     r0 = rand()    !First rand output not random
                         ! It is seed (clock) dependent
+!       seed = int(seed*rand())
+!       CALL srand(seed)
+
+
+
+       !WRITE(77,*) seed,r0,nclock,r2s
       ! ============ <<
        
-
-			iz = iz1		!iz1 is layer in which the source is.
 				 
 				! ============ >>
 				! Pick P- ,SH- or SV- initial phonon state randomly.
 				! Ratios based on Hardebeck:2002
 				!
-				IF (iz == 1)   ip = 1         ! Surface impact = P-wave only
+				IF (iz1 == 1)   ip = 1         ! Surface impact = P-wave only
 				
 				IF (iz /= 1) THEN
 					r0 = rand()
 					IF (r0 < 1./21.) THEN
 						ip = 1 !P
 						ip = 1
-					ELSE IF ((r0 >= 1./21.).and.(r0 < 6./21.)) THEN
+					ELSE IF ((r0 >= 1./21.).and.(r0 < 11./21.)) THEN
 						ip = 2 !SH
 					ELSE 
 						ip = 3 !SV
@@ -419,16 +432,20 @@ PROGRAM STATSYN_GLOBALSCAT
 				! Pick take-off angle					 			 
 				
        
-				IF (iz == 1) THEN                       !IF QUAKE STARTS AT SURF GO down
+				!IF (iz1 == 1) THEN                       !IF QUAKE STARTS AT SURF GO down
 					angst = pi/2.                         !0 - 90 (0 = down)
-				ELSE                                    !IF QUAKE AT DEPTH THEN UP OR down
-					angst = pi                            !0 - 180 (0 = down)
-				END IF                                 
+				!ELSE                                    !IF QUAKE AT DEPTH THEN UP OR down
+				!	angst = pi                            !0 - 180 (0 = down)
+				!END IF                                 
  
         r0 = rand()                            !SELECT RANDOM RAY PARAMETER 
         ang1 = angst*r0                        !Randomly select angle
         
-        angst = pi 			!Need a full range angst for scattered ray parameter
+        !angst = pi 			!Need a full range angst for scattered ray parameter
+        
+        
+        !WRITE(77,*) seed,ang1,angst,r0,ip
+
         ! ============ <<
 				
 				
@@ -438,21 +455,35 @@ PROGRAM STATSYN_GLOBALSCAT
         x = 0.                                 !START LOCATION = ZERO
         s = 0.                                 !SET START ATTENUATION = ZERO
         a = 1.                                 !START AMPLITUDE = 1.
+        ! a    = cos(ang1*2.-pi/4.)              !SOURCE AMPLITUDE
         totald = 0.                                 !START AT ZERO KM TRAVELED
         x_sign = 1.                            !DISTANCE DIRECTION
-       
-        p    = abs(sin(ang1))/vf(iz,iwave)
         az   = 0.
-        ! a    = cos(ang1*2.-pi/4.)              !SOURCE AMPLITUDE
-		    a = 1.
         ncaust = 0                             !# OF CAUSTICS STARS AT 0.
+        
+        !Set initial depth index (iz)
+   			iz = iz1		!iz1 is layer in which the source is.
 				
-        IF (ang1 < pi/2.) THEN
+        !IF (ang1 < pi/2.) THEN
+!         ud = 1	
+!         iz = iz + 1 !Need this to make sure that source always stars at the same depth.
+!        ELSE
+!         ud = -1
+!        END IF
+        r0 = rand()
+        IF ((r0 < 0.5).OR.(iz == 1)) THEN
          ud = 1	
          iz = iz + 1 !Need this to make sure that source always stars at the same depth.
         ELSE
          ud = -1
         END IF
+
+
+       !Set ray parameter
+        p    = abs(sin(ang1))/vf(iz,iwave)
+!DEBUG        WRITE(*,*) 'P',p,ang1,vf(iz,iwave),iz,iwave,r0
+
+        
         NITR = 0
         
         n_iter_last = -999
@@ -480,8 +511,8 @@ PROGRAM STATSYN_GLOBALSCAT
 	     ! Calculate actual phonon depth
        izfac = 0
 			 IF (ud == 1) izfac = -1 
-			 z_act = z(iz+izfac)    !Depth of phonon  FLAT
-       IF (I < 11) WRITE(78,*) I,NITR, 'START :',t,z_act,iz,z_s(iz),x,ud  !DEBUG
+			 z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
+!       IF (I < 11) WRITE(78,*) I,NITR, 'START :',t,z_act,iz,z_s(iz),x,ud,p,iwave  !DEBUG
       
 			 		
 				!r0 = rand()           !RANDOM NUMBER FROM 0 TO 1
@@ -586,7 +617,7 @@ PROGRAM STATSYN_GLOBALSCAT
 								
 									!debug
 									!WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
-									IF (I < 11) WRITE(78,*) I,NITR, ' REC :',s,abs(xo-x_index/deg2km),ix,xo,x_index,x
+!									IF (I < 11) WRITE(78,*) I,NITR, ' REC :',s,abs(xo-x_index/deg2km),ix,xo,x_index,x
 !									IF (I < 11) WRITE(78,*) 'p = ',p,'dt = ',dtsurf
 !									IF (I < 11) WRITE(78,*) 'A ',I,NITR,t,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
 
@@ -595,7 +626,7 @@ PROGRAM STATSYN_GLOBALSCAT
 					! If the real phonon distance (x) is more than 0.1 deg from the seismogram at xo,
 					! do not record this surface hit (cycle).
 					      surCYC1 = surCYC1 +1
-					      IF (I < 11) WRITE(78,*) I,NITR, ' REC :','TOO FAR',abs(xo-x_index/deg2km),ix,xo,x_index,x 
+!					      IF (I < 11) WRITE(78,*) I,NITR, ' REC :','TOO FAR',abs(xo-x_index/deg2km),ix,xo,x_index,x 
 !					      IF (I < 11) WRITE(78,*) 'A ',t,I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL     
 					END IF
 					
@@ -672,7 +703,7 @@ PROGRAM STATSYN_GLOBALSCAT
 										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 /= 0))
 		 
 !												IF (I < 11) WRITE(78,*) I,NITR, ' INSL1:',t,iz,z_s(iz),z_act,x,ud,ds_scat,ds_SL,dh,p
-												IF (I < 11) WRITE(78,*) I,NITR, ' INSL1:',t,z_act,dh,ds_scat,ds_SL,z_act   !p*vf(iz,iwave),asin(p*vf(iz,iwave))
+!												IF (I < 11) WRITE(78,*) I,NITR, ' INSL1:',t,z_act,dh,ds_scat,ds_SL,z_act   !p*vf(iz,iwave),asin(p*vf(iz,iwave))
 												
 												!DEBUG
 												scat_time = scat_time +1
@@ -709,7 +740,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			
 										END DO
 										!IF (I < 11) WRITE(78,*) 'Ob',p,dh2,dh,vf(iz,iwave)
-										IF (I < 11) WRITE(78,*) I,NITR, ' OUTSL:',t,z_act,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL,dh
+!										IF (I < 11) WRITE(78,*) I,NITR, ' OUTSL:',t,z_act,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL,dh
 								 
 		 !						END IF								
 											 
@@ -766,7 +797,7 @@ PROGRAM STATSYN_GLOBALSCAT
 				IF (ud == 1) izfac = -1 
 				z_act = z(iz+izfac)    !Depth of phonon while in SL
 			 	 
-	     IF (I < 11) WRITE(78,*) I,NITR, 'END   :',t,z_act,iz,z_s(iz),z_act,x,ud,irtr1
+!	     IF (I < 11) WRITE(78,*) I,NITR, 'STOP   :',t,z_act,iz,z_s(iz),z_act,x,ud,p,irtr1
 			 END DO		!CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
 			 ! ====================== <<
 			 ! Close single ray tracing while loop
@@ -1093,7 +1124,7 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       COMPLEX      cone,ctwo                     !COMPLEX  = 1 OR = 2
       COMPLEX      va1,vb1,rho1,va2,vb2,rho2     !VELOCITY & DENSITY (COMPLEX)
       REAL         pin                           !INPUT SLOWNESS
-      COMPLEX      p                             !INPUT SLOWNESS (P OR S)
+      COMPLEX      psub                          !INPUT SLOWNESS (P OR S)
       COMPLEX      si1,si2,sj1,sj2               !SIN OF ANGLE
       COMPLEX      ci1,ci2,cj1,cj2               !COMPLEX SCRATCH
       COMPLEX      term1,term2                   !COMPLEX SCRATCH
@@ -1109,49 +1140,49 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       vb2    = cmplx(vs2,  0.)
       rho2   = cmplx(den2, 0.)
 
-      p      = cmplx(pin,  0.)                   !MAKE RAY PARAMETER COMPEX      
+      psub   = cmplx(pin,  0.)                   !MAKE RAY PARAMETER COMPEX      
       
       cone   = cmplx(1.,0.)                      !COMPLEX 1 & 2
       ctwo   = cmplx(2.,0.)
       
-      si1    = va1 * p                           !SIN OF ANGLE
-      si2    = va2 * p          
-      sj1    = vb1 * p
-      sj2    = vb2 * p       
+      si1    = va1 * psub                           !SIN OF ANGLE
+      si2    = va2 * psub          
+      sj1    = vb1 * psub
+      sj2    = vb2 * psub       
 !
       ci1    = csqrt(cone-si1**2)                !
       ci2    = csqrt(cone-si2**2)
       cj1    = csqrt(cone-sj1**2)
       cj2    = csqrt(cone-sj2**2)         
 !
-      term1  = (cone-ctwo*vb2*vb2*p*p)
-      term2  = (cone-ctwo*vb1*vb1*p*p)
+      term1  = (cone-ctwo*vb2*vb2*psub*psub)
+      term2  = (cone-ctwo*vb1*vb1*psub*psub)
       
       a      = rho2*term1-rho1*term2
-      b      = rho2*term1+ctwo*rho1*vb1*vb1*p*p
-      c      = rho1*term2+ctwo*rho2*vb2*vb2*p*p
+      b      = rho2*term1+ctwo*rho1*vb1*vb1*psub*psub
+      c      = rho1*term2+ctwo*rho2*vb2*vb2*psub*psub
       d      = ctwo*(rho2*vb2*vb2-rho1*vb1*vb1)
       E      = b*ci1/va1+c*ci2/va2
       F      = b*cj1/vb1+c*cj2/vb2
       G      = a-d*ci1*cj2/(va1*vb2)
       H      = a-d*ci2*cj1/(va2*vb1)
-      DEN    = E*F+G*H*p*p
+      DEN    = E*F+G*H*psub*psub
 !
       IF (PorS  ==  1) THEN
        trm1   = b*ci1/va1-c*ci2/va2          
        trm2   = a+d*ci1*cj2/(va1*vb2)
-       arp    = (trm1*F-trm2*H*p*p)/DEN           !refl down P to P up
+       arp    = (trm1*F-trm2*H*psub*psub)/DEN           !refl down P to P up
        trm1   = a*b+c*d*ci2*cj2/(va2*vb2)       
-       ars    = (-ctwo*ci1*trm1*p)/(vb1*DEN)      !refl down P to S up
+       ars    = (-ctwo*ci1*trm1*psub)/(vb1*DEN)      !refl down P to S up
        atp    = ctwo*rho1*ci1*F/(va2*DEN)         !trans down P to P down
-       ats    = ctwo*rho1*ci1*H*p/(vb2*DEN)       !trans down P to S down
+       ats    = ctwo*rho1*ci1*H*psub/(vb2*DEN)       !trans down P to S down
       ELSE
        trm1   = a*b+c*d*ci2*cj2/(va2*vb2)       
-       arp    = (-ctwo*cj1*trm1*p)/(va1*DEN)      !refl down S to P up
+       arp    = (-ctwo*cj1*trm1*psub)/(va1*DEN)      !refl down S to P up
        trm1   = b*cj1/vb1-c*cj2/vb2               
        trm2   = a+d*ci2*cj1/(va2*vb1)
-       ars    = -(trm1*E-trm2*G*p*p)/DEN          !refl down S to S up
-       atp    = -ctwo*rho1*cj1*G*p/(va2*DEN)      !trans down S to P down 
+       ars    = -(trm1*E-trm2*G*psub*psub)/DEN          !refl down S to S up
+       atp    = -ctwo*rho1*cj1*G*psub/(va2*DEN)      !trans down S to P down 
        ats    = ctwo*rho1*cj1*E/(vb2*DEN)         !trans down S to S down
       END IF
       
@@ -1210,6 +1241,8 @@ SUBROUTINE LAYERTRACE(p,h,utop,ubot,imth,dx,dt,irtr)
          dx=0.            !ray turned above layer
          dt=0.
          irtr=0
+         !DEBUG
+         !IF (I < 11) WRITE(78,*) 'RAY TURNED',p,utop
          RETURN
       END IF
 !
@@ -1574,7 +1607,8 @@ SUBROUTINE INTERFACE_NORMAL
           END IF																													!IF2a
           
           r0 = rand()                       !RANDOM NUMBER FROM 0 TO 1
-
+!          WRITE(*,*) '    ',r0
+          
           IF (ip  ==  2) THEN                   !IF SH-WAVE								!IF2b
 
 						IF (h > 0.) THEN                    !IF GRADIENT, THEN				!IF3c
@@ -1595,8 +1629,8 @@ SUBROUTINE INTERFACE_NORMAL
 							rt_sum = abs(arp)+abs(atp)+abs(ars)+abs(ats)    !SUM OF REFL/TRAN COEFS
 							
 							!debug
-  						IF (I < 11) WRITE(78,*) 'THICKNESS IS 0km',r0, &
-  											abs(arp)/rt_sum,abs(atp)/rt_sum,abs(ars)/rt_sum,abs(ats)/rt_sum,p,ip
+!  						IF (I < 11) WRITE(78,*) 'THICKNESS IS 0km',r0, &
+!  											abs(arp)/rt_sum,abs(atp)/rt_sum,abs(ars)/rt_sum,abs(ats)/rt_sum,p,ip
 
 							rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
 							rt_max = abs(arp)/rt_sum             !
@@ -1636,12 +1670,14 @@ SUBROUTINE INTERFACE_NORMAL
 					t = t + dt1
 					totald = totald + 2*corelayer
 					s = s + dt1/Q(nlay)
-				END IF	
+					
 				
 				!debug
-  						IF (I < 11) WRITE(78,*) 'COEFFICIENTS:',r0, &
-  											abs(arp)/rt_sum,abs(atp)/rt_sum,abs(ars)/rt_sum,abs(ats)/rt_sum,p,'WAVE',ip																															!IF1
+!				WRITE(*,*) '--->',r0
+!  						IF (I < 11) WRITE(78,*) 'COEFFICIENTS:',irtr1,r0, &
+!  											abs(arp)/rt_sum,abs(atp)/rt_sum,abs(ars)/rt_sum,abs(ats)/rt_sum,p,'WAVE',ip																															!IF1
 	
+        END IF				!IF1
         
 				!FIX NEXT IF FOR DIFFRACTED WAVES: 
 				IF (irtr1 == 2) THEN             !RAY TURNS IN LAYER FOLLOW 1 LEN
