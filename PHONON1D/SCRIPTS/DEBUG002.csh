@@ -23,8 +23,8 @@ set npow       = -0.5   # Power law factor for scatterer lengthscale
 set dQdfstyle  = 1
 
 
-set file_out   = "DEBUG1_1VEL"
-set model_name = "DEBUG_1VEL_10km"
+set file_out   = "DEBUG2_2VEL"
+set model_name = "DEBUG_2VEL_10km"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
