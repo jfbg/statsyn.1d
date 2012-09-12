@@ -35,7 +35,7 @@ PROGRAM STATSYN_GLOBALSCAT
 				REAL             w(nt0)
 			
 				! SOURCE
-				! Leaving source declaration here (and not in pho_vars) speeds up the compilation
+				! Leaving source declarations here (and not in pho_vars) speeds up the compilation
 				! time by a lot (nt0 is large).
 				REAL          mts(101,4,nt0)        !ATTENUATED SOURCE
 				REAL          b(nt0), e(nt0)        !HILBERT TRANSFORM & ENVELOPE
@@ -414,7 +414,6 @@ PROGRAM STATSYN_GLOBALSCAT
 					r0 = rand()
 					IF (r0 < 1./21.) THEN
 						ip = 1 !P
-						ip = 1
 					ELSE IF ((r0 >= 1./21.).and.(r0 < 11./21.)) THEN
 						ip = 2 !SH
 					ELSE 
