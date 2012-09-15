@@ -639,7 +639,7 @@ PROGRAM STATSYN_GLOBALSCAT
 						scat_prob = BG_prob			!Assume background probability at first.
 						IF ((z_act <= scat_depth).AND.(SL_prob > 0)) THEN
 						     scat_prob = SL_prob			!Scattering layer probability
-						ELSEIF ((z_act == scat_depth).AND.(ud == 1)) THEN
+						ELSE IF ((z_act == scat_depth).AND.(ud == 1)) THEN
 						      scat_prob = BG_prob			!Background probability
 						END IF
 						
@@ -970,7 +970,7 @@ SUBROUTINE ATTENUATE(sin,sout,ndat,dt,tstar,dQdfSTYLE)
       	!Can give rdQdf any form. 
       	IF (dQdfSTYLE == 1) THEN
       	     rdQdf(I) = 1.      !Q constant at all frequencies
-      	ELSEIF (dQdfSTYLE == 2) THEN
+      	ELSE IF (dQdfSTYLE == 2) THEN
       	     rdQdf(I) = 1. + ((df*float(I-1)-1)*.3)
       	ELSE
       	     rdQdf(I) = 1.
@@ -1835,7 +1835,7 @@ SUBROUTINE RAYTRACE_SCAT
       IF (ud == 1) THEN
           ztop = z_act
           zbot = z_pos
-      ELSEIF (ud == -1) THEN
+      ELSE IF (ud == -1) THEN
       		ztop = z_pos
       		zbot = z_act
       END IF 
@@ -1922,7 +1922,7 @@ SUBROUTINE GET_DS_SCAT
 			 
 			 IF (ud == -1) THEN
 			     dh_temp = abs(z_act - z(iz-1)) ! Distance to vel layer above			     
-			 ELSEIF (ud == 1) THEN
+			 ELSE IF (ud == 1) THEN
 			     dh_temp = abs(z_act - z(iz))  ! Distance to vel layer below
 			 END IF
 			 
@@ -1933,7 +1933,7 @@ SUBROUTINE GET_DS_SCAT
       IF (ud == -1) THEN
           utop = 1./vf(iz-1,iwave)
           ubot = 1./vscat
-      ELSEIF (ud == 1) THEN
+      ELSE IF (ud == 1) THEN
       		utop = 1./vscat
       		ubot = 1./vf(iz,iwave)
       END IF 
@@ -1962,7 +1962,7 @@ SUBROUTINE IP2IWAVE
 
       IF (ip == 1) THEN
          iwave = 1
-      ELSEIF ((ip == 2).OR.(ip == 3)) THEN
+      ELSE IF ((ip == 2).OR.(ip == 3)) THEN
          iwave = 2
       END IF
       
