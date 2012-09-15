@@ -100,7 +100,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
       WRITE(6,'(A)') 'ENTER MAX SCATTERING DEPTH:'
       READ (5,    *)  scat_depth
-      WRITE(6,*) 'HI2:',scat_depth
+      WRITE(6,*) 'Base of Scattering Layer (km):',scat_depth
 
       WRITE(6,'(A)') 'ENTER SCATTERING PROBABILITY IN SCATTERING LAYER:'
       READ (5,    *)  SL_prob
@@ -150,7 +150,7 @@ PROGRAM STATSYN_GLOBALSCAT
       
       dreceiver = 0.05  !radius around receiver in which the phonons will be recorded (deg)
      
-	  
+      !Initialize random seed for sequence of random numbers used to multiply to clock-based seeds.	  
       CALL INIT_RANDOM_SEED()
       CALL RANDOM_NUMBER(r2s)
       
@@ -275,7 +275,7 @@ PROGRAM STATSYN_GLOBALSCAT
       DO WHILE (qdep >= z_s(iz1+1))               !FIND WHICH LAYER QUAKE STARTS IN
        iz1 = iz1 +1															 !FIRST LAYER IS ASSUMED TO BE AT 0km.
       END DO
-		  WRITE(6,*) 'DEPTH:',iz1,z_s(iz1)
+		  WRITE(6,*) 'SOURCE DEPTH AND LAYER:',iz1,z_s(iz1)
 		  
 		  !iz1 will be iz1+1 if downgoing phonon, but this is corrected once the launch
 		  ! angle is defined.
@@ -410,7 +410,6 @@ PROGRAM STATSYN_GLOBALSCAT
 				!
 				IF (iz1 == 1)   ip = 1         ! Surface impact = P-wave only
 				
-				IF (iz /= 1) THEN
 					r0 = rand()
 					IF (r0 < 1./21.) THEN
 						ip = 1 !P
@@ -430,19 +429,9 @@ PROGRAM STATSYN_GLOBALSCAT
 				! ============ >>
 				! Pick take-off angle					 			 
 				
-       
-				!IF (iz1 == 1) THEN                       !IF QUAKE STARTS AT SURF GO down
-					angst = pi/2.                         !0 - 90 (0 = down)
-				!ELSE                                    !IF QUAKE AT DEPTH THEN UP OR down
-				!	angst = pi                            !0 - 180 (0 = down)
-				!END IF                                 
- 
+				angst = pi/2.                         
         r0 = rand()                            !SELECT RANDOM RAY PARAMETER 
         ang1 = angst*r0                        !Randomly select angle
-        
-        !angst = pi 			!Need a full range angst for scattered ray parameter
-        
-        
         !WRITE(77,*) seed,ang1,angst,r0,ip
 
         ! ============ <<
@@ -463,14 +452,9 @@ PROGRAM STATSYN_GLOBALSCAT
         !Set initial depth index (iz)
    			iz = iz1		!iz1 is layer in which the source is.
 				
-        !IF (ang1 < pi/2.) THEN
-!         ud = 1	
-!         iz = iz + 1 !Need this to make sure that source always stars at the same depth.
-!        ELSE
-!         ud = -1
-!        END IF
+				!Set up/down direction
         r0 = rand()
-        IF ((r0 < 0.5).OR.(iz == 1)) THEN
+        IF ((r0 < 0.5).OR.(iz == 1)) THEN			 !IF QUAKE STARTS AT SURF GO DOWN
          ud = 1	
          iz = iz + 1 !Need this to make sure that source always stars at the same depth.
         ELSE
@@ -546,8 +530,9 @@ PROGRAM STATSYN_GLOBALSCAT
 					IF ( abs(xo-x_index/deg2km) <= dreceiver) THEN
 						! phonon is closer then 0.1 deg to a recorder, RECORD AT SURFACE		
 					
-										dtsurf = dreceiver*deg2km*p !Time correction if phonon doesn't hit the surface
-																								! right on the receiver. Max time is when ang1 is 90.
+										dtsurf = (xo-x_index/deg2km)*deg2km*p 
+										!Time correction if phonon doesn't hit the surface
+										! right on the receiver. Max time is when ang1 is 90.
 					
 										IT = nint((t +dtsurf      -t1)/dti) + 1 
 					
