@@ -410,6 +410,7 @@ PROGRAM STATSYN_GLOBALSCAT
 				!
 				IF (iz1 == 1)   ip = 1         ! Surface impact = P-wave only
 				
+				IF (iz1 /= 1) THEN
 					r0 = rand()
 					IF (r0 < 1/3) THEN
 					 ip = 1
