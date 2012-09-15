@@ -28,8 +28,8 @@ set model_name = "DEBUG_1VEL_10km"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 10     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 10     ## Number of iterations
+@ n_kern  = 20     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 5     ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
