@@ -411,9 +411,9 @@ PROGRAM STATSYN_GLOBALSCAT
 				IF (iz1 == 1)   ip = 1         ! Surface impact = P-wave only
 				
 					r0 = rand()
-					IF (r0 < 1/3)
+					IF (r0 < 1/3) THEN
 					 ip = 1
-					ELSE IF ((r0 <= 1/3).AND.(r0 < 2/3))
+					ELSE IF ((r0 <= 1/3).AND.(r0 < 2/3)) THEN
 					 ip = 2
 					ELSE
 					 ip = 3
