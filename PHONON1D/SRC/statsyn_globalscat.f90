@@ -539,11 +539,12 @@ PROGRAM STATSYN_GLOBALSCAT
 						! phonon is closer then 0.1 deg to a recorder, RECORD AT SURFACE		
 					
 										dtsurf = (xo-x_index/deg2km)*deg2km*p 
+
 										!Time correction if phonon doesn't hit the surface
 										! right on the receiver. Max time is when ang1 is 90.
 					
 										IT = nint((t +dtsurf      -t1)/dti) + 1 
-					
+										write(*,*) dtsurf, IT, I					
 										ims = int(s/datt)+1
 										IF (ims > 100) ims = 100
 										IF (ims <=   1) ims =   2
