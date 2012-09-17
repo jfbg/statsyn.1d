@@ -398,7 +398,7 @@ PROGRAM STATSYN_GLOBALSCAT
        CALL RANDOM_NUMBER(r2s)
        seed = (nclock*r2s)! + 11 * (/ (k - 1, k = 1, nseed) /)
        CALL srand(seed)    
-       write(*,*) I,seed,r2s,nclock,10**(real(nint(log10(real(nclock)/10**8))))       
+!       write(*,*) I,seed,r2s,nclock,10**(real(nint(log10(real(nclock)/10**8))))       
 	     r0 = rand()    !First rand output not random
                         ! It is seed (clock) dependent
 !       seed = int(seed*rand())
@@ -550,7 +550,9 @@ PROGRAM STATSYN_GLOBALSCAT
 										! right on the receiver. Max time is when ang1 is 90.
 					
 										IT = nint((t +dtsurf      -t1)/dti) + 1 
+										
 										write(*,*) dtsurf, IT, I, p					
+										
 										ims = int(s/datt)+1
 										IF (ims > 100) ims = 100
 										IF (ims <=   1) ims =   2
