@@ -109,5 +109,6 @@ MODULE PHO_VARS			! Make variables global
 				INTEGER     :: nseed
 				INTEGER     :: seed
 				INTEGER (kind=8)     :: nclock,nclock1
+				INTEGER           ntime(8)
 
 			END MODULE PHO_VARS
