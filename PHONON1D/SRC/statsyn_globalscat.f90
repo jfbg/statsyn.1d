@@ -418,9 +418,9 @@ PROGRAM STATSYN_GLOBALSCAT
 				
 				IF (iz1 /= 1) THEN
 					r0 = rand()
-					IF (r0 < 1/3) THEN
+					IF (r0 < 1./3.) THEN
 					 ip = 1
-					ELSE IF ((r0 <= 1/3).AND.(r0 < 2/3)) THEN
+					ELSE IF ((r0 <= 1./3.).AND.(r0 < 2./3.)) THEN
 					 ip = 2
 					ELSE
 					 ip = 3
@@ -478,7 +478,9 @@ PROGRAM STATSYN_GLOBALSCAT
 
        !Set ray parameter
         p    = abs(sin(ang1))/vf(iz,iwave)
-!DEBUG        WRITE(*,*) 'P',p,ang1,vf(iz,iwave),iz,iwave,r0
+        
+        !DEBUG
+!        IF (I < 10001) WRITE(78,*) p,ang1,vf(iz,iwave),iz,iwave,r0
 
         
         NITR = 0
@@ -551,7 +553,7 @@ PROGRAM STATSYN_GLOBALSCAT
 					
 										IT = nint((t +dtsurf      -t1)/dti) + 1 
 										
-										write(*,*) dtsurf, IT, I, p					
+!										write(*,*) dtsurf, IT, I, p					
 										
 										ims = int(s/datt)+1
 										IF (ims > 100) ims = 100
