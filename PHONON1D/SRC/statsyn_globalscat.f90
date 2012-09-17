@@ -392,7 +392,8 @@ PROGRAM STATSYN_GLOBALSCAT
        CALL SYSTEM_CLOCK(COUNT=nclock)
        CALL RANDOM_NUMBER(r2s)
        seed = (nclock*r2s)! + 11 * (/ (k - 1, k = 1, nseed) /)
-       CALL srand(seed)             
+       CALL srand(seed)    
+       write(*,*) I,seed,r2s         
 	     r0 = rand()    !First rand output not random
                         ! It is seed (clock) dependent
 !       seed = int(seed*rand())
