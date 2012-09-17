@@ -544,7 +544,7 @@ PROGRAM STATSYN_GLOBALSCAT
 										! right on the receiver. Max time is when ang1 is 90.
 					
 										IT = nint((t +dtsurf      -t1)/dti) + 1 
-										write(*,*) dtsurf, IT, I					
+										write(*,*) dtsurf, IT, I, p					
 										ims = int(s/datt)+1
 										IF (ims > 100) ims = 100
 										IF (ims <=   1) ims =   2
