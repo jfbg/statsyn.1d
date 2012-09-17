@@ -392,7 +392,7 @@ PROGRAM STATSYN_GLOBALSCAT
        CALL DATE_AND_TIME(values=ntime)
 !       CALL SYSTEM_CLOCK(COUNT=nclock)
        nclock = ntime(1)*ntime(2)*ntime(3)*ntime(5)*ntime(6)*ntime(7)*ntime(8)
-       write(*,*) '---->', ntime
+!       write(*,*) '---->', ntime
 !       nclock = nclock / 10**(real(nint(log10(real(nclock)/10**9))))
 !       o/10^(round(log10(o/1e8)))
        CALL RANDOM_NUMBER(r2s)
