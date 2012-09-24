@@ -126,7 +126,7 @@
 			WRITE(6,*) '          Distance between source and layer is (km):',qdep-z_s(iz2)			
 			IF (qdep - z_s(iz2) < 2)  check_source = 0
 			
-			qdepdiff = qdep-.1
+			qdepdiff = qdep !-.1
 			
 			! Adding a layer where the source is located
 			IF (check_source == 1) THEN

@@ -541,7 +541,7 @@ PROGRAM STATSYN_GLOBALSCAT
 					IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
 					ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
 
-					xo = x1 + float(ix-1)*dxi					!Distance_index in km
+					xo = x1 + float(ix-1)*dxi					!Distance_index in degrees
 					
 					IF ( abs(xo-x_index/deg2km) <= dreceiver) THEN
 						! phonon is closer then 0.1 deg to a recorder, RECORD AT SURFACE		
@@ -649,7 +649,7 @@ PROGRAM STATSYN_GLOBALSCAT
 						
 						!Set depth-dependent scattering probability
 						scat_prob = BG_prob			!Assume background probability at first.
-						IF ((z_act <= scat_depth).AND.(SL_prob > 0)) THEN
+						IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) THEN
 						     scat_prob = SL_prob			!Scattering layer probability
 						ELSE IF ((z_act == scat_depth).AND.(ud == 1)) THEN
 						      scat_prob = BG_prob			!Background probability
@@ -662,15 +662,17 @@ PROGRAM STATSYN_GLOBALSCAT
 				
 						!Check if scatter
 						CALL INTERFACE_SCATTER
-						iwave = ip
-						IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
+						!iwave doesn't change in INTERFACE_SCATTER
+						!iwave = ip
+						!IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
 
 						
 						
 						izfac = 0
 						IF (ud == 1) izfac = -1 
 						z_act = z(iz+izfac)    !Depth of phonon while in vel layer FLAT
-
+						!debug
+            write(78,*) 'Z1 = ',z_act,iz,iz1,ud,izfac,z(iz)
 
 						dh = z(iz) - z(iz-1) !First dh is thickness of layer (FLAT)
 						
@@ -698,7 +700,8 @@ PROGRAM STATSYN_GLOBALSCAT
 											!ds_SL is linear distance to next velocity layer
 											!If ds_SL > ds_scat, then the phonon reach next scatterer 
 											!                          before reaching the next layer
-											
+											!debug
+                      write(78,*) 'Z2 = ',z_act
 											!Calculate first ds_scat (distance to next scatterer)
 											CALL GET_DS_SCAT  !change ds_scat  FLAT
 																						 
@@ -1749,8 +1752,7 @@ SUBROUTINE INTERFACE_SCATTER
       
       ud_pre = ud  !save current ud before scattering it.
       
-				 IF (z_act == 0) angst = pi/2  !Goes down only
-      	     
+				  
 				 r0 = rand()
 				 IF (r0 < 0.5) x_sign=-x_sign		
 				 r0 = rand()
@@ -1914,13 +1916,17 @@ SUBROUTINE GET_DS_SCAT
       IF ((z_act <= scat_depth).AND.(SL_prob > 0)) THEN
             ds_scat_nf = ((dsmax**(npow+1) - dsmin**(npow+1))*rand() & 
 																				+ dsmin**(npow+1))**(1/(npow+1))
+			ELSE IF ((z_act == scat_depth).AND.(ud == 1)) THEN
+						ds_scat_nf = 10   !background scatterer scale-length ~10km
 			END IF
 			
-			!Find middle depth of travel so that we can find appropriate flatten ds_scat
-			z_mid = z_act+dh/2*ud
+			!Find approximate flattening factor, based on actual depth z_act
+			z_mid = z_act !+dh/2*ud
 			r = erad-z_mid
 			z_f = -erad*alog(r/erad)			!Flattening transformation of depth
 			ds_scat = z_f/z_mid*ds_scat_nf  !Flatten ds_scat_nf (approximation based on mid depth)
+			
+			IF (I < 10) WRITE(78,*) ds_scat, ds_scat_nf, z_act,r,z_f
 			
 			RETURN			 
       END SUBROUTINE GET_DS_SCAT
