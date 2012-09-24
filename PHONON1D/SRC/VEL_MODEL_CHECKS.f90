@@ -178,6 +178,8 @@
       END DO
       
       CLOSE(45)
+      
+      rhs = rh  !Will transform rhs in flattening subroutine
      	
 
 

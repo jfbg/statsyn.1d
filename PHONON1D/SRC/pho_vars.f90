@@ -20,9 +20,9 @@ MODULE PHO_VARS			! Make variables global
 				INTEGER       check_scat, check_core, check_scat2, check_source
 				
 				REAL          t,x,xo,a,x_index
-				REAL          z(nlay0),vf(nlay0,2)
+				REAL          z(nlay0),vf(nlay0,2),rh(nlay0)
 				REAL          z_st(nlay0),r_st(nlay0),vst(nlay0,2),rht(nlay0)
-				REAL          z_s(nlay0),r_s(nlay0),vs(nlay0,2),rh(nlay0)
+				REAL          z_s(nlay0),r_s(nlay0),vs(nlay0,2),rhs(nlay0)
 				REAL          dx1,dt1
 				INTEGER       irtr1
 				INTEGER     :: iz,iz1,itt,iz2

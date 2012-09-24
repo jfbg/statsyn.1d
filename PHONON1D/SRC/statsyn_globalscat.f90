@@ -193,8 +193,8 @@ PROGRAM STATSYN_GLOBALSCAT
 !       READ(1,*,IOSTAT=status) z_s(i),r_s(i),vs(i,1),vs(i,2),rh(i),Q(i)
 	   
 !       IF (status /= 0) EXIT
-       CALL FLATTEN(z_s(i),vs(i,1),z(i),vf(i,1),erad)!FLATTEN P-WAVE VELOCITIES
-       CALL FLATTEN(z_s(i),vs(i,2),z(i),vf(i,2),erad)!FLATTEN S-WAVE VELOCITIES
+       CALL FLATTEN(z_s(i),vs(i,1),rhs(i),z(i),vf(i,1),rh(i),erad)!FLATTEN P-WAVE VELOCITIES
+       CALL FLATTEN(z_s(i),vs(i,2),rhs(i),z(i),vf(i,2),rh(i),erad)!FLATTEN S-WAVE VELOCITIES
       END DO
 
 
@@ -226,7 +226,7 @@ PROGRAM STATSYN_GLOBALSCAT
       OPEN(15,FILE='model_flat.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL
       !WRITE(15,*) 'z_s',vf(I,1),vs(I,2),rh(I),Q(i)
       DO I = 1,nlay
-      	WRITE(15,*) z_s(I),z(I),vf(I,1),vf(I,2),rh(I),Q(i)
+      	WRITE(15,*) z_s(I),z(I),vf(I,1),vf(I,2),rhs(I),rh(I),Q(i)
       END DO
       
       CLOSE(15)
@@ -1203,11 +1203,16 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
 END SUBROUTINE rtcoef2
 
 
-SUBROUTINE FLATTEN(z_s,vs,z_f,vf_f,erad)
-      REAL     z_s,z_f,vf_f,vs,erad,r
+SUBROUTINE FLATTEN(z_s,vs,rhs,z_f,vf_f,rh_f,erad)
+      REAL     z_s,z_f,vf_f,vs,erad,r,rhs,rh_f,p
+      
+      p = 2
+      
       r=erad-z_s
       z_f=-erad*alog(r/erad)
       vf_f=vs*(erad/r)
+      rh_f = ((erad/r)**(p-2))*rhs
+      
       RETURN
 END SUBROUTINE FLATTEN
 
