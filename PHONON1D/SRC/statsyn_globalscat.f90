@@ -672,7 +672,7 @@ PROGRAM STATSYN_GLOBALSCAT
 						IF (ud == 1) izfac = -1 
 						z_act = z(iz+izfac)    !Depth of phonon while in vel layer FLAT
 						!debug
-            write(78,*) 'Z1 = ',z_act,iz,iz1,ud,izfac,z(iz)
+            !write(78,*) 'Z1 = ',z_act,iz,iz1,ud,izfac,z(iz)
 
 						dh = z(iz) - z(iz-1) !First dh is thickness of layer (FLAT)
 						
@@ -701,7 +701,7 @@ PROGRAM STATSYN_GLOBALSCAT
 											!If ds_SL > ds_scat, then the phonon reach next scatterer 
 											!                          before reaching the next layer
 											!debug
-                      write(78,*) 'Z2 = ',z_act
+                      !write(78,*) 'Z2 = ',z_act
 											!Calculate first ds_scat (distance to next scatterer)
 											CALL GET_DS_SCAT  !change ds_scat  FLAT
 																						 
@@ -1926,7 +1926,7 @@ SUBROUTINE GET_DS_SCAT
 			z_f = -erad*alog(r/erad)			!Flattening transformation of depth
 			ds_scat = z_f/z_mid*ds_scat_nf  !Flatten ds_scat_nf (approximation based on mid depth)
 			
-			IF (I < 10) WRITE(78,*) ds_scat, ds_scat_nf, z_act,r,z_f
+!			IF (I < 10) WRITE(78,*) ds_scat, ds_scat_nf, z_act,r,z_f
 			
 			RETURN			 
       END SUBROUTINE GET_DS_SCAT
