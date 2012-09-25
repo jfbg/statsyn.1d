@@ -31,7 +31,7 @@ set model_name = "IASP91_ori"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 12     ## Number of kernels to use per iteration (simultaneous run)
+@ n_kern  = 22    ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 1     ## Number of iterations
 
 # Output folder
@@ -71,7 +71,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 1100 
 else if ($i == 1) then
- set q_depth = 0020
+ set q_depth = 0019
 else
  set q_depth = 0.01
 endif
