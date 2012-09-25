@@ -649,20 +649,20 @@ PROGRAM STATSYN_GLOBALSCAT
 						
 						!Set depth-dependent scattering probability
 						scat_prob = BG_prob			!Assume background probability at first.
-						IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) THEN
-						     scat_prob = SL_prob			!Scattering layer probability
-						ELSE IF ((z_act == scat_depth).AND.(ud == 1)) THEN
-						      scat_prob = BG_prob			!Background probability
-						END IF
 						
-						IF (iz >= nlay-1) scat_prob = 0. !no scattering near center of Moon
+						!Scattering layer probability
+						IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) scat_prob = SL_prob			
+						!Background probability
+						IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
+						
+						IF (iz >= nlay-2) scat_prob = 0. !no scattering near center of Moon
 					
 					IF (scat_prob > 0.) THEN
 				
 				
 						!Check if scatter
 						CALL INTERFACE_SCATTER
-						!iwave doesn't change in INTERFACE_SCATTER
+						!iwave doesn't change in INTERFACE_SCATTER YET....
 						!iwave = ip
 						!IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
 
@@ -705,17 +705,21 @@ PROGRAM STATSYN_GLOBALSCAT
 											!Calculate first ds_scat (distance to next scatterer)
 											CALL GET_DS_SCAT  !change ds_scat  FLAT
 																						 
+										  !Get iz_scat (layer in which phonon is scattered, if scattered)
+										  IF (ud == 1) iz_scat = iz-1
+										  IF (ud == -1) iz_scat = iz
 										 
 										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 /= 0))
-		 
+										
+	 
 !												IF (I < 11) WRITE(78,*) I,NITR, ' INSL1:',t,iz,z_s(iz),z_act,x,ud,ds_scat,ds_SL,dh,p
 !												IF (I < 11) WRITE(78,*) I,NITR, ' INSL1:',t,z_act,dh,ds_scat,ds_SL,z_act   !p*vf(iz,iwave),asin(p*vf(iz,iwave))
 												
 												!DEBUG
-												scat_time = scat_time +1
+												!scat_time = scat_time +1
 												
 												!debug
-												dh2 = dh
+												!dh2 = dh
 												
 												!Calculare what would dh be if phonon only travelled ds_scat km
 												dh = ds_scat*abs(cos(asin(p*vf(iz,iwave))))   !FLAT
@@ -1849,7 +1853,7 @@ SUBROUTINE RAYTRACE_SCAT
 			! based on velocities at top and at the bottom of the layer
  
       vgrad = (vf(iz,iwave)-vf(iz-1,iwave))/(z(iz)-z(iz-1))  !FLAT GRADIENT
-      z_pos = z_act + dh*ud  !Final position								 !FLAT
+      z_pos = z_act + dh*ud  !Final z position							 !FLAT
       
       IF (ud == 1) THEN
           ztop = z_act
@@ -1861,15 +1865,15 @@ SUBROUTINE RAYTRACE_SCAT
       
 	
 				IF (iz /= 1) THEN
-				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
-				    vtop = vf(iz-1,iwave) + (ztop-z(iz-1)) * vgrad
+				  IF (abs(vf(iz_scat,iwave)) > 0.) THEN
+				    vtop = vf(iz_scat,iwave) + (ztop-z(iz_scat)) * vgrad
 				    utop = 1./vtop              !SLOWNESS AT 1st SCATTERER
 				  ELSE
 				    utop = 0.
 				  END IF 
 		
-					IF (abs(vf(iz-1,iwave)) > 0.) THEN
-		        vbot = vf(iz,iwave) + (zbot-z(iz-1)) * vgrad
+					IF (abs(vf(iz_scat,iwave)) > 0.) THEN
+		        vbot = vf(iz_scat,iwave) + (zbot-z(iz_scat)) * vgrad
 						ubot = 1./vbot                !SLOWNESS AT 2nd SCATTERER
 					ELSE
 						ubot = 0.
@@ -1882,7 +1886,7 @@ SUBROUTINE RAYTRACE_SCAT
 !					IF (I < 11) WRITE(78,*) 'IRTR1 = ',irtr1,ztop,vtop,zbot,vbot,ud
 
 					
-					dtstr1 = dt1/Q(iz)                    !t* = TIME/QUALITY FACTOR
+					dtstr1 = dt1/Q(iz_scat)                    !t* = TIME/QUALITY FACTOR
 				ELSE
 					irtr1  = -1
 					dx1    = 0.
@@ -1979,6 +1983,7 @@ SUBROUTINE GET_DS_SCAT
 			 CALL LAYERTRACE(p,dh_temp,utop,ubot,imth,dx1,dt1,irtr1)
 			 ds_SL = (dh_temp**2+dx1**2)**0.5
       
+      RETURN
 END SUBROUTINE GET_DS_SL
 
 SUBROUTINE IP2IWAVE
