@@ -14,7 +14,7 @@ set n_phonon   = "500000"
 
 # SCATTERING
 set bg_scat    = 0.00
-set prob_scat  = 0.20
+set prob_scat  = 0.2
 set dsmin      = 0.5   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
@@ -28,7 +28,7 @@ set model_name = "S_VPREMOON_Qp_nocrust"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 10     ## Number of kernels to use per iteration (simultaneous run)
+@ n_kern  = 15     ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 5     ## Number of iterations
 
 # Output folder
