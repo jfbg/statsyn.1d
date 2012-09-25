@@ -749,22 +749,19 @@ PROGRAM STATSYN_GLOBALSCAT
 																						
 			
 										END DO
-										!IF (I < 11) WRITE(78,*) 'Ob',p,dh2,dh,vf(iz,iwave)
-!										IF (I < 11) WRITE(78,*) I,NITR, ' OUTSL:',t,z_act,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL,dh
-								 
-		 !						END IF								
 											 
 								 !Leaves WHILE loop when ds_SL < distance to next vel layer
 								 !Need to travel to next vel layer
 									 CALL RAYTRACE_SCAT !Already have dh
+									 !Figure out in which interface the phonon is now at
+									 iz = iz_scat
 									 CALL INTERFACE_NORMAL
 									 iwave = ip
 									 IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
 					    	   
 		 
 									 z_act = z_act + dh*ud
-								  !Figure out in which layer the phonon is now into
-									 iz = iz + ud 
+								   
 
 							ELSE
   									 ! ============ >>
@@ -1715,8 +1712,7 @@ SUBROUTINE INLAYER_SCATTER
       r0 = rand()
       IF (r0 < scat_prob) THEN 
       
-				 IF (z_act == 0) angst = pi/2  !Goes down only
-      	     
+     	     
 				 r0 = rand()
 				 IF (r0 < 0.5) x_sign=-x_sign		
 				 r0 = rand()
@@ -1740,7 +1736,6 @@ SUBROUTINE INLAYER_SCATTER
 				 IF (az < -pi) az = az + 2.*pi
 				 IF (az >  pi) az = az - 2.*pi
 				 
-				 angst = pi   !Reset full range of possible angles.
       END IF	
 
       RETURN
@@ -1791,7 +1786,6 @@ SUBROUTINE INTERFACE_SCATTER
 				 IF (az < -pi) az = az + 2.*pi
 				 IF (az >  pi) az = az - 2.*pi
 				 
-				 angst = pi   !Reset full range of possible angles.
       END IF	
       
  
