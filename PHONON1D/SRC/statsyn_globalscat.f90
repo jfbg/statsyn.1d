@@ -492,6 +492,8 @@ PROGRAM STATSYN_GLOBALSCAT
        DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
        
        NITR = NITR + 1
+       scat_FLAG = 0
+      
        
 	     ! Calculate actual phonon depth
        izfac = 0
@@ -533,12 +535,12 @@ PROGRAM STATSYN_GLOBALSCAT
 					
 					IF (scat_prob > 0.) THEN
 
-						izfac = 0
+            izfac = 0
 						IF (ud == 1) izfac = -1 
 						z_act = z(iz+izfac)    !Depth of phonon while in vel layer FLAT
 					
 					!DEBUG
-					!WRITE(78,*) I,NITR,'ENTER SCATTERING ZONE',scat_prob,iz,ud,z_act
+!					WRITE(78,*) I,NITR,'ENTER SCATTERING ZONE',scat_prob,iz,ud,z_act
 				
 					  !Get iz_scat (layer in which phonon is scattered, if scattered)
 					  iz_scat = iz-1
@@ -575,7 +577,10 @@ PROGRAM STATSYN_GLOBALSCAT
 								 
 								 CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
 								 
-								 IF (irtr1 == 1) THEN !Only scatter if ray would have gone through layer
+							IF (irtr1 == 1) THEN !Only scatter if ray would have gone through layer
+							
+							        scat_FLAG = 1
+							
 											ds_SL = (dh**2+dx1**2)**0.5
 		 
 											!ds_SL is linear distance to next velocity layer
@@ -587,7 +592,7 @@ PROGRAM STATSYN_GLOBALSCAT
 											CALL GET_DS_SCAT  !change ds_scat  FLAT
 										  
 								!DEBUG
-								!WRITE(78,*) I,NITR,iz,iz_scat,z_act,ds_SL,ds_scat,t,x,ud
+!								WRITE(78,*) I,NITR,iz,iz_scat,z_act,ds_SL,ds_scat,t,x,ud
 										 
 										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 /= 0))
 										
@@ -628,7 +633,7 @@ PROGRAM STATSYN_GLOBALSCAT
 												CALL GET_DS_SCAT
 												
 												!DEBUG
-												!WRITE(78,*) I,NITR,iz,iz_scat,z_act,ds_SL,ds_scat,t,x,ud
+!												WRITE(78,*) I,NITR,iz,iz_scat,z_act,ds_SL,ds_scat,t,x,ud
 																						
 			
 										END DO
@@ -636,16 +641,15 @@ PROGRAM STATSYN_GLOBALSCAT
 								 !Leaves WHILE loop when ds_SL < distance to next vel layer
 								 !Need to travel to next vel layer
 									 CALL RAYTRACE_SCAT !Already have dh
+									 
 									 !Figure out in which interface the phonon is now at
-									 IF (ud == -1) iz = iz_scat-1
-									 IF (ud ==  1) iz = iz_scat+1
+									 IF (ud == -1) iz = iz_scat
+									 IF (ud ==  1) iz = iz_scat+2
 									 CALL INTERFACE_NORMAL
 									 iwave = ip
 									 IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
 					    	   
-		 
-									
-								   
+			   
 
 							ELSE
   									 ! ============ >>
@@ -654,7 +658,6 @@ PROGRAM STATSYN_GLOBALSCAT
 										 CALL INTERFACE_NORMAL
 					    	     iwave = ip
 							   	   IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
-!										 iz = iz + ud  
 										 ! RAY TRACING IN LAYER	
 										 ! ============ <<
 										 
@@ -668,7 +671,6 @@ PROGRAM STATSYN_GLOBALSCAT
 					CALL INTERFACE_NORMAL			
 					iwave = ip
 					IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
-!					iz = iz + ud  
 					! RAY TRACING IN LAYER	
 					! ============ <<
 					
@@ -682,9 +684,8 @@ PROGRAM STATSYN_GLOBALSCAT
 				! RECORD IF PHONON IS AT SURFACE
 				IF (iz <= 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
 				
-			    iz = 1
+!			    iz = 1
 					ud = 1                                !RAY NOW MUST TRAVEL down
-!					iz = iz + ud
 					
 					!Find index for distance
 					x_index = abs(x)
@@ -697,16 +698,13 @@ PROGRAM STATSYN_GLOBALSCAT
 					xo = x1 + float(ix-1)*dxi					!Distance_index in degrees
 					
 					IF ( abs(xo-x_index/deg2km) <= dreceiver) THEN
-						! phonon is closer then 0.1 deg to a recorder, RECORD AT SURFACE		
-					
-										dtsurf = (xo-x_index/deg2km)*deg2km*p 
+						! phonon is closer then 0.05 (dreceiver) deg to a recorder, RECORD AT SURFACE		
 
 										!Time correction if phonon doesn't hit the surface
-										! right on the receiver. Max time is when ang1 is 90.
+										! right on the receiver. Max time is when ang1 is 90.					
+										dtsurf = (xo-x_index/deg2km)*deg2km*p 
 					
-										IT = nint((t +dtsurf      -t1)/dti) + 1 
-										
-!										write(*,*) dtsurf, IT, I, p					
+										IT = nint((t +dtsurf      -t1)/dti) + 1 			
 										
 										ims = int(s/datt)+1
 										IF (ims > 100) ims = 100
@@ -768,42 +766,24 @@ PROGRAM STATSYN_GLOBALSCAT
 											
 										END IF
 										
-					
-										
-								
-									!debug
-									!WRITE(77,*) I,NITR,iz,z_s(iz),x,ud, 'RECORDED AT SURFACE'
-!									IF (I < 11) WRITE(78,*) I,NITR, ' REC :',s,abs(xo-x_index/deg2km),ix,xo,x_index,x
-!									IF (I < 11) WRITE(78,*) 'p = ',p,'dt = ',dtsurf
-!									IF (I < 11) WRITE(78,*) 'A ',I,NITR,t,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL
 
-					
 					ELSE!CYCLE 1
-					! If the real phonon distance (x) is more than 0.1 deg from the seismogram at xo,
+					! If the real phonon distance (x) is more than 0.05 (dreceiver) deg from the seismogram at xo,
 					! do not record this surface hit (cycle).
 					      surCYC1 = surCYC1 +1
-!					      IF (I < 11) WRITE(78,*) I,NITR, ' REC :','TOO FAR',abs(xo-x_index/deg2km),ix,xo,x_index,x 
-!					      IF (I < 11) WRITE(78,*) 'A ',t,I,NITR,iz,z_s(iz),'1',z_act,x,ud,ds_scat,ds_SL     
 					END IF
-					
-        
+					        
         END IF
 				! RECORD IF PHONON IS AT SURFACE
 				! ============ <<
 
 				!GO TO NEXT LAYER
-			  iz = iz + ud  
-        
-				!DEBUG
-			 	!IF (I < 21) WRITE(77,*) I,NITR,iz,z_s(iz),x,ud,'NORMAL_END',irtr1
-			 
-			 
-		 
-!				izfac = 0
-!				IF (ud == 1) izfac = -1 
-!				z_act = z(iz+izfac)    !Depth of phonon while in SL
-			 	 
-!	     IF (I < 11) WRITE(78,*) I,NITR, 'STOP   :',t,z_act,iz,z_s(iz),z_act,x,ud,p,irtr1
+				IF ((scat_FLAG == 0).OR.(iz == 1))    iz = iz + ud  
+       
+       !DEBUG 
+!       IF (t > t2) WRITE(77,*) I,NITR,'TIME'
+!       IF (NITR > 200*nlay) WRITE(77,*) 'LAYERS'
+
 			 END DO		!CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
 			 ! ====================== <<
 			 ! Close single ray tracing while loop
@@ -1924,7 +1904,8 @@ SUBROUTINE GET_DS_SCAT
 			END IF
 			
 			!Find approximate flattening factor, based on actual depth z_act
-			z_mid = z_act !+dh/2*ud
+!			z_mid = z_act !+dh/2*ud
+			z_mid = (z(iz) - z(iz-1))/2+z(iz)
 			r = erad-z_mid
 			z_f = -erad*alog(r/erad)			!Flattening transformation of depth
 			
@@ -1937,6 +1918,8 @@ SUBROUTINE GET_DS_SCAT
       IF ((z_act == scat_depth).AND.(ud == 1)) THEN
          ds_scat = 9999 !So that it doesnt scatter in layer beneath scattering layer
       END IF
+      
+      IF (ds_scat < dsmin) ds_scat = dsmin
       
       !DEBUG
 !      WRITE(78,*) 'NEXT ds_scat =',ds_scat

@@ -59,6 +59,7 @@ MODULE PHO_VARS			! Make variables global
 				REAL          scat_depth,scat_prob,BG_prob,SL_prob
 				REAL          scat_thet,scat_phi
 				REAL          z_mid								!Mid depth of travel between two scatterers.
+				INTEGER       scat_FLAG
 				
 				! ATTENUATION
 				INTEGER       dQdfSTYLE				!Let user choose dQdf behaviour based on list.		
