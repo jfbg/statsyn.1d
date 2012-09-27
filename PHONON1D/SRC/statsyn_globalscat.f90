@@ -1909,7 +1909,7 @@ SUBROUTINE GET_DS_SCAT
 			r = erad-z_mid
 			z_f = -erad*alog(r/erad)			!Flattening transformation of depth
 			
-			IF (z_mid == 0) THEN
+			IF ((z_mid == 0).OR.(z_f == 0)) THEN
 			  ds_scat = ds_scat_nf
 		  ELSE
 			  ds_scat = z_f/z_mid*ds_scat_nf  !Flatten ds_scat_nf (approximation based on mid depth)
