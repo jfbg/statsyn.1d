@@ -491,6 +491,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			 
        DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
        
+      
        NITR = NITR + 1
        scat_FLAG = 0
       
@@ -499,6 +500,9 @@ PROGRAM STATSYN_GLOBALSCAT
        izfac = 0
 			 IF (ud == 1) izfac = -1 
 			 z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
+
+			 !DEBUG
+!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,iz
       
       !DEBUG
 !      WRITE(77,*) I,NITR,iz,z_act,ud,t,x
@@ -551,10 +555,6 @@ PROGRAM STATSYN_GLOBALSCAT
 						!iwave doesn't change in INTERFACE_SCATTER YET....
 						!iwave = ip
 						!IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
-
-						
-						
-
 
 
 						dh = z(iz) - z(iz-1) !First dh is thickness of layer (FLAT)
@@ -634,6 +634,9 @@ PROGRAM STATSYN_GLOBALSCAT
 												
 												!DEBUG
 !												WRITE(78,*) I,NITR,iz,iz_scat,z_act,ds_SL,ds_scat,t,x,ud
+
+										 !DEBUG
+!										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,iz
 																						
 			
 										END DO
@@ -692,6 +695,7 @@ PROGRAM STATSYN_GLOBALSCAT
 					DO WHILE (x_index >= circum)
 					  x_index = x_index - circum
 					END DO
+					
 					IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
 					ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
 
@@ -1184,14 +1188,14 @@ END SUBROUTINE rtcoef2
 
 
 SUBROUTINE FLATTEN(z_s,vs,rhs,z_f,vf_f,rh_f,erad)
-      REAL     z_s,z_f,vf_f,vs,erad,r,rhs,rh_f,p
+      REAL     z_s,z_f,vf_f,vs,erad,r,rhs,rh_f,pfac
       
-      p = 2
+      pfac = 2
       
       r=erad-z_s
       z_f=-erad*alog(r/erad)
       vf_f=vs*(erad/r)
-      rh_f = ((erad/r)**(p-2))*rhs
+      rh_f = ((erad/r)**(pfac-2))*rhs
       
       RETURN
 END SUBROUTINE FLATTEN
@@ -1697,16 +1701,22 @@ SUBROUTINE INLAYER_SCATTER
 				 r0 = rand()
 				 IF (r0 < scat_prob) ud = -ud
 		 
-				 r0 = rand()
-				 r0 = ( r0 - 0.5 )
-				 p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
+!				 r0 = rand()
+!				 r0 = ( r0 - 0.5 )
+!				 p = p1 + r0*(1./vf(iz_scat,iwave)-p1)!*scat_prob
 
-				 DO WHILE ((p < p1).OR.(p >= 1./vf(iz,iwave)) ) !p2(iwave)))
-				 
 				 r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
 				 ang1 = angst*r0
-				 p = abs(sin(ang1))/vf(iz,iwave)
+				 p = abs(sin(ang1))/vf(iz_scat,iwave)
+				 
+
+				 DO WHILE ((p < p1).OR.(p >= 1./vf(iz,iwave)) ) !p2(iwave)))
+				 r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
+				 ang1 = angst*r0
+				 p = abs(sin(ang1))/vf(iz_scat,iwave)
 				 END DO
+				 
+!				 write(*,*) r0,angst,ang1,p
 		 
 				 r0 = rand()                        !
 				 r1 = rand()                        !
@@ -1714,6 +1724,7 @@ SUBROUTINE INLAYER_SCATTER
 				 az = az + asin(r0**2)                  !
 				 IF (az < -pi) az = az + 2.*pi
 				 IF (az >  pi) az = az - 2.*pi
+
 				 
       END IF	
 
@@ -1889,7 +1900,7 @@ SUBROUTINE GET_DS_SCAT
       
       USE pho_vars      
       IMPLICIT NONE
-      REAL     r,z_f  
+      REAL     rt,z_ft  
       
 
       ds_scat_nf = 10   !background scatterer scale-length ~10km
@@ -1906,18 +1917,18 @@ SUBROUTINE GET_DS_SCAT
 			!Find approximate flattening factor, based on actual depth z_act
 !			z_mid = z_act !+dh/2*ud
 			z_mid = (z(iz) - z(iz-1))/2+z(iz)
-			r = erad-z_mid
-			z_f = -erad*alog(r/erad)			!Flattening transformation of depth
+			rt = erad-z_mid
+			z_ft = -erad*alog(rt/erad)			!Flattening transformation of depth
 			
-			IF ((z_mid == 0).OR.(z_f == 0)) THEN
+			IF ((z_mid == 0).OR.(z_ft == 0)) THEN
 			  ds_scat = ds_scat_nf
 		  ELSE
-			  ds_scat = z_f/z_mid*ds_scat_nf  !Flatten ds_scat_nf (approximation based on mid depth)
+			  ds_scat = z_ft/z_mid*ds_scat_nf  !Flatten ds_scat_nf (approximation based on mid depth)
       END IF
       
-      IF ((z_act == scat_depth).AND.(ud == 1)) THEN
-         ds_scat = 9999 !So that it doesnt scatter in layer beneath scattering layer
-      END IF
+!      IF ((z_act == scat_depth).AND.(ud == 1)) THEN
+!         ds_scat = 9999 !So that it doesnt scatter in layer beneath scattering layer
+!      END IF
       
       IF (ds_scat < dsmin) ds_scat = dsmin
       

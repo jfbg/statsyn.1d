@@ -14,7 +14,7 @@ set n_phonon   = "1000000"
 
 # SCATTERING
 set bg_scat    = 0.00
-set prob_scat  = 0.00
+set prob_scat  = 0.600
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
@@ -23,7 +23,7 @@ set npow       = -0.5   # Power law factor for scatterer lengthscale
 set dQdfstyle  = 1
 
 
-set file_out   = "D003_noscat"
+set file_out   = "D003_scat60"
 set model_name = "S_VPREMOON_Qp_ori"
 
 @ n_depth = 1     ## Number of depths to use
