@@ -623,10 +623,6 @@ PROGRAM STATSYN_GLOBALSCAT
 												!write(78,*) 'DH ====== ',irtr1,dh,ds_scat,p,vf(iz,iwave),p*vf(iz,iwave),abs(cos(asin(p*vf(iz,iwave))))
 												
 												! Calculate new ds_SL based on new ud and p (if it got scattered)
-!												 IF (ud == -1) dh = abs(z_act - z(iz-1)) ! Distance to vel layer above
-!												 IF (ud == 1) dh = abs(z_act - z(iz))  ! Distance to vel layer below
-!												 CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
-!												 ds_SL = (dh**2+dx1**2)**0.5
 												CALL GET_DS_SL
 												
 												!New ds_scat
@@ -1915,8 +1911,7 @@ SUBROUTINE GET_DS_SCAT
 			END IF
 			
 			!Find approximate flattening factor, based on actual depth z_act
-!			z_mid = z_act !+dh/2*ud
-			z_mid = (z(iz) - z(iz-1))/2+z(iz)
+			z_mid = (z(iz_scat+1) - z(iz_scat))/2+z(iz_scat)
 			rt = erad-z_mid
 			z_ft = -erad*alog(rt/erad)			!Flattening transformation of depth
 			
@@ -1926,10 +1921,7 @@ SUBROUTINE GET_DS_SCAT
 			  ds_scat = z_ft/z_mid*ds_scat_nf  !Flatten ds_scat_nf (approximation based on mid depth)
       END IF
       
-!      IF ((z_act == scat_depth).AND.(ud == 1)) THEN
-!         ds_scat = 9999 !So that it doesnt scatter in layer beneath scattering layer
-!      END IF
-      
+   
       IF (ds_scat < dsmin) ds_scat = dsmin
       
       !DEBUG
@@ -1948,37 +1940,23 @@ SUBROUTINE GET_DS_SL
       REAL dh_temp,vscat,vgrad
 			 
 			 IF (ud == -1) THEN
-			     dh_temp = abs(z_act - z(iz-1)) ! Distance to vel layer above			     
+			     dh_temp = abs(z_act - z(iz_scat)) ! Distance to vel layer above			     
 			 ELSE IF (ud == 1) THEN
-			     dh_temp = abs(z_act - z(iz))  ! Distance to vel layer below
+			     dh_temp = abs(z_act - z(iz_scat+1))  ! Distance to vel layer below
 			 END IF
 			 
-			vgrad = (vf(iz,iwave)-vf(iz-1,iwave))/(z(iz)-z(iz-1))  !FLAT GRADIENT
-			vscat = vf(iz-1,iwave) + (z_act-z(iz-1)) * vgrad
+			vgrad = (vf(iz_scat+1,iwave)-vf(iz_scat,iwave))/(z(iz_scat+1)-z(iz_scat))  !FLAT GRADIENT
+			vscat = vf(iz_scat,iwave) + abs((z_act-z(iz_scat))) * vgrad
 
       
       IF (ud == -1) THEN
-          utop = 1./vf(iz-1,iwave)
+          utop = 1./vf(iz_scat,iwave)
           ubot = 1./vscat
       ELSE IF (ud == 1) THEN
       		utop = 1./vscat
-      		ubot = 1./vf(iz,iwave)
+      		ubot = 1./vf(iz_scat+1,iwave)
       END IF 
       
-!				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
-!				    vtop = vf(iz,iwave) + (ztop-z(iz-1)) * vgrad
-!				    utop = 1./vtop              !SLOWNESS AT 1st SCATTERER
-!				  ELSE
-!				    utop = 0.
-!				  END IF 
-!		
-!					IF (abs(vf(iz,iwave)) > 0.) THEN
-!		        vbot = vf(iz,iwave) + (zbot-z(iz-1)) * vgrad
-!						ubot = 1./vbot                !SLOWNESS AT 2nd SCATTERER
-!					ELSE
-!						ubot = 0.
-!					END IF
-			 
 			 
 			 CALL LAYERTRACE(p,dh_temp,utop,ubot,imth,dx1,dt1,irtr1)
 			 ds_SL = (dh_temp**2+dx1**2)**0.5
