@@ -1904,6 +1904,7 @@ SUBROUTINE GET_DS_SCAT
       r0 = rand()
          
       IF ((z_act <= scat_depth).AND.(SL_prob > 0)) THEN
+            !Change uniform distribution into power-law distribution
             ds_scat_nf = ((dsmax**(npow+1) - dsmin**(npow+1))*r0 & 
 																				+ dsmin**(npow+1))**(1/(npow+1))
 			ELSE IF ((z_act == scat_depth).AND.(ud == 1)) THEN
