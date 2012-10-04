@@ -50,7 +50,7 @@ MODULE PHO_VARS			! Make variables global
         REAL          ds_scat_nf,ds_scat    !scatterer length0scale(non-flattened + flattened)
 				REAL					dz										!Distance between actual depth and base of layer
 				REAL					ds_SL									!Distance between phonon and next velocity layer
-				REAL          dh										!Vertical Distance between phonon and next vel layer.
+				REAL          dh,dh2										!Vertical Distance between phonon and next vel layer.
 				INTEGER				izfac									!0 if traveling above iz, 1 if below
 				REAL					z_act									!Depth when in between two vel layers
 				REAL          Q0										!Background Qi for frequency dependent Qi

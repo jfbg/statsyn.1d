@@ -50,7 +50,7 @@ PROGRAM STATSYN_GLOBALSCAT
 				
 				! DEBUGGING
 				CHARACTER*100 :: debugfile,logend
-				REAL						 dh2, dhsmall
+				REAL						 dhsmall
 				INTEGER (kind=8) ::  surfcount
 			  INTEGER (kind=8) ::  surCYC1,exTIME,exNLAY
 			  INTEGER 				 ::  logperc
@@ -541,7 +541,6 @@ PROGRAM STATSYN_GLOBALSCAT
 				
 					  !Get iz_scat (layer in which phonon is scattered, if scattered)
 					  iz_scat = iz-1
-!					  IF (iz_scat == 0) WRITE(*,*) 'JJJJJ'
 					  
 						dh = z(iz) - z(iz-1) !First dh is thickness of layer (FLAT)
 						
@@ -575,6 +574,7 @@ PROGRAM STATSYN_GLOBALSCAT
 										  
 									 
 										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 >= 1))
+!										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 >= 1).AND.(dh < dh2))
 										
 	 
 !												IF (I < 11) WRITE(78,*) I,NITR, ' INSL1:',t,iz,z_s(iz),z_act,x,ud,ds_scat,ds_SL,dh,p
@@ -586,28 +586,40 @@ PROGRAM STATSYN_GLOBALSCAT
 												!debug
 												!dh2 = dh
 												
-												!Calculare what would dh be if phonon only travelled ds_scat km
+												 												!Calculare what would dh be if phonon only travelled ds_scat km
 												dh = ds_scat*abs(cos(asin(p*vf(iz_scat,iwave))))   !FLAT
-											 
-												!Make phonon travel to  next scatterer
-												CALL RAYTRACE_SCAT
+												if (ud == 1) dh2 = abs(z(iz_scat+1) - z_act)
+									      if (ud == -1) dh2 = abs(z_act - z(iz_scat))
 												
-!												IF (irtr1 /= 0)  z_act = z_act + dh*ud !Calculate new depth FLAT
-											 z_act = z_act + dh*ud !Calculate new depth FLAT
+												IF (dh < dh2) THEN
+															!Make phonon travel to  next scatterer
+															CALL RAYTRACE_SCAT
+															
+			!												IF (irtr1 /= 0)  z_act = z_act + dh*ud !Calculate new depth FLAT
+														 z_act = z_act + dh*ud !Calculate new depth FLAT
+															
+															!Is phonon scattered at scatterer or does it go through?
+															CALL INLAYER_SCATTER
+															
+															!write(78,*) 'DH ====== ',irtr1,dh,ds_scat,p,vf(iz,iwave),p*vf(iz,iwave),abs(cos(asin(p*vf(iz,iwave))))
+															
+															! Calculate new ds_SL based on new ud and p (if it got scattered)
+															CALL GET_DS_SL
+															
+															!New ds_scat
+															CALL GET_DS_SCAT
+															
+												ELSE
 												
-												!Is phonon scattered at scatterer or does it go through?
-												CALL INLAYER_SCATTER
-												
-												!write(78,*) 'DH ====== ',irtr1,dh,ds_scat,p,vf(iz,iwave),p*vf(iz,iwave),abs(cos(asin(p*vf(iz,iwave))))
-												
-												! Calculate new ds_SL based on new ud and p (if it got scattered)
-												CALL GET_DS_SL
-												
-												!New ds_scat
-												CALL GET_DS_SCAT
+                              ds_scat = 9999
+                              
+                        END IF												
 												
 												!DEBUG
 !												WRITE(78,*) I,NITR,iz,iz_scat,z_act,ds_SL,ds_scat,t,x,ud
+
+									      
+
 
 										 !DEBUG
 !										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz
@@ -617,7 +629,10 @@ PROGRAM STATSYN_GLOBALSCAT
 											 
 								 !Leaves WHILE loop when ds_SL < distance to next vel layer
 								 !Need to travel to next vel layer
-  								 dh = ds_SL*abs(cos(asin(p*vf(iz_scat,iwave))))   !FLAT
+!  								 dh = ds_SL*abs(cos(asin(p*vf(iz_scat,iwave))))   !FLAT
+									 if (ud == 1) dh = abs(z(iz_scat+1) - z_act)
+									 if (ud == -1) dh = abs(z_act - z(iz_scat))
+									 !write(77,*) dh,z_act,z(iz_scat),z(iz_scat+1),ud,z_act + dh*ud
 									 CALL RAYTRACE_SCAT
 									 
 									 !Set iz to what it would have been without scattering, based on direction
