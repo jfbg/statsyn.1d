@@ -405,20 +405,20 @@ PROGRAM STATSYN_GLOBALSCAT
 				
 				IF (iz1 /= 1) THEN
 					r0 = rand()
-					IF (r0 < 1./3.) THEN
-					 ip = 1
-					ELSE IF ((r0 <= 1./3.).AND.(r0 < 2./3.)) THEN
-					 ip = 2
-					ELSE
-					 ip = 3
-					END IF 
-!					IF (r0 < 1./21.) THEN
-!						ip = 1 !P
-!					ELSE IF ((r0 >= 1./21.).and.(r0 < 11./21.)) THEN
-!						ip = 2 !SH
-!					ELSE 
-!						ip = 3 !SV
-!					END IF
+!					IF (r0 < 1./3.) THEN
+!					 ip = 1
+!					ELSE IF ((r0 <= 1./3.).AND.(r0 < 2./3.)) THEN
+!					 ip = 2
+!					ELSE
+!					 ip = 3
+!					END IF 
+					IF (r0 < 1./21.) THEN
+						ip = 1 !P
+					ELSE IF ((r0 >= 1./21.).and.(r0 < 11./21.)) THEN
+						ip = 2 !SH
+					ELSE 
+						ip = 3 !SV
+					END IF
 				END IF
         
         iwave = ip
@@ -574,20 +574,11 @@ PROGRAM STATSYN_GLOBALSCAT
 										  
 									 
 										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 >= 1))
-!										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 >= 1).AND.(dh < dh2))
-										
-	 
-!												IF (I < 11) WRITE(78,*) I,NITR, ' INSL1:',t,iz,z_s(iz),z_act,x,ud,ds_scat,ds_SL,dh,p
-!												IF (I < 11) WRITE(78,*) I,NITR, ' INSL1:',t,z_act,dh,ds_scat,ds_SL,z_act   !p*vf(iz,iwave),asin(p*vf(iz,iwave))
-												
-												!DEBUG
-												!scat_time = scat_time +1
-												
-												!debug
-												!dh2 = dh
-												
-												 												!Calculare what would dh be if phonon only travelled ds_scat km
+
+												!Calculare what would dh be if phonon only travelled ds_scat km
 												dh = ds_scat*abs(cos(asin(p*vf(iz_scat,iwave))))   !FLAT
+
+												!Calculate vertical to next layer
 												if (ud == 1) dh2 = abs(z(iz_scat+1) - z_act)
 									      if (ud == -1) dh2 = abs(z_act - z(iz_scat))
 												
