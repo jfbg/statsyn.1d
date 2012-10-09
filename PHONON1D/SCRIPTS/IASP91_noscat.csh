@@ -1,5 +1,8 @@
 #!/bin/csh
 
+# IASP91
+# Benchmark of travel times
+
 #
 # Set synthetic parameters
 #
@@ -8,13 +11,13 @@ set ray_par    = "0.0 0.1668 0.2931"
 @ t_start      = 0
 @ t_max        = 4500			# 75 minutes
 set d_range    = "0 180 91"
-set model      = "2"	#2 for Moon
+set model      = "1"	#1 for Earth
 set mx_scat_dp = "10"
 set n_phonon   = "1000000"
 
 # SCATTERING
-set bg_scat    = 0.00
-set prob_scat  = 0.00
+set bg_scat    = 0.0
+set prob_scat  = 0.0 
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
@@ -23,13 +26,13 @@ set npow       = -0.5   # Power law factor for scatterer lengthscale
 set dQdfstyle  = 1
 
 
-set file_out   = "D003_noscat"
-set model_name = "S_VPREMOON_Qp_ori"
+set file_out   = "IASP91_noscat"
+set model_name = "IASP91_ori"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 4     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 10    ## Number of iterations
+@ n_kern  = 6    ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 5     ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -68,7 +71,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 1100 
 else if ($i == 1) then
- set q_depth = 0030
+ set q_depth = 0020
 else
  set q_depth = 0.01
 endif
