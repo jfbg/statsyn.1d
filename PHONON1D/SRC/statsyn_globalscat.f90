@@ -389,8 +389,7 @@ PROGRAM STATSYN_GLOBALSCAT
        CALL DATE_AND_TIME(values=ntime)
        nclock = ntime(1)*ntime(2)*ntime(3)*ntime(5)*ntime(6)*ntime(7)*ntime(8)
        CALL RANDOM_NUMBER(r2s)
-       seed = (nclock*r2s)! + 11 * (/ (k - 1, k = 1, nseed) /)
-      
+       seed = (nclock*r2s)! + 11 * (/ (k - 1, k = 1, nseed) /)      
        CALL srand(seed)    
 	     r0 = rand()    !First rand output not random
                         ! It is seed (clock) dependent
@@ -405,22 +404,23 @@ PROGRAM STATSYN_GLOBALSCAT
 				
 				IF (iz1 /= 1) THEN
 					r0 = rand()
-!					IF (r0 < 1./3.) THEN
-!					 ip = 1
-!					ELSE IF ((r0 <= 1./3.).AND.(r0 < 2./3.)) THEN
-!					 ip = 2
-!					ELSE
-!					 ip = 3
-!					END IF 
-					IF (r0 < 1./21.) THEN
-						ip = 1 !P
-					ELSE IF ((r0 >= 1./21.).and.(r0 < 11./21.)) THEN
-						ip = 2 !SH
-					ELSE 
-						ip = 3 !SV
-					END IF
+					IF (r0 < 1./3.) THEN
+					 ip = 1
+					ELSE IF ((r0 >= 1./3.).AND.(r0 < 2./3.)) THEN
+					 ip = 2
+					ELSE
+					 ip = 3
+					END IF 
+!					IF (r0 < 1./21.) THEN
+!						ip = 1 !P
+!					ELSE IF ((r0 >= 1./21.).and.(r0 < 11./21.)) THEN
+!						ip = 2 !SH
+!					ELSE 
+!						ip = 3 !SV
+!					END IF
 				END IF
         
+!        ip = 2
         iwave = ip
 				IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
 				
@@ -503,7 +503,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			 z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
 
 			 !DEBUG
-!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz
+!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud
       
 			
 				! ============ >>
@@ -573,7 +573,7 @@ PROGRAM STATSYN_GLOBALSCAT
 											CALL GET_DS_SCAT  !change ds_scat  FLAT
 										  
 									 
-										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 >= 1))
+										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 == 1))
 
 												!Calculare what would dh be if phonon only travelled ds_scat km
 												dh = ds_scat*abs(cos(asin(p*vf(iz_scat,iwave))))   !FLAT
@@ -587,12 +587,10 @@ PROGRAM STATSYN_GLOBALSCAT
 															CALL RAYTRACE_SCAT
 															
 			!												IF (irtr1 /= 0)  z_act = z_act + dh*ud !Calculate new depth FLAT
-														 z_act = z_act + dh*ud !Calculate new depth FLAT
+														  z_act = z_act + dh*ud !Calculate new depth FLAT
 															
 															!Is phonon scattered at scatterer or does it go through?
-															CALL INLAYER_SCATTER
-															
-															!write(78,*) 'DH ====== ',irtr1,dh,ds_scat,p,vf(iz,iwave),p*vf(iz,iwave),abs(cos(asin(p*vf(iz,iwave))))
+															CALL INLAYER_SCATTER														
 															
 															! Calculate new ds_SL based on new ud and p (if it got scattered)
 															CALL GET_DS_SL
@@ -605,15 +603,11 @@ PROGRAM STATSYN_GLOBALSCAT
                               ds_scat = 9999
                               
                         END IF												
-												
-												!DEBUG
-!												WRITE(78,*) I,NITR,iz,iz_scat,z_act,ds_SL,ds_scat,t,x,ud
-
-									      
+								      
 
 
 										 !DEBUG
-!										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz
+!										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud
 																						
 			
 										END DO
@@ -651,13 +645,14 @@ PROGRAM STATSYN_GLOBALSCAT
 					! RAY TRACING IN LAYER	
 					! ============ <<
 					
-				END IF !SCATTERING LAYER IF
-
-     					
+				END IF !SCATTERING LAYER IF    					
 				! SCATTERING LAYER
 				! ============ <<
 				
-								! ============ >>
+				
+				
+				
+				! ============ >>
 				! RECORD IF PHONON IS AT SURFACE
 				IF (iz <= 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
 				
@@ -756,13 +751,8 @@ PROGRAM STATSYN_GLOBALSCAT
 				! ============ <<
 
 				!GO TO NEXT LAYER
-!				IF ((scat_FLAG == 0).OR.(iz == 1))    iz = iz + ud  
         iz = iz + ud  
        
-       !DEBUG 
-!       IF (t > t2) WRITE(77,*) I,NITR,'TIME'
-!       IF (NITR > 200*nlay) WRITE(77,*) 'LAYERS'
-
 			 END DO		!CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
 			 ! ====================== <<
 			 ! Close single ray tracing while loop
@@ -774,8 +764,6 @@ PROGRAM STATSYN_GLOBALSCAT
         WRITE(6,*) nint(float(I)/float(ntr)*100),'% COMPLETE'
 			 END IF
       
-!			WRITE(6,*) 999
-
 !				maxcount = 0.
 !				DO kk = 1,nx
 !					DO ll = 1,nlay
@@ -787,12 +775,11 @@ PROGRAM STATSYN_GLOBALSCAT
 
 !				trackcount = trackcount / 100.
 
-!			WRITE(6,*) t		!DEBUG
 
 		 !LOG
-		 logperc = nint(float(I)/float(ntr)*100)
-		 IF (NITR >= 200*nlay) logend = 'NLAY'
-     IF (t >= t2) logend = 'TIME'
+!		 logperc = nint(float(I)/float(ntr)*100)
+!		 IF (NITR >= 200*nlay) logend = 'NLAY'
+!     IF (t >= t2) logend = 'TIME'
     
      !WRITE(79,*) I,NITR,surfcount,surCYC1,x,iz,scat_time,logend,logperc
 
@@ -804,7 +791,7 @@ PROGRAM STATSYN_GLOBALSCAT
 !			======================================================
 
 			
-			CLOSE(79)
+
 			
 !			======================================================
 !			----- Output Synthetics -----	
@@ -815,21 +802,21 @@ PROGRAM STATSYN_GLOBALSCAT
       DO ic = 1, 3
       ofile2 = trim(ofile)//'.'//cmp(ic)
 
-      OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
-       
-       WRITE(22,*) nt,nx
-       WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
-      
-				DO I = 1, nt
-					DO J = 1, nx
-						IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
-					END DO
-					WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
-				END DO
-
-      
-				CLOSE(22)
-				
+!      OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+!       
+!       WRITE(22,*) nt,nx
+!       WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
+!      
+!				DO I = 1, nt
+!					DO J = 1, nx
+!						IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
+!					END DO
+!					WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
+!				END DO
+!
+!      
+!				CLOSE(22)
+!				
 				
       END DO
       WRITE(6,*) 'Synthetic outputs done'
@@ -843,6 +830,7 @@ PROGRAM STATSYN_GLOBALSCAT
       
       CLOSE(77)
       CLOSE(78)
+ 			CLOSE(79)
       !Debug ^^
 			
 			
@@ -1026,28 +1014,27 @@ END SUBROUTINE padr                            !END PADR
       
 
 SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
+! p.139 of Aki and Richards 2nd edition
       REAL       p,ar,at
-      REAL       pi,j1,j2,b1,rh1,rh2
+      REAL       pi,j1,j2,b1,b2,rh1,rh2
       pi   = atan(1.)*4.
       r2d = 180./pi
       IF (p*b1 <= 1.) THEN
-       j1   = asin(p*b1)
+       j1   = abs(asin(p*b1))
       ELSE
        j1 = pi/2.
       END IF
       IF (p*b2 <= 1.) THEN
-       j2   = asin(p*b2)
+       j2   = abs(asin(p*b2))
       ELSE
        j2   = pi/2. 
       END IF
       
       DD   = rh1*b1*cos(j1)+rh2*b2*cos(j2)
-
       ar   = (rh1*b1*cos(j1)-rh2*b2*cos(j2))/DD
       at   = 2.*rh1*b1*cos(j1)/DD
       
-      !DEBUG
-!      WRITE(6,*) 'AR & AT ====>   ',ar,at
+!      WRITE(77,*) '     --->',ar,at,p
       
       RETURN
 END SUBROUTINE REFTRAN_SH
@@ -1552,9 +1539,18 @@ SUBROUTINE INTERFACE_NORMAL
       
             
 				IF ( (iz > 1).AND.(abs(irtr1) == 1).AND. &												!IF1
-							(iz < nlay) ) THEN
-!					IF ( (iz > 1).AND.(iz <= nlay) ) h = z_s(iz)-z_s(iz-1)
-          IF ( (iz > 1).AND.(iz <= nlay) ) h = z(iz)-z(iz-1)
+							(iz < nlay-1) ) THEN
+							
+					IF ((iz == 2).AND.(ud == -1)) THEN
+					! Skip INTERFACE_NORMAL BECAUSE PHONON IS AT SURFACE
+					ELSE
+							
+					h = z(iz)-z(iz-1)		
+!          IF (ud == 1) h = z(iz)-z(iz-1)
+!          IF (ud == -1) h = z(iz-1)-z(iz-2)
+
+					!DEBUG
+!					IF (ip == 2)       WRITE(77,*) I,NITR,iz,ud,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1),P0
 
           IF (ip  ==  2) THEN																							!IF2a
 						IF ( (ud == 1) ) THEN               !IF downGOING SH WAVE			!IF3a
@@ -1563,29 +1559,36 @@ SUBROUTINE INTERFACE_NORMAL
 						ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE				!IF3a
 							CALL REFTRAN_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1), &
                            ar,at)
+!							CALL REFTRAN_SH(p,vf(iz-1,2),vf(iz-2,2),rh(iz-1),rh(iz-2), &
+!                           ar,at)
 						END IF																												!IF3a
           ELSE																														!IF2a
 						IF ( (ud == 1) ) THEN               !IF downGOING P-SV WAVE		!IF3b
 							CALL RTCOEF2(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
-                          vf(iz  ,1),vf(iz  ,2),rh(iz), &
+                             vf(iz  ,1),vf(iz  ,2),rh(iz), &
                           ip,arp,ars,atp,ats)
 						ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE			!IF3b
 							CALL RTCOEF2(p,vf(iz  ,1),vf(iz  ,2),rh(iz  ), &
-                          vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
-                          ip,arp,ars,atp,ats)           
+                             vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
+                          ip,arp,ars,atp,ats)     
+!							CALL RTCOEF2(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
+!                             vf(iz-2,1),vf(iz-2,2),rh(iz-2), &
+!                          ip,arp,ars,atp,ats)            
 						END IF																												!IF3b
           END IF																													!IF2a
           
           r0 = rand()                       !RANDOM NUMBER FROM 0 TO 1
-!          WRITE(*,*) '    ',r0
+
+
+
           
           IF (ip  ==  2) THEN                   !IF SH-WAVE								!IF2b
 
 						IF (h > 0.) THEN                    !IF GRADIENT, THEN				!IF3c
-							IF (r0 < (abs(ar)/(abs(ar)+abs(at)))/P0**2) THEN!CHECK FOR REFLECTN !IF4a
- 								IF (ar < 0) a = -a                !OPPOSITE POLARITY
-								ud = -ud                           !downGOING/UPGOING
-							END IF                              !												!IF4a
+!							IF (r0 < (abs(ar)/(abs(ar)+abs(at)))/P0**2) THEN!CHECK FOR REFLECTN !IF4a
+! 								IF (ar < 0) a = -a                !OPPOSITE POLARITY
+!								ud = -ud                           !downGOING/UPGOING
+!							END IF                              !												!IF4a
 						ELSE                                 !IF INTERFACE THEN				!IF3c
 							IF (r0 < (abs(ar)/(abs(ar)+abs(at)))) THEN!CHECK FOR REFLECTION	!IF4b
 								IF (ar < 0) a = -a                !OPPOSITE POLARITY
@@ -1598,11 +1601,7 @@ SUBROUTINE INTERFACE_NORMAL
           						        
 							rt_sum = abs(arp)+abs(atp)+abs(ars)+abs(ats)    !SUM OF REFL/TRAN COEFS
 							
-							!debug
-!  						IF (I < 11) WRITE(78,*) 'THICKNESS IS 0km',r0, &
-!  											abs(arp)/rt_sum,abs(atp)/rt_sum,abs(ars)/rt_sum,abs(ats)/rt_sum,p,ip
-
-							rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
+  						rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
 							rt_max = abs(arp)/rt_sum             !
 							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED P !IF4c
 								IF (arp < 0) a = -a                 !REVERSE POLARITY
@@ -1633,6 +1632,7 @@ SUBROUTINE INTERFACE_NORMAL
 						END IF      																										!IF3d
           END IF                                !END IF: SH, OR P-SV				!IF2b
          
+         END IF
         ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE  !IF1
 					ud = -ud
 					dt1 = (2*corelayer)/vf(iz,iwave)
@@ -1655,6 +1655,7 @@ SUBROUTINE INTERFACE_NORMAL
 				ncaust = ncaust + 1                   !# OF CAUSTICS
 				END IF
 				
+!				ip = 2
 				iwave = ip
 				IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
 			
@@ -1679,29 +1680,22 @@ SUBROUTINE INLAYER_SCATTER
 				 r0 = rand()
 				 IF (r0 < scat_prob) ud = -ud
 		 
-!				 r0 = rand()
-!				 r0 = ( r0 - 0.5 )
-!				 p = p1 + r0*(1./vf(iz_scat,iwave)-p1)!*scat_prob
-
 				 r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
 				 ang1 = angst*r0
 				 p = abs(sin(ang1))/vf(iz_scat,iwave)
 				 
 
 				 DO WHILE ((p < p1).OR.(p >= 1./vf(iz_scat,iwave)) ) !p2(iwave)))
-				 r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
-				 ang1 = angst*r0
-				 p = abs(sin(ang1))/vf(iz_scat,iwave)
+				   r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
+				   ang1 = angst*r0
+				   p = abs(sin(ang1))/vf(iz_scat,iwave)
 				 END DO
 				 
-
-				 
-!				 write(*,*) r0,angst,ang1,p
 		 
-				 r0 = rand()                        !
-				 r1 = rand()                        !
+				 r0 = rand()                        
+				 r1 = rand()                        
 				 IF (r1 < 0.5) az = az - pi
-				 az = az + asin(r0**2)                  !
+				 az = az + asin(r0**2)              
 				 IF (az < -pi) az = az + 2.*pi
 				 IF (az >  pi) az = az - 2.*pi
 
