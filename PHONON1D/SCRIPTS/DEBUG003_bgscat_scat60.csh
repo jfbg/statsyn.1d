@@ -14,7 +14,7 @@ set n_phonon   = "1000000"
 
 # SCATTERING
 set bg_scat    = 0.001
-set prob_scat  = 0.60
+set prob_scat  = 0.6
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
@@ -23,13 +23,13 @@ set npow       = -0.5   # Power law factor for scatterer lengthscale
 set dQdfstyle  = 1
 
 
-set file_out   = "D004_bgscat"
-set model_name = "S_VPREMOON_Qp_nocrust"
+set file_out   = "D003_bgscat"
+set model_name = "S_VPREMOON_Qp_ori"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 5     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 10    ## Number of iterations
+@ n_kern  = 10     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 5    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
