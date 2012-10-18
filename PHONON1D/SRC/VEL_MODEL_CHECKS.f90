@@ -54,7 +54,7 @@
 					 vs(K,1) = vst(K,1)
 					 vs(K,2) = vst(K,2)
 					 rh(K) = rht(K)
-					 Q(K) = Qt(K)
+					 Q(K,1) = Qt(K)
 					END IF
 				 
 					IF ((K == iz1 +1).AND.(check_scat == 1)) THEN
@@ -64,14 +64,14 @@
 							vs(K,1) = (vst(K,1)-vst(K-1,1))/(z_st(K) - z_st(K-1)) * (scat_depth - z_st(K-1)) + vst(K-1,1)
 							vs(K,2) = (vst(K,2)-vst(K-1,2))/(z_st(K) - z_st(K-1)) * (scat_depth - z_st(K-1)) + vst(K-1,2)
 							rh(K) = (rht(K)-rht(K-1))/(z_st(K) - z_st(K-1)) * (scat_depth - z_st(K)) + rht(K)
-							Q(K) = (Qt(K)-Qt(K-1))/(z_st(K) - z_st(K-1)) * (scat_depth - z_st(K)) + Qt(K)
+							Q(K,1) = (Qt(K)-Qt(K-1))/(z_st(K) - z_st(K-1)) * (scat_depth - z_st(K)) + Qt(K)
 					ELSEIF ((K == iz1 +1).AND.(check_scat == 0)) THEN
 							z_s(K) = z_st(K)
 							r_s(K) = r_st(K)
 							vs(K,1) = vst(K,1)
 							vs(K,2) = vst(K,2)
 							rh(K) = rht(K)
-							Q(K) = Qt(K)
+							Q(K,1) = Qt(K)
 					END IF
 						
 					IF ((K > iz1 + 1).AND.(K < nlay)) THEN
@@ -80,7 +80,7 @@
 							vs(K,1) = vst(K-check_scat,1)
 							vs(K,2) = vst(K-check_scat,2)
 							rh(K) = rht(K-check_scat)
-							Q(K) = Qt(K-check_scat)
+							Q(K,1) = Qt(K-check_scat)
 					END IF
 									
 				END DO
@@ -146,7 +146,7 @@
 					 vs(K,1) = vst(K,1)
 					 vs(K,2) = vst(K,2)
 					 rh(K) = rht(K)
-					 Q(K) = Qt(K)
+					 Q(K,1) = Qt(K)
 					END IF
 					
 					IF (K == iz2 +1) THEN
@@ -156,7 +156,7 @@
 							vs(K,1) = (vst(K,1)-vst(K-1,1))/(z_st(K) - z_st(K-1)) * (qdepdiff - z_st(K-1)) + vst(K-1,1)
 							vs(K,2) = (vst(K,2)-vst(K-1,2))/(z_st(K) - z_st(K-1)) * (qdepdiff - z_st(K-1)) + vst(K-1,2)
 							rh(K) = (rht(K)-rht(K-1))/(z_st(K) - z_st(K-1)) * (qdepdiff - z_st(K)) + rht(K)
-							Q(K) = (Qt(K)-Qt(K-1))/(z_st(K) - z_st(K-1)) * (qdepdiff - z_st(K)) + Qt(K)
+							Q(K,1) = (Qt(K)-Qt(K-1))/(z_st(K) - z_st(K-1)) * (qdepdiff - z_st(K)) + Qt(K)
 					END IF
 					
 					IF (K > iz2 + 1) THEN
@@ -165,16 +165,21 @@
 							vs(K,1) = vst(K-1,1)
 							vs(K,2) = vst(K-1,2)
 							rh(K) = rht(K-1)
-							Q(K) = Qt(K-1)
+							Q(K,1) = Qt(K-1)
 					END IF
 					
 				END DO
 			END IF
 			
+			! Calculate Qs (4/9)*Qp
+			DO I = 1,nlay
+			 Q(I,2) = 4/9*Q(I,1)
+			END DO
+			
       OPEN(45,FILE='model_modified.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL
       
       DO I = 1,nlay
-      	WRITE(45,*) z_s(I),vs(I,1),vs(I,2),rh(I),Q(i)
+      	WRITE(45,*) z_s(I),vs(I,1),vs(I,2),rh(I),Q(I,1),Q(I,2)
       END DO
       
       CLOSE(45)

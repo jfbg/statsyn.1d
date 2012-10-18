@@ -191,10 +191,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 !      OPEN(1,FILE=ifile,STATUS='OLD')    !OPEN SEISMIC VELOCITY MODEL
 	  
-      DO I = 1, nlay                     !READ IN VELOCITY MODEL
-!       READ(1,*,IOSTAT=status) z_s(i),r_s(i),vs(i,1),vs(i,2),rh(i),Q(i)
-	   
-!       IF (status /= 0) EXIT
+      DO I = 1, nlay                    
        CALL FLATTEN(z_s(i),vs(i,1),rhs(i),z(i),vf(i,1),rh(i),erad)!FLATTEN P-WAVE VELOCITIES
        CALL FLATTEN(z_s(i),vs(i,2),rhs(i),z(i),vf(i,2),rh(i),erad)!FLATTEN S-WAVE VELOCITIES
       END DO
@@ -226,9 +223,8 @@ PROGRAM STATSYN_GLOBALSCAT
 22    FORMAT (f6.1,2(i5,f6.2,f5.2),2x,2f9.6,2x,2f9.6)
 
       OPEN(15,FILE='model_flat.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL
-      !WRITE(15,*) 'z_s',vf(I,1),vs(I,2),rh(I),Q(i)
       DO I = 1,nlay
-      	WRITE(15,*) z_s(I),z(I),vf(I,1),vf(I,2),rhs(I),rh(I),Q(i)
+      	WRITE(15,*) z_s(I),z(I),vf(I,1),vf(I,2),rhs(I),rh(I),Q(I,1),Q(I,2)
       END DO
       
       CLOSE(15)
@@ -1635,7 +1631,7 @@ SUBROUTINE INTERFACE_NORMAL
 					x = x + 180*deg2km
 					t = t + dt1
 					totald = totald + 2*corelayer
-					s = s + dt1/Q(nlay)
+					s = s + dt1/Q(nlay,iwave)
 					
 				
 				!debug
@@ -1776,7 +1772,7 @@ SUBROUTINE RAYTRACE
 					imth = 2                              !INTERPOLATION METHOD
 					
 					CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
-					dtstr1 = dt1/Q(iz)                    !t* = TIME/QUALITY FACTOR
+					dtstr1 = dt1/Q(iz,iwave)                    !t* = TIME/QUALITY FACTOR
 				ELSE
 					irtr1  = -1
 					dx1    = 0.
@@ -1837,7 +1833,7 @@ SUBROUTINE RAYTRACE_SCAT
 
 					CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
 					
-					dtstr1 = dt1/Q(iz_scat)                    !t* = TIME/QUALITY FACTOR
+					dtstr1 = dt1/Q(iz_scat,iwave)                    !t* = TIME/QUALITY FACTOR
         
         IF (irtr1 == 0) THEN
          ud = -ud
