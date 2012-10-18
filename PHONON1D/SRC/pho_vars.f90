@@ -29,7 +29,7 @@ MODULE PHO_VARS			! Make variables global
 				REAL  			:: maxcount
 				INTEGER     :: IT,JT,I,J,ic,jj,k,kk,ll,mm
 				REAL          p,ang1
-				REAL          Q(nlay0),Qt(nlay0)              !QUALITY FACTOR 
+				REAL          Q(nlay0,2),Qt(nlay0)              !QUALITY FACTOR 
 				REAL          dtstr1                !ATTENUATION PER LAYER
 				REAL          pi,P0
 				INTEGER       n180,idelt1,idelt2

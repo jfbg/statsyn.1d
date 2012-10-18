@@ -91,7 +91,7 @@
 						vs(nlay,1) = vst(nlay-1,1)
 						vs(nlay,2) = vst(nlay-1,2)
 						rh(nlay) = rht(nlay-1)
-						Q(nlay) = Qt(nlay-1)    		  
+						Q(nlay,1) = Qt(nlay-1)    		  
 			 ELSE
 				 WRITE(6,*) '   --> Adding thin layer near core'
 						z_s(nlay-1) = z_st(I) - corelayer
@@ -104,8 +104,8 @@
 						vs(nlay,2)  = vst(I,2)
 						rh(nlay-1)  = (rht(I)-rht(I-1))/(z_st(I) - z_st(I-1)) * (z_st(I) - corelayer - z_st(I-1)) + rht(I-1)
 						rh(nlay)  = rht(I)
-						Q(nlay-1)  = (Qt(I)-Qt(I-1))/(z_st(I) - z_st(I-1)) * (z_st(I) - corelayer - z_st(I-1)) + Qt(I-1)
-						Q(nlay)  = Qt(I)
+						Q(nlay-1,1)  = (Qt(I)-Qt(I-1))/(z_st(I) - z_st(I-1)) * (z_st(I) - corelayer - z_st(I-1)) + Qt(I-1)
+						Q(nlay,1)  = Qt(I)
 			 END IF
 						
 				 
@@ -114,7 +114,9 @@
 				r_s = r_st
 				vs = vst
 				rh = rht
-				Q = Qt
+				DO I = 1,nlay
+				  Q(I,1) = Qt(I)
+				END DO
 			END IF
 			
 			
@@ -134,7 +136,9 @@
 				r_st = r_s
 				vst = vs
 				rht = rh
-				Qt = Q
+				DO I = 1,nlay
+				  Q(I,1) = Qt(I)
+				END DO
 				
 				nlay = nlay+1
 				
@@ -173,7 +177,7 @@
 			
 			! Calculate Qs (4/9)*Qp
 			DO I = 1,nlay
-			 Q(I,2) = 4/9*Q(I,1)
+			 Q(I,2) = (4./9.)*Q(I,1)
 			END DO
 			
       OPEN(45,FILE='model_modified.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL
