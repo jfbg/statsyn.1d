@@ -503,7 +503,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			 z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
 
 			 !DEBUG
-!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud
+!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
       
 			
 				! ============ >>
@@ -517,28 +517,24 @@ PROGRAM STATSYN_GLOBALSCAT
 
 				! ============ >>
 				! SCATTERING LAYER
-								       
-					
+	
 						! THE PHONON CAN BE SCATTERED AT ALL DEPTHS. THE ONLY THING THAT CHANGES
 						! IS THE SCATTERING PROBABILITY, WHICH DEPENDS ON THE DEPTH.
 						
-						!Set depth-dependent scattering probability
-						scat_prob = BG_prob			!Assume background probability at first.
-						
-						!Scattering layer probability
-						IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) scat_prob = SL_prob			
-						!Background probability if leaving scat layer from at base
-						IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
-						
-						IF (iz >= nlay-2) scat_prob = 0. !no scattering near center of Moon
-					
-					  IF ((scat_prob > 0.).AND.(iz > 1)) THEN
-					
-					
-  					!Check if scatter
-						CALL INTERFACE_SCATTER
+								!Set depth-dependent scattering probability
+								scat_prob = BG_prob			!Assume background probability at first.
+								IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) scat_prob = SL_prob			
+								   !Scattering layer probability
+								IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
+								   !Background probability if leaving scat layer from at base
+								IF (iz >= nlay-2) scat_prob = 0. !no scattering near center of Moon
 
-				
+  					!Check if scatter at interface
+					  IF ((scat_prob > 0.).AND.(iz > 1)) CALL INTERFACE_SCATTER
+						IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
+
+					  IF ((scat_prob > 0.).AND.(iz > 1)) THEN
+		
 					  !Get iz_scat (layer in which phonon is scattered, if scattered)
 					  iz_scat = iz-1
 					  
@@ -607,7 +603,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 
 										 !DEBUG
-!										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud
+!										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
 																						
 			
 										END DO
@@ -636,7 +632,7 @@ PROGRAM STATSYN_GLOBALSCAT
 										 
 							 END IF
 															
-				ELSE !No scattering in layer (make it faster if scat_prob == 0.)
+    		ELSE IF (iz > 1) THEN !No scattering in layer (make it faster if scat_prob == 0.)
 				
 					! ============ >>
 					! RAY TRACING IN LAYER
