@@ -364,7 +364,7 @@ PROGRAM STATSYN_GLOBALSCAT
 !			^^^^^ Attenuation ^^^^^		
 
 
-     vel_perturb = 0.0
+     vel_perturb = 0.05
 
   
 			 
