@@ -4,7 +4,7 @@
       
       IMPLICIT NONE
       
-      REAL(8) qdepdiff
+      REAL qdepdiff
       
       !MODEL CHECKS
 			check_scat = 1
