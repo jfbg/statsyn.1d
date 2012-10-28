@@ -13,9 +13,9 @@ PROGRAM STATSYN_GLOBALSCAT
 !
 ! The distance between scatterers can be calculated dIFferently based on the location within
 ! or without the scattering layer. Global background scattering scale-length is constant 
-! (at this point) and set to 10km. This can be changed in the GET_DS_SCAT subroutine.
+! (at this point) and set to 10km. This can be changed in the GET_DS_SCAT SUBROUTINE.
 !
-! Flattening of density is implemented. Change exponent in FLATTEN subroutine.
+! Flattening of density is implemented. Change exponent in FLATTEN SUBROUTINE.
 !
 ! 
 !
@@ -115,6 +115,10 @@ PROGRAM STATSYN_GLOBALSCAT
 			WRITE(6,'(A)') 'ENTER SCATTERER LENGTH-SCALES (km) (MIN, MAX, NPOW):'
       READ (5,    *)  dsmin, dsmax, npow
 			WRITE(6,*) 'dsmin/dsmax/npow:',dsmin, dsmax, npow
+			
+		  WRITE(6,'(A)') 'ENTER VELOCITY PERTURBATION:'
+      READ (5,    *)  vel_perturb
+			WRITE(6,*) 'vel_perturb:',vel_perturb
 			
  			WRITE(6,'(A)') 'ENTER dQdf STYLE (SEE dQdfSTYLES.txt)'
       READ (5,    *)  dQdfSTYLE
@@ -362,13 +366,6 @@ PROGRAM STATSYN_GLOBALSCAT
 		END DO
       CLOSE(24)
 !			^^^^^ Attenuation ^^^^^		
-
-
-     vel_perturb = 0.05
-
-  
-			 
-			 
 !     ======================================================
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !   	!!!!! START OF MAIN RAY TRACING LOOP
@@ -405,20 +402,20 @@ PROGRAM STATSYN_GLOBALSCAT
 				
 				IF (iz1 /= 1) THEN
 					r0 = rand()
-					IF (r0 < 1./3.) THEN
-					 ip = 1
-					ELSE IF ((r0 >= 1./3.).AND.(r0 < 2./3.)) THEN
-					 ip = 2
-					ELSE
-					 ip = 3
-					END IF 
-!					IF (r0 < 1./21.) THEN
-!						ip = 1 !P
-!					ELSE IF ((r0 >= 1./21.).and.(r0 < 11./21.)) THEN
-!						ip = 2 !SH
-!					ELSE 
-!						ip = 3 !SV
-!					END IF
+!					IF (r0 < 1./3.) THEN
+!					 ip = 1
+!					ELSE IF ((r0 >= 1./3.).AND.(r0 < 2./3.)) THEN
+!					 ip = 2
+!					ELSE
+!					 ip = 3
+!					END IF 
+					IF (r0 < 1./21.) THEN
+						ip = 1 !P
+					ELSE IF ((r0 >= 1./21.).and.(r0 < 11./21.)) THEN
+						ip = 2 !SH
+					ELSE 
+						ip = 3 !SV
+					END IF
 				END IF
         
 !        ip = 2
@@ -527,12 +524,12 @@ PROGRAM STATSYN_GLOBALSCAT
 								scat_prob = BG_prob			!Assume background probability at first.
 								IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) scat_prob = SL_prob			
 								   !Scattering layer probability
-								IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
+								!IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
 								   !Background probability IF leaving scat layer from at base
 								IF (iz >= nlay-2) scat_prob = 0. !no scattering near center of Moon
 
   					!Check IF scatter at interface
-!					  IF ((scat_prob > 0.).AND.(iz > 1)) CALL INTERFACE_SCATTER
+					  IF ((scat_prob > 0.).AND.(iz > 1)) CALL INTERFACE_SCATTER
 						IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
 
 					  IF ((scat_prob > 0.).AND.(iz > 1)) THEN
@@ -1022,24 +1019,45 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
 ! p.139 of Aki and Richards 2nd edition
       REAL(8)       p,ar,at
       REAL(8)       pi,j1,j2,b1,b2,rh1,rh2
-      pi   = atan(1.)*4.
-      r2d = 180./pi
-      IF (p*b1 <= 1.) THEN
-       j1   = abs(asin(p*b1))
-      ELSE
-       j1 = pi/2.
-      END IF
-      IF (p*b2 <= 1.) THEN
-       j2   = abs(asin(p*b2))
-      ELSE
-       j2   = pi/2. 
-      END IF
+      COMPLEX       vb1,rho1,vb2,rho2,psub
+      COMPLEX       cone,ctwo,sj1,sj2,cj1,cj2
+      COMPLEX       DD,car,cat
+!      pi   = atan(1.)*4.
+!      r2d = 180./pi
+!      IF (p*b1 <= 1.) THEN
+!       j1   = abs(asin(p*b1))
+!      ELSE
+!       j1 = pi/2.
+!      END IF
+!      IF (p*b2 <= 1.) THEN
+!       j2   = abs(asin(p*b2))
+!      ELSE
+!       j2   = pi/2. 
+!      END IF
       
-      DD   = rh1*b1*cos(j1)+rh2*b2*cos(j2)
-      ar   = (rh1*b1*cos(j1)-rh2*b2*cos(j2))/DD
-      at   = 2.*rh1*b1*cos(j1)/DD
+      vb1    = cmplx(b1,  0.)
+      rho1   = cmplx(rh1, 0.)
+      vb2    = cmplx(b2,  0.)
+      rho2   = cmplx(rh2, 0.)
+      psub   = cmplx(p,  0.)                   !MAKE RAY PARAMETER COMPEX      
       
-!      WRITE(77,*) '     --->',ar,at,p
+      cone = cmplx(1,0)
+      ctwo = cmplx(2,0)
+      
+      sj1    = vb1 * psub      
+      sj2    = vb2 * psub       
+      cj1    = csqrt(cone-sj1**2)
+      cj2    = csqrt(cone-sj2**2)  
+      
+      DD   = rho1*vb1*cj1+rho2*vb2*cj2
+      car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
+      cat   = ctwo*rho1*vb1*cj1/DD
+      
+      ar = REAL(car)
+      at = REAL(cat)
+      
+      !Check for total internal reflection !fix
+      IF (b2*p > 1) at = 0
       
       RETURN
 END SUBROUTINE REFTRAN_SH
@@ -1107,7 +1125,7 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       sj1    = vb1 * psub
       sj2    = vb2 * psub       
 !
-      ci1    = csqrt(cone-si1**2)                !
+      ci1    = csqrt(cone-si1**2)                ! cosine of angle
       ci2    = csqrt(cone-si2**2)
       cj1    = csqrt(cone-sj1**2)
       cj2    = csqrt(cone-sj2**2)         
@@ -1147,6 +1165,13 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       rrs = REAL(ars)!**2+imag(ars)**2)**0.5
       rtp = REAL(atp)!**2+imag(atp)**2)**0.5
       rts = REAL(ats)!**2+imag(ats)**2)**0.5
+      
+      ! Check for total internal reflection     !fix
+      IF (vp2*pin > 1) rtp = 0
+      IF (vs2*pin > 1) rts = 0
+      IF (vp1*pin > 1) rrp = 0
+      IF (vs1*pin > 1) rrs = 0
+      
       
 !      WRITE(6,*) 'HI1:',a,b,c,d,E,F,G,H,DEN
       
@@ -1738,37 +1763,45 @@ SUBROUTINE INTERFACE_SCATTER
       
       ud_pre = ud  !save current ud before scattering it.
       
+  		IF (r0 < scat_prob) THEN
+			 CALL REF_TRAN_PROB
+		  END IF
+		  
+		 !Fix iz IF direction has changed
+		 IF ((ud_pre == 1).AND.(ud == -1))  iz = iz-1
+     IF ((ud_pre == -1).AND.(ud == 1))  iz = iz+1		  
+      
 				  
-				 r0 = rand()
-				 IF (r0 < 0.5) x_sign=-x_sign		
-				 r0 = rand()
-				 IF (r0 < 0.5) ud = -ud
-				 
-  			 IF (z_act <= 0.) ud = 1 !make sure you're going down IF leaving surface
+				 !r0 = rand()
+!				 IF (r0 < 0.5) x_sign=-x_sign		
+!				 r0 = rand()
+!				 IF (r0 < 0.5) ud = -ud
+!				 
+!  			 IF (z_act <= 0.) ud = 1 !make sure you're going down IF leaving surface
+!				
+!				 !Fix iz IF direction has changed
+!				 IF ((ud_pre == 1).AND.(ud == -1))  iz = iz-1
+!         IF ((ud_pre == -1).AND.(ud == 1))  iz = iz+1	
+!		 
+!				 r0 = rand()
+!				 r0 = ( r0 - 0.5 )
+!				 p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
+!
+!				 DO WHILE ((p < p1).OR.(p >= 1./vf(iz-1,iwave)) ) !p2(iwave)))
+!				 r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
+!				 ang1 = angst*r0
+!				 p = abs(sin(ang1))/vf(iz,iwave)
+!				 END DO
+!				 
+!
+!		 
+!				 r0 = rand()                        !
+!				 r1 = rand()                        !
+!				 IF (r1 < 0.5) az = az - pi
+!				 az = az + asin(r0**2)                  !
+!				 IF (az < -pi) az = az + 2.*pi
+!				 IF (az >  pi) az = az - 2.*pi
 				
-				 !Fix iz IF direction has changed
-				 IF ((ud_pre == 1).AND.(ud == -1))  iz = iz-1
-         IF ((ud_pre == -1).AND.(ud == 1))  iz = iz+1	
-		 
-				 r0 = rand()
-				 r0 = ( r0 - 0.5 )
-				 p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
-
-				 DO WHILE ((p < p1).OR.(p >= 1./vf(iz-1,iwave)) ) !p2(iwave)))
-				 r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
-				 ang1 = angst*r0
-				 p = abs(sin(ang1))/vf(iz,iwave)
-				 END DO
-				 
-
-		 
-				 r0 = rand()                        !
-				 r1 = rand()                        !
-				 IF (r1 < 0.5) az = az - pi
-				 az = az + asin(r0**2)                  !
-				 IF (az < -pi) az = az + 2.*pi
-				 IF (az >  pi) az = az - 2.*pi
-				 
       END IF	
       
  
@@ -1966,72 +1999,91 @@ SUBROUTINE REF_TRAN_PROB
       REAL(8) :: art(10),ref_tran_sum
       REAL(8) :: vp2,vs2,rh2,v2              !! P & S  & density of layer 2 (generic vel=v2)
       REAL(8) :: azr                         !! azimuth in radians
-      REAL(8) :: ta(3),n1(3),tb(3)        !! Phonon trajectory, reflector normal & new traject
+      REAL(8) :: ta(3),n1(3),tb(3),n2(3)        !! Phonon trajectory, reflector normal & new traject
       REAL(8) :: ca,sa,ci,si              !! Cosine & sine of azimuth & inclination
       REAL(8) :: fact                     !! Impedence contrast factor
       REAL(8) :: inc
       INTEGER :: ip2,irt
-      INTEGER :: iwave2
+      INTEGER :: iwave2,rin
       REAL(8) :: theta,phi,theta2,phi2
       REAL(8) :: pp,ps                    !! Ray parameters for P & S waves
-      REAL(8) :: get_ang,ang2,p_in
+      REAL(8) :: get_ang,ang2,p_in,tttt
       
-!      pi = atan(1.)*4.
 
- !     WRITE(6,*) I,NITR,'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv'
+!      WRITE(6,*) 'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv',ip,iwave,I,NITR
       p_in = p
-
-
       
-      phi = asin(p*vf(iz_scat,iwave))          !!  !fix, was p/v
-      theta   = az*pi/180.                !!
-      ta(1) = sin(phi)*cos(theta)          !! East
+      !Zero coefficient vectors
+      rt(1:10) = 0
+      art(1:10) = 0
+      
+      !Incoming ray      
+      phi = asin(p*vf(iz_scat,iwave))          !!  
+      theta   = az   !fix, az is already in radians   *pi/180.                !!
+      ta(1) = sin(phi)*cos(theta)*x_sign   !! East  !fix added x_sign
       ta(2) = sin(phi)*sin(theta)          !! North
-      ta(3) = cos(phi)                     !! Vertical
-
-!      write(6,*) phi,theta
-     
+      ta(3) = cos(phi)*ud                  !! Vertical  !fix added ud
 
       CALL unit_vector_3(ta)
       
-!      write(6,*) 'ta:',ta
-      
-      
-!! Create inclination & declination of reflector plane
+      ! Create inclination & declination of reflector plane (normal to plane)
       r0 = rand()
-      theta2 = 2.*pi*(r0-0.5)
+      theta2 = 2.*pi*(r0-0.5) 
       r0 = rand()
-      phi2   =    pi*(r0-0.5)
+      phi2   =    pi*(r0-0.5) 
       
-     
-      n1(1) = sin(phi2)*cos(theta2) !fix 
-      n1(2) = sin(phi2)*sin(theta2) !fix
+      n1(1) = sin(phi2)*cos(theta2)  
+      n1(2) = sin(phi2)*sin(theta2)
       n1(3) = cos(phi2)
+
+      !NEEDFIX
+!      n1(1:3) = 0.
+!      n1(3) = 1.     !if n1 is vertical, p_in and p are the same if ip == 1 and ip == 2, which is good.
+
       CALL unit_vector_3(n1)
 !      write(6,*) 'n1:',n1      
      
-!! Sin & Cos of inc and az      
+      ! Sin & Cos of inc and az      
       sa = sin(phi-phi2)
       si = sin(theta-theta2)
       ca = cos(phi-phi2)
       ci = cos(theta-theta2)
       
       ang2 = abs(get_ang(ta,n1))           !! Angle between phonon trajectory & norm
-      
-!      write(6,*) '      ',ang2
+                                           !! do not need abs because it is abs in get_ang
+                                           !! ang2 should be <= 90deg (pi/2)
+      IF (ang2 > pi/2) THEN    !fix
+        n1 = -1.*n1
+        ang2 = abs(get_ang(ta,n1))
+      END IF
+
+!      write(6,*) '  ang2:',ang2/pi*180
       
       pp = sin(ang2)/vf(iz_scat,1)              !! P-wave ray parameter
       ps = sin(ang2)/vf(iz_scat,2)              !! S-wave ray parameter
+      
+!      write(6,*) '  pi:',p_in
+!      write(6,*) '  pp:',pp
+!      write(6,*) '  ps:',ps
 
 !! Create random velocity contrast between 0.05 and -0.05 (or value of vel_perturb)
-      fact = 1.0 + vel_perturb*((rand()-0.5)*2)!! Factor of impedence contrast !fix
+      fact = 1.0 + vel_perturb*((rand()-0.5)*2)!! Factor of impedence contrast 
       vp2 = vf(iz_scat,1)*fact                  !! New P & S wave velocities for other side
       vs2 = vf(iz_scat,2)*fact                  !!
       rh2 = rh(iz_scat)*fact                    !! 
-!      iwave = ip                           !! (1)=P wave, 2=S wave velocity
-!      IF (ip==3) iwave = 2
       
-      IF (ip==1) THEN                      !! P Incident
+!      CALL RTCOEF2(0.0996D0,10d0,5d0,3.3d0,15d0,7.5d0,4.5d0,1,rt(1),rt(2),rt(3),rt(4))
+!      write(6,*) 'pppppppppp:   ',rt(1:6)
+!   rt(1:4) = -0.91725403070449829      -0.18144103884696960       -2.0106177777051926E-002 -0.26910814642906189 
+      !rt(3), p-transm, should be 0 in this case bcs this is an ang of 80, which should be pure reflection.
+      
+!       CALL  REFTRAN_SH(0.0996d0,10d0,15d0,3.3d0,4.5d0,rt(1),rt(2))
+!       WRITE(6,*) 'pppppppppppppp:',rt(1:2)
+      
+!      tttt = 1.2
+!      WRITE(6,*) '>>>>>>>>>>>>>>>>',asin(1.2)
+      
+      IF (ip == 1) THEN                      !! P Incident
        CALL RTCOEF2(pp,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),vp2,vs2,rh2,1,rt(1),rt(2),rt(3),rt(4)) !! P-SV reflected & transmitted (Pr=1,Sr=2,Pt=3,St=4)
        rt(1)=rt(1)                         !! P  refl
        rt(5)=rt(2)*sa                      !! SH refl
@@ -2040,72 +2092,84 @@ SUBROUTINE REF_TRAN_PROB
        rt(6)=rt(4)*sa                      !! SH trans
        rt(4)=rt(4)*ca                      !! SV trans
        
+       DO jj = 1, 10                        !! If errors, zero them 
+        IF (isnan(rt(jj))) rt(jj) = 0.
+       END DO
+
+       
       ELSE
        CALL REFTRAN_SH(ps,vf(iz_scat,2),vs2,rh(iz_scat),rh2,rt(9),rt(10))   !! SH reflected & transmitted amplitudes
        CALL RTCOEF2(ps,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),vp2,vs2,rh2,2,rt(5),rt(6),rt(7),rt(8)) !! SV-P reflected & transmitted (Pr=5,Sr=6,Pt=7,St=8)
-       do jj = 1, 10                        !! If errors, zero them
+       DO jj = 1, 10                        !! If errors, zero them
         IF (isnan(rt(jj))) rt(jj) = 0.
-       END do
-       
+       END DO    
   
-       IF (ip==3) THEN                     !! SV Incidence
+       IF (ip==2) THEN                     !! SV Incidence   !fix, SV is ip == 2
        
         rt(1)=rt(5)*ca                     !! P  refl
-        rt(2)=rt(6)*ca+rt(9)*sa            !! SV refl
+        rt(2)=abs(rt(6))*ca+abs(rt(9))*sa  !! SV refl  !fix
         rt(3)=rt(7)*ca                     !! P  trans
-        rt(4)=rt(8)*ca+rt(10)*sa           !! SV trans
-	      rt(5)=rt(6)*sa+rt(9)*ca            !! SH refl
-	      rt(6)=rt(8)*sa+rt(10)*ca           !! SH trans
+        rt(4)=abs(rt(8))*ca+abs(rt(10))*sa !! SV trans !fix
+	      rt(5)=abs(rt(6))*sa+abs(rt(9))*ca  !! SH refl  !fix
+	      rt(6)=abs(rt(8))*sa+abs(rt(10))*ca !! SH trans !fix
 	
        ELSE                                !! SH Incidence
         rt(1)=rt(5)*sa                     !! P  refl
-        rt(2)=rt(6)*sa+rt(9)*ca            !! SV refl
+        rt(2)=abs(rt(6))*sa+abs(rt(9))*ca  !! SV refl  !fix
         rt(3)=rt(7)*sa                     !! P  trans
-        rt(4)=rt(8)*sa+rt(10)*ca           !! SV trans
-      	rt(5)=rt(6)*ca+rt(9)*sa            !! SH trans
-	      rt(6)=rt(8)*ca+rt(10)*sa           !! SH trans
+        rt(4)=abs(rt(8))*sa+abs(rt(10))*ca !! SV trans !fix
+      	rt(5)=abs(rt(6))*ca+abs(rt(9))*sa  !! SH refl  !fix
+	      rt(6)=abs(rt(8))*ca+abs(rt(10))*sa !! SH trans !fix
        END IF
       END IF
       
-!      WRITE(6,*) I,NITR,rt(1:6)
+!      WRITE(6,*) '  rt:',rt(1:6)
+
             
+      !Sumcum coefficients
       ref_tran_sum = 0.                                    !! Zero total prob normalization
-      
       art(1)= abs(rt(1))                                   !! prob=abs(ref or trans coeff)
       DO jj = 2, 6
-       IF (.not.(isnan(rt(jj)))) art(jj) = art(jj-1) + abs(rt(jj))!! Sum the absolute value of reflection & transmittion coefficients
-      END DO
-      
-!      WRITE(6,*) I,NITR,art(1:6)
-      ref_tran_sum = art(6)   !fix
-      
-      art = art/ref_tran_sum  !fix (art needs to be normalized to 1)
-!      WRITE(6,*) I,NITR,art(1:6)
+        art(jj) = art(jj-1) + abs(rt(jj))!! Sum the absolute value of reflection & transmittion coefficients
+      END DO 
+
+      !Normalize cumulative coefficients
+      ref_tran_sum = art(6)   
+      art = art/ref_tran_sum  
+!      WRITE(6,*) ' art:',art(1:6)
             
       IF (isnan(ref_tran_sum).or.ref_tran_sum==0.) RETURN  !! ERROR SO SKIP
       
      
       r0 = rand()
       
-      IF (r0 < art(1)/ref_tran_sum) THEN                               !! Determine output phase & set vars
+      IF (r0 < art(1)) THEN                               !! Determine output phase & set vars
        ip2 = 1                                            !! P reflected
        irt = -1
+       rin = 1
       ELSE IF (r0 < art(2)) THEN                          !! SV reflected
-       ip2 = 3
+       ip2 = 2 !fix was 3
        irt = -1
+       rin = 2
       ELSE IF (r0 < art(3)) THEN                          !! P transmitted
        ip2 = 1
        irt = 1
+       rin = 3
       ELSE IF (r0 < art(4)) THEN                          !! SV transmitted
-       ip2 = 3
+       ip2 = 2 !fix was 3
        irt = 1
+       rin = 4
       ELSE IF (r0 < art(5)) THEN                          !! SH reflected
-       ip2 = 2
+       ip2 = 3 !fix was 2
        irt = -1
+       rin = 5
       ELSE IF (r0 < art(6)) THEN                          !! SH tranmsitted
-       ip2 = 2
+       ip2 = 3 !fix was 2
        irt = 1
-      END IF         
+       rin = 6
+      END IF   
+      
+!     write(6,*) '  rin:',rin,r0      
 
      
       iwave2 = ip2                                        !! Set output wave velocity P=1,S=2
@@ -2122,32 +2186,62 @@ SUBROUTINE REF_TRAN_PROB
        v2  = vf(iz_scat,iwave2)
       ENDIF
       
+!      WRITE(6,*) '  n1:',n1
       
-      CALL ref_tran_ray(n1,ta,vf(iz_scat,iwave),v2,irt,tb)     !! Get the new trajectory
-      IF (tb(1)+tb(2)+tb(3) < 0) ud = -ud                 !! set up-down variable
+      ! Get the new trajectory
+      CALL ref_tran_ray(n1,ta,vf(iz_scat,iwave),v2,irt,tb)     
+
+      ! set up-down variable   
+      !IF (tb(1)+tb(2)+tb(3) < 0) ud = -ud                 !fix
+      IF (tb(3) < 0) THEN                           !fix IF LOOP
+        ud = -1
+      ELSE  
+        ud = 1 
+      END IF
+      
+      ! set east-west variable         
+      IF (tb(1) < 0) THEN                           !fix IF LOOP
+        x_sign = -1
+      ELSE  
+        x_sign = 1
+      END IF
       
       
-      CALL ucar2sphr(ta(1),ta(2),ta(3),az,inc)                 !! get azimuth & inclination
-!            WRITE(6,*) inc/pi*180,az/pi*180
+!      write(6,*) '  V ===>', vf(iz_scat,iwave),v2,irt
+!      write(6,*) ta
+!      write(6,*) tb
+      
+      CALL ucar2sphr(tb(1),tb(2),tb(3),az,inc)                 !! get azimuth & inclination
+      n2(1:3) = 0
+      n2(3) = 1 !Make vertical vector, normal to horizontal plane
+			inc = abs(get_ang(tb,n2))
+      IF (inc > pi/2) THEN    !fix
+        n2 = -1.*n2
+        inc = abs(get_ang(tb,n2))
+      END IF
+
       iwave = iwave2
       ip = ip2
       
-      IF (inc < 1) THEN   !fix, do not want neg incident angle, means neg ray p.
-         x_sign = -x_sign
-         inc = -inc
-      END IF
+!      IF (inc < 0) THEN   
+!!         x_sign = -x_sign
+!         inc = -inc
+!!         WRITE(6,*) 'JKHGKJHGJKHGJKHGKJJHGJHGKJH'
+!      END IF
       
-      p = sin(inc)/vf(iz_scat,iwave2)
-      
-!            WRITE(6,*) I,NITR,'in=',asin(vf(iz_scat,iwave2)*p_in)/pi*180,'out=',inc/pi*180
 
-!      WRITE(6,*) I,NITR,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
+      p = sin(inc)/vf(iz_scat,iwave2)
+!      WRITE(6,*) '  po:',p
+!      WRITE(6,*) '  in=',asin(vf(iz_scat,iwave2)*p_in)/pi*180,'out=',inc/pi*180
+            
+
+!      WRITE(6,*) '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',ip,I,NITR
       RETURN
 END SUBROUTINE REF_TRAN_PROB
 
 
 
-double precision function dot_product_3(a,b)
+DOUBLE PRECISION FUNCTION dot_product_3(a,b)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
 !   ! This function calculates the dot product of two 3-component vectors!   !
 !   !                                                                    !   !
@@ -2156,21 +2250,21 @@ double precision function dot_product_3(a,b)
 !   !                                                                    !   !
 !   ! Beware of the bug!! (I don't know which one, but it must be there!)!   !
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
-    implicit none                                 !! Allow no implicit variables
+    IMPLICIT NONE                                 !! Allow no implicit variables
     REAL(8) :: a(3),b(3)                          !! Input vectors
         
     dot_product_3 = a(1)*b(1)+a(2)*b(2)+a(3)*b(3) !! Calculate the dot product
      
-    return   
-end function dot_product_3
+    RETURN   
+END FUNCTION dot_product_3
 
 
 
-double precision function get_ang(x1,x2)
+DOUBLE PRECISION FUNCTION get_ang(x1,x2)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
 !   ! This function gets the angle between two vectors.                  !   !
 !   !                                                                    !   !
-!   ! This subroutine was written by Jesse F. Lawrence                   !   !
+!   ! This SUBROUTINE was written by Jesse F. Lawrence                   !   !
 !   !      Contact:   jflawrence@stanford.edu                            !   !
 !   !                                                                    !   !
 !   ! Beware of the bug!! (I don't know which one, but it must be there!)!   !
@@ -2179,57 +2273,70 @@ double precision function get_ang(x1,x2)
    REAL(8)           :: x1(3),x2(3)               !! two vectors
    REAL              :: arcos                     !! Inverse cosine
    REAL(8)           :: dot_product_3             !! The dot product
+   REAL(8)           :: x1mag,x2mag
    
-   get_ang = abs(arcos(dot_product_3(x1,x2)))     !! Calculate the angle
+   x1mag = (dot_product(x1,x1))**.5
+   x2mag = (dot_product(x2,x2))**.5
    
-   return                                         !! Return
-end function get_ang
+!   get_ang = abs(arcos(dot_product_3(x1,x2)))     !! Calculate the angle
+   get_ang = abs(arcos(dot_product_3(x1,x2)/(x1mag*x2mag)))     !! fix
+   
+   
+   ! FIX EXPLANATION
+   !x1 . x2 = |x1||x2|cos(ang)
+   !(x1.x2) / (|x1||x1|) = cos(ang)
+   !ang = acos((x1.x2) / (|x1||x1|))
+   ! Shouldn't have been a problem as we are using unit vectors, but probably better
+   ! to generalize the function
+   
+   RETURN                                         !! Return
+END FUNCTION get_ang
 
 
 
 
 
 
-subroutine unit_vector_3(n)
+SUBROUTINE unit_vector_3(n)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
-!   ! This subroutine makes a unit vector out of input vector, n.        !   !
+!   ! This SUBROUTINE makes a unit vector out of input vector, n.        !   !
 !   !                                                                    !   !
-!   ! This subroutine was written by Jesse F. Lawrence                   !   !
+!   ! This SUBROUTINE was written by Jesse F. Lawrence                   !   !
 !   !      Contact:   jflawrence@stanford.edu                            !   !
 !   !                                                                    !   !
 !   ! Beware of the bug!! (I don't know which one, but it must be there!)!   !
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
-   implicit           none
+   IMPLICIT           NONE
    REAL(8)         :: n(3)
    REAL(8)         :: n_mag
    REAL(8)         :: dot_product_3
    
    n_mag = (dot_product_3(n,n))**0.5
    n(1:3) = n(1:3)/n_mag
-   return
-end subroutine unit_vector_3
+   RETURN
+END SUBROUTINE unit_vector_3
 
 
 
 
-subroutine ref_tran_ray(n1,ta1,v1,v2,itr,ta2)
+SUBROUTINE REF_TRAN_RAY(n1,ta1,v1,v2,itr,ta2)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
 !   ! This subourine calculates the vector of the new trajectory after   !   !
 !   !      transmission or reflection (itr).                             !   !
 !   !                                                                    !   !
-!   ! This subroutine was written by Jesse F. Lawrence                   !   !
+!   ! This SUBROUTINE was written by Jesse F. Lawrence                   !   !
 !   !      Contact:   jflawrence@stanford.edu                            !   !
 !   !                                                                    !   !
 !   ! Beware of the bug!! (I don't know which one, but it must be there!)!   !
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
-   implicit none
+   IMPLICIT NONE
    REAL(8) :: n1(3),ta1(3),ta2(3)
    REAL(8) :: a1(3),b1(3),a2(3),b2(3)
-   integer :: i
+   INTEGER :: i
    REAL(8) :: dp_tn
-   REAL(8) :: v1,v2 !! Velocities of two media
-   REAL(8) :: dp,dot_product_3,b2_mag
-   integer :: itr,jj
+   REAL(8) :: v1,v2,vc !! Velocities of two media
+   REAL(8) :: dp,dot_product_3,b2_mag,dp2,sg
+   INTEGER :: itr,jj
 !
 !                          b1  ^
 !                       \------\
@@ -2256,44 +2363,76 @@ subroutine ref_tran_ray(n1,ta1,v1,v2,itr,ta2)
 !        a1 = - (ta1.n1)*n1
 !        b1 = a1 - ta1 = n1 (1+n1.ta1)
 !        b2 = v2/v1 * b1 = v2/v1 * n1 (1-n1.ta1)
-!        a2 = - sqrt[1-b2^2]*n1 
+!        a2 = - sqrt[1-b2_mag^2]*n1 
 
 
-   call unit_vector_3(n1)
-   call unit_vector_3(ta1)
+!   nu = v2^-1/v1^-1;
+!   ta2 = (sign(dot(ta1,n1))*(1-nu^2+dot(n1,ta1)^2*nu^2)^.5-dot(n1,ta1)*nu)*n1+nu*ta1
+       
    
-   
-   dp = dot_product_3(ta1,n1)
-   
-     
-   if (dp < 1) then
-      ta1(1:3) = -ta1(1:3)
-      dp = -dp
-   end if
-   
-   do jj = 1, 3
-    a1(jj) = dp * n1(jj)
-    b1(jj) = a1(jj) - ta1(jj)
-    b2(jj) = v2*v2/v1/v1 * b1(jj)
-   end do
 
-   b2_mag = (1.-dot_product_3(b2,b2))**0.5
-   
-   do jj = 1, 3
-!    write(6,*) 'DING',b2_mag
-    a2(jj) = - b2_mag*n1(jj)*float(itr)
-    ta2(jj) = b2(jj) + a2(jj)
-   end do
-   
-!   write(6,*) 'A1:',a1(1:3)
-!   write(6,*) 'B1:',b1(1:3)
-!   write(6,*) 'A2:',a2(1:3)
-!   write(6,*) 'B2:',b2(1:3)
+      CALL unit_vector_3(n1) 
+      CALL unit_vector_3(ta1)
+      
+      vc = v2/v1   !u1/u2
+      dp = dot_product_3(n1,ta1)
+      sg = abs(dp)/dp
+      
+      ! Find transmitted vector
+      ta2 = (sg*(1.-vc**2+dp**2*vc**2)**.5-dp*vc)*n1+vc*ta1
+      
+      !For reflection, reflect vector on plane (normal is n1)
+			 IF (itr == -1) THEN
+				 dp2 = dot_product_3(ta2,n1)
+				 DO jj = 1,3
+					 ta2(jj) = ta2(jj) - 2*dp2*n1(jj)
+				 END DO
+			 END IF 
+
 !   
-!   write(6,*) '|ta2|:',(dot_product(ta2,ta2))**0.5
+!   
+!   dp = dot_product_3(ta1,n1)
+!   
+!     
+!!   if (dp < 1) then
+!   if (dp < 0) then     !fix
+!      ta1(1:3) = -ta1(1:3)
+!      dp = -dp
+!   end if
+!   
+!   do jj = 1, 3
+!    a1(jj) = dp * n1(jj)             !ok
+!!    b1(jj) = a1(jj) - ta1(jj)
+!    b1(jj) = ta1(jj) - a1(jj)  !fix
+!!    b2(jj) = v2*v2/v1/v1 * b1(jj)
+!    b2(jj) = v2/v1 * b1(jj)
+!   end do
+!
+!   b2_mag = (1.-dot_product_3(b2,b2))**0.5
+!   
+!   do jj = 1, 3
+!!    write(6,*) 'DING',b2_mag
+!!    a2(jj) = - b2_mag*n1(jj)*float(itr)
+!    a2(jj) =  b2_mag*n1(jj)   !*float(itr) reflection is not -1*(vector), depends on n1
+!    ta2(jj) = b2(jj) + a2(jj)
+!   end do
+!   
+!   IF (itr == -1) THEN
+!     dp2 = dot_product_3(ta2,n1)
+!     DO jj = 1,3
+!       ta2(jj) = ta2(jj) - 2*dp2*n1(jj)
+!     END DO
+!   END IF  
+!   
+!!   write(6,*) 'A1:',a1(1:3)
+!!   write(6,*) 'B1:',b1(1:3)
+!!   write(6,*) 'A2:',a2(1:3)
+!!   write(6,*) 'B2:',b2(1:3)
+!!   
+!!   write(6,*) '|ta2|:',(dot_product(ta2,ta2))**0.5
    
-   return
-end subroutine ref_tran_ray
+   RETURN
+END SUBROUTINE REF_TRAN_RAY
 
 
 
