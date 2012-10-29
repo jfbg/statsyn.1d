@@ -632,7 +632,7 @@ PROGRAM STATSYN_GLOBALSCAT
 										
 										CALL etime(elapsed,ttime2)
 							    WRITE(6,*) 'Loop:', ttime2-ttime1,'count:',loopcount
-
+                  WRITE(76,*) loopcount
 											 
 								 !Leaves WHILE loop when ds_SL < distance to next vel layer
 								 !Need to travel to next vel layer
