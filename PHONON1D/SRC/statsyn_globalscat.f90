@@ -584,6 +584,8 @@ PROGRAM STATSYN_GLOBALSCAT
 										  
 									 
 										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 == 1))
+										
+										    CALL etime(elapsed,ttime1)
 
 												!Calculare what would dh be IF phonon only travelled ds_scat km
 												dh = ds_scat*abs(cos(asin(p*vf(iz_scat,iwave))))   !FLAT
@@ -620,6 +622,9 @@ PROGRAM STATSYN_GLOBALSCAT
 
 										 !DEBUG
 !										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
+
+										    CALL etime(elapsed,ttime2)
+										    WRITE(6,*) 'Loop:', ttime2-ttime1
 																						
 			
 										END DO
