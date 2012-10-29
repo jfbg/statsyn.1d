@@ -527,6 +527,8 @@ PROGRAM STATSYN_GLOBALSCAT
 
 				! ============ >>
 				! SCATTERING LAYER
+				
+				CALL etime(elapsed,ttime1)
 	
 						! THE PHONON CAN BE SCATTERED AT ALL DEPTHS. THE ONLY THING THAT CHANGES
 						! IS THE SCATTERING PROBABILITY, WHICH DEPENDS ON THE DEPTH.
@@ -583,13 +585,9 @@ PROGRAM STATSYN_GLOBALSCAT
 											CALL GET_DS_SCAT  !change ds_scat  FLAT
 										  
 
-
-									 loopcount = 0
-									 CALL etime(elapsed,ttime1)
 									 
 										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 == 1))
 										
-                    loopcount = loopcount +1
                     
 												!Calculare what would dh be IF phonon only travelled ds_scat km
 												dh = ds_scat*abs(cos(asin(p*vf(iz_scat,iwave))))   !FLAT
@@ -629,10 +627,7 @@ PROGRAM STATSYN_GLOBALSCAT
 																						
 			
 										END DO
-										
-										CALL etime(elapsed,ttime2)
-							    WRITE(6,*) 'Loop:', ttime2-ttime1,'count:',loopcount
-                  WRITE(76,*) loopcount
+
 											 
 								 !Leaves WHILE loop when ds_SL < distance to next vel layer
 								 !Need to travel to next vel layer
@@ -658,6 +653,10 @@ PROGRAM STATSYN_GLOBALSCAT
 										 ! ============ <<
 										 
 							 END IF
+							 
+        CALL etime(elapsed,ttime2)
+        WRITE(6,*) 'Scattime:',ttime2-ttime1
+        
 															
     		ELSE IF (iz > 1) THEN !No scattering in layer (make it faster IF scat_prob == 0.)
 				
