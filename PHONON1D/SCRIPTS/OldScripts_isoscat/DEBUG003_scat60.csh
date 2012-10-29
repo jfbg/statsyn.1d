@@ -14,17 +14,16 @@ set n_phonon   = "1000000"
 
 # SCATTERING
 set bg_scat    = 0.00
-set prob_scat  = 0.200
+set prob_scat  = 0.600
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
-set velperturb = .1
 
 # Source attenuation
 set dQdfstyle  = 1
 
 
-set file_out   = "D003_scat20"
+set file_out   = "D003_scat60"
 set model_name = "S_VPREMOON_Qp_ori"
 
 @ n_depth = 1     ## Number of depths to use
@@ -118,7 +117,6 @@ echo "$mx_scat_dp       \!MAX SCATTERING DEPTH            " >> $file_csh
 echo "$prob_scat          \!SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh
 echo "$bg_scat          \!BACKGROUND SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh
 echo "$dsmin $dsmax $npow \!SCATERER SCALE-LENGTHS"          >> $file_csh
-echo "$velperturb         \!VELOCITY PERTURBATION"          >> $file_csh
 echo "$dQdfstyle        \!dQ/df Style            "          >> $file_csh
 echo "$outTRACK_dir/$file_track"                            >> $file_csh
 echo "$out_dir/$file_whole"                                 >> $file_csh

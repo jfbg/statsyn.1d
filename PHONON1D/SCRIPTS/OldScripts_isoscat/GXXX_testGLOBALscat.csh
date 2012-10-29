@@ -1,5 +1,8 @@
 #!/bin/csh
 
+# JXX_testISO
+
+
 #
 # Set synthetic parameters
 #
@@ -10,27 +13,26 @@ set ray_par    = "0.0 0.1668 0.2931"
 set d_range    = "0 180 91"
 set model      = "2"	#2 for Moon
 set mx_scat_dp = "10"
-set n_phonon   = "1000000"
+set n_phonon   = "1000"
 
 # SCATTERING
-set bg_scat    = 0.00
-set prob_scat  = 0.200
+set prob_scat  = 0.8
+set bg_scat    = 0.05
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
-set velperturb = .1
 
 # Source attenuation
-set dQdfstyle  = 1
+set dQdfstyle  = 2
 
-
-set file_out   = "D003_scat20"
-set model_name = "S_VPREMOON_Qp_ori"
+set file_out   = "JXX_VP_nocrust_noscat"
+#set model_name = "VPREMOON_Qp_nvlvl"
+set model_name = "VPREMOON_Qp_nocrust"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 5     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 10    ## Number of iterations
+@ n_kern  = 1     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 1     ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -67,9 +69,9 @@ endif
 while ($i < $n_depth)
 @ i = $i + 1
 if ($i == 2) then
- set q_depth = 1100 
+ set q_depth = 0020 
 else if ($i == 1) then
- set q_depth = 0030
+ set q_depth = 20
 else
  set q_depth = 0.01
 endif
@@ -92,7 +94,7 @@ while ($j < $n_kern)
 @ j = $j + 1
 
 
-sleep 4
+sleep 1
 
 ## 
 # Start phonon synthetics
@@ -118,7 +120,6 @@ echo "$mx_scat_dp       \!MAX SCATTERING DEPTH            " >> $file_csh
 echo "$prob_scat          \!SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh
 echo "$bg_scat          \!BACKGROUND SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh
 echo "$dsmin $dsmax $npow \!SCATERER SCALE-LENGTHS"          >> $file_csh
-echo "$velperturb         \!VELOCITY PERTURBATION"          >> $file_csh
 echo "$dQdfstyle        \!dQ/df Style            "          >> $file_csh
 echo "$outTRACK_dir/$file_track"                            >> $file_csh
 echo "$out_dir/$file_whole"                                 >> $file_csh
