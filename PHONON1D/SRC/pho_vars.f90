@@ -42,7 +42,7 @@ MODULE PHO_VARS			! Make variables global
 				
 				! Measure elapsed time
 				REAL        elapsed(2)
-				REAL        totaltime,ttime1,ttime2
+				REAL        totaltime,ttime1,ttime2,ttime3,ttime4
 
 				
 				! SURFACE HIT

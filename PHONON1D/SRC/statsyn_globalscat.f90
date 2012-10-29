@@ -381,6 +381,8 @@ PROGRAM STATSYN_GLOBALSCAT
 			
       DO I = 1, ntr   !FOR EACH TRACE -- DOLOOP_001
       
+      CALL etime(elapsed,ttime3)
+      
       
 	  ! ============ >>
       ! ----- Initialize Randomization -----			
@@ -792,6 +794,8 @@ PROGRAM STATSYN_GLOBALSCAT
     
      !WRITE(79,*) I,NITR,surfcount,surCYC1,x,iz,scat_time,logEND,logperc
 
+       CALL etime(elapsed,ttime4)      
+      WRITE(6,*) I,'time:',ttime4-ttime3
 
 			END DO	!CLOSE MAIN RAY TRACING LOOP - DOLOOP_001
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2270,7 +2274,7 @@ SUBROUTINE REF_TRAN_PROB
 
       CALL etime(elapsed,ttime2)
       
-      WRITE(6,*) 'REF_TRAN_PROB:',ttime2-ttime1
+!      WRITE(6,*) 'REF_TRAN_PROB:',ttime2-ttime1
       RETURN
 END SUBROUTINE REF_TRAN_PROB
 
