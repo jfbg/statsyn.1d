@@ -1820,6 +1820,10 @@ SUBROUTINE INTERFACE_SCATTER
       USE pho_vars
       IMPLICIT NONE
       INTEGER     ud_pre  !ud before scattering
+      REAL    time10,time11
+      
+      
+      CALL etime(elapsed,time10)
      
 
       !Check IF scatter first
@@ -1869,6 +1873,9 @@ SUBROUTINE INTERFACE_SCATTER
 				
       END IF	
       
+      CALL etime(elapsed,time11)
+      
+      WRITE(6,*) '--------->',time11-time10
  
 			
 			RETURN	
