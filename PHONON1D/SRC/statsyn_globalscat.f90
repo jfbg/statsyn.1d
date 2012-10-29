@@ -502,7 +502,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			 z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
 
 			 !DEBUG
-       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
+!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
       
 			
 				! ============ >>
@@ -557,11 +557,11 @@ PROGRAM STATSYN_GLOBALSCAT
 								 CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
 								 ds_SL = (dh**2+dx1**2)**0.5
 								 
-								 WRITE(76,*) I,NITR,scat_prob,irtr1,p,vf(iz-1,iwave),iz,asin(p*vf(iz-1,iwave))/pi*180
+!								 WRITE(76,*) I,NITR,scat_prob,irtr1,p,vf(iz-1,iwave),iz,asin(p*vf(iz-1,iwave))/pi*180
 								 
 							IF (irtr1 == 1) THEN !Only scatter IF ray would have gone through layer
 							
-							        WRITE(76,*) I,NITR,scat_prob
+!							        WRITE(76,*) I,NITR,scat_prob
 							
 							        scat_FLAG = 1
 
@@ -597,7 +597,7 @@ PROGRAM STATSYN_GLOBALSCAT
 															!New ds_scat
 															CALL GET_DS_SCAT
 															
-															WRITE(76,*) I,NITR,p,ds_SL,ds_scat
+!															WRITE(76,*) I,NITR,p,ds_SL,ds_scat
 															
 												ELSE
 												
@@ -608,7 +608,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 
 										 !DEBUG
-										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
+!										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
 																						
 			
 										END DO
@@ -800,26 +800,26 @@ PROGRAM STATSYN_GLOBALSCAT
       wf(1,1,2) = 1.
       wf(1,1,3) = 1.
       
-!      DO ic = 1, 3
-!      ofile2 = trim(ofile)//'.'//cmp(ic)
-!
-!      OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
-!       
-!       WRITE(22,*) nt,nx
-!       WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
-!      
-!				DO I = 1, nt
-!					DO J = 1, nx
-!						IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
-!					END DO
-!					WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
-!				END DO
-!
-!      
-!				CLOSE(22)
-!				
-!				
-!      END DO
+      DO ic = 1, 3
+      ofile2 = trim(ofile)//'.'//cmp(ic)
+
+      OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+       
+       WRITE(22,*) nt,nx
+       WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
+      
+				DO I = 1, nt
+					DO J = 1, nx
+						IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
+					END DO
+					WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
+				END DO
+
+      
+				CLOSE(22)
+				
+				
+      END DO
       WRITE(6,*) 'Synthetic outputs done'
       
       !Debug
@@ -1466,7 +1466,7 @@ SUBROUTINE UCAR2SPHR(x1,x2,x3,lon,lat)
 !   ! DECLARE VARIABLES:                                                 !   !
       REAL(8)      lon,lat,x1,x2,x3,pi
       pi = atan(1.)*4.                          !SET PI = 3.14....
-      lat = arsin(x3)                           !
+      lat = ARSIN(x3)                           !
       IF (x1 == 0.) THEN
        IF (x2 > 0.) lon = pi / 2.
        IF (x2 < 0.) lon = 3. * pi / 2.
@@ -1489,7 +1489,7 @@ SUBROUTINE DIST_TWO_ANGLES(lon1,lat1,lon2,lat2,angdist)
       REAL(8)    ::  lat1,lon1,lat2,lon2,angdist
       REAL(8)    ::  x1,x2,x3,y1,y2,y3
       REAL(8)    ::  pi
-      REAL       ::  arcos
+      REAL       ::  ARCOS
 
       IF (lat1 /= lat2) THEN
        IF  (abs(lon1-lon2)/abs(lat1-lat2) < 0.02) THEN
@@ -1500,35 +1500,35 @@ SUBROUTINE DIST_TWO_ANGLES(lon1,lat1,lon2,lat2,angdist)
 
       CALL USPH2CAR(lon1,lat1,x1,x2,x3)
       CALL USPH2CAR(lon2,lat2,y1,y2,y3)
-      angdist = abs(arcos(x1*y1 + x2*y2 + x3*y3))
+      angdist = abs(ARCOS(x1*y1 + x2*y2 + x3*y3))
 
       RETURN
 END SUBROUTINE DIST_TWO_ANGLES
 
       
    
-REAL FUNCTION arcos(a)
+REAL FUNCTION ARCOS(a)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
 !   !THIS FUCTION DETERMINES THE ARC COSINE OF AN ANGLE (a):             !   !
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
       IMPLICIT     NONE
       REAL(8)      :: a, aa, pi, pi2
-      REAL         :: artan2
+      REAL         :: ARTAN2
       aa = 1D0-a*a
       pi = atan(1.)*4D0
       pi2 = pi/2D0
       
       IF (aa > 0) THEN
-       arcos = artan2(sqrt(aa),a)
+       ARCOS = ARTAN2(sqrt(aa),a)
       ELSE
-       arcos = pi2-sign(pi2,a)
+       ARCOS = pi2-sign(pi2,a)
       END IF
       RETURN
-END FUNCTION arcos
+END FUNCTION ARCOS
 
 
 
-REAL FUNCTION arsin(a)
+REAL FUNCTION ARSIN(a)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
 !   !THIS FUCTION DETERMINES THE ARC SINE OF AN ANGLE (a):               !   !
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
@@ -1538,16 +1538,16 @@ REAL FUNCTION arsin(a)
       pi = atan(1.)*4D0
       pi2 = pi/2D0
       IF (aa > 0) THEN
-       arsin = atan(a/sqrt(aa))
+       ARSIN = atan(a/sqrt(aa))
       ELSE
-       arsin = sign(pi2,a)
+       ARSIN = sign(pi2,a)
       END IF
       RETURN
-END FUNCTION arsin
+END FUNCTION ARSIN
       
       
       
-REAL FUNCTION artan2(y,x)
+REAL FUNCTION ARTAN2(y,x)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
 !   !THIS FUCTION DETERMINES THE ARC TANGENT OF AN ANGLE (X AND Y):     !   !
 !   !     THIS VERSION OF ARCTAN DOES NOT CHOKE AT (0,0):               !   !
@@ -1557,15 +1557,15 @@ REAL FUNCTION artan2(y,x)
       pi = atan(1.)*4D0
       pi2 = pi/2D0
       IF (x == 0) THEN
-       artan2 = sign(pi2,y)
+       ARTAN2 = sign(pi2,y)
       ELSE
-       artan2 = atan(y/x)
+       ARTAN2 = atan(y/x)
        IF (x < 0) THEN
-        artan2 = artan2+sign(pi,y)
+        ARTAN2 = ARTAN2+sign(pi,y)
        END IF
       END IF
       RETURN
-END FUNCTION artan2
+END FUNCTION ARTAN2
 
 !=======================================
 SUBROUTINE INTERFACE_NORMAL
@@ -2007,7 +2007,7 @@ SUBROUTINE REF_TRAN_PROB
       INTEGER :: iwave2,rin
       REAL(8) :: theta,phi,theta2,phi2
       REAL(8) :: pp,ps                    !! Ray parameters for P & S waves
-      REAL(8) :: get_ang,ang2,p_in,tttt
+      REAL(8) :: GET_ANG,ang2,p_in,tttt
       
 
 !      WRITE(6,*) 'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv',ip,iwave,I,NITR
@@ -2024,7 +2024,7 @@ SUBROUTINE REF_TRAN_PROB
       ta(2) = sin(phi)*sin(theta)          !! North
       ta(3) = cos(phi)*ud                  !! Vertical  !fix added ud
 
-      CALL unit_vector_3(ta)
+      CALL UNIT_VECTOR_3(ta)
       
       ! Create inclination & declination of reflector plane (normal to plane)
       r0 = rand()
@@ -2040,7 +2040,7 @@ SUBROUTINE REF_TRAN_PROB
 !      n1(1:3) = 0.
 !      n1(3) = 1.     !if n1 is vertical, p_in and p are the same if ip == 1 and ip == 2, which is good.
 
-      CALL unit_vector_3(n1)
+      CALL UNIT_VECTOR_3(n1)
 !      write(6,*) 'n1:',n1      
      
       ! Sin & Cos of inc and az      
@@ -2049,12 +2049,12 @@ SUBROUTINE REF_TRAN_PROB
       ca = cos(phi-phi2)
       ci = cos(theta-theta2)
       
-      ang2 = abs(get_ang(ta,n1))           !! Angle between phonon trajectory & norm
-                                           !! do not need abs because it is abs in get_ang
+      ang2 = abs(GET_ANG(ta,n1))           !! Angle between phonon trajectory & norm
+                                           !! do not need abs because it is abs in GET_ANG
                                            !! ang2 should be <= 90deg (pi/2)
       IF (ang2 > pi/2) THEN    !fix
         n1 = -1.*n1
-        ang2 = abs(get_ang(ta,n1))
+        ang2 = abs(GET_ANG(ta,n1))
       END IF
 
 !      write(6,*) '  ang2:',ang2/pi*180
@@ -2214,10 +2214,10 @@ SUBROUTINE REF_TRAN_PROB
       CALL ucar2sphr(tb(1),tb(2),tb(3),az,inc)                 !! get azimuth & inclination
       n2(1:3) = 0
       n2(3) = 1 !Make vertical vector, normal to horizontal plane
-			inc = abs(get_ang(tb,n2))
+			inc = abs(GET_ANG(tb,n2))
       IF (inc > pi/2) THEN    !fix
         n2 = -1.*n2
-        inc = abs(get_ang(tb,n2))
+        inc = abs(GET_ANG(tb,n2))
       END IF
 
       iwave = iwave2
@@ -2241,7 +2241,7 @@ END SUBROUTINE REF_TRAN_PROB
 
 
 
-DOUBLE PRECISION FUNCTION dot_product_3(a,b)
+DOUBLE PRECISION FUNCTION DOT_PRODUCT_3(a,b)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
 !   ! This function calculates the dot product of two 3-component vectors!   !
 !   !                                                                    !   !
@@ -2253,14 +2253,14 @@ DOUBLE PRECISION FUNCTION dot_product_3(a,b)
     IMPLICIT NONE                                 !! Allow no implicit variables
     REAL(8) :: a(3),b(3)                          !! Input vectors
         
-    dot_product_3 = a(1)*b(1)+a(2)*b(2)+a(3)*b(3) !! Calculate the dot product
+    DOT_PRODUCT_3 = a(1)*b(1)+a(2)*b(2)+a(3)*b(3) !! Calculate the dot product
      
     RETURN   
-END FUNCTION dot_product_3
+END FUNCTION DOT_PRODUCT_3
 
 
 
-DOUBLE PRECISION FUNCTION get_ang(x1,x2)
+DOUBLE PRECISION FUNCTION GET_ANG(x1,x2)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
 !   ! This function gets the angle between two vectors.                  !   !
 !   !                                                                    !   !
@@ -2271,15 +2271,15 @@ DOUBLE PRECISION FUNCTION get_ang(x1,x2)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
    implicit             none
    REAL(8)           :: x1(3),x2(3)               !! two vectors
-   REAL              :: arcos                     !! Inverse cosine
-   REAL(8)           :: dot_product_3             !! The dot product
+   REAL              :: ARCOS                     !! Inverse cosine
+   REAL(8)           :: DOT_PRODUCT_3             !! The dot product
    REAL(8)           :: x1mag,x2mag
    
    x1mag = (dot_product(x1,x1))**.5
    x2mag = (dot_product(x2,x2))**.5
    
-!   get_ang = abs(arcos(dot_product_3(x1,x2)))     !! Calculate the angle
-   get_ang = abs(arcos(dot_product_3(x1,x2)/(x1mag*x2mag)))     !! fix
+!   GET_ANG = abs(ARCOS(DOT_PRODUCT_3(x1,x2)))     !! Calculate the angle
+   GET_ANG = abs(ARCOS(DOT_PRODUCT_3(x1,x2)/(x1mag*x2mag)))     !! fix
    
    
    ! FIX EXPLANATION
@@ -2290,14 +2290,14 @@ DOUBLE PRECISION FUNCTION get_ang(x1,x2)
    ! to generalize the function
    
    RETURN                                         !! Return
-END FUNCTION get_ang
+END FUNCTION GET_ANG
 
 
 
 
 
 
-SUBROUTINE unit_vector_3(n)
+SUBROUTINE UNIT_VECTOR_3(n)
 !   ! --- --------- --------- --------- --------- --------- --------- -- !   !
 !   ! This SUBROUTINE makes a unit vector out of input vector, n.        !   !
 !   !                                                                    !   !
@@ -2309,12 +2309,12 @@ SUBROUTINE unit_vector_3(n)
    IMPLICIT           NONE
    REAL(8)         :: n(3)
    REAL(8)         :: n_mag
-   REAL(8)         :: dot_product_3
+   REAL(8)         :: DOT_PRODUCT_3
    
-   n_mag = (dot_product_3(n,n))**0.5
+   n_mag = (DOT_PRODUCT_3(n,n))**0.5
    n(1:3) = n(1:3)/n_mag
    RETURN
-END SUBROUTINE unit_vector_3
+END SUBROUTINE UNIT_VECTOR_3
 
 
 
@@ -2335,7 +2335,7 @@ SUBROUTINE REF_TRAN_RAY(n1,ta1,v1,v2,itr,ta2)
    INTEGER :: i
    REAL(8) :: dp_tn
    REAL(8) :: v1,v2,vc !! Velocities of two media
-   REAL(8) :: dp,dot_product_3,b2_mag,dp2,sg
+   REAL(8) :: dp,DOT_PRODUCT_3,b2_mag,dp2,sg
    INTEGER :: itr,jj
 !
 !                          b1  ^
@@ -2371,11 +2371,11 @@ SUBROUTINE REF_TRAN_RAY(n1,ta1,v1,v2,itr,ta2)
        
    
 
-      CALL unit_vector_3(n1) 
-      CALL unit_vector_3(ta1)
+      CALL UNIT_VECTOR_3(n1) 
+      CALL UNIT_VECTOR_3(ta1)
       
       vc = v2/v1   !u1/u2
-      dp = dot_product_3(n1,ta1)
+      dp = DOT_PRODUCT_3(n1,ta1)
       sg = abs(dp)/dp
       
       ! Find transmitted vector
@@ -2383,7 +2383,7 @@ SUBROUTINE REF_TRAN_RAY(n1,ta1,v1,v2,itr,ta2)
       
       !For reflection, reflect vector on plane (normal is n1)
 			 IF (itr == -1) THEN
-				 dp2 = dot_product_3(ta2,n1)
+				 dp2 = DOT_PRODUCT_3(ta2,n1)
 				 DO jj = 1,3
 					 ta2(jj) = ta2(jj) - 2*dp2*n1(jj)
 				 END DO
@@ -2391,7 +2391,7 @@ SUBROUTINE REF_TRAN_RAY(n1,ta1,v1,v2,itr,ta2)
 
 !   
 !   
-!   dp = dot_product_3(ta1,n1)
+!   dp = DOT_PRODUCT_3(ta1,n1)
 !   
 !     
 !!   if (dp < 1) then
@@ -2408,7 +2408,7 @@ SUBROUTINE REF_TRAN_RAY(n1,ta1,v1,v2,itr,ta2)
 !    b2(jj) = v2/v1 * b1(jj)
 !   end do
 !
-!   b2_mag = (1.-dot_product_3(b2,b2))**0.5
+!   b2_mag = (1.-DOT_PRODUCT_3(b2,b2))**0.5
 !   
 !   do jj = 1, 3
 !!    write(6,*) 'DING',b2_mag
@@ -2418,7 +2418,7 @@ SUBROUTINE REF_TRAN_RAY(n1,ta1,v1,v2,itr,ta2)
 !   end do
 !   
 !   IF (itr == -1) THEN
-!     dp2 = dot_product_3(ta2,n1)
+!     dp2 = DOT_PRODUCT_3(ta2,n1)
 !     DO jj = 1,3
 !       ta2(jj) = ta2(jj) - 2*dp2*n1(jj)
 !     END DO
