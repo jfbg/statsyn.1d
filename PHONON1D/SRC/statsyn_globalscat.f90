@@ -582,7 +582,7 @@ PROGRAM STATSYN_GLOBALSCAT
 											!Calculate first ds_scat (distance to next scatterer)
 											CALL GET_DS_SCAT  !change ds_scat  FLAT
 										  
-								    CALL etime(elapsed,ttime1)
+
 
 									 
 										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 == 1))
@@ -626,8 +626,7 @@ PROGRAM STATSYN_GLOBALSCAT
 																						
 			
 										END DO
-										    CALL etime(elapsed,ttime2)
-										    WRITE(6,*) 'Loop:', ttime2-ttime1
+
 											 
 								 !Leaves WHILE loop when ds_SL < distance to next vel layer
 								 !Need to travel to next vel layer
@@ -636,6 +635,9 @@ PROGRAM STATSYN_GLOBALSCAT
 									 IF (ud == -1) dh = abs(z_act - z(iz_scat))
 									 !write(77,*) dh,z_act,z(iz_scat),z(iz_scat+1),ud,z_act + dh*ud
 									 CALL RAYTRACE_SCAT
+									 
+!							    CALL etime(elapsed,ttime2)
+!							    WRITE(6,*) 'Loop:', ttime2-ttime1
 									 
 									 !Set iz to what it would have been without scattering, based on direction
 									 iz = iz_scat+1
@@ -672,7 +674,7 @@ PROGRAM STATSYN_GLOBALSCAT
 				! ============ >>
 				! RECORD IF PHONON IS AT SURFACE
 				IF (iz <= 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
-				
+		    CALL etime(elapsed,ttime1)
 !			    iz = 1
 					ud = 1                                !RAY NOW MUST TRAVEL down
 					
@@ -762,8 +764,11 @@ PROGRAM STATSYN_GLOBALSCAT
 					! do not record this surface hit (cycle).
 					      surCYC1 = surCYC1 +1
 					END IF
-					        
+				
+        											    CALL etime(elapsed,ttime2)
+							    WRITE(6,*) 'Surface:', ttime2-ttime1	        
         END IF
+
 				! RECORD IF PHONON IS AT SURFACE
 				! ============ <<
 
