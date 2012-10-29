@@ -34,7 +34,7 @@ MODULE PHO_VARS			! Make variables global
 				REAL(8)          pi,P0
 				INTEGER       n180,idelt1,idelt2
 				REAL(8)       :: angst                 !! Starting angle for trace
-				INTEGER		 :: iztrack,ixtrack
+				INTEGER		 :: iztrack,ixtrackm,loopcount
 				REAL(8)       :: deg2km
 				REAL(8)          corelayer
 				

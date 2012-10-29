@@ -584,10 +584,13 @@ PROGRAM STATSYN_GLOBALSCAT
 										  
 
 
+									 loopcount = 0
+									 CALL etime(elapsed,ttime1)
 									 
 										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 == 1))
 										
-
+                    loopcount = loopcount +1
+                    
 												!Calculare what would dh be IF phonon only travelled ds_scat km
 												dh = ds_scat*abs(cos(asin(p*vf(iz_scat,iwave))))   !FLAT
 
@@ -626,6 +629,9 @@ PROGRAM STATSYN_GLOBALSCAT
 																						
 			
 										END DO
+										
+										CALL etime(elapsed,ttime2)
+							    WRITE(6,*) 'Loop:', ttime2-ttime1,'count:',loopcount
 
 											 
 								 !Leaves WHILE loop when ds_SL < distance to next vel layer
@@ -636,8 +642,6 @@ PROGRAM STATSYN_GLOBALSCAT
 									 !write(77,*) dh,z_act,z(iz_scat),z(iz_scat+1),ud,z_act + dh*ud
 									 CALL RAYTRACE_SCAT
 									 
-!							    CALL etime(elapsed,ttime2)
-!							    WRITE(6,*) 'Loop:', ttime2-ttime1
 									 
 									 !Set iz to what it would have been without scattering, based on direction
 									 iz = iz_scat+1
@@ -674,7 +678,6 @@ PROGRAM STATSYN_GLOBALSCAT
 				! ============ >>
 				! RECORD IF PHONON IS AT SURFACE
 				IF (iz <= 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
-		    CALL etime(elapsed,ttime1)
 !			    iz = 1
 					ud = 1                                !RAY NOW MUST TRAVEL down
 					
@@ -764,9 +767,7 @@ PROGRAM STATSYN_GLOBALSCAT
 					! do not record this surface hit (cycle).
 					      surCYC1 = surCYC1 +1
 					END IF
-				
-        											    CALL etime(elapsed,ttime2)
-							    WRITE(6,*) 'Surface:', ttime2-ttime1	        
+					        
         END IF
 
 				! RECORD IF PHONON IS AT SURFACE
