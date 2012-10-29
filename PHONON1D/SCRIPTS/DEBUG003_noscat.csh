@@ -4,6 +4,7 @@
 # Set synthetic parameters
 #
 
+
 set ray_par    = "0.0 0.1668 0.2931"
 @ t_start      = 0
 @ t_max        = 4500			# 75 minutes
