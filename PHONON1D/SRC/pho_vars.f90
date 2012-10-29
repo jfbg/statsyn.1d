@@ -39,6 +39,10 @@ MODULE PHO_VARS			! Make variables global
 				REAL(8)          corelayer
 				
 				CHARACTER*100 IFile,ofile,ofile2,logfile
+				
+				! Measure elapsed time
+				REAL        elapsed(2)
+				REAL        totaltime
 
 				
 				! SURFACE HIT

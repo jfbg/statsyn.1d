@@ -397,8 +397,8 @@ PROGRAM STATSYN_GLOBALSCAT
        CALL srand(seed)    
 	     r0 = rand()    !First rand output not random
                         ! It is seed (clock) depENDent
-        write(6,*) 'seed:',seed,I,r2s,ntime(8)
-        write(6,*) 'ntime:',ntime(5:8)
+!        write(6,*) 'seed:',seed,I,r2s,ntime(8)
+!        write(6,*) 'ntime:',ntime(5:8)
       ! ============ <<
        
 				 
@@ -829,6 +829,11 @@ PROGRAM STATSYN_GLOBALSCAT
 !				
 !      END DO
       WRITE(6,*) 'Synthetic outputs done'
+      
+      CALL etime(elapsed,totaltime)
+      WRITE(6,FMT = 871) totaltime,I-1,totaltime/(I-1)
+871   FORMAT ('Total time = ',f9.2,'s for ',i8,' phonons (',f3.2,'s/p)')
+
       
       !Debug
       WRITE(6,*) 'Total Surface records = ', surfcount
