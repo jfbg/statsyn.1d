@@ -1078,7 +1078,7 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
 
       CALL etime(elapsed,ttime2)
       
-      WRITE(6,*) 'REFTRAN_SH:',ttime2-ttime1
+!      WRITE(6,*) 'REFTRAN_SH:',ttime2-ttime1
       
       RETURN
 END SUBROUTINE REFTRAN_SH
@@ -1202,7 +1202,7 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
 
       CALL etime(elapsed,ttime2)
       
-      WRITE(6,*) 'RTCOEF2:',ttime2-ttime1
+!      WRITE(6,*) 'RTCOEF2:',ttime2-ttime1
       
       RETURN
 END SUBROUTINE RTCOEF2
@@ -2038,6 +2038,8 @@ SUBROUTINE REF_TRAN_PROB
       REAL(8) :: pp,ps                    !! Ray parameters for P & S waves
       REAL(8) :: GET_ANG,ang2,p_in,tttt
       
+      
+      CALL etime(elapsed,ttime1)
 
 !      WRITE(6,*) 'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv',ip,iwave,I,NITR
       p_in = p
@@ -2265,6 +2267,10 @@ SUBROUTINE REF_TRAN_PROB
             
 
 !      WRITE(6,*) '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',ip,I,NITR
+
+      CALL etime(elapsed,ttime2)
+      
+      WRITE(6,*) 'REF_TRAN_PROB:',ttime2-ttime1
       RETURN
 END SUBROUTINE REF_TRAN_PROB
 
