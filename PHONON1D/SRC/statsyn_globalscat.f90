@@ -378,6 +378,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 			!Debug
 			surfcount = 0.
+      CALL etime(elapsed,ttimestart)
 			
       DO I = 1, ntr   !FOR EACH TRACE -- DOLOOP_001
       
@@ -835,8 +836,8 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(6,*) 'Synthetic outputs done'
       
       CALL etime(elapsed,totaltime)
-      WRITE(6,FMT = 871) totaltime,I-1,totaltime/(I-1)
-871   FORMAT ('Total time = ',f9.2,'s for ',i8,' phonons (',f3.2,'s/p)')
+      WRITE(6,FMT = 871) totaltime-ttimestart,I-1,(totaltime-ttimestart)/(I-1)
+871   FORMAT ('Total time = ',f9.2,'s for ',i8,' phonons (',f7.5,'s/p)')
 
       
       !Debug

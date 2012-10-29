@@ -11,11 +11,11 @@ set ray_par    = "0.0 0.1668 0.2931"
 set d_range    = "0 180 91"
 set model      = "2"	#2 for Moon
 set mx_scat_dp = "10"
-set n_phonon   = "50"
+set n_phonon   = "1000"
 
 # SCATTERING
-set bg_scat    = 0.0
-set prob_scat  = 0.20
+set bg_scat    = 0.000000001
+set prob_scat  = 0.000000001
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
