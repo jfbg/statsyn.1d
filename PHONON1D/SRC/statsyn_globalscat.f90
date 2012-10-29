@@ -387,10 +387,11 @@ PROGRAM STATSYN_GLOBALSCAT
        CALL DATE_AND_TIME(values=ntime)
        nclock = ntime(1)*ntime(2)*ntime(3)*ntime(5)*ntime(6)*ntime(7)*ntime(8)
        CALL RANDOM_NUMBER(r2s)
-       seed = (nclock*r2s)! + 11 * (/ (k - 1, k = 1, nseed) /)      
+       seed = abs((nclock*r2s))! + 11 * (/ (k - 1, k = 1, nseed) /)      
        CALL srand(seed)    
 	     r0 = rand()    !First rand output not random
                         ! It is seed (clock) depENDent
+        write(6,*) 'seed:',seed,I
       ! ============ <<
        
 				 
@@ -502,7 +503,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			 z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
 
 			 !DEBUG
-!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
+       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
       
 			
 				! ============ >>
@@ -608,7 +609,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 
 										 !DEBUG
-!										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
+										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
 																						
 			
 										END DO
@@ -800,26 +801,26 @@ PROGRAM STATSYN_GLOBALSCAT
       wf(1,1,2) = 1.
       wf(1,1,3) = 1.
       
-      DO ic = 1, 3
-      ofile2 = trim(ofile)//'.'//cmp(ic)
-
-      OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
-       
-       WRITE(22,*) nt,nx
-       WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
-      
-				DO I = 1, nt
-					DO J = 1, nx
-						IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
-					END DO
-					WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
-				END DO
-
-      
-				CLOSE(22)
-				
-				
-      END DO
+      !DO ic = 1, 3
+!      ofile2 = trim(ofile)//'.'//cmp(ic)
+!
+!      OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+!       
+!       WRITE(22,*) nt,nx
+!       WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
+!      
+!				DO I = 1, nt
+!					DO J = 1, nx
+!						IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
+!					END DO
+!					WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
+!				END DO
+!
+!      
+!				CLOSE(22)
+!				
+!				
+!      END DO
       WRITE(6,*) 'Synthetic outputs done'
       
       !Debug
