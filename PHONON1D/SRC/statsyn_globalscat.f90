@@ -380,9 +380,13 @@ PROGRAM STATSYN_GLOBALSCAT
 			surfcount = 0.
       CALL etime(elapsed,ttimestart)
 			
+			
+			
       DO I = 1, ntr   !FOR EACH TRACE -- DOLOOP_001
       
-      CALL etime(elapsed,ttime3)
+      WRITE(6,*) '---->',I,'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv'
+      
+      CALL etime(elapsed,tt1)
       
       
 	  ! ============ >>
@@ -500,6 +504,9 @@ PROGRAM STATSYN_GLOBALSCAT
 			 ! Start single ray tracing while loop
 			 ! ====================== >>
 			 
+       CALL etime(elapsed,tt2)
+       WRITE(6,*) '       Params:',tt2-tt1,I
+			 
        DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
        
       
@@ -528,7 +535,7 @@ PROGRAM STATSYN_GLOBALSCAT
 				! ============ >>
 				! SCATTERING LAYER
 				
-				CALL etime(elapsed,ttime1)
+
 	
 						! THE PHONON CAN BE SCATTERED AT ALL DEPTHS. THE ONLY THING THAT CHANGES
 						! IS THE SCATTERING PROBABILITY, WHICH DEPENDS ON THE DEPTH.
@@ -544,6 +551,9 @@ PROGRAM STATSYN_GLOBALSCAT
   					!Check IF scatter at interface
 					  IF ((scat_prob > 0.).AND.(iz > 1)) CALL INTERFACE_SCATTER
 						IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
+						
+       CALL etime(elapsed,tt3)
+       WRITE(6,*) '       Prescat :',tt3-tt2,I
 
 					  IF ((scat_prob > 0.).AND.(iz > 1)) THEN
 		
@@ -641,6 +651,10 @@ PROGRAM STATSYN_GLOBALSCAT
 									 !Set iz to what it would have been without scattering, based on direction
 									 iz = iz_scat+1
 									 CALL INTERFACE_NORMAL
+									 
+									 
+       CALL etime(elapsed,tt4)
+       WRITE(6,*) '       Allscat:',tt4-tt3,I
 					    	   
 			   
 
@@ -652,10 +666,13 @@ PROGRAM STATSYN_GLOBALSCAT
 										 ! RAY TRACING IN LAYER	
 										 ! ============ <<
 										 
+       CALL etime(elapsed,tt5)
+       WRITE(6,*) '   NoscatInscat:',tt5-tt3,I
+										 
 							 END IF
 							 
-        CALL etime(elapsed,ttime2)
-        WRITE(6,*) 'Scattime:',ttime2-ttime1
+
+
         
 															
     		ELSE IF (iz > 1) THEN !No scattering in layer (make it faster IF scat_prob == 0.)
@@ -667,10 +684,15 @@ PROGRAM STATSYN_GLOBALSCAT
 					! RAY TRACING IN LAYER	
 					! ============ <<
 					
+			 CALL etime(elapsed,tt6)
+       WRITE(6,*) '       Noscat  :',tt6-tt3,I
+					
 				END IF !SCATTERING LAYER IF    					
 				! SCATTERING LAYER
 				! ============ <<
 				
+       CALL etime(elapsed,tt7)
+       WRITE(6,*) '       ScatLoop:',tt7-tt3,I				
 				
 				
 				
@@ -780,7 +802,8 @@ PROGRAM STATSYN_GLOBALSCAT
 			 ! Close single ray tracing while loop
 			 ! ====================== <<			 
 			 
-			 
+       CALL etime(elapsed,tt8)
+       WRITE(6,*) '        Surface:',tt8-tt7,I							 
 			 			 
 			 IF (mod(float(I),float(ntr)/20.) == 0) THEN !STATUS REPORT
         WRITE(6,*) nint(float(I)/float(ntr)*100),'% COMPLETE'
@@ -805,8 +828,15 @@ PROGRAM STATSYN_GLOBALSCAT
     
      !WRITE(79,*) I,NITR,surfcount,surCYC1,x,iz,scat_time,logEND,logperc
 
+
+!      WRITE(6,*) I,'time:',ttime4-ttime3
+
+       CALL etime(elapsed,tt9)
+       WRITE(6,*) '           Rest:',tt9-tt8,I				
+       
        CALL etime(elapsed,ttime4)      
-      WRITE(6,*) I,'time:',ttime4-ttime3
+      
+      WRITE(6,*) '---->',I,ttime4-ttime3,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
 
 			END DO	!CLOSE MAIN RAY TRACING LOOP - DOLOOP_001
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1065,7 +1095,7 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
 !       j2   = pi/2. 
 !      END IF
 
-      CALL etime(elapsed,ttime1)
+
       
       vb1    = cmplx(b1,  0.)
       rho1   = cmplx(rh1, 0.)
@@ -1091,9 +1121,6 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
       !Check for total internal reflection !fix
       IF (b2*p > 1) at = 0
 
-      CALL etime(elapsed,ttime2)
-      
-!      WRITE(6,*) 'REFTRAN_SH:',ttime2-ttime1
       
       RETURN
 END SUBROUTINE REFTRAN_SH
@@ -1146,7 +1173,6 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
  				REAL        elapsed(2)
 				REAL        totaltimem,ttime1,ttime2
 
-      CALL etime(elapsed,ttime1)
       
       va1    = cmplx(vp1,  0.)                   !MAKE VEL & DENSITY COMPLEX
       vb1    = cmplx(vs1,  0.)
@@ -1212,12 +1238,7 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       IF (vp1*pin > 1) rrp = 0
       IF (vs1*pin > 1) rrs = 0
       
-      
-!      WRITE(6,*) 'HI1:',a,b,c,d,E,F,G,H,DEN
 
-      CALL etime(elapsed,ttime2)
-      
-!      WRITE(6,*) 'RTCOEF2:',ttime2-ttime1
       
       RETURN
 END SUBROUTINE RTCOEF2
@@ -2054,7 +2075,6 @@ SUBROUTINE REF_TRAN_PROB
       REAL(8) :: GET_ANG,ang2,p_in,tttt
       
       
-      CALL etime(elapsed,ttime1)
 
 !      WRITE(6,*) 'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv',ip,iwave,I,NITR
       p_in = p
@@ -2283,9 +2303,7 @@ SUBROUTINE REF_TRAN_PROB
 
 !      WRITE(6,*) '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',ip,I,NITR
 
-      CALL etime(elapsed,ttime2)
-      
-!      WRITE(6,*) 'REF_TRAN_PROB:',ttime2-ttime1
+
       RETURN
 END SUBROUTINE REF_TRAN_PROB
 
