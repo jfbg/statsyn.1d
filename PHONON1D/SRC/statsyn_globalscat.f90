@@ -582,10 +582,11 @@ PROGRAM STATSYN_GLOBALSCAT
 											!Calculate first ds_scat (distance to next scatterer)
 											CALL GET_DS_SCAT  !change ds_scat  FLAT
 										  
+								    CALL etime(elapsed,ttime1)
+
 									 
 										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 == 1))
 										
-										    CALL etime(elapsed,ttime1)
 
 												!Calculare what would dh be IF phonon only travelled ds_scat km
 												dh = ds_scat*abs(cos(asin(p*vf(iz_scat,iwave))))   !FLAT
@@ -622,12 +623,11 @@ PROGRAM STATSYN_GLOBALSCAT
 
 										 !DEBUG
 !										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
-
-										    CALL etime(elapsed,ttime2)
-										    WRITE(6,*) 'Loop:', ttime2-ttime1
 																						
 			
 										END DO
+										    CALL etime(elapsed,ttime2)
+										    WRITE(6,*) 'Loop:', ttime2-ttime1
 											 
 								 !Leaves WHILE loop when ds_SL < distance to next vel layer
 								 !Need to travel to next vel layer
