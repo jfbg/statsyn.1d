@@ -1035,6 +1035,8 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
       COMPLEX       vb1,rho1,vb2,rho2,psub
       COMPLEX       cone,ctwo,sj1,sj2,cj1,cj2
       COMPLEX       DD,car,cat
+				REAL        elapsed(2)
+				REAL        totaltimem,ttime1,ttime2
 !      pi   = atan(1.)*4.
 !      r2d = 180./pi
 !      IF (p*b1 <= 1.) THEN
@@ -1047,6 +1049,8 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
 !      ELSE
 !       j2   = pi/2. 
 !      END IF
+
+      CALL etime(elapsed,ttime1)
       
       vb1    = cmplx(b1,  0.)
       rho1   = cmplx(rh1, 0.)
@@ -1071,6 +1075,10 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
       
       !Check for total internal reflection !fix
       IF (b2*p > 1) at = 0
+
+      CALL etime(elapsed,ttime2)
+      
+      WRITE(6,*) 'REFTRAN_SH:',ttime2-ttime1
       
       RETURN
 END SUBROUTINE REFTRAN_SH
@@ -1120,6 +1128,10 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       COMPLEX      trm1,trm2                     !COMPLEX SCRATCH
       COMPLEX      arp,ars,atp,ats               !REFLECTION & TRANSMISSION COEFS
       REAL(8)         rrp,rrs,rtp,rts               !REFLECTION & TRANSMISSION COEFS
+ 				REAL        elapsed(2)
+				REAL        totaltimem,ttime1,ttime2
+
+      CALL etime(elapsed,ttime1)
       
       va1    = cmplx(vp1,  0.)                   !MAKE VEL & DENSITY COMPLEX
       vb1    = cmplx(vs1,  0.)
@@ -1187,9 +1199,13 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       
       
 !      WRITE(6,*) 'HI1:',a,b,c,d,E,F,G,H,DEN
+
+      CALL etime(elapsed,ttime2)
+      
+      WRITE(6,*) 'RTCOEF2:',ttime2-ttime1
       
       RETURN
-END SUBROUTINE rtcoef2
+END SUBROUTINE RTCOEF2
 
 
 SUBROUTINE FLATTEN(z_s,vs,rhs,z_f,vf_f,rh_f,erad)
