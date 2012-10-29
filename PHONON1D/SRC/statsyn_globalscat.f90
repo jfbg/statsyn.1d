@@ -385,13 +385,14 @@ PROGRAM STATSYN_GLOBALSCAT
 	  ! ============ >>
       ! ----- Initialize Randomization -----			
        CALL DATE_AND_TIME(values=ntime)
-       nclock = ntime(1)*ntime(2)*ntime(3)*ntime(5)*ntime(6)*ntime(7)*ntime(8)
+!       nclock = ntime(1)*ntime(2)*ntime(3)*ntime(5)*ntime(6)*ntime(7)*ntime(8)
+       nclock = ntime(5)*ntime(6)*ntime(7)*ntime(8)
        CALL RANDOM_NUMBER(r2s)
        seed = abs((nclock*r2s))! + 11 * (/ (k - 1, k = 1, nseed) /)      
        CALL srand(seed)    
 	     r0 = rand()    !First rand output not random
                         ! It is seed (clock) depENDent
-        write(6,*) 'seed:',seed,I
+!        write(6,*) 'seed:',seed,I
       ! ============ <<
        
 				 
