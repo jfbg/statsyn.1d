@@ -1,7 +1,7 @@
 MODULE PHO_VARS			! Make variables global
 				
 				IMPLICIT NONE
-				SAVE
+				
 				
 				
 				INTEGER, PARAMETER :: nlay0=1000, nt0=144000, nx0=91
