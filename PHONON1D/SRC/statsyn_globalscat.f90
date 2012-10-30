@@ -520,7 +520,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			 z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
 
 			 !DEBUG
-!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
+       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1
       
 			
 				! ============ >>
@@ -542,20 +542,23 @@ PROGRAM STATSYN_GLOBALSCAT
 						
 								!Set depth-dependent scattering probability
 								scat_prob = BG_prob			!Assume background probability at first.
-								IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) scat_prob = SL_prob			
+								IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) scat_prob = SL_prob
+!								WRITE(78,*) iz,ud,scat_prob			
 								   !Scattering layer probability
 								!IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
 								   !Background probability IF leaving scat layer from at base
 								IF (iz >= nlay-2) scat_prob = 0. !no scattering near center of Moon
-
+!								WRITE(78,*) iz,ud,scat_prob
   					!Check if scatter at interface
   					r0 = rand()
 					  IF ((scat_prob > 0.).AND.(iz > 1).AND.(r0 < scat_prob)) THEN   !CALL INTERFACE_SCATTER
+!					      WRITE(78,*) 'YAY!!!!'
 								ud_pre = ud  !save current ud before scattering it.
-								IF (ud == -1) iz_scat = iz
+								IF (ud == -1) iz_scat = iz -1
 								IF (ud ==  1) iz_scat = iz -1
+!								WRITE(78,*) p,ud,iz
 								CALL REF_TRAN_PROB   !Scatter
-								
+!								WRITE(78,*) p,ud,iz								
 								!Fix iz if direction has changed
 								IF ((ud_pre == 1).AND.(ud == -1))  iz = iz-1
 								IF ((ud_pre == -1).AND.(ud == 1))  iz = iz+1
@@ -621,7 +624,7 @@ PROGRAM STATSYN_GLOBALSCAT
 															!Is phonon scattered at scatterer or does it go through?
 															r0 = rand()
 															IF (r0 < scat_prob) THEN
-																 CALL REF_TRAN_PROB
+																 CALL REF_TRAN_PROB   !Scatter
 															END IF														
 															
 															! Calculate new ds_SL based on new ud and p (if it got scattered)
@@ -641,7 +644,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 
 										 !DEBUG
-!										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob
+										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2
 																						
 			
 										END DO
@@ -2080,15 +2083,16 @@ SUBROUTINE REF_TRAN_PROB
       INTEGER :: ip2,irt
       INTEGER :: iwave2,rin
       REAL(8) :: theta,phi,theta2,phi2
-      REAL(8) :: pp,ps                    !! Ray parameters for P & S waves
+      REAL(8) :: pp,ps,p_out                    !! Ray parameters for P & S waves
       REAL(8) :: GET_ANG,ang2,p_in,tttt
       REAL       rrr1,rrr2
       
       CALL etime(elapsed,rrr1)      
 
+      p_out = -1
       
-
-!      WRITE(6,*) 'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv',ip,iwave,I,NITR
+      DO WHILE (p_out <= 0)
+      
       p_in = p
       
       !Zero coefficient vectors
@@ -2114,12 +2118,7 @@ SUBROUTINE REF_TRAN_PROB
       n1(2) = sin(phi2)*sin(theta2)
       n1(3) = cos(phi2)
 
-      !NEEDFIX
-!      n1(1:3) = 0.
-!      n1(3) = 1.     !if n1 is vertical, p_in and p are the same if ip == 1 and ip == 2, which is good.
-
       CALL UNIT_VECTOR_3(n1)
-!      write(6,*) 'n1:',n1      
      
       ! Sin & Cos of inc and az      
       sa = sin(phi-phi2)
@@ -2134,32 +2133,17 @@ SUBROUTINE REF_TRAN_PROB
         n1 = -1.*n1
         ang2 = abs(GET_ANG(ta,n1))
       END IF
-
-!      write(6,*) '  ang2:',ang2/pi*180
       
       pp = sin(ang2)/vf(iz_scat,1)              !! P-wave ray parameter
       ps = sin(ang2)/vf(iz_scat,2)              !! S-wave ray parameter
-      
-!      write(6,*) '  pi:',p_in
-!      write(6,*) '  pp:',pp
-!      write(6,*) '  ps:',ps
 
-!! Create random velocity contrast between 0.05 and -0.05 (or value of vel_perturb)
+
+      ! Create random velocity contrast between 0.05 and -0.05 (or value of vel_perturb)
       fact = 1.0 + vel_perturb*((rand()-0.5)*2)!! Factor of impedence contrast 
       vp2 = vf(iz_scat,1)*fact                  !! New P & S wave velocities for other side
       vs2 = vf(iz_scat,2)*fact                  !!
       rh2 = rh(iz_scat)*fact                    !! 
       
-!      CALL RTCOEF2(0.0996D0,10d0,5d0,3.3d0,15d0,7.5d0,4.5d0,1,rt(1),rt(2),rt(3),rt(4))
-!      write(6,*) 'pppppppppp:   ',rt(1:6)
-!   rt(1:4) = -0.91725403070449829      -0.18144103884696960       -2.0106177777051926E-002 -0.26910814642906189 
-      !rt(3), p-transm, should be 0 in this case bcs this is an ang of 80, which should be pure reflection.
-      
-!       CALL  REFTRAN_SH(0.0996d0,10d0,15d0,3.3d0,4.5d0,rt(1),rt(2))
-!       WRITE(6,*) 'pppppppppppppp:',rt(1:2)
-      
-!      tttt = 1.2
-!      WRITE(6,*) '>>>>>>>>>>>>>>>>',asin(1.2)
       
       IF (ip == 1) THEN                      !! P Incident
        CALL RTCOEF2(pp,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),vp2,vs2,rh2,1,rt(1),rt(2),rt(3),rt(4)) !! P-SV reflected & transmitted (Pr=1,Sr=2,Pt=3,St=4)
@@ -2173,7 +2157,6 @@ SUBROUTINE REF_TRAN_PROB
        DO jj = 1, 10                        !! If errors, zero them 
         IF (isnan(rt(jj))) rt(jj) = 0.
        END DO
-
        
       ELSE
        CALL REFTRAN_SH(ps,vf(iz_scat,2),vs2,rh(iz_scat),rh2,rt(9),rt(10))   !! SH reflected & transmitted amplitudes
@@ -2201,9 +2184,7 @@ SUBROUTINE REF_TRAN_PROB
        END IF
       END IF
       
-!      WRITE(6,*) '  rt:',rt(1:6)
-
-            
+           
       !Sumcum coefficients
       ref_tran_sum = 0.                                    !! Zero total prob normalization
       art(1)= abs(rt(1))                                   !! prob=abs(ref or trans coeff)
@@ -2214,9 +2195,17 @@ SUBROUTINE REF_TRAN_PROB
       !Normalize cumulative coefficients
       ref_tran_sum = art(6)   
       art = art/ref_tran_sum  
-!      WRITE(6,*) ' art:',art(1:6)
             
-      IF (isnan(ref_tran_sum).or.ref_tran_sum==0.) RETURN  !! ERROR SO SKIP
+      IF (isnan(ref_tran_sum).or.ref_tran_sum==0.) THEN
+      
+       IF (isnan(ref_tran_sum))   THEN
+!             write(78,*) phi
+!            WRITE(78,*) 'NaN AHAHAHAHAHAH'
+!            WRITE(78,*) rt(1:6)
+        END IF
+!       IF (ref_tran_sum == 0)        WRITE(78,*) '000 AHAHAHAHAHAH'
+        RETURN  !! ERROR SO SKIP
+      END IF
       
      
       r0 = rand()
@@ -2247,13 +2236,9 @@ SUBROUTINE REF_TRAN_PROB
        rin = 6
       END IF   
       
-!     write(6,*) '  rin:',rin,r0      
-
-     
       iwave2 = ip2                                        !! Set output wave velocity P=1,S=2
       IF (ip2 == 3) iwave2 = 2
 
-     
       IF (irt==1) THEN                                    !! Velocity in ref/trans layer
        IF (ip2/=1) THEN
         v2 = vs2
@@ -2263,8 +2248,6 @@ SUBROUTINE REF_TRAN_PROB
       ELSE
        v2  = vf(iz_scat,iwave2)
       ENDIF
-      
-!      WRITE(6,*) '  n1:',n1
       
       ! Get the new trajectory
       CALL ref_tran_ray(n1,ta,vf(iz_scat,iwave),v2,irt,tb)     
@@ -2284,11 +2267,6 @@ SUBROUTINE REF_TRAN_PROB
         x_sign = 1
       END IF
       
-      
-!      write(6,*) '  V ===>', vf(iz_scat,iwave),v2,irt
-!      write(6,*) ta
-!      write(6,*) tb
-      
       CALL ucar2sphr(tb(1),tb(2),tb(3),az,inc)                 !! get azimuth & inclination
       n2(1:3) = 0
       n2(3) = 1 !Make vertical vector, normal to horizontal plane
@@ -2300,23 +2278,16 @@ SUBROUTINE REF_TRAN_PROB
 
       iwave = iwave2
       ip = ip2
-      
-!      IF (inc < 0) THEN   
-!!         x_sign = -x_sign
-!         inc = -inc
-!!         WRITE(6,*) 'JKHGKJHGJKHGJKHGKJJHGJHGKJH'
-!      END IF
-      
+
 
       p = sin(inc)/vf(iz_scat,iwave2)
-!      WRITE(6,*) '  po:',p
-!      WRITE(6,*) '  in=',asin(vf(iz_scat,iwave2)*p_in)/pi*180,'out=',inc/pi*180
-            
-
-!      WRITE(6,*) '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',ip,I,NITR
+      p_out = p
+      
+      END DO
 
       CALL etime(elapsed,rrr2)
-      WRITE(6,*) 'tt:',rrr2-rrr1
+!      WRITE(6,*) 'tt:',rrr2-rrr1
+!      WRITE(78,*) 'tt:',rrr2-rrr1
       
 
       RETURN

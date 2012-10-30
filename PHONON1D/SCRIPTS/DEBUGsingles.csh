@@ -22,11 +22,11 @@ set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = .1
 
 # Source attenuation
-set dQdfstyle  = 1
+set dQdfstyle  = 25
 
 
 set file_out   = "D003_noscat"
-set model_name = "S_VPREMOON_Qp_nocrust"
+set model_name = "S_VPREMOON_Qp_ori"
 # set model_name = "DEBUG_1VEL_10km"
 
 @ n_depth = 1     ## Number of depths to use
