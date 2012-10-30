@@ -504,11 +504,11 @@ PROGRAM STATSYN_GLOBALSCAT
 			 ! Start single ray tracing while loop
 			 ! ====================== >>
 			 
-       CALL etime(elapsed,tt2)
-       !WRITE(6,*) '       Params:',tt2-tt1,I
 			 
        DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
        
+       CALL etime(elapsed,tt2)
+       !WRITE(6,*) '       Params:',tt2-tt1,I
       
        NITR = NITR + 1
        scat_FLAG = 0
