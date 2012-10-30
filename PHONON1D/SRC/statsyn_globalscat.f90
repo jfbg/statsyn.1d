@@ -505,7 +505,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			 ! ====================== >>
 			 
        CALL etime(elapsed,tt2)
-       WRITE(6,*) '       Params:',tt2-tt1,I
+       !WRITE(6,*) '       Params:',tt2-tt1,I
 			 
        DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
        
@@ -553,7 +553,7 @@ PROGRAM STATSYN_GLOBALSCAT
 						IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
 						
        CALL etime(elapsed,tt3)
-       WRITE(6,*) '       Prescat :',tt3-tt2,I
+       !WRITE(6,*) '       Prescat :',tt3-tt2,I
        WRITE(76,*) tt3-tt2
 
 					  IF ((scat_prob > 0.).AND.(iz > 1)) THEN
@@ -655,7 +655,7 @@ PROGRAM STATSYN_GLOBALSCAT
 									 
 									 
        CALL etime(elapsed,tt4)
-       WRITE(6,*) '       Allscat:',tt4-tt3,I
+       !WRITE(6,*) '       Allscat:',tt4-tt3,I
 					    	   
 			   
 
@@ -668,7 +668,7 @@ PROGRAM STATSYN_GLOBALSCAT
 										 ! ============ <<
 										 
        CALL etime(elapsed,tt5)
-       WRITE(6,*) '   NoscatInscat:',tt5-tt3,I
+       !WRITE(6,*) '   NoscatInscat:',tt5-tt3,I
 										 
 							 END IF
 							 
@@ -686,14 +686,14 @@ PROGRAM STATSYN_GLOBALSCAT
 					! ============ <<
 					
 			 CALL etime(elapsed,tt6)
-       WRITE(6,*) '       Noscat  :',tt6-tt3,I
+       !WRITE(6,*) '       Noscat  :',tt6-tt3,I
 					
 				END IF !SCATTERING LAYER IF    					
 				! SCATTERING LAYER
 				! ============ <<
 				
        CALL etime(elapsed,tt7)
-       WRITE(6,*) '       ScatLoop:',tt7-tt3,I				
+       !WRITE(6,*) '       ScatLoop:',tt7-tt3,I				
 				
 				
 				
@@ -804,7 +804,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			 ! ====================== <<			 
 			 
        CALL etime(elapsed,tt8)
-       WRITE(6,*) '        Surface:',tt8-tt7,I							 
+       !WRITE(6,*) '        Surface:',tt8-tt7,I							 
 			 			 
 			 IF (mod(float(I),float(ntr)/20.) == 0) THEN !STATUS REPORT
         WRITE(6,*) nint(float(I)/float(ntr)*100),'% COMPLETE'
@@ -833,11 +833,11 @@ PROGRAM STATSYN_GLOBALSCAT
 !      WRITE(6,*) I,'time:',ttime4-ttime3
 
        CALL etime(elapsed,tt9)
-       WRITE(6,*) '           Rest:',tt9-tt8,I				
+       !WRITE(6,*) '           Rest:',tt9-tt8,I				
        
        CALL etime(elapsed,ttime4)      
       
-      WRITE(6,*) '---->',I,ttime4-ttime3,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
+      !WRITE(6,*) '---->',I,ttime4-ttime3,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
 
 			END DO	!CLOSE MAIN RAY TRACING LOOP - DOLOOP_001
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1876,7 +1876,7 @@ SUBROUTINE INTERFACE_SCATTER
       
       CALL etime(elapsed,time11)
       
-      WRITE(6,*) '--------->',time11-time10
+      !WRITE(6,*) '--------->',time11-time10
  
 			
 			RETURN	
@@ -2081,7 +2081,10 @@ SUBROUTINE REF_TRAN_PROB
       REAL(8) :: theta,phi,theta2,phi2
       REAL(8) :: pp,ps                    !! Ray parameters for P & S waves
       REAL(8) :: GET_ANG,ang2,p_in,tttt
+      REAL       rrr1,rrr2
       
+      CALL etime(elapsed,rrr1)      
+
       
 
 !      WRITE(6,*) 'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv',ip,iwave,I,NITR
@@ -2311,6 +2314,9 @@ SUBROUTINE REF_TRAN_PROB
 
 !      WRITE(6,*) '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',ip,I,NITR
 
+      CALL etime(elapsed,rrr2)
+      WRITE(6,*) 'tt:',rrr2-rrr1
+      
 
       RETURN
 END SUBROUTINE REF_TRAN_PROB
