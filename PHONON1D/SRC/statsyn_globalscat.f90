@@ -554,6 +554,7 @@ PROGRAM STATSYN_GLOBALSCAT
 						
        CALL etime(elapsed,tt3)
        WRITE(6,*) '       Prescat :',tt3-tt2,I
+       WRITE(76,*) tt3-tt2
 
 					  IF ((scat_prob > 0.).AND.(iz > 1)) THEN
 		
