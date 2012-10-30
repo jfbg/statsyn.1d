@@ -5,13 +5,13 @@ PROGRAM STATSYN_GLOBALSCAT
 ! Scattering is isotropic
 ! Scattering length-scale follows power law (declared in running shell)
 ! Qi is frequency depENDent (Need to change form of dQ/df accordingly
-!														(search for rdQdf to modIFy it)
+!														(search for rdQdf to modify it)
 !
 ! Scattering is possible in the surface scattering layer and as a backgroung scattering,
 ! which occurs everywhere outside of the scattering layer and has a low scat probability.
 ! Both probabilities have to be declared in the running shell script.
 !
-! The distance between scatterers can be calculated dIFferently based on the location within
+! The distance between scatterers can be calculated differently based on the location within
 ! or without the scattering layer. Global background scattering scale-length is constant 
 ! (at this point) and set to 10km. This can be changed in the GET_DS_SCAT SUBROUTINE.
 !
@@ -75,7 +75,7 @@ PROGRAM STATSYN_GLOBALSCAT
 !			----- GET INPUTS FROM USER-----
       
       WRITE(6,*) 'ENTER SEISMIC VELOCITY MODEL FILE NAME'
-      READ (*,'(A)') IFile
+      READ (*,'(A)') ifile
 
 25    WRITE(6,'(A)') 'ENTER RAY PARAMETER RANGE (p1, p2(P), p2(S)):'
       READ (5,    *)  p1, p2(1), p2(2)
@@ -193,7 +193,7 @@ PROGRAM STATSYN_GLOBALSCAT
 !     ======================================================
 !			----- APPLY FLATTENING TRANSFORMATION -----
 
-!      OPEN(1,FILE=IFile,STATUS='OLD')    !OPEN SEISMIC VELOCITY MODEL
+!      OPEN(1,FILE=ifile,STATUS='OLD')    !OPEN SEISMIC VELOCITY MODEL
 	  
       DO I = 1, nlay                    
        CALL FLATTEN(z_s(i),vs(i,1),rhs(i),z(i),vf(i,1),rh(i),erad)!FLATTEN P-WAVE VELOCITIES
@@ -286,7 +286,7 @@ PROGRAM STATSYN_GLOBALSCAT
       END DO
 		  WRITE(6,*) 'SOURCE DEPTH AND LAYER:',iz1,z_s(iz1)
 		  
-		  !iz1 will be iz1+1 IF downgoing phonon, but this is corrected once the launch
+		  !iz1 will be iz1+1 if downgoing phonon, but this is corrected once the launch
 		  ! angle is defined.
 !			^^^^^ Find Source Layer ^^^^^
       
@@ -540,7 +540,7 @@ PROGRAM STATSYN_GLOBALSCAT
 						! THE PHONON CAN BE SCATTERED AT ALL DEPTHS. THE ONLY THING THAT CHANGES
 						! IS THE SCATTERING PROBABILITY, WHICH DEPENDS ON THE DEPTH.
 						
-								!Set depth-depENDent scattering probability
+								!Set depth-dependent scattering probability
 								scat_prob = BG_prob			!Assume background probability at first.
 								IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) scat_prob = SL_prob			
 								   !Scattering layer probability
@@ -548,8 +548,19 @@ PROGRAM STATSYN_GLOBALSCAT
 								   !Background probability IF leaving scat layer from at base
 								IF (iz >= nlay-2) scat_prob = 0. !no scattering near center of Moon
 
-  					!Check IF scatter at interface
-					  IF ((scat_prob > 0.).AND.(iz > 1)) CALL INTERFACE_SCATTER
+  					!Check if scatter at interface
+  					r0 = rand()
+					  IF ((scat_prob > 0.).AND.(iz > 1).AND.(r0 < scat_prob)) THEN   !CALL INTERFACE_SCATTER
+								ud_pre = ud  !save current ud before scattering it.
+								IF (ud == -1) iz_scat = iz
+								IF (ud ==  1) iz_scat = iz -1
+								CALL REF_TRAN_PROB   !Scatter
+								
+								!Fix iz if direction has changed
+								IF ((ud_pre == 1).AND.(ud == -1))  iz = iz-1
+								IF ((ud_pre == -1).AND.(ud == 1))  iz = iz+1
+            END IF
+
 						IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
 						
        CALL etime(elapsed,tt3)
@@ -558,7 +569,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 					  IF ((scat_prob > 0.).AND.(iz > 1)) THEN
 		
-					  !Get iz_scat (layer in which phonon is scattered, IF scattered)
+					  !Get iz_scat (layer in which phonon is scattered, if scattered)
 					  iz_scat = iz-1
 					  
 						dh = z(iz) - z(iz-1) !First dh is thickness of layer (FLAT)
@@ -581,11 +592,7 @@ PROGRAM STATSYN_GLOBALSCAT
 								 CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
 								 ds_SL = (dh**2+dx1**2)**0.5
 								 
-!								 WRITE(76,*) I,NITR,scat_prob,irtr1,p,vf(iz-1,iwave),iz,asin(p*vf(iz-1,iwave))/pi*180
-								 
-							IF (irtr1 == 1) THEN !Only scatter IF ray would have gone through layer
-							
-!							        WRITE(76,*) I,NITR,scat_prob
+							IF (irtr1 == 1) THEN !Only scatter if ray would have gone through layer
 							
 							        scat_FLAG = 1
 
@@ -595,12 +602,9 @@ PROGRAM STATSYN_GLOBALSCAT
 											!Calculate first ds_scat (distance to next scatterer)
 											CALL GET_DS_SCAT  !change ds_scat  FLAT
 										  
-
-									 
 										DO WHILE ((ds_scat < ds_SL).AND.(irtr1 == 1))
 										
-                    
-												!Calculare what would dh be IF phonon only travelled ds_scat km
+												!Calculate what would dh be if phonon only travelled ds_scat km
 												dh = ds_scat*abs(cos(asin(p*vf(iz_scat,iwave))))   !FLAT
 
 												!Calculate vertical to next layer
@@ -615,9 +619,12 @@ PROGRAM STATSYN_GLOBALSCAT
 														  z_act = z_act + dh*ud !Calculate new depth FLAT
 															
 															!Is phonon scattered at scatterer or does it go through?
-															CALL INLAYER_SCATTER														
+															r0 = rand()
+															IF (r0 < scat_prob) THEN
+																 CALL REF_TRAN_PROB
+															END IF														
 															
-															! Calculate new ds_SL based on new ud and p (IF it got scattered)
+															! Calculate new ds_SL based on new ud and p (if it got scattered)
 															CALL GET_DS_SL
 															
 															!New ds_scat
@@ -676,7 +683,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
         
 															
-    		ELSE IF (iz > 1) THEN !No scattering in layer (make it faster IF scat_prob == 0.)
+    		ELSE IF (iz > 1) THEN !No scattering in layer (make it faster if scat_prob == 0.)
 				
 					! ============ >>
 					! RAY TRACING IN LAYER
@@ -717,7 +724,7 @@ PROGRAM STATSYN_GLOBALSCAT
 					IF ( abs(xo-x_index/deg2km) <= dreceiver) THEN
 						! phonon is closer THEN 0.05 (dreceiver) deg to a recorder, RECORD AT SURFACE		
 
-										!Time correction IF phonon doesn't hit the surface
+										!Time correction if phonon doesn't hit the surface
 										! right on the receiver. Max time is when ang1 is 90.					
 										dtsurf = (xo-x_index/deg2km)*deg2km*p 
 					
@@ -1345,9 +1352,9 @@ SUBROUTINE LAYERTRACE(p,h,utop,ubot,imth,dx,dt,irtr)
          etau=qs-p*qr
          ex=qr
       END IF
-!   ! check lower limit to see IF we have turning point
+!   ! check lower limit to see if we have turning point
       u=ubot
-      IF (u <= p) THEN   !IF turning point,
+      IF (u <= p) THEN   !if turning point,
          irtr=2          !THEN no contribution
          go to 160       !from bottom point
       END IF 
@@ -1649,11 +1656,6 @@ SUBROUTINE INTERFACE_NORMAL
 					ELSE
 							
 					h = z(iz)-z(iz-1)		
-!          IF (ud == 1) h = z(iz)-z(iz-1)
-!          IF (ud == -1) h = z(iz-1)-z(iz-2)
-
-					!DEBUG
-!					IF (ip == 2)       WRITE(77,*) I,NITR,iz,ud,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1),P0
 
           IF (ip  ==  2) THEN																							!IF2a
 						IF ( (ud == 1) ) THEN               !IF downGOING SH WAVE			!IF3a
@@ -1775,7 +1777,7 @@ SUBROUTINE INLAYER_SCATTER
 !      WRITE(6,*) 'Made it:', I,NITR
 !      INTEGER     ud_pre  !ud before scattering
 !
-!      !Check IF scatter first
+!      !Check if scatter first
 !      r0 = rand()
 !      IF (r0 < scat_prob) THEN 
 !      
@@ -1820,26 +1822,25 @@ SUBROUTINE INTERFACE_SCATTER
       
       USE pho_vars
       IMPLICIT NONE
-      INTEGER     ud_pre  !ud before scattering
+      INTEGER     ud_pre2  !ud before scattering
       REAL    time10,time11
       
       
       CALL etime(elapsed,time10)
      
 
-      !Check IF scatter first
+      !Check if scatter first
       r0 = rand()
       IF (r0 < scat_prob) THEN 
       
-      ud_pre = ud  !save current ud before scattering it.
+      ud_pre2 = ud  !save current ud before scattering it.
       
-  		IF (r0 < scat_prob) THEN
 			 CALL REF_TRAN_PROB
-		  END IF
+
 		  
-		 !Fix iz IF direction has changed
-		 IF ((ud_pre == 1).AND.(ud == -1))  iz = iz-1
-     IF ((ud_pre == -1).AND.(ud == 1))  iz = iz+1		  
+		 !Fix iz if direction has changed
+		 IF ((ud_pre2 == 1).AND.(ud == -1))  iz = iz-1
+     IF ((ud_pre2 == -1).AND.(ud == 1))  iz = iz+1		  
       
 				  
 				 !r0 = rand()
@@ -1847,9 +1848,9 @@ SUBROUTINE INTERFACE_SCATTER
 !				 r0 = rand()
 !				 IF (r0 < 0.5) ud = -ud
 !				 
-!  			 IF (z_act <= 0.) ud = 1 !make sure you're going down IF leaving surface
+!  			 IF (z_act <= 0.) ud = 1 !make sure you're going down if leaving surface
 !				
-!				 !Fix iz IF direction has changed
+!				 !Fix iz if direction has changed
 !				 IF ((ud_pre == 1).AND.(ud == -1))  iz = iz-1
 !         IF ((ud_pre == -1).AND.(ud == 1))  iz = iz+1	
 !		 
@@ -1999,7 +2000,7 @@ SUBROUTINE GET_DS_SCAT
       r0 = rand()
          
       IF ((z_act <= scat_depth).AND.(SL_prob > 0)) THEN
-            !Change unIForm distribution into power-law distribution
+            !Change uniform distribution into power-law distribution
             ds_scat_nf = ((dsmax**(npow+1) - dsmin**(npow+1))*r0 & 
 																				+ dsmin**(npow+1))**(1/(npow+1))
 			END IF
@@ -2009,7 +2010,7 @@ SUBROUTINE GET_DS_SCAT
 			END IF
 			
 			!Find approximate flattening factor, based on actual depth z_act
-			! z_act is FLAT, find what z_act would be IF NONFLAT, ratio gives
+			! z_act is FLAT, find what z_act would be if NONFLAT, ratio gives
 			! scale_length factor
       z_nf = erad - erad*exp(z_act/(-1*erad)) ;
 		
