@@ -812,9 +812,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			 ! ====================== <<
 			 ! Close single ray tracing while loop
 			 ! ====================== <<	
-			 
-			 WRITE(6,*) '>>>>',I,NITR,t		 
-			 
+
        CALL etime(elapsed,tt8)
        !WRITE(6,*) '        Surface:',tt8-tt7,I							 
 			 			 
@@ -833,22 +831,10 @@ PROGRAM STATSYN_GLOBALSCAT
 
 !				trackcount = trackcount / 100.
 
-
-		 !LOG
-!		 logperc = nint(float(I)/float(ntr)*100)
-!		 IF (NITR >= 200*nlay) logEND = 'NLAY'
-!     IF (t >= t2) logEND = 'TIME'
-    
-     !WRITE(79,*) I,NITR,surfcount,surCYC1,x,iz,scat_time,logEND,logperc
-
-
-!      WRITE(6,*) I,'time:',ttime4-ttime3
-
        CALL etime(elapsed,tt9)
        !WRITE(6,*) '           Rest:',tt9-tt8,I				
        
        CALL etime(elapsed,ttime4)      
-      
       !WRITE(6,*) '---->',I,ttime4-ttime3,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
 
 			END DO	!CLOSE MAIN RAY TRACING LOOP - DOLOOP_001
@@ -2087,15 +2073,12 @@ SUBROUTINE REF_TRAN_PROB
       INTEGER :: ip2,irt
       INTEGER :: iwave2,rin,iwave_in
       REAL(8) :: theta,phi,theta2,phi2
-      REAL(8) :: pp,ps,p_out                    !! Ray parameters for P & S waves
-      REAL(8) :: GET_ANG,ang2,p_in,tttt
+      REAL(8) :: pp,ps                 !! Ray parameters for P & S waves
+      REAL(8) :: GET_ANG,ang2,p_in
       REAL       rrr1,rrr2
       
-      CALL etime(elapsed,rrr1)      
+      !CALL etime(elapsed,rrr1)      
 
-!      p_out = -1
-      
-!      DO WHILE (p_out <= 0)
       iwave_in = iwave
       p_in = p
       
@@ -2105,11 +2088,7 @@ SUBROUTINE REF_TRAN_PROB
       rt(1:10) = 0
       art(1:10) = 0
       
-      IF (isnan(asin(p*vf(iz_scat,iwave)))) THEN
-        WRITE(77,*) 'NaN:', I,iz,ud,iz_scat,iwave,p,vf(iz_scat,iwave),p*vf(iz_scat,iwave)
-        WRITE(78,*) 'NaN:', I,iz,ud,iz_scat,iwave,p,vf(iz_scat,iwave),p*vf(iz_scat,iwave)
-      END IF
-      
+     
       !Incoming ray      
       phi = asin(p*vf(iz_scat,iwave))          !!  
       theta   = az   !fix, az is already in radians   *pi/180.                !!
@@ -2207,17 +2186,8 @@ SUBROUTINE REF_TRAN_PROB
       ref_tran_sum = art(6)   
       art = art/ref_tran_sum  
             
-      IF (isnan(ref_tran_sum).or.ref_tran_sum==0.) THEN
-      
-       IF (isnan(ref_tran_sum))   THEN
-!             write(78,*) phi
-!            WRITE(78,*) 'NaN AHAHAHAHAHAH'
-!            WRITE(78,*) rt(1:6)
-        END IF
-!       IF (ref_tran_sum == 0)        WRITE(78,*) '000 AHAHAHAHAHAH'
-        RETURN  !! ERROR SO SKIP
-      END IF
-      
+      IF (isnan(ref_tran_sum).or.ref_tran_sum==0.) RETURN  !! ERROR SO SKIP
+    
      
       r0 = rand()
       
@@ -2284,50 +2254,28 @@ SUBROUTINE REF_TRAN_PROB
         x_sign = 1.
       END IF
       
-!      CALL ucar2sphr(tb(1),tb(2),tb(3),az,inc)                 !! get azimuth & inclination
+      ! Get azimuth & inclination
       n2(1:3) = 0
       n2(3) = 1 !Make vertical vector, normal to horizontal plane
 			inc = abs(GET_ANG(tb,n2))
       IF (inc > pi/2) THEN    !fix
-        p_out = inc
         n2 = -1.*n2
         inc = abs(GET_ANG(tb,n2))
       END IF
       
       n2(1:3) = 0
-      n2(3) = 2 !Make horizontal vector
+      n2(3) = 2 !Make horizontal vector, pointing North (y)
 			az = abs(GET_ANG(tb,n2))
       IF (az > pi/2) THEN    !fix
         n2 = -1.*n2
         az = abs(GET_ANG(tb,n2))
       END IF
 
-      
-      WRITE(6,*) x_sign,cos(az),az
-
       iwave = iwave2
       ip = ip2
-
-
       p = sin(inc)/vf(iz_scat,iwave2)
-!      p_out = p
       
-      IF (p < 0)  THEN
-
-        WRITE(77,*) inc,sin(inc),p_out
-        WRITE(77,*) 'pi:',p_in
-        WRITE(77,*) 'is:',iz_scat,vf(iz_scat,iwave_in),iwave_in,p_in*vf(iz_scat,iwave_in)
-        WRITE(77,*) 'ta:',ta
-        WRITE(77,*) 'tb:',tb
-        WRITE(77,*) 'n2:',n2
-        WRITE(6,*) 'HAHAHAHAHA'
-      END IF
-      
-!      END DO
-
-      CALL etime(elapsed,rrr2)
-!      WRITE(6,*) 'tt:',rrr2-rrr1
-!      WRITE(78,*) 'tt:',rrr2-rrr1
+      !CALL etime(elapsed,rrr2)
       
 
       RETURN
