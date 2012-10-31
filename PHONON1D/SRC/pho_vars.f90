@@ -61,13 +61,14 @@ MODULE PHO_VARS			! Make variables global
 				REAL(8)					z_act									!Depth when in between two vel layers
 				REAL(8)          Q0										!Background Qi for frequency dependent Qi
 				REAL(8)          dQdf									!Q gradient with f
-				INTEGER       iz_scat								!Vel layer in which phonon is while it's scattered
+				INTEGER       iz_scat,iz_from								!Vel layer in which phonon is while it's scattered
 				REAL(8)          scat_depth,scat_prob,BG_prob,SL_prob
 				REAL(8)          scat_thet,scat_phi
 				REAL(8)          z_mid								!Mid depth of travel between two scatterers.
 				INTEGER       scat_FLAG
 	      REAL(8) ::    vel_perturb
 	      INTEGER       ud_pre
+	      INTEGER       conv_count(6)
 				
 				! ATTENUATION
 				INTEGER       dQdfSTYLE				!Let user choose dQdf behaviour based on list.		

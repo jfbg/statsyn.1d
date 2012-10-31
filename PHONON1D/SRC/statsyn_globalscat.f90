@@ -48,6 +48,7 @@ PROGRAM STATSYN_GLOBALSCAT
 				REAL(8)          nn(nx0,nt0)
 							
 				
+				
 				! DEBUGGING
 				CHARACTER*100 :: debugfile,logEND
 				REAL(8)						 dhsmall
@@ -235,7 +236,6 @@ PROGRAM STATSYN_GLOBALSCAT
       
 
 !			----- Convert depths to flat depth -----
-!			scat_depth = -erad*REAL(alog(REAL((erad-scat_depth)/erad,4)),8)  !FLATTEN scat_depth
 			scat_depth = -erad*dlog((erad-scat_depth)/erad)  !FLATTEN scat_depth
 			WRITE(6,*) 'Flattened scattering depth =',scat_depth
 
@@ -274,6 +274,8 @@ PROGRAM STATSYN_GLOBALSCAT
         END DO
        END DO
       END DO
+      
+      conv_count(1:6) = 0
 !			^^^^^ Initialize stacks variable ^^^^^	
 
 
@@ -384,7 +386,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			
       DO I = 1, ntr   !FOR EACH TRACE -- DOLOOP_001
       
-      WRITE(6,*) '---->',I,'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv'
+!      WRITE(6,*) '---->',I,'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv'
       
       CALL etime(elapsed,tt1)
       
@@ -542,13 +544,11 @@ PROGRAM STATSYN_GLOBALSCAT
 						
 								!Set depth-dependent scattering probability
 								scat_prob = BG_prob			!Assume background probability at first.
-								IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) scat_prob = SL_prob
-!								WRITE(78,*) iz,ud,scat_prob			
+								IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) scat_prob = SL_prob		
 								   !Scattering layer probability
 								!IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
 								   !Background probability IF leaving scat layer from at base
 								IF (iz >= nlay-2) scat_prob = 0. !no scattering near center of Moon
-!								WRITE(78,*) iz,ud,scat_prob
   					!Check if scatter at interface
   					r0 = rand()
 					  IF ((scat_prob > 0.).AND.(iz > 1).AND.(r0 < scat_prob)) THEN   !CALL INTERFACE_SCATTER
@@ -811,7 +811,9 @@ PROGRAM STATSYN_GLOBALSCAT
 			 END DO		!CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
 			 ! ====================== <<
 			 ! Close single ray tracing while loop
-			 ! ====================== <<			 
+			 ! ====================== <<	
+			 
+			 WRITE(6,*) '>>>>',I,NITR,t		 
 			 
        CALL etime(elapsed,tt8)
        !WRITE(6,*) '        Surface:',tt8-tt7,I							 
@@ -894,6 +896,8 @@ PROGRAM STATSYN_GLOBALSCAT
       !Debug
       WRITE(6,*) 'Total Surface records = ', surfcount
       WRITE(6,*) 'Too far from receiver = ', surCYC1
+      
+      WRITE(6,*) 'Scattered:',  conv_count(1:6)
 
 !			^^^^^ Output Synthetics ^^^^^
 			
@@ -1977,7 +1981,7 @@ SUBROUTINE RAYTRACE_SCAT
          totald = totald + ds_scat !DISTANCE TRAVELED IN LAYER
          
          t = t + dt1                    !TRAVEL TIME
-         x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
+         x = x + dx1*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
         END IF
       
@@ -2081,7 +2085,7 @@ SUBROUTINE REF_TRAN_PROB
       REAL(8) :: fact                     !! Impedence contrast factor
       REAL(8) :: inc
       INTEGER :: ip2,irt
-      INTEGER :: iwave2,rin
+      INTEGER :: iwave2,rin,iwave_in
       REAL(8) :: theta,phi,theta2,phi2
       REAL(8) :: pp,ps,p_out                    !! Ray parameters for P & S waves
       REAL(8) :: GET_ANG,ang2,p_in,tttt
@@ -2089,15 +2093,22 @@ SUBROUTINE REF_TRAN_PROB
       
       CALL etime(elapsed,rrr1)      
 
-      p_out = -1
+!      p_out = -1
       
-      DO WHILE (p_out <= 0)
-      
+!      DO WHILE (p_out <= 0)
+      iwave_in = iwave
       p_in = p
+      
+      IF (isnan(asin(p*vf(iz_scat,iwave)))) RETURN
       
       !Zero coefficient vectors
       rt(1:10) = 0
       art(1:10) = 0
+      
+      IF (isnan(asin(p*vf(iz_scat,iwave)))) THEN
+        WRITE(77,*) 'NaN:', I,iz,ud,iz_scat,iwave,p,vf(iz_scat,iwave),p*vf(iz_scat,iwave)
+        WRITE(78,*) 'NaN:', I,iz,ud,iz_scat,iwave,p,vf(iz_scat,iwave),p*vf(iz_scat,iwave)
+      END IF
       
       !Incoming ray      
       phi = asin(p*vf(iz_scat,iwave))          !!  
@@ -2214,26 +2225,32 @@ SUBROUTINE REF_TRAN_PROB
        ip2 = 1                                            !! P reflected
        irt = -1
        rin = 1
+       conv_count(1) = conv_count(1) + 1
       ELSE IF (r0 < art(2)) THEN                          !! SV reflected
        ip2 = 2 !fix was 3
        irt = -1
        rin = 2
+       conv_count(2) = conv_count(2) + 1
       ELSE IF (r0 < art(3)) THEN                          !! P transmitted
        ip2 = 1
        irt = 1
        rin = 3
+       conv_count(3) = conv_count(3) + 1
       ELSE IF (r0 < art(4)) THEN                          !! SV transmitted
        ip2 = 2 !fix was 3
        irt = 1
        rin = 4
+       conv_count(4) = conv_count(4) + 1
       ELSE IF (r0 < art(5)) THEN                          !! SH reflected
        ip2 = 3 !fix was 2
        irt = -1
        rin = 5
+       conv_count(5) = conv_count(5) + 1
       ELSE IF (r0 < art(6)) THEN                          !! SH tranmsitted
        ip2 = 3 !fix was 2
        irt = 1
        rin = 6
+       conv_count(6) = conv_count(6) + 1
       END IF   
       
       iwave2 = ip2                                        !! Set output wave velocity P=1,S=2
@@ -2262,28 +2279,51 @@ SUBROUTINE REF_TRAN_PROB
       
       ! set east-west variable         
       IF (tb(1) < 0) THEN                           !fix IF LOOP
-        x_sign = -1
+        x_sign = -1.
       ELSE  
-        x_sign = 1
+        x_sign = 1.
       END IF
       
-      CALL ucar2sphr(tb(1),tb(2),tb(3),az,inc)                 !! get azimuth & inclination
+!      CALL ucar2sphr(tb(1),tb(2),tb(3),az,inc)                 !! get azimuth & inclination
       n2(1:3) = 0
       n2(3) = 1 !Make vertical vector, normal to horizontal plane
 			inc = abs(GET_ANG(tb,n2))
       IF (inc > pi/2) THEN    !fix
+        p_out = inc
         n2 = -1.*n2
         inc = abs(GET_ANG(tb,n2))
       END IF
+      
+      n2(1:3) = 0
+      n2(3) = 2 !Make horizontal vector
+			az = abs(GET_ANG(tb,n2))
+      IF (az > pi/2) THEN    !fix
+        n2 = -1.*n2
+        az = abs(GET_ANG(tb,n2))
+      END IF
+
+      
+      WRITE(6,*) x_sign,cos(az),az
 
       iwave = iwave2
       ip = ip2
 
 
       p = sin(inc)/vf(iz_scat,iwave2)
-      p_out = p
+!      p_out = p
       
-      END DO
+      IF (p < 0)  THEN
+
+        WRITE(77,*) inc,sin(inc),p_out
+        WRITE(77,*) 'pi:',p_in
+        WRITE(77,*) 'is:',iz_scat,vf(iz_scat,iwave_in),iwave_in,p_in*vf(iz_scat,iwave_in)
+        WRITE(77,*) 'ta:',ta
+        WRITE(77,*) 'tb:',tb
+        WRITE(77,*) 'n2:',n2
+        WRITE(6,*) 'HAHAHAHAHA'
+      END IF
+      
+!      END DO
 
       CALL etime(elapsed,rrr2)
 !      WRITE(6,*) 'tt:',rrr2-rrr1

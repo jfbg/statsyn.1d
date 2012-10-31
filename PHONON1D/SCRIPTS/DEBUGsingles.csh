@@ -14,19 +14,19 @@ set mx_scat_dp = "10"
 set n_phonon   = "5"
 
 # SCATTERING
-set bg_scat    = 0.
-set prob_scat  = 0.9
+set bg_scat    = 0.001
+set prob_scat  = 0.0
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
-set velperturb = .1
+set velperturb = .9
 
 # Source attenuation
 set dQdfstyle  = 25
 
 
 set file_out   = "D003_noscat"
-set model_name = "S_VPREMOON_Qp_ori"
+set model_name = "S_VPREMOON_Qp_nocrust"
 # set model_name = "DEBUG_1VEL_10km"
 
 @ n_depth = 1     ## Number of depths to use
