@@ -386,7 +386,6 @@ PROGRAM STATSYN_GLOBALSCAT
 			
       DO I = 1, ntr   !FOR EACH TRACE -- DOLOOP_001
       
-!      WRITE(6,*) '---->',I,'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv'
       
       CALL etime(elapsed,tt1)
       
@@ -448,7 +447,6 @@ PROGRAM STATSYN_GLOBALSCAT
 				angst = pi/2.                         
         r0 = rand()                            !SELECT RANDOM RAY PARAMETER 
         ang1 = angst*r0                        !Randomly select angle
-        !WRITE(77,*) seed,ang1,angst,r0,ip
 
         ! ============ <<
 				
@@ -480,11 +478,6 @@ PROGRAM STATSYN_GLOBALSCAT
 
        !Set ray parameter
         p    = abs(sin(ang1))/vf(iz,iwave)
-!        WRITE(76,*) p
-        
-        !DEBUG
-!        IF (I < 10001) WRITE(78,*) p,ang1,vf(iz,iwave),iz,iwave,r0
-
         
         NITR = 0
         
@@ -552,13 +545,9 @@ PROGRAM STATSYN_GLOBALSCAT
   					!Check if scatter at interface
   					r0 = rand()
 					  IF ((scat_prob > 0.).AND.(iz > 1).AND.(r0 < scat_prob)) THEN   !CALL INTERFACE_SCATTER
-!					      WRITE(78,*) 'YAY!!!!'
 								ud_pre = ud  !save current ud before scattering it.
-								IF (ud == -1) iz_scat = iz -1
-								IF (ud ==  1) iz_scat = iz -1
-!								WRITE(78,*) p,ud,iz
-								CALL REF_TRAN_PROB   !Scatter
-!								WRITE(78,*) p,ud,iz								
+							  iz_scat = iz -1
+								CALL REF_TRAN_PROB   !Scatter	
 								!Fix iz if direction has changed
 								IF ((ud_pre == 1).AND.(ud == -1))  iz = iz-1
 								IF ((ud_pre == -1).AND.(ud == 1))  iz = iz+1
@@ -568,7 +557,7 @@ PROGRAM STATSYN_GLOBALSCAT
 						
        CALL etime(elapsed,tt3)
        !WRITE(6,*) '       Prescat :',tt3-tt2,I
-       WRITE(76,*) tt3-tt2
+!       WRITE(76,*) tt3-tt2
 
 					  IF ((scat_prob > 0.).AND.(iz > 1)) THEN
 		
@@ -633,7 +622,6 @@ PROGRAM STATSYN_GLOBALSCAT
 															!New ds_scat
 															CALL GET_DS_SCAT
 															
-!															WRITE(76,*) I,NITR,p,ds_SL,ds_scat
 															
 												ELSE
 												
@@ -843,7 +831,9 @@ PROGRAM STATSYN_GLOBALSCAT
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !			======================================================
 
-			
+      CALL etime(elapsed,totaltime)
+      WRITE(6,FMT = 871) totaltime-ttimestart,I-1,(totaltime-ttimestart)/(I-1)
+871   FORMAT ('Total time = ',f9.2,'s for ',i8,' phonons (',f7.5,'s/p)')			
 
 			
 !			======================================================
@@ -852,34 +842,27 @@ PROGRAM STATSYN_GLOBALSCAT
       wf(1,1,2) = 1.
       wf(1,1,3) = 1.
       
-      !DO ic = 1, 3
-!      ofile2 = trim(ofile)//'.'//cmp(ic)
-!
-!      OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
-!       
-!       WRITE(22,*) nt,nx
-!       WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
-!      
-!				DO I = 1, nt
-!					DO J = 1, nx
-!						IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
-!					END DO
-!					WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
-!				END DO
-!
-!      
-!				CLOSE(22)
-!				
-!				
-!      END DO
+      DO ic = 1, 3
+				ofile2 = trim(ofile)//'.'//cmp(ic)
+	
+				OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+				 
+				 WRITE(22,*) nt,nx
+				 WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
+				
+					DO I = 1, nt
+						DO J = 1, nx
+							IF (abs(wf(J,I,ic)) > 999.9999) wf(J,I,ic) = 999.9999*wf(J,I,ic)/abs(wf(J,I,ic))
+						END DO
+						WRITE(22,FMT=888) t1+float(I-1)*dti,(wf(J,I,ic)*0.1,J=1,nx)
+					END DO				
+			  
+			  CLOSE(22)
+							
+      END DO
       WRITE(6,*) 'Synthetic outputs done'
       
-      CALL etime(elapsed,totaltime)
-      WRITE(6,FMT = 871) totaltime-ttimestart,I-1,(totaltime-ttimestart)/(I-1)
-871   FORMAT ('Total time = ',f9.2,'s for ',i8,' phonons (',f7.5,'s/p)')
 
-      
-      !Debug
       WRITE(6,*) 'Total Surface records = ', surfcount
       WRITE(6,*) 'Too far from receiver = ', surCYC1
       
@@ -2264,7 +2247,7 @@ SUBROUTINE REF_TRAN_PROB
       END IF
       
       n2(1:3) = 0
-      n2(3) = 2 !Make horizontal vector, pointing North (y)
+      n2(3) = 1 !Make horizontal vector, pointing East (x), azimuth is form x so that cos(az == 0) = 1
 			az = abs(GET_ANG(tb,n2))
       IF (az > pi/2) THEN    !fix
         n2 = -1.*n2
