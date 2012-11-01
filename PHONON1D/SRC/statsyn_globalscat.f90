@@ -4,7 +4,7 @@ PROGRAM STATSYN_GLOBALSCAT
 !
 ! Scattering is isotropic
 ! Scattering length-scale follows power law (declared in running shell)
-! Qi is frequency depENDent (Need to change form of dQ/df accordingly
+! Qi is frequency dependent (Need to change form of dQ/df accordingly
 !														(search for rdQdf to modify it)
 !
 ! Scattering is possible in the surface scattering layer and as a backgroung scattering,
@@ -547,7 +547,7 @@ PROGRAM STATSYN_GLOBALSCAT
 					  IF ((scat_prob > 0.).AND.(iz > 1).AND.(r0 < scat_prob)) THEN   !CALL INTERFACE_SCATTER
 								ud_pre = ud  !save current ud before scattering it.
 							  iz_scat = iz -1
-								CALL REF_TRAN_PROB   !Scatter	
+								CALL REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh)  !Scatter	
 								!Fix iz if direction has changed
 								IF ((ud_pre == 1).AND.(ud == -1))  iz = iz-1
 								IF ((ud_pre == -1).AND.(ud == 1))  iz = iz+1
@@ -613,7 +613,7 @@ PROGRAM STATSYN_GLOBALSCAT
 															!Is phonon scattered at scatterer or does it go through?
 															r0 = rand()
 															IF (r0 < scat_prob) THEN
-																 CALL REF_TRAN_PROB   !Scatter
+																 CALL REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh)   !Scatter
 															END IF														
 															
 															! Calculate new ds_SL based on new ud and p (if it got scattered)
@@ -1113,7 +1113,7 @@ END SUBROUTINE REFTRAN_SH
 
 ! SUBROUTINE RTCOEF calculates reflection/transmission coefficients
 ! for interface between two solid layers, based on the equations on 
-! p. 150 of Aki and Richards.
+! p. 144 of Aki and Richards, 2nd edition.
 !
 !  Inputs:    vp1     =  P-wave velocity of layer 1 (top layer)
 !  (REAL)     vs1     =  S-wave velocity of layer 1
@@ -1123,10 +1123,10 @@ END SUBROUTINE REFTRAN_SH
 !             den2    =  density of layer 2
 !             pin     =  horizontal slowness (ray PARAMETER)
 !             PorS    =  1=P-WAVE, 3=SV-WAVE
-!  Returns:   arp     =  down P to P up     (refl)
-!  (COMPLEX)  ars     =  down P to S up     (refl)
-!             atp     =  down P to P down   (tran)
-!             ats     =  down P to S down   (tran)
+!  Returns:   rrp     =  down P to P up     (refl)
+!  (REAL)     rrs     =  down P to S up     (refl)
+!             rtp     =  down P to P down   (tran)
+!             rts     =  down P to S down   (tran)
 !   OR:
 !             arp     =  down S to P up     (refl)
 !             ars     =  down S to S up     (refl)
@@ -1134,7 +1134,7 @@ END SUBROUTINE REFTRAN_SH
 !             ats     =  down S to S down   (tran)
 !
 ! NOTE:  All input variables are REAL.  
-!        All output variables are COMPLEX!
+!        All output variables are REAL.
 !        Coefficients are not energy normalized.
 !
 SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
@@ -1745,119 +1745,119 @@ END SUBROUTINE INTERFACE_NORMAL
 
 
 
-SUBROUTINE INLAYER_SCATTER
-      
-      USE pho_vars
-      IMPLICIT NONE
-      
-!      WRITE(6,*) 'Made it:', I,NITR
-!      INTEGER     ud_pre  !ud before scattering
+!SUBROUTINE INLAYER_SCATTER
+!      
+!      USE pho_vars
+!      IMPLICIT NONE
+!      
+!     ! WRITE(6,*) 'Made it:', I,NITR
+!!      INTEGER     ud_pre  !ud before scattering
+!!
+!!      !Check if scatter first
+!!      r0 = rand()
+!!      IF (r0 < scat_prob) THEN 
+!!      
+!!     	     
+!!				 r0 = rand()
+!!				 IF (r0 < 0.5) x_sign=-x_sign		
+!!				 r0 = rand()
+!!				 IF (r0 < scat_prob) ud = -ud
+!!		 
+!!				 r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
+!!				 ang1 = angst*r0
+!!				 p = abs(sin(ang1))/vf(iz_scat,iwave)
+!!				 
+!!
+!!				 DO WHILE ((p < p1).OR.(p >= 1./vf(iz_scat,iwave)) ) !p2(iwave)))
+!!				   r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
+!!				   ang1 = angst*r0
+!!				   p = abs(sin(ang1))/vf(iz_scat,iwave)
+!!				 END DO
+!!				 
+!!		 
+!!				 r0 = rand()                        
+!!				 r1 = rand()                        
+!!				 IF (r1 < 0.5) az = az - pi
+!!				 az = az + asin(r0**2)              
+!!				 IF (az < -pi) az = az + 2.*pi
+!!				 IF (az >  pi) az = az - 2.*pi
+!!
+!!        END IF
+!
+!      r0 = rand()
+!      IF (r0 < scat_prob) THEN
+!         CALL REF_TRAN_PROB
+!      END IF
+!
+!
+!      RETURN
+!END SUBROUTINE INLAYER_SCATTER
+
+
+!SUBROUTINE INTERFACE_SCATTER
+!      
+!      USE pho_vars
+!      IMPLICIT NONE
+!      INTEGER     ud_pre2  !ud before scattering
+!      REAL    time10,time11
+!      
+!      
+!      CALL etime(elapsed,time10)
+!     
 !
 !      !Check if scatter first
 !      r0 = rand()
 !      IF (r0 < scat_prob) THEN 
 !      
-!     	     
-!				 r0 = rand()
-!				 IF (r0 < 0.5) x_sign=-x_sign		
-!				 r0 = rand()
-!				 IF (r0 < scat_prob) ud = -ud
-!		 
-!				 r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
-!				 ang1 = angst*r0
-!				 p = abs(sin(ang1))/vf(iz_scat,iwave)
-!				 
+!      ud_pre2 = ud  !save current ud before scattering it.
+!      
+!			 CALL REF_TRAN_PROB
 !
-!				 DO WHILE ((p < p1).OR.(p >= 1./vf(iz_scat,iwave)) ) !p2(iwave)))
-!				   r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
-!				   ang1 = angst*r0
-!				   p = abs(sin(ang1))/vf(iz_scat,iwave)
-!				 END DO
-!				 
-!		 
-!				 r0 = rand()                        
-!				 r1 = rand()                        
-!				 IF (r1 < 0.5) az = az - pi
-!				 az = az + asin(r0**2)              
-!				 IF (az < -pi) az = az + 2.*pi
-!				 IF (az >  pi) az = az - 2.*pi
-!
-!        END IF
-
-      r0 = rand()
-      IF (r0 < scat_prob) THEN
-         CALL REF_TRAN_PROB
-      END IF
-
-
-      RETURN
-END SUBROUTINE INLAYER_SCATTER
-
-
-SUBROUTINE INTERFACE_SCATTER
-      
-      USE pho_vars
-      IMPLICIT NONE
-      INTEGER     ud_pre2  !ud before scattering
-      REAL    time10,time11
-      
-      
-      CALL etime(elapsed,time10)
-     
-
-      !Check if scatter first
-      r0 = rand()
-      IF (r0 < scat_prob) THEN 
-      
-      ud_pre2 = ud  !save current ud before scattering it.
-      
-			 CALL REF_TRAN_PROB
-
-		  
-		 !Fix iz if direction has changed
-		 IF ((ud_pre2 == 1).AND.(ud == -1))  iz = iz-1
-     IF ((ud_pre2 == -1).AND.(ud == 1))  iz = iz+1		  
-      
-				  
-				 !r0 = rand()
-!				 IF (r0 < 0.5) x_sign=-x_sign		
-!				 r0 = rand()
-!				 IF (r0 < 0.5) ud = -ud
-!				 
-!  			 IF (z_act <= 0.) ud = 1 !make sure you're going down if leaving surface
+!		  
+!		 !Fix iz if direction has changed
+!		 IF ((ud_pre2 == 1).AND.(ud == -1))  iz = iz-1
+!     IF ((ud_pre2 == -1).AND.(ud == 1))  iz = iz+1		  
+!      
+!				  
+!				!r0 = rand()
+!!!				 IF (r0 < 0.5) x_sign=-x_sign		
+!!!				 r0 = rand()
+!!!				 IF (r0 < 0.5) ud = -ud
+!!!				 
+!!!  			 IF (z_act <= 0.) ud = 1 !make sure you're going down if leaving surface
+!!!				
+!!!				 !Fix iz if direction has changed
+!!!				 IF ((ud_pre == 1).AND.(ud == -1))  iz = iz-1
+!!!         IF ((ud_pre == -1).AND.(ud == 1))  iz = iz+1	
+!!!		 
+!!!				 r0 = rand()
+!!!				 r0 = ( r0 - 0.5 )
+!!!				 p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
+!!!
+!!!				 DO WHILE ((p < p1).OR.(p >= 1./vf(iz-1,iwave)) ) !p2(iwave)))
+!!!				 r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
+!!!				 ang1 = angst*r0
+!!!				 p = abs(sin(ang1))/vf(iz,iwave)
+!!!				 END DO
+!!!				 
+!!!
+!!!		 
+!!!				 r0 = rand()                        !
+!!!				 r1 = rand()                        !
+!!!				 IF (r1 < 0.5) az = az - pi
+!!!				 az = az + asin(r0**2)                  !
+!!!				 IF (az < -pi) az = az + 2.*pi
+!!!				 IF (az >  pi) az = az - 2.*pi
 !				
-!				 !Fix iz if direction has changed
-!				 IF ((ud_pre == 1).AND.(ud == -1))  iz = iz-1
-!         IF ((ud_pre == -1).AND.(ud == 1))  iz = iz+1	
-!		 
-!				 r0 = rand()
-!				 r0 = ( r0 - 0.5 )
-!				 p = p1 + r0*(1./vf(iz,iwave)-p1)!*scat_prob
-!
-!				 DO WHILE ((p < p1).OR.(p >= 1./vf(iz-1,iwave)) ) !p2(iwave)))
-!				 r0 = rand()                       !SELECT RANDOM RAY PARAMETER 
-!				 ang1 = angst*r0
-!				 p = abs(sin(ang1))/vf(iz,iwave)
-!				 END DO
-!				 
-!
-!		 
-!				 r0 = rand()                        !
-!				 r1 = rand()                        !
-!				 IF (r1 < 0.5) az = az - pi
-!				 az = az + asin(r0**2)                  !
-!				 IF (az < -pi) az = az + 2.*pi
-!				 IF (az >  pi) az = az - 2.*pi
-				
-      END IF	
-      
-      CALL etime(elapsed,time11)
-      
-      !WRITE(6,*) '--------->',time11-time10
- 
-			
-			RETURN	
-END SUBROUTINE INTERFACE_SCATTER
+!      END IF	
+!      
+!      CALL etime(elapsed,time11)
+!      
+!      !WRITE(6,*) '--------->',time11-time10
+! 
+!			
+!			RETURN	
+!END SUBROUTINE INTERFACE_SCATTER
       
       
 SUBROUTINE RAYTRACE
@@ -2041,10 +2041,12 @@ SUBROUTINE GET_DS_SL
       RETURN
 END SUBROUTINE GET_DS_SL
 
-SUBROUTINE REF_TRAN_PROB
-      USE pho_vars
+SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh)
+!      USE pho_vars
       IMPLICIT NONE
-!      REAL(8) :: vel_perturb   ! in pho_vars
+      
+      INTEGER, PARAMETER :: nlay0=1000
+
       REAL(8) ::  rt(10)
       REAL(8) :: art(10),ref_tran_sum
       REAL(8) :: vp2,vs2,rh2,v2              !! P & S  & density of layer 2 (generic vel=v2)
@@ -2053,17 +2055,28 @@ SUBROUTINE REF_TRAN_PROB
       REAL(8) :: ca,sa,ci,si              !! Cosine & sine of azimuth & inclination
       REAL(8) :: fact                     !! Impedence contrast factor
       REAL(8) :: inc
-      INTEGER :: ip2,irt
+      INTEGER :: ip2,irt,r0
       INTEGER :: iwave2,rin,iwave_in
       REAL(8) :: theta,phi,theta2,phi2
       REAL(8) :: pp,ps                 !! Ray parameters for P & S waves
       REAL(8) :: GET_ANG,ang2,p_in
       REAL       rrr1,rrr2
+      INTEGER    jj
+      REAL(8)    pi
       
+      REAL(8)    p,az,x_sign
+			INTEGER    iwave,ip,ud,iz_scat
+      REAL(8) :: vel_perturb 
+			REAL(8)    vf(nlay0,2),rh(nlay0)
+      INTEGER       conv_count(6)
+      
+            
       !CALL etime(elapsed,rrr1)      
 
       iwave_in = iwave
       p_in = p
+
+      pi = atan(1.)*4D0
       
       IF (isnan(asin(p*vf(iz_scat,iwave)))) RETURN
       
