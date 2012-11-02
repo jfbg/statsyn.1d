@@ -515,7 +515,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			 z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
 
 			 !DEBUG
-!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1
+       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1
       
 			
 				! ============ >>
@@ -632,7 +632,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 
 										 !DEBUG
-!										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2
+										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2
 																						
 			
 										END DO
@@ -2055,7 +2055,7 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       REAL(8) :: ca,sa,ci,si              !! Cosine & sine of azimuth & inclination
       REAL(8) :: fact                     !! Impedence contrast factor
       REAL(8) :: inc
-      INTEGER :: ip2,irt,r0
+      INTEGER :: ip2,irt
       INTEGER :: iwave2,rin,iwave_in
       REAL(8) :: theta,phi,theta2,phi2
       REAL(8) :: pp,ps                 !! Ray parameters for P & S waves
@@ -2064,11 +2064,15 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       INTEGER    jj
       REAL(8)    pi
       
-      REAL(8)    p,az,x_sign
+      REAL(8)    p,az,x_sign,r0
 			INTEGER    iwave,ip,ud,iz_scat
       REAL(8) :: vel_perturb 
 			REAL(8)    vf(nlay0,2),rh(nlay0)
       INTEGER       conv_count(6)
+      
+      !For REF_TRAN_RAY
+     REAL(8) :: vc !! Velocities of two media
+     REAL(8) :: dp,DOT_PRODUCT_3,dp2,sg
       
             
       !CALL etime(elapsed,rrr1)      
@@ -2233,7 +2237,30 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       ENDIF
       
       ! Get the new trajectory
-      CALL ref_tran_ray(n1,ta,vf(iz_scat,iwave),v2,irt,tb)     
+			 ! ~========================================================
+      ! REF_TRAN_RAY used to be a subroutine but it slowed down TITUS a lot, so
+      ! included in this subroutine
+!      CALL ref_tran_ray(n1,ta,vf(iz_scat,iwave),v2,irt,tb)     
+      
+      CALL UNIT_VECTOR_3(n1) 
+      CALL UNIT_VECTOR_3(ta)
+      
+      vc = v2/vf(iz_scat,iwave)   !u1/u2
+      dp = DOT_PRODUCT_3(n1,ta)
+      sg = abs(dp)/dp
+      
+      ! Find transmitted vector
+      tb = (sg*(1.-vc**2+dp**2*vc**2)**.5-dp*vc)*n1+vc*ta
+      
+      !For reflection, reflect vector on plane (normal is n1)
+			 IF (irt == -1) THEN
+				 dp2 = DOT_PRODUCT_3(tb,n1)
+				 DO jj = 1,3
+					 tb(jj) = tb(jj) - 2*dp2*n1(jj)
+				 END DO
+			 END IF 
+			 
+			 ! ~========================================================
 
       ! set up-down variable   
       !IF (tb(1)+tb(2)+tb(3) < 0) ud = -ud                 !fix
@@ -2357,120 +2384,120 @@ END SUBROUTINE UNIT_VECTOR_3
 
 
 
-SUBROUTINE REF_TRAN_RAY(n1,ta1,v1,v2,itr,ta2)
-!   ! --- --------- --------- --------- --------- --------- --------- -- !   !
-!   ! This subourine calculates the vector of the new trajectory after   !   !
-!   !      transmission or reflection (itr).                             !   !
-!   !                                                                    !   !
-!   ! This SUBROUTINE was written by Jesse F. Lawrence                   !   !
-!   !      Contact:   jflawrence@stanford.edu                            !   !
-!   !                                                                    !   !
-!   ! Beware of the bug!! (I don't know which one, but it must be there!)!   !
-!   ! --- --------- --------- --------- --------- --------- --------- -- !   !
-   IMPLICIT NONE
-   REAL(8) :: n1(3),ta1(3),ta2(3)
-   REAL(8) :: a1(3),b1(3),a2(3),b2(3)
-   INTEGER :: i
-   REAL(8) :: dp_tn
-   REAL(8) :: v1,v2,vc !! Velocities of two media
-   REAL(8) :: dp,DOT_PRODUCT_3,b2_mag,dp2,sg
-   INTEGER :: itr,jj
+!SUBROUTINE REF_TRAN_RAY(n1,ta1,v1,v2,itr,ta2)
+!!   ! --- --------- --------- --------- --------- --------- --------- -- !   !
+!!   ! This subourine calculates the vector of the new trajectory after   !   !
+!!   !      transmission or reflection (itr).                             !   !
+!!   !                                                                    !   !
+!!   ! This SUBROUTINE was written by Jesse F. Lawrence                   !   !
+!!   !      Contact:   jflawrence@stanford.edu                            !   !
+!!   !                                                                    !   !
+!!   ! Beware of the bug!! (I don't know which one, but it must be there!)!   !
+!!   ! --- --------- --------- --------- --------- --------- --------- -- !   !
+!   IMPLICIT NONE
+!   REAL(8) :: n1(3),ta1(3),ta2(3)
+!   REAL(8) :: a1(3),b1(3),a2(3),b2(3)
+!   INTEGER :: i
+!   REAL(8) :: dp_tn
+!   REAL(8) :: v1,v2,vc !! Velocities of two media
+!   REAL(8) :: dp,DOT_PRODUCT_3,b2_mag,dp2,sg
+!   INTEGER :: itr,jj
+!!
+!!                          b1  ^
+!!                       \------\
+!!                              \
+!!                       |-     \     ^
+!!                        \     \     \
+!!                         \    \     \
+!!                          \   \     \  a1
+!!                      ta1  \  \     \
+!!                            \ \     \
+!!                             \\     \
+!!          --------------------\-------------------->
+!!                    \         \\.
+!!                    \         \  \.
+!!                    \         \    \.    ta2
+!!                a2  \         \      \.
+!!                    \         \        \.
+!!                    \         \          _|
+!!                    V         \
+!!                              \ ---------->
+!!                              \     b2
+!!
+!!
+!!        a1 = - (ta1.n1)*n1
+!!        b1 = a1 - ta1 = n1 (1+n1.ta1)
+!!        b2 = v2/v1 * b1 = v2/v1 * n1 (1-n1.ta1)
+!!        a2 = - sqrt[1-b2_mag^2]*n1 
 !
-!                          b1  ^
-!                       \------\
-!                              \
-!                       |-     \     ^
-!                        \     \     \
-!                         \    \     \
-!                          \   \     \  a1
-!                      ta1  \  \     \
-!                            \ \     \
-!                             \\     \
-!          --------------------\-------------------->
-!                    \         \\.
-!                    \         \  \.
-!                    \         \    \.    ta2
-!                a2  \         \      \.
-!                    \         \        \.
-!                    \         \          _|
-!                    V         \
-!                              \ ---------->
-!                              \     b2
 !
+!!   nu = v2^-1/v1^-1;
+!!   ta2 = (sign(dot(ta1,n1))*(1-nu^2+dot(n1,ta1)^2*nu^2)^.5-dot(n1,ta1)*nu)*n1+nu*ta1
+!       
+!   
 !
-!        a1 = - (ta1.n1)*n1
-!        b1 = a1 - ta1 = n1 (1+n1.ta1)
-!        b2 = v2/v1 * b1 = v2/v1 * n1 (1-n1.ta1)
-!        a2 = - sqrt[1-b2_mag^2]*n1 
-
-
-!   nu = v2^-1/v1^-1;
-!   ta2 = (sign(dot(ta1,n1))*(1-nu^2+dot(n1,ta1)^2*nu^2)^.5-dot(n1,ta1)*nu)*n1+nu*ta1
-       
-   
-
-      CALL UNIT_VECTOR_3(n1) 
-      CALL UNIT_VECTOR_3(ta1)
-      
-      vc = v2/v1   !u1/u2
-      dp = DOT_PRODUCT_3(n1,ta1)
-      sg = abs(dp)/dp
-      
-      ! Find transmitted vector
-      ta2 = (sg*(1.-vc**2+dp**2*vc**2)**.5-dp*vc)*n1+vc*ta1
-      
-      !For reflection, reflect vector on plane (normal is n1)
-			 IF (itr == -1) THEN
-				 dp2 = DOT_PRODUCT_3(ta2,n1)
-				 DO jj = 1,3
-					 ta2(jj) = ta2(jj) - 2*dp2*n1(jj)
-				 END DO
-			 END IF 
-
-!   
-!   
-!   dp = DOT_PRODUCT_3(ta1,n1)
-!   
-!     
-!!   if (dp < 1) then
-!   if (dp < 0) then     !fix
-!      ta1(1:3) = -ta1(1:3)
-!      dp = -dp
-!   end if
-!   
-!   do jj = 1, 3
-!    a1(jj) = dp * n1(jj)             !ok
-!!    b1(jj) = a1(jj) - ta1(jj)
-!    b1(jj) = ta1(jj) - a1(jj)  !fix
-!!    b2(jj) = v2*v2/v1/v1 * b1(jj)
-!    b2(jj) = v2/v1 * b1(jj)
-!   end do
+!      CALL UNIT_VECTOR_3(n1) 
+!      CALL UNIT_VECTOR_3(ta1)
+!      
+!      vc = v2/v1   !u1/u2
+!      dp = DOT_PRODUCT_3(n1,ta1)
+!      sg = abs(dp)/dp
+!      
+!      ! Find transmitted vector
+!      ta2 = (sg*(1.-vc**2+dp**2*vc**2)**.5-dp*vc)*n1+vc*ta1
+!      
+!      !For reflection, reflect vector on plane (normal is n1)
+!			 IF (itr == -1) THEN
+!				 dp2 = DOT_PRODUCT_3(ta2,n1)
+!				 DO jj = 1,3
+!					 ta2(jj) = ta2(jj) - 2*dp2*n1(jj)
+!				 END DO
+!			 END IF 
 !
-!   b2_mag = (1.-DOT_PRODUCT_3(b2,b2))**0.5
-!   
-!   do jj = 1, 3
-!!    write(6,*) 'DING',b2_mag
-!!    a2(jj) = - b2_mag*n1(jj)*float(itr)
-!    a2(jj) =  b2_mag*n1(jj)   !*float(itr) reflection is not -1*(vector), depends on n1
-!    ta2(jj) = b2(jj) + a2(jj)
-!   end do
-!   
-!   IF (itr == -1) THEN
-!     dp2 = DOT_PRODUCT_3(ta2,n1)
-!     DO jj = 1,3
-!       ta2(jj) = ta2(jj) - 2*dp2*n1(jj)
-!     END DO
-!   END IF  
-!   
-!!   write(6,*) 'A1:',a1(1:3)
-!!   write(6,*) 'B1:',b1(1:3)
-!!   write(6,*) 'A2:',a2(1:3)
-!!   write(6,*) 'B2:',b2(1:3)
 !!   
-!!   write(6,*) '|ta2|:',(dot_product(ta2,ta2))**0.5
-   
-   RETURN
-END SUBROUTINE REF_TRAN_RAY
+!!   
+!!   dp = DOT_PRODUCT_3(ta1,n1)
+!!   
+!!     
+!!!   if (dp < 1) then
+!!   if (dp < 0) then     !fix
+!!      ta1(1:3) = -ta1(1:3)
+!!      dp = -dp
+!!   end if
+!!   
+!!   do jj = 1, 3
+!!    a1(jj) = dp * n1(jj)             !ok
+!!!    b1(jj) = a1(jj) - ta1(jj)
+!!    b1(jj) = ta1(jj) - a1(jj)  !fix
+!!!    b2(jj) = v2*v2/v1/v1 * b1(jj)
+!!    b2(jj) = v2/v1 * b1(jj)
+!!   end do
+!!
+!!   b2_mag = (1.-DOT_PRODUCT_3(b2,b2))**0.5
+!!   
+!!   do jj = 1, 3
+!!!    write(6,*) 'DING',b2_mag
+!!!    a2(jj) = - b2_mag*n1(jj)*float(itr)
+!!    a2(jj) =  b2_mag*n1(jj)   !*float(itr) reflection is not -1*(vector), depends on n1
+!!    ta2(jj) = b2(jj) + a2(jj)
+!!   end do
+!!   
+!!   IF (itr == -1) THEN
+!!     dp2 = DOT_PRODUCT_3(ta2,n1)
+!!     DO jj = 1,3
+!!       ta2(jj) = ta2(jj) - 2*dp2*n1(jj)
+!!     END DO
+!!   END IF  
+!!   
+!!!   write(6,*) 'A1:',a1(1:3)
+!!!   write(6,*) 'B1:',b1(1:3)
+!!!   write(6,*) 'A2:',a2(1:3)
+!!!   write(6,*) 'B2:',b2(1:3)
+!!!   
+!!!   write(6,*) '|ta2|:',(dot_product(ta2,ta2))**0.5
+!   
+!   RETURN
+!END SUBROUTINE REF_TRAN_RAY
 
 
 
