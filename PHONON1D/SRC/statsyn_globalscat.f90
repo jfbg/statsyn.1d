@@ -523,7 +523,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			 z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
 
 			 !DEBUG
-       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1
+!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1
       
 			
 				! ============ >>
@@ -640,7 +640,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 
 										 !DEBUG
-										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2
+!										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2
 																						
 			
 										END DO
