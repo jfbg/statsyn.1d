@@ -14,16 +14,15 @@ set mx_scat_dp = "15"
 set n_phonon   = "5" 
 
 # SCATTERING
-set bg_scat    = .001
-set prob_scat  = .9
+set bg_scat    = 1.0
+set prob_scat  = 1.0
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = .9
 
 # Source attenuation
-set dQdfstyle  = 2
-
+set dQdfstyle  = 1
 
 set file_out   = "D003_noscat"
 set model_name = "S_VPREMOON_Qp_nocrust"

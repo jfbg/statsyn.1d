@@ -40,12 +40,14 @@ PROGRAM STATSYN_GLOBALSCAT
 				! Leaving source declarations here (and not in pho_vars) speeds up the compilation
 				! time by a lot (nt0 is large).
 				REAL(8)          mts(101,4,nt0)        !ATTENUATED SOURCE
-				REAL(8)          b(nt0), e(nt0)        !HILBERT TRANSFORM & ENVELOPE
-				REAL(8)          mtsc(nt0),datt,dtst1  !SCRATCH SPACE
+				REAL             mts4(101,4,nt0)        !ATTENUATED SOURCE
+				REAL          b(nt0), e(nt0)        !HILBERT TRANSFORM & ENVELOPE
+				REAL          mtsc(nt0),datt,dtst1  !SCRATCH SPACE
 				INTEGER       ims
-				REAL(8)          mt(nt0)               !SOURCE-TIME FUNCTION 
+				REAL          mt(nt0)               !SOURCE-TIME FUNCTION 
 				COMPLEX       ms(nt0),ss(nx0,nt0)   !SOURCE & STACKED SPECTRA
-				REAL(8)          nn(nx0,nt0)
+				REAL          nn(nx0,nt0)
+				REAL          dt4
 							
 				
 				
@@ -298,9 +300,13 @@ PROGRAM STATSYN_GLOBALSCAT
 !     ======================================================
 !			----- Generate Source Function -----		           
 !      WRITE(6,*) 'CALCULATING SOURCE:'        !CALCULATING SOURCE
+      dt4 = REAL(dti,4)
       pi = atan(1.)*4.                        !
+!      write(6,*) 'pi =',pi
       P0 = dti*4.                             !DOMINANT PERIOD
+!      write(6,*) 'p0 =',P0
       nts = nint(P0*4./dti)+1                 !# OF POINTS IN SOURCE SERIES
+!      write(6,*) 'nts =',nts
       IF (nts < 31) nts = 31
       nts1 = 1000
       DO I = 1, nts1
@@ -309,8 +315,8 @@ PROGRAM STATSYN_GLOBALSCAT
       DO I = 1, nts                           !SOURCE-TIME FUNCTION
        t0 = dti*float(I-1)-P0
        mt(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
-               *exp(-2.*pi**2.*(t0/P0-0.5)**2.)
-!       WRITE(6,*) t0,mt(i)
+               *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
+!       WRITE(6,*) '>>>>',t0,mt(i)
       END DO
 			
 			
@@ -329,32 +335,34 @@ PROGRAM STATSYN_GLOBALSCAT
       							! This is datt, not max att. max att will be datt*(101-1) = 2.
      DO I = 1, 101                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
-       CALL ATTENUATE(mt,mtsc,nts1,dti,dtst1,dQdfSTYLE) !
+       CALL ATTENUATE(mt,mtsc,nts1,dt4,dtst1,dQdfSTYLE) !
        pow1 = 0.
        DO J = 1, nts1                         !
-        mts(I,1,J) =  mtsc(J)                 !
-        mts(I,3,J) = -mtsc(J)                 !
+        mts4(I,1,J) =  mtsc(J)                 !
+        mts4(I,3,J) = -mtsc(J)                 !
         pow1 = pow1 + mtsc(J)**2
        END DO                                 !
        nfil = 5
-       CALL TILBERT(mtsc,dti,nts1,nfil,b,e)   !HILBER TRANSFORM (pi/2PHASESHFT)
+       CALL TILBERT(mtsc,dt4,nts1,nfil,b,e)   !HILBER TRANSFORM (pi/2PHASESHFT)
        pow2 = 0.                              !ZERO POWER OF SERIES
        DO K = 1, nts1                         !COPY HILBERT SERIES TO CORRECT
-        mts(I,2,K) = -b(K)                    !
-        mts(I,4,K) =  b(K)
+        mts4(I,2,K) = -b(K)                    !
+        mts4(I,4,K) =  b(K)
         pow2 = pow2 + b(k)**2                 !CUMULATIVE POWER
        END DO
        DO K = 1, nts1                         !NORMALIZE HILBERTS
-        mts(I,2,K) = mts(I,2,K)*pow1/pow2     !
-        mts(I,4,K) = mts(I,4,K)*pow1/pow2     !
+        mts4(I,2,K) = mts4(I,2,K)*pow1/pow2     !
+        mts4(I,4,K) = mts4(I,4,K)*pow1/pow2     !
        END DO
       END DO
+      
+      mts = REAL(mts4,8)
 			
       OPEN(23,FILE='source.out')              !OUTPUT SOURCE
       WRITE(23,*) nts,101                     !
       WRITE(23,FMT=888) 999.99,(datt*float(J-1),J=1,101)
       DO I = 1, nts
-        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,2,I)*1.,J=1,101)
+        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,3,I)*1.,J=1,101)
       END DO
       CLOSE(23)
  
@@ -773,6 +781,8 @@ PROGRAM STATSYN_GLOBALSCAT
 														wf(ix,JT,ic) = wf(ix,JT,ic) + a * c_mult(ic) &
 																* (   (1.-frac)*mts(ims-1,icaust,JJ) &
 																		+ (   frac)*mts(ims  ,icaust,JJ) )!ATTENUATION
+																		
+!													 write(6,*) '----->',wf(ix,JT,ic)
 													END IF
 												END DO
 											END DO
@@ -833,7 +843,10 @@ PROGRAM STATSYN_GLOBALSCAT
 
       CALL etime(elapsed,totaltime)
       WRITE(6,FMT = 871) totaltime-ttimestart,I-1,(totaltime-ttimestart)/(I-1)
-871   FORMAT ('Total time = ',f9.2,'s for ',i8,' phonons (',f7.5,'s/p)')			
+871   FORMAT ('Total time = ',f9.2,'s for ',i8,' phonons (',f7.5,'s/p)')	
+      WRITE(6,*) 'Total Surface records = ', surfcount
+      WRITE(6,*) 'Too far from receiver = ', surCYC1      
+      WRITE(6,*) 'Scattered:',  conv_count(1:6)		
 
 			
 !			======================================================
@@ -862,11 +875,6 @@ PROGRAM STATSYN_GLOBALSCAT
       END DO
       WRITE(6,*) 'Synthetic outputs done'
       
-
-      WRITE(6,*) 'Total Surface records = ', surfcount
-      WRITE(6,*) 'Too far from receiver = ', surCYC1
-      
-      WRITE(6,*) 'Scattered:',  conv_count(1:6)
 
 !			^^^^^ Output Synthetics ^^^^^
 			
@@ -942,40 +950,42 @@ SUBROUTINE ATTENUATE(sin,sout,ndat,dt,tstar,dQdfSTYLE)
 !   |AS WITH ALL MY CODES, BEWARE OF THE BUG. NO GUARANTEES! SORRY!      !   !
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
 !   |DECLARE VARIABLES AND SET PARAMETERS:                               !   !
-      REAL(8)           sin(*),sout(*),tstar
-      INTEGER        ndat,nfreq              !# OF POINTS IN TIME & FREQ DOMAIN
+      IMPLICIT       NONE
+      REAL           sin(*),sout(*),tstar
+      INTEGER        ndat,nfreq,npts              !# OF POINTS IN TIME & FREQ DOMAIN
       INTEGER        MAXPTS                  !MAX # OF POINTS & ITERATIONS
       PARAMETER(     MAXPTS = 16384)         !
-      REAL(8)           xs(16384)               !SCRATCH SPACE
+      REAL           xs(16384)               !SCRATCH SPACE
       COMPLEX        xf(16384),yf(16384)     !SCRATCH SPACE
-      REAL(8)           dt,df                   !TIME & FREQ SAMPLING INTERVAL
-      REAL(8)           pi                      !SET PI = 3.14....
-      REAL(8)           w,dw                    !FREQUENCY VARIABLES
-      REAL(8)           damp
-      REAL(8)           rdQdf(16384)
-      INTEGER				 dQdfSTYLE
-      
-      
-       
-      
+      REAL           dt,df                   !TIME & FREQ SAMPLING INTERVAL
+      REAL           pi                      !SET PI = 3.14....
+      REAL           w,dw,dadw                    !FREQUENCY VARIABLES
+      REAL           damp
+      REAL           rdQdf(16384)
+      INTEGER				 dQdfSTYLE,I
 
       
       CALL NP2(ndat,npts)                    !FIND POWER OF TWO, npts >= ndat
       IF (npts > MAXPTS) THEN               !CHECK THAT ARRAY IS NOT TOO BIG
        WRITE(6,*) 'WARNING: SERIES TRUNCATED TO:',MAXPTS
        npts = MAXPTS
-      END IF                                 !
+      END IF  
+
       CALL PADR(sin,ndat+1,npts)             !PAD SERIES WITH ZEROS
       CALL COPYR(sin,xs,npts)                 !COPY INITIAL DENOMINATOR
       
       CALL GET_SPEC(xs,npts,dt,xf,nfreq,df) !GET SPECTRUM OF x
+      
+      
       pi = atan(1.)*4.                       !SET PI = 3.14....
       dw = 2.*pi*df                          !ANGULAR FREQUENCY SAMPLING INTERVAL
-      
+!      write(6,*) 'dw:',dw,pi,df,dt,ndat,npts
+
       DO I = 1, nfreq
       	!Can give rdQdf any form. 
       	IF (dQdfSTYLE == 1) THEN
       	     rdQdf(I) = 1.      !Q constant at all frequencies
+!      	                       WRITE(6,*) 'Atte6'
       	ELSE IF (dQdfSTYLE == 2) THEN
       	     rdQdf(I) = 1. + ((df*float(I-1)-1)*.3)
       	ELSE
@@ -985,17 +995,18 @@ SUBROUTINE ATTENUATE(sin,sout,ndat,dt,tstar,dQdfSTYLE)
       
       dadw = -tstar*dw                       !DERIVATIVE dA(w)di = -dt*dw
       
-            
       DO I = 1, nfreq                        !APPLY ATTENUATION FILTER
-       damp = exp(float(I-1)*dadw/rdQdf(I))
+       damp =  exp(float(I-1)*dadw/rdQdf(I))
        w     = dw* float(I-1)                !ANGULAR FREQUENCY
        IF (damp < 0.) damp = 0.
        yf(I) = xf(I)*cmplx(damp,0.)
        yf(I) = yf(I)*exp( cmplx(0.,w*tstar/rdQdf(I)))
+!       yf(I) = yf(I)*exp( cmplx(0.,w*tstar))
       END DO
 
-      CALL GET_TS(yf,nfreq,df,0,sout,npts,dt) !GET TIME SERIES OF ATTENUATED SPEC
 
+      CALL GET_TS(yf,nfreq,df,0,sout,npts,dt) !GET TIME SERIES OF ATTENUATED SPEC
+    
       RETURN
 END SUBROUTINE ATTENUATE                      !END ATTENUATE
       
@@ -1029,7 +1040,7 @@ SUBROUTINE COPYR(f1,f2,npts)
 !   |AS WITH ALL MY CODES, BEWARE OF THE BUG. NO GUARANTEES! SORRY!      !   !
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
       INTEGER     I,npts                       !STEP & NUMBER OF POINTS
-      REAL(8)        f1(*),f2(*)                  !INPUT AND OUTPUT SERIES
+      REAL        f1(*),f2(*)                  !INPUT AND OUTPUT SERIES
       DO I = 1, npts                           !
        f2(I) = f1(I)                           !COPY POINTS
       END DO
@@ -1048,7 +1059,7 @@ SUBROUTINE PADR(f1,n1,n2)
 !   |AS WITH ALL MY CODES, BEWARE OF THE BUG. NO GUARANTEES! SORRY!      !   !
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
       INTEGER     I,n1,n2                      !STEP, START & END POINTS
-      REAL(8)        f1(*)                        !SERIES TO ADD ZEROS TO
+      REAL        f1(*)                        !SERIES TO ADD ZEROS TO
       DO I = n1, n2                            !
        f1(I) = 0.                              !MAKE ZERO
       END DO
@@ -1396,8 +1407,8 @@ SUBROUTINE TILBERT(a,dt,npts,nfil,b,e)
 !               e    =  envelope time FUNCTION
 !
 !   | --- --------- --------- --------- --------- --------- --------- -- |   !
-      REAL(8)       a(*),b(*),e(*),h(2001)
-      REAL(8)       dt
+      REAL       a(*),b(*),e(*),h(2001)
+      REAL       dt
       INTEGER    npts,nfil,nfiltot,I,J,II,JJ,i1,i2
       SAVE       dt0,npts0,h,nfiltot             !STORE VARIABLES TO SAVE TIME
       pi = atan(1.)*4.                           !SET PI = 3.14.....
@@ -1412,7 +1423,7 @@ SUBROUTINE TILBERT(a,dt,npts,nfil,b,e)
          h(i) = 0.
         END IF
 10     END DO
-       CALL TAPERR(h,nfiltot,REAL(0.5,8),REAL(0.5,8))
+       CALL TAPERR(h,nfiltot,0.5,0.5)
        dt0     = dt                              !STORE SAMPLING INTERVAL
        npts0   = npts                            !STORE NUMBER OF POINTS
       END IF
@@ -1446,7 +1457,7 @@ SUBROUTINE TAPERR(S1,ndat,tap1,tap2)
 !   | THIS SUBROUTINE TAPERS ANY SIGNAL (S1), OF LENGTH npts, FROM 1 TO  !   ! 
 !   |      tap1*npts, AND FROM tap2*npts TO npts.                        !   !
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
-      REAL(8)       S1(*),tap1,tap2,PI,cs
+      REAL       S1(*),tap1,tap2,PI,cs
       INTEGER    tap1n,tap2n
       INTEGER    I,ndat
       PI = atan(1.0)*4.
@@ -1470,7 +1481,7 @@ SUBROUTINE ZEROR(series,npts)
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
 !   |THIS SUBROUTINE ZEROES ANY 1D SERIES OF LENGTH TO POINT, npts:      !   !
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
-      REAL(8) series(*)
+      REAL series(*)
       INTEGER npts
 
       DO I = 1, npts
@@ -1988,7 +1999,7 @@ SUBROUTINE GET_DS_SCAT
 			!Find approximate flattening factor, based on actual depth z_act
 			! z_act is FLAT, find what z_act would be if NONFLAT, ratio gives
 			! scale_length factor
-      z_nf = erad - erad*exp(z_act/(-1*erad)) ;
+      z_nf = erad - erad*dexp(z_act/(-1*erad)) ;
 		
 			IF ((z_nf == 0).OR.(z_act == 0)) THEN
 			   fac = 1
