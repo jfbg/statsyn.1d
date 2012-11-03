@@ -25,8 +25,8 @@ set velperturb = .1
 set dQdfstyle  = 2
 
 
-set file_out   = "D003b_bgscat_scat60_Q2"
-set model_name = "S_VPREMOON_Qp_ori"
+set file_out   = "D003b_bgscat_scat60_Q2_nocrust"
+set model_name = "S_VPREMOON_Qp_nocrust"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
