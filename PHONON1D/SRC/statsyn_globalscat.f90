@@ -748,6 +748,7 @@ PROGRAM STATSYN_GLOBALSCAT
 										! Calculate angle of incidence. This was not done before so the angle used
 										! was the last one from scattering or the initial take-off angle.
 										ang1 = asin(p*vf(iz,iwave))
+!										WRITE(6,*) ang1/pi*180
 					
 										IF ( (IT > 1-nts).and.(IT <= nt0+nts) ) THEN
 											IF ( (ip == 1) ) THEN
@@ -780,8 +781,7 @@ PROGRAM STATSYN_GLOBALSCAT
 													IF ( (JT > 0).AND.(JT <= nt0).AND.(a /= 0.) ) THEN
 														wf(ix,JT,ic) = wf(ix,JT,ic) + a * c_mult(ic) &
 																* (   (1.-frac)*mts(ims-1,icaust,JJ) &
-																		+ (   frac)*mts(ims  ,icaust,JJ) )!ATTENUATION
-																		
+																		+ (   frac)*mts(ims  ,icaust,JJ) )!ATTENUATION																		
 !													 write(6,*) '----->',wf(ix,JT,ic)
 													END IF
 												END DO
@@ -1909,6 +1909,7 @@ SUBROUTINE RAYTRACE
          t = t + dt1                    !TRAVEL TIME
          x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
+         
         END IF
         
 				RETURN 			
@@ -1919,6 +1920,7 @@ SUBROUTINE RAYTRACE_SCAT
       USE pho_vars
 			IMPLICIT NONE
 			REAL(8)   ztop,zbot,vtop,vbot,z_pos,vgrad
+
 			
 			!First need to interp velocities at z_act and at z_act+dh
 			! based on velocities at top and at the bottom of the layer

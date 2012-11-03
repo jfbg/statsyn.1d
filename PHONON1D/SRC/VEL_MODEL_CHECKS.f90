@@ -137,7 +137,7 @@
 				vst = vs
 				rht = rh
 				DO I = 1,nlay
-				  Q(I,1) = Qt(I)
+				  Qt(I) = Q(I,1)
 				END DO
 				
 				nlay = nlay+1

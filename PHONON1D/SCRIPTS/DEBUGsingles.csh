@@ -2,31 +2,31 @@
 
 #
 # Set synthetic parameters
-
 #
+
 
 set ray_par    = "0.0 0.1668 0.2931"
 @ t_start      = 0
 @ t_max        = 4500			# 75 minutes
 set d_range    = "0 180 91"
 set model      = "2"	#2 for Moon
-set mx_scat_dp = "15"
-set n_phonon   = "5" 
+set mx_scat_dp = "10"
+set n_phonon   = "4000"
 
 # SCATTERING
-set bg_scat    = 1.0
-set prob_scat  = 1.0
+set bg_scat    = 0.001
+set prob_scat  = 0.6
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
-set velperturb = .9
+set velperturb = .1
 
 # Source attenuation
 set dQdfstyle  = 1
 
-set file_out   = "D003_noscat"
-set model_name = "S_VPREMOON_Qp_nocrust"
-# set model_name = "DEBUG_1VEL_10km"
+
+set file_out   = "D003_bgscat"
+set model_name = "S_VPREMOON_Qp_ori"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
@@ -70,9 +70,9 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 1100 
 else if ($i == 1) then
- set q_depth = 30
+ set q_depth = 0030
 else
- set q_depth = 1000
+ set q_depth = 0.01
 endif
 
 echo "Depth=:" $q_depth
@@ -93,7 +93,7 @@ while ($j < $n_kern)
 @ j = $j + 1
 
 
-#sleep 4
+sleep 4
 
 ## 
 # Start phonon synthetics
