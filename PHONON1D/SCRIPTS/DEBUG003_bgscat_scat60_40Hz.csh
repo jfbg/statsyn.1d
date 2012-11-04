@@ -31,7 +31,7 @@ set model_name = "S_VPREMOON_Qp_ori"
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
 @ n_kern  = 6     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 5    ## Number of iterations
+@ n_iter  = 10    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -52,7 +52,7 @@ cd ..
 while ($l < $n_freq)
 @ l = $l + 1
 
-if ($l == 2) then
+if ($l == 1) then
  set dt = "0.025"
  set period = "40"
 else

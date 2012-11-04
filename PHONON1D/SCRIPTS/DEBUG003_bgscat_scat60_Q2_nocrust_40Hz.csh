@@ -22,16 +22,16 @@ set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = .1
 
 # Source attenuation
-set dQdfstyle  = 1
+set dQdfstyle  = 2
 
 
-set file_out   = "D003_bgscat_scat60"
-set model_name = "S_VPREMOON_Qp_ori"
+set file_out   = "D003b_bgscat_scat60_Q2_nocrust"
+set model_name = "S_VPREMOON_Qp_nocrust"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
 @ n_kern  = 6     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 5    ## Number of iterations
+@ n_iter  = 10    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -52,7 +52,7 @@ cd ..
 while ($l < $n_freq)
 @ l = $l + 1
 
-if ($l == 2) then
+if ($l == 1) then
  set dt = "0.025"
  set period = "40"
 else
