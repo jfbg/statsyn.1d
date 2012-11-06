@@ -4,7 +4,7 @@ MODULE PHO_VARS			! Make variables global
 				
 				
 				
-				INTEGER, PARAMETER :: nlay0=1000, nt0=144000, nx0=91
+				INTEGER, PARAMETER :: nlay0=1000
 								
 				! ENERGY TRACKING
 				CHARACTER*100 :: tfile

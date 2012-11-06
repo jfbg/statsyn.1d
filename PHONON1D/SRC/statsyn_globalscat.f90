@@ -33,6 +33,7 @@ PROGRAM STATSYN_GLOBALSCAT
 				
 				IMPLICIT NONE
 				
+				INTEGER, PARAMETER :: nt0=180000, nx0=91
 				DOUBLE PRECISION wf(nx0,nt0,3)        !STACKED DATA
 				REAL(8)             w(nt0)
 			
@@ -729,8 +730,9 @@ PROGRAM STATSYN_GLOBALSCAT
 										! right on the receiver. Max time is when ang1 is 90.					
 										dtsurf = (xo-x_index/deg2km)*deg2km*p 
 					
-										IT = nint((t +dtsurf      -t1)/dti) + 1 			
+										IT = nint((t +dtsurf      -t1)/dti) + 1 
 										
+								
 										ims = int(s/datt)+1
 										IF (ims > 100) ims = 100
 										IF (ims <=   1) ims =   2
@@ -758,13 +760,13 @@ PROGRAM STATSYN_GLOBALSCAT
 												c_mult(2) = sin(ang1) * sin(az)  !! Tangential Amp from P wave
 												c_mult(3) = sin(ang1) * cos(az)  !! Radial Amp for P wave
 											ELSE IF (ip == 2) THEN
-												c_mult(1) = 0.!cos(ang1)*sin(az) !! Vertical Amp for SH
-												c_mult(2) = cos(az)              !! Tangential Amp for SH
-												c_mult(3) = sin(az)              !! Radial Amp for SH
-											ELSE IF (ip == 3) THEN
 												c_mult(1) = sin(ang1)*cos(az)    !! Vertical amp for SV
 												c_mult(2) = cos(ang1)*sin(az)    !! Tangential amp for SV
 												c_mult(3) = cos(ang1)*cos(az)    !! Radial amp for SV
+											ELSE IF (ip == 3) THEN
+												c_mult(1) = 0.!cos(ang1)*sin(az) !! Vertical Amp for SH
+												c_mult(2) = cos(az)              !! Tangential Amp for SH
+												c_mult(3) = sin(az)              !! Radial Amp for SH
 											END IF
 											
 										!JFL	Not sure why p was redefined here, for an s-wave iwave = 2 (??).
@@ -775,6 +777,8 @@ PROGRAM STATSYN_GLOBALSCAT
 											n_iter_last = nitr
 											ix_last = ix
 											it_last = it
+											
+!										WRITE(77,*) t,dtsurf,dti,IT,nts,nt0
 											
 							
 											DO ic = 1, 3
