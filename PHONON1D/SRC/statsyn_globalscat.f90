@@ -543,6 +543,8 @@ PROGRAM STATSYN_GLOBALSCAT
 						! THE PHONON CAN BE SCATTERED AT ALL DEPTHS. THE ONLY THING THAT CHANGES
 						! IS THE SCATTERING PROBABILITY, WHICH DEPENDS ON THE DEPTH.
 						
+                iz_scat = iz -1 !Layer in which phonon would scatter
+						
 								!Set depth-dependent scattering probability
 								scat_prob = BG_prob			!Assume background probability at first.
 								IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) scat_prob = SL_prob		
@@ -550,11 +552,11 @@ PROGRAM STATSYN_GLOBALSCAT
 								!IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
 								   !Background probability IF leaving scat layer from at base
 								IF (iz >= nlay-2) scat_prob = 0. !no scattering near center of Moon
+								IF (vf(iz_scat,2) == 0.) scat_prob = 0. !no scattering in liquid layer
   					!Check if scatter at interface
   					r0 = rand()
-					  IF ((scat_prob > 0.).AND.(iz > 1).AND.(r0 < scat_prob)) THEN   !CALL INTERFACE_SCATTER
+					  IF ((scat_prob > 0.).AND.(iz > 1).AND.(r0 < scat_prob).AND.(vf(iz) THEN   !CALL INTERFACE_SCATTER
 								ud_pre = ud  !save current ud before scattering it.
-							  iz_scat = iz -1
 								CALL REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh)  !Scatter	
 								!Fix iz if direction has changed
 								IF ((ud_pre == 1).AND.(ud == -1))  iz = iz-1
