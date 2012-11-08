@@ -178,6 +178,7 @@
 			! Calculate Qs (4/9)*Qp
 			DO I = 1,nlay
 			 Q(I,2) = (4./9.)*Q(I,1)
+			 IF (vs(I,2) == 0) Q(I,2) = 1
 			END DO
 			
       OPEN(45,FILE='model_modified.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL

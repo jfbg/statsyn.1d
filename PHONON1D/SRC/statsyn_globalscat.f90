@@ -148,7 +148,7 @@ PROGRAM STATSYN_GLOBALSCAT
       cmp(3) = 'lpr'
       
       pi = atan(1.)*4.
-      re = 6371.
+      re = 6370.
       rm = 1737.
       
       d2r = pi/180.
