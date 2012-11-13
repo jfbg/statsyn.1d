@@ -9,9 +9,9 @@ set ray_par    = "0.0 0.1668 0.2931"
 @ t_start      = 0
 @ t_max        = 4500			# 75 minutes
 set d_range    = "0 180 91"
-set model      = "2"	#2 for Moon
+set model      = "1"	#2 for Moon
 set mx_scat_dp = "10"
-set n_phonon   = "500"
+set n_phonon   = "1000"
 
 # SCATTERING
 set bg_scat    = 0.00
@@ -26,7 +26,8 @@ set dQdfstyle  = 1
 
 
 set file_out   = "D003_bgscat"
-set model_name = "S_VPREMOON_Qp_nocrust"
+set model_name = "EARTH_MODEL_10km"
+#set model_name = "S_VPREMOON_Qp_ori"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
@@ -93,7 +94,7 @@ while ($j < $n_kern)
 @ j = $j + 1
 
 
-sleep 4
+#sleep 4
 
 ## 
 # Start phonon synthetics

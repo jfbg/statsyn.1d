@@ -11,7 +11,7 @@ set ray_par    = "0.0 0.1668 0.2931"
 set d_range    = "0 180 91"
 set model      = "1"	#2 for Moon
 set mx_scat_dp = "10"
-set n_phonon   = "3000000"
+set n_phonon   = "10000"
 
 # SCATTERING
 set bg_scat    = 0.00
@@ -25,13 +25,14 @@ set velperturb = .1
 set dQdfstyle  = 1
 
 
-set file_out   = "BENCHMARK_EARTH001"
+set file_out   = "BENCHMARK_EARTH001_MOHOa"
 set model_name = "EARTH_MODEL_10km"
+#set model_name = "S_VPREMOON_Qp_ori"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 20     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 10    ## Number of iterations
+@ n_kern  = 1     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 1    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
