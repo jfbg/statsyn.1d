@@ -14,7 +14,7 @@ set mx_scat_dp = "15"
 set n_phonon   = "3000000"
 
 # SCATTERING
-set bg_scat    = 0.00
+set bg_scat    = 0.001
 set prob_scat  = 0.7
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale

@@ -423,20 +423,20 @@ PROGRAM STATSYN_GLOBALSCAT
 				
 				IF (iz1 /= 1) THEN
 					r0 = rand()
-					IF (r0 < 1./3.) THEN
-					 ip = 1
-					ELSE IF ((r0 >= 1./3.).AND.(r0 < 2./3.)) THEN
-					 ip = 2
-					ELSE
-					 ip = 3
-					END IF 
-!					IF (r0 < 1./21.) THEN
-!						ip = 1 !P
-!					ELSE IF ((r0 >= 1./21.).and.(r0 < 11./21.)) THEN
-!						ip = 2 !SV
-!					ELSE 
-!						ip = 3 !SH
-!					END IF
+!					IF (r0 < 1./3.) THEN
+!					 ip = 1
+!					ELSE IF ((r0 >= 1./3.).AND.(r0 < 2./3.)) THEN
+!					 ip = 2
+!					ELSE
+!					 ip = 3
+!					END IF 
+					IF (r0 < 1./21.) THEN
+						ip = 1 !P
+					ELSE IF ((r0 >= 1./21.).and.(r0 < 11./21.)) THEN
+						ip = 2 !SV
+					ELSE 
+						ip = 3 !SH
+					END IF
 				END IF
         
 !        ip = 2
@@ -636,6 +636,8 @@ PROGRAM STATSYN_GLOBALSCAT
 															
 															!New ds_scat
 															CALL GET_DS_SCAT
+															
+															write(77,*) ds_scat
 															
 															
 												ELSE
