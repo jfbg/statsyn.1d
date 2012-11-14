@@ -637,7 +637,7 @@ PROGRAM STATSYN_GLOBALSCAT
 															!New ds_scat
 															CALL GET_DS_SCAT
 															
-															write(77,*) ds_scat
+!															write(77,*) ds_scat
 															
 															
 												ELSE
