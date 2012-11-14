@@ -159,6 +159,7 @@ PROGRAM STATSYN_GLOBALSCAT
       n180 = nint(180/dxi)			!Number of intervals in 180deg
       
       dreceiver = 0.05  !radius around receiver in which the phonons will be recorded (deg)
+      tstuck = 0
      
       !Initialize random seed for sequence of random numbers used to multiply to clock-based seeds.	  
       CALL INIT_RANDOM_SEED()
@@ -303,11 +304,8 @@ PROGRAM STATSYN_GLOBALSCAT
 !      WRITE(6,*) 'CALCULATING SOURCE:'        !CALCULATING SOURCE
       dt4 = REAL(dti,4)
       pi = atan(1.)*4.                        !
-!      write(6,*) 'pi =',pi
       P0 = dti*4.                             !DOMINANT PERIOD
-!      write(6,*) 'p0 =',P0
       nts = nint(P0*4./dti)+1                 !# OF POINTS IN SOURCE SERIES
-!      write(6,*) 'nts =',nts
       IF (nts < 31) nts = 31
       nts1 = 1000
       DO I = 1, nts1
@@ -317,7 +315,6 @@ PROGRAM STATSYN_GLOBALSCAT
        t0 = dti*float(I-1)-P0
        mt(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
-!       WRITE(6,*) '>>>>',t0,mt(i)
       END DO
 			
 			
@@ -395,6 +392,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			
       DO I = 1, ntr   !FOR EACH TRACE -- DOLOOP_001
       
+    
       
       CALL etime(elapsed,tt1)
       
@@ -414,8 +412,6 @@ PROGRAM STATSYN_GLOBALSCAT
        CALL srand(seed)    
 	     r0 = rand()    !First rand output not random
                         ! It is seed (clock) depENDent
-!        write(6,*) 'seed:',seed,I,r2s,ntime(8)
-!        write(6,*) 'ntime:',ntime(5:8)
       ! ============ <<
        
 				 
@@ -427,20 +423,20 @@ PROGRAM STATSYN_GLOBALSCAT
 				
 				IF (iz1 /= 1) THEN
 					r0 = rand()
-!					IF (r0 < 1./3.) THEN
-!					 ip = 1
-!					ELSE IF ((r0 >= 1./3.).AND.(r0 < 2./3.)) THEN
-!					 ip = 2
-!					ELSE
-!					 ip = 3
-!					END IF 
-					IF (r0 < 1./21.) THEN
-						ip = 1 !P
-					ELSE IF ((r0 >= 1./21.).and.(r0 < 11./21.)) THEN
-						ip = 2 !SH
-					ELSE 
-						ip = 3 !SV
-					END IF
+					IF (r0 < 1./3.) THEN
+					 ip = 1
+					ELSE IF ((r0 >= 1./3.).AND.(r0 < 2./3.)) THEN
+					 ip = 2
+					ELSE
+					 ip = 3
+					END IF 
+!					IF (r0 < 1./21.) THEN
+!						ip = 1 !P
+!					ELSE IF ((r0 >= 1./21.).and.(r0 < 11./21.)) THEN
+!						ip = 2 !SV
+!					ELSE 
+!						ip = 3 !SH
+!					END IF
 				END IF
         
 !        ip = 2
@@ -488,12 +484,14 @@ PROGRAM STATSYN_GLOBALSCAT
        !Set ray parameter
         p    = abs(sin(ang1))/vf(iz,iwave)
         
+        
         NITR = 0
         
         n_iter_last = -999
         ix_last = -999
         it_last = -999
-        t_last = 0
+        t_last = t
+        t_last_count = 0
         ! ============ <<
         
         ! ============ >>
@@ -524,7 +522,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			 z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
 
 			 !DEBUG
-!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1
+!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1,irtr1
       
 			
 				! ============ >>
@@ -548,12 +546,18 @@ PROGRAM STATSYN_GLOBALSCAT
 						
 								!Set depth-dependent scattering probability
 								scat_prob = BG_prob			!Assume background probability at first.
+								
 								IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) scat_prob = SL_prob		
 								   !Scattering layer probability
+								
 								!IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
 								   !Background probability IF leaving scat layer from at base
+								
 								IF (iz >= nlay-2) scat_prob = 0. !no scattering near center of Moon
+								
 								IF (vf(iz_scat,2) == 0.) scat_prob = 0. !No scattering in liquid layers
+  					
+  					
   					!Check if scatter at interface
   					r0 = rand()
 					  IF ((scat_prob > 0.).AND.(iz > 1).AND.(r0 < scat_prob)) THEN   !CALL INTERFACE_SCATTER
@@ -594,7 +598,7 @@ PROGRAM STATSYN_GLOBALSCAT
 								 imth = 2	!Interpolation method in Layer trace (2 is linear)
 								 CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
 								 ds_SL = (dh**2+dx1**2)**0.5
-								 
+								 							 
 							IF (irtr1 == 1) THEN !Only scatter if ray would have gone through layer
 							
 							        scat_FLAG = 1
@@ -636,14 +640,14 @@ PROGRAM STATSYN_GLOBALSCAT
 															
 												ELSE
 												
-                              ds_scat = 9999
+                              ds_scat = 999999
                               
                         END IF												
 								      
 
 
 										 !DEBUG
-!										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2
+!										 WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2,irtr1
 																						
 			
 										END DO
@@ -660,6 +664,8 @@ PROGRAM STATSYN_GLOBALSCAT
 									 
 									 !Set iz to what it would have been without scattering, based on direction
 									 iz = iz_scat+1
+!									 IF (ud == -1) iz = iz_scat
+!									 IF (ud == 1)  iz = iz_scat + 2
 									 CALL INTERFACE_NORMAL
 									 
 									 
@@ -672,6 +678,7 @@ PROGRAM STATSYN_GLOBALSCAT
   									 ! ============ >>
 										 ! RAY TRACING IN LAYER
 										 CALL RAYTRACE
+!						         if (dt1 > 0.) iz = iz + ud 
 										 CALL INTERFACE_NORMAL
 										 ! RAY TRACING IN LAYER	
 										 ! ============ <<
@@ -690,6 +697,7 @@ PROGRAM STATSYN_GLOBALSCAT
 					! ============ >>
 					! RAY TRACING IN LAYER
 					CALL RAYTRACE
+!	        if (dt1 > 0.) iz = iz + ud 
 					CALL INTERFACE_NORMAL			
 					! RAY TRACING IN LAYER	
 					! ============ <<
@@ -752,7 +760,6 @@ PROGRAM STATSYN_GLOBALSCAT
 										! Calculate angle of incidence. This was not done before so the angle used
 										! was the last one from scattering or the initial take-off angle.
 										ang1 = asin(p*vf(iz,iwave))
-!										WRITE(6,*) ang1/pi*180
 					
 										IF ( (IT > 1-nts).and.(IT <= nt0+nts) ) THEN
 											IF ( (ip == 1) ) THEN
@@ -778,7 +785,6 @@ PROGRAM STATSYN_GLOBALSCAT
 											ix_last = ix
 											it_last = it
 											
-!										WRITE(77,*) t,dtsurf,dti,IT,nts,nt0
 											
 							
 											DO ic = 1, 3
@@ -788,7 +794,6 @@ PROGRAM STATSYN_GLOBALSCAT
 														wf(ix,JT,ic) = wf(ix,JT,ic) + a * c_mult(ic) &
 																* (   (1.-frac)*mts(ims-1,icaust,JJ) &
 																		+ (   frac)*mts(ims  ,icaust,JJ) )!ATTENUATION																		
-!													 write(6,*) '----->',wf(ix,JT,ic)
 													END IF
 												END DO
 											END DO
@@ -811,11 +816,34 @@ PROGRAM STATSYN_GLOBALSCAT
 
 				!GO TO NEXT LAYER
         iz = iz + ud  
+        
+       !Check if time increased since last loop  -- Some phonon gets stuck and I'm not sure why yet...
+       IF (t_last == t) THEN
+         t_last_count = t_last_count + 1
+         IF (t_last_count > 999) THEN
+!           WRITE(77,*) t_last_count,I,NITR         
+!           WRITE(6,FMT = 333) iz,t,x,ud,nint(x_sign),ip         
+           IF (t_last_count > 999) t = 9999.
+           tstuck = tstuck + 1
+!           WRITE(77,*) 'STUCK',I,NITR,ud,iz,iz2,ip,p,vf(iz,iwave),vf(iz-1,iwave),arp,atp
+!            WRITE(77,*) '    ->  TdPP, TdSP, RdPP, TuPP, RuSP, RuPP, TuPS, RuSS, RuPS'
+!            WRITE(77,*) '    -> ',TdPP, TdSP, RdPP, TuPP, RuSP, RuPP, TuPS, RuSS, RuPS
+!         ELSEIF (last_RT == 2) THEN
+!            IF (ip == 3) WRITE(77,*) '    --> ip = 3:', ar,at
+!            IF (ip.ne.3) WRITE(77,*) '    --> ip ~= 3:', arp,atp,ars,ats
+!         END IF
+         END IF
+       ELSE
+         t_last_count = 0   !reset t_last_count
+         t_last = t
+       END IF
        
 			 END DO		!CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
 			 ! ====================== <<
 			 ! Close single ray tracing while loop
 			 ! ====================== <<	
+
+    !DEBUG
 
        CALL etime(elapsed,tt8)
        !WRITE(6,*) '        Surface:',tt8-tt7,I							 
@@ -835,11 +863,13 @@ PROGRAM STATSYN_GLOBALSCAT
 
 !				trackcount = trackcount / 100.
 
+
        CALL etime(elapsed,tt9)
        !WRITE(6,*) '           Rest:',tt9-tt8,I				
        
        CALL etime(elapsed,ttime4)      
       !WRITE(6,*) '---->',I,ttime4-ttime3,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
+
 
 			END DO	!CLOSE MAIN RAY TRACING LOOP - DOLOOP_001
 !   	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -852,9 +882,11 @@ PROGRAM STATSYN_GLOBALSCAT
 871   FORMAT ('Total time = ',f9.2,'s for ',i8,' phonons (',f7.5,'s/p)')	
       WRITE(6,*) 'Total Surface records = ', surfcount
       WRITE(6,*) 'Too far from receiver = ', surCYC1      
-      WRITE(6,*) 'Scattered:',  conv_count(1:6)		
+      WRITE(6,*) 'Scattered:',  conv_count(1:6)
+      WRITE(6,*) 'Dead stuck:', tstuck		
 
-			
+333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f7.2,', ud=',i2,', x_sign= ',i2', ip= ',i1)
+		
 !			======================================================
 !			----- Output Synthetics -----	
 			wf(1,1,1) = 1.
@@ -1096,32 +1128,36 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
 !       j2   = pi/2. 
 !      END IF
 
+      IF (b2 <= 0) THEN  !Same as free surface if reflects on liquid layer
+       ar = 1.
+       at = 0.
+      ELSE
+				
+				vb1    = cmplx(b1,  0.)
+				rho1   = cmplx(rh1, 0.)
+				vb2    = cmplx(b2,  0.)
+				rho2   = cmplx(rh2, 0.)
+				psub   = cmplx(p,  0.)                   !MAKE RAY PARAMETER COMPEX      
+				
+				cone = cmplx(1,0)
+				ctwo = cmplx(2,0)
+				
+				sj1    = vb1 * psub      
+				sj2    = vb2 * psub       
+				cj1    = csqrt(cone-sj1**2)
+				cj2    = csqrt(cone-sj2**2)  
+				
+				DD   = rho1*vb1*cj1+rho2*vb2*cj2
+				car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
+				cat   = ctwo*rho1*vb1*cj1/DD
+				
+				ar = REAL(car)
+				at = REAL(cat)
+				
+				!Check for total internal reflection !fix
+				IF (b2*p > 1) at = 0
 
-      
-      vb1    = cmplx(b1,  0.)
-      rho1   = cmplx(rh1, 0.)
-      vb2    = cmplx(b2,  0.)
-      rho2   = cmplx(rh2, 0.)
-      psub   = cmplx(p,  0.)                   !MAKE RAY PARAMETER COMPEX      
-      
-      cone = cmplx(1,0)
-      ctwo = cmplx(2,0)
-      
-      sj1    = vb1 * psub      
-      sj2    = vb2 * psub       
-      cj1    = csqrt(cone-sj1**2)
-      cj2    = csqrt(cone-sj2**2)  
-      
-      DD   = rho1*vb1*cj1+rho2*vb2*cj2
-      car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
-      cat   = ctwo*rho1*vb1*cj1/DD
-      
-      ar = REAL(car)
-      at = REAL(cat)
-      
-      !Check for total internal reflection !fix
-      IF (b2*p > 1) at = 0
-
+      END IF
       
       RETURN
 END SUBROUTINE REFTRAN_SH
@@ -1173,7 +1209,7 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       REAL(8)         rrp,rrs,rtp,rts               !REFLECTION & TRANSMISSION COEFS
  				REAL        elapsed(2)
 				REAL        totaltimem,ttime1,ttime2
-
+				
       
       va1    = cmplx(vp1,  0.)                   !MAKE VEL & DENSITY COMPLEX
       vb1    = cmplx(vs1,  0.)
@@ -1234,15 +1270,159 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       rts = REAL(ats)!**2+imag(ats)**2)**0.5
       
       ! Check for total internal reflection     !fix
-      IF (vp2*pin > 1) rtp = 0
+      IF (vp2*pin > 1) THEN
+        rtp = 0
+!        WRITE(77,*) 'YEP vp2',vp2,pin
+      END IF
       IF (vs2*pin > 1) rts = 0
-      IF (vp1*pin > 1) rrp = 0
+      IF (vp1*pin > 1) THEN
+        rrp = 0
+!        WRITE(77,*) 'YEP vp1',vp1,pin
+      END IF
       IF (vs1*pin > 1) rrs = 0
       
 
       
       RETURN
 END SUBROUTINE RTCOEF2
+
+
+SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, RuSP, RuPS, RuSS)
+
+      IMPLICIT NONE
+  
+      REAL(4)     rc,rrhof,ra,rb,rrhos
+      REAL(8)     rp
+      REAL(4)     TdPP, TdSP, RdPP, TuPP, TuPS, RuPP
+      REAL(4)     RuSP, RuPS, RuSS
+
+      COMPLEX(4)     p,c,rhof,a,b,rhos      
+      COMPLEX(4)     p2,mu,lm,qf,Ff(2,2),Fs(4,4),invFf(2,2),L(3,4),Ltemp(2,4)
+      COMPLEX(4)     dum(3,3),tdum(3,3)
+      COMPLEX(4)     q(6),N(6,6)
+      
+!          WRITE(76,*) '--------- vvvvvvvvvvv ----------'
+!          WRITE(76,*) 'p:',p      
+!          WRITE(76,*) 'c:',c
+!          WRITE(76,*) 'a1:',a
+!          WRITE(76,*) 'b1:',b
+!          WRITE(76,*) 'rhof:',rhof
+!          WRITE(76,*) 'rhos:',rhos
+
+! FUNCTION [TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, RuSP, RuPS, RuSS] = RTFLUID(p,c,rhof,a,b,rhos)
+! FUNCTION RTFLUID computes reflection and transmission coefficients for a fluid-solid boundary
+! (e.g. ocean bottom) where P is slowness, C is fluid velocity, RHOF is fluid density, A,B 
+! are P- and S-velocity of solid and RHOS is solid density.
+!
+! CONVERTED FROM MICHAEL BOSTOCK MATLAB VERSION by JF BLANCHETTE-GUERTIN (2012/11/09)
+!
+! Model assumes that the liquid layer is overlying the solid one (i.e. ocean)
+
+     p = CMPLX(rp,0.)
+     c = CMPLX(rc,0.)
+     rhof = CMPLX(rrhof,0.)
+     rhos = CMPLX(rrhos,0.)
+     a = CMPLX(ra,0.)
+     b = CMPLX(rb,0.)
+
+		 tdum(:,:) = 0.
+		 
+		 p2=p*p
+		 mu=rhos*b*b
+		 lm=rhos*a*a-2*mu
+		 
+		 !Fluid properties.
+		 qf=sqrt(1/c**2-p2)
+		 Ff(1,1) = qf*c 
+		 Ff(1,2) = -qf*c
+		 Ff(2,1) = rhof*c
+		 Ff(2,2) = rhof*c
+		 
+
+		 
+		 ! Find inverse of Ff 
+     invFf = Ff
+     CALL GAUSS(invFf,2)
+		 
+		 ! Solid properties (call isotroc for consistency with 
+		 ! Rmatrix on conventions of signs etc.)
+		 
+		 CALL ISOTROC(q,N,a,b,rhos,p,CMPLX(0.,0.));
+		 
+ 
+		 Fs(1,1:4) = [N(1,1),N(1,2),N(1,4),N(1,5)]
+		 Fs(2,1:4) = [N(3,1),N(3,2),N(3,4),N(3,5)]
+		 Fs(3,1:4) = [N(4,1),N(4,2),N(4,4),N(4,5)]
+     Fs(4,1:4) = [N(6,1),N(6,2),N(6,4),N(6,5)]
+
+ 
+		 ! Define matrix L that encapsulates continuity conditions (continuity of
+		 ! vertical displacement and vertical traction) as well as vanishing horizontal
+		 ! traction at fluid solid interface.
+		
+		 Ltemp(1,:) = Fs(2,:)
+		 Ltemp(2,:) = Fs(4,:)
+		 
+		 L(1:2,:) = matmul(invFf,Ltemp)
+		 L(3,:) = Fs(3,:)
+		 
+		 ! P-incidence from above (from liquid)
+		 dum(1,:) = [L(1,1),L(1,2),CMPLX(0.,0.)]
+		 dum(2,:) = [L(2,1),L(2,2),CMPLX(-1.,0.)]
+		 dum(3,:) = [L(3,1),L(3,2),CMPLX(0.,0.)]
+		 
+		 CALL GAUSS(dum,3)
+		 tdum(:,1) = [1,0,0]
+		 		 
+		 dum = matmul(dum,tdum)
+
+		 TdPP=REAL(dum(1,1));
+		 TdSP=REAL(dum(2,1));
+		 RdPP=REAL(dum(3,1));
+		 
+		 ! P-incidence from below.
+		 dum(1,:) = [CMPLX(0.),L(1,1),L(1,2)]
+		 dum(2,:) = [CMPLX(-1.),L(2,1),L(2,2)]
+		 dum(3,:) = [CMPLX(0.),L(3,1),L(3,2)]
+ 		 CALL GAUSS(dum,3)			
+     tdum(:,1) =  [-L(1,3),-L(2,3),-L(3,3)]
+		 dum = matmul(dum,tdum)
+		      
+		 TuPP=REAL(dum(1,1));
+		 RuPP=REAL(dum(2,1));
+		 RuSP=REAL(dum(3,1));
+		 
+		 ! S-incidence from below.
+		 dum(1,:) = [CMPLX(0.),L(1,1),L(1,2)]
+		 dum(2,:) = [CMPLX(-1.),L(2,1),L(2,2)]
+		 dum(3,:) = [CMPLX(0.),L(3,1),L(3,2)]
+		 		 
+ 		 CALL GAUSS(dum,3)			
+     tdum(:,1) =  [-L(1,4),-L(2,4),-L(3,4)]
+		 dum = matmul(dum,tdum)
+
+		 TuPS=REAL(dum(1,1));
+		 RuPS=REAL(dum(2,1));
+		 RuSS=REAL(dum(3,1));
+		 
+		 !DEBUG CRITICAL ANGLE
+		 IF (rc*rp > 1) THEN
+		    TuPS = 0
+		    TuPP = 0
+		 END IF
+		 IF (rb*rp > 1) TdSP = 0
+		 IF (ra*rp > 1) THEN
+		    TdPP = 0.
+		    TdSP = 0.
+		    RuPS = 0.
+		 END IF
+
+
+
+
+		 
+		 RETURN
+END SUBROUTINE RTFLUID
 
 
 SUBROUTINE FLATTEN(z_s,vs,rhs,z_f,vf_f,rh_f,erad)
@@ -1637,50 +1817,217 @@ END FUNCTION ARTAN2
 SUBROUTINE INTERFACE_NORMAL
       
       USE pho_vars
-      
       IMPLICIT NONE
       
+      
+      last_RT = 0
+      init_ud = ud
+      iz2 = iz
+!      IF (ud == -1) iz2 = iz
+!      IF (ud ==  1) iz2 = iz-1 
+      
+!       WRITE(6,*) '----------------------------------------------'
+!       WRITE(6,*) '-> ',I, NITR,iz,iz2,ud,ip
+      
+			h = abs(z(iz2)-z(iz2-1))
+
+!       IF (t > 400000) THEN
+      IF (((vf(iz2,2) == 0).OR.(vf(iz2-1,2) == 0)).AND.(ip.ne.3).AND.(h <= 0.).AND.(iz > 1)) THEN
+      				!Solid-Liquid Interface   
+ 							!Transverse waves (SH) do not disturb the liquid layer
+ 							! RTFLUID assumes that the liquid layer sits on top of the solid one.
+ 							Last_RT = 1
+ 							
+! 				WRITE(6,*) '-> LIQUID'
+      
+       !Solid over liquid
+       IF ((vf(iz2,2) == 0).AND.(vf(iz2-1,2).ne.0)) THEN
+          IF (ud ==1)  THEN
+             INCI = -1  !Upward Incidence in RTFLUID
+!             WRITE(77,*) 'Solid over Liquid - Upward Incidence', ud,ip
+          END IF
+          IF (ud ==-1) THEN
+             INCI = 1  !Downward Incidence in RTFLUID
+!             WRITE(77,*) 'Solid over Liquid - Downward Incidence', ud,ip
+          END IF
+          c = vf(iz2,1)
+          a1 = vf(iz2-1,1)
+          b1 = vf(iz2-1,2)
+          rhof = rh(iz2)
+          rhos = rh(iz2-1)
+          
+!          WRITE(77,*) 'c:',c
+!          WRITE(77,*) 'a1:',a1
+!          WRITE(77,*) 'b1:',b1
+!          WRITE(77,*) 'rhof:',rhof
+!          WRITE(77,*) 'rhos:',rhos
+          
+       END IF
+       
+       ! Liquid over solid
+       IF ((vf(iz2,2).ne.0).AND.(vf(iz2-1,2) == 0)) THEN
+          c = vf(iz2-1,1)
+          a1 = vf(iz2,1)
+          b1 = vf(iz2,2)
+          rhof = rh(iz2-1)
+          rhos = rh(iz2)       
+          IF (ud ==1) INCI = 1  !Downward Incidence in RTFLUID
+          IF (ud ==-1) INCI = -1  !Upward Incidence in RTFLUID
+       END IF
+                 
+       CALL  RTFLUID(p,c,rhof,a1,b1,rhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, RuSP, RuPS, RuSS)
+       
+       
+       
+       
+
+!       WRITE(6,*) '-> ',iz,iz2, ud,ip,vf(iz2,2),vf(iz2-1,2),INCI
+!      WRITE(6,*) '!!!!!-> ',TdPP, TdSP, RdPP, TuPP, RuSP, RuPP, TuPS, RuSS, RuPS
+       
+      IF ((ip == 1).AND.(INCI == 1)) THEN
+
+         IF (isnan(TdPP)) WRITE(6,*) 'TdPP NaN'
+         IF (isnan(TdSP)) WRITE(6,*) 'TdSP NaN'
+         IF (isnan(RdPP)) WRITE(6,*) 'RdPP NaN'
+      
+         IF (isnan(TdPP)) TdPP = 0
+         IF (isnan(TdSP)) TdSP = 0
+         IF (isnan(RdPP)) RdPP = 0
+      
+				 sumCOEFF = abs(TdPP) + abs(TdSP) + abs(RdPP)
+				 TdPP = TdPP / sumCOEFF
+				 TdSP = TdSP / sumCOEFF
+				 RdPP = RdPP / sumCOEFF
+      
+        r0 = rand()
+        IF (r0 <= abs(TdPP)) THEN
+          IF (TdPP < 0) a = -a
+!               if(t_last_count >995) WRITE(6,*) '-> TdPP'
+        ELSEIF ((r0 > abs(TdPP)).AND.(r0 <= abs(TdPP) + abs(TdSP))) THEN
+          IF (TdSP < 0) a = -a
+!               if(t_last_count >995) WRITE(6,*) '-> TdSP'
+          ip = 2
+        ELSE
+          IF (RdPP < 0) a = -a
+!               if(t_last_count >995) WRITE(6,*) '-> RdPP'
+          ud = -ud
+        END iF  
+          
+      ELSEIF ((ip == 1).AND.(INCI == -1)) THEN
+!         WRITE(77,*) I,NITR,ud,'-> RuPP',TuPP,RuSP,RuPP,p,vf(iz2-1,1),vf(iz2,1)
+				 sumCOEFF = abs(TuPP) + abs(RuSP) + abs(RuPP)
+
+         IF (isnan(TuPP)) WRITE(6,*) 'TuPP NaN'
+         IF (isnan(RuSP)) WRITE(6,*) 'RuSP NaN'
+         IF (isnan(RuPP)) WRITE(6,*) 'RuPP NaN'
+      
+         IF (isnan(TuPP)) TuPP = 0
+         IF (isnan(RuSP)) RuSP = 0
+         IF (isnan(RuPP)) RuPP = 0
+
+
+				 TuPP = TuPP / sumCOEFF
+				 RuSP = RuSP / sumCOEFF
+				 RuPP = RuPP / sumCOEFF  
+				 
+        r0 = rand()
+        IF (r0 <= abs(TuPP)) THEN
+          IF (TuPP < 0) a = -a
+!               if(t_last_count >995) WRITE(6,*) '-> TuPP'
+
+        ELSEIF ((r0 > abs(TuPP)).AND.(r0 <= abs(TuPP) + abs(RuSP))) THEN
+          IF (RuSP < 0) a = -a
+!               if(t_last_count >995) WRITE(6,*) '-> RuSP'
+          ip = 2
+          ud = -ud
+        ELSE
+          IF (RuPP < 0) a = -a
+!               if(t_last_count >995) WRITE(6,*) '-> RuPP'
+!               WRITE(77,*) I,NITR,ud,'-> RuPP',TuPP,RuSP,RuPP,p,vf(iz2-1,1),vf(iz2,1)
+!               WRITE(77,*) '>>>',p,c,rhof,a1,b1,rhos
+          ud = -ud
+        END iF       
+        
+      ELSEIF ((ip == 2).AND.(INCI == -1)) THEN
+         IF (isnan(TuPS)) WRITE(6,*) 'TuPS NaN'
+         IF (isnan(RuSS)) WRITE(6,*) 'RuSS NaN'
+         IF (isnan(RuPS)) WRITE(6,*) 'RuPS NaN'
+      
+         IF (isnan(TuPS)) TuPS = 0
+         IF (isnan(RuSS)) RuSS = 0
+         IF (isnan(RuPS)) RuPS = 0
+
+      
+      
+				 sumCOEFF = abs(TuPS) + abs(RuSS) + abs(RuPS)
+				 TuPS = TuPS / sumCOEFF
+				 RuSS = RuSS / sumCOEFF
+				 RuPS = RuPS / sumCOEFF
+				 
+        r0 = rand()
+        IF (r0 <= abs(TuPS)) THEN
+          IF (TuPS < 0) a = -a
+!               if(t_last_count >995) WRITE(6,*) '-> TuPS'
+          ip = 1
+        ELSEIF ((r0 > abs(TuPS)).AND.(r0 <= abs(TuPS) + abs(RuSS))) THEN
+          IF (RuSS < 0) a = -a
+!               if(t_last_count >995) WRITE(6,*) '-> RuSS'
+          ud = -ud
+        ELSE
+          IF (RuPS < 0) a = -a
+!               if(t_last_count >995) WRITE(6,*) '-> RuPS'
+          ud = -ud
+          ip = 1
+        END iF  
+       
+      END IF  
+      
+
+
+     
+      
+      ELSE  !Solid-Solid Interface
+            last_RT = 2
+      
+! 				WRITE(6,*) '-> SOLID',vf(iz2,iwave),vf(iz2-1,iwave),iwave
+      
             
-				IF ( (iz > 1).AND.(abs(irtr1) == 1).AND. &												!IF1
-							(iz < nlay-1) ) THEN
+				IF ( (iz2 > 1).AND.(abs(irtr1) == 1).AND. &												!IF1
+							(iz2 < nlay-1) ) THEN
 							
-					IF ((iz == 2).AND.(ud == -1)) THEN
+					IF ((iz2 == 2).AND.(ud == -1)) THEN
 					! Skip INTERFACE_NORMAL BECAUSE PHONON IS AT SURFACE
 					ELSE
 							
-					h = z(iz)-z(iz-1)		
+					h = z(iz2)-z(iz2-1)		
 
-          IF (ip  ==  2) THEN																							!IF2a
+          IF (ip  ==  3) THEN																							!IF2a
 						IF ( (ud == 1) ) THEN               !IF downGOING SH WAVE			!IF3a
-							CALL REFTRAN_SH(p,vf(iz-1,2),vf(iz,2),rh(iz-1),rh(iz), &
+							CALL REFTRAN_SH(p,vf(iz2-1,2),vf(iz2,2),rh(iz2-1),rh(iz2), &
                            ar,at)
 						ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE				!IF3a
-							CALL REFTRAN_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1), &
+							CALL REFTRAN_SH(p,vf(iz2,2),vf(iz2-1,2),rh(iz2),rh(iz2-1), &
                            ar,at)
-!							CALL REFTRAN_SH(p,vf(iz-1,2),vf(iz-2,2),rh(iz-1),rh(iz-2), &
-!                           ar,at)
+
 						END IF																												!IF3a
           ELSE																														!IF2a
 						IF ( (ud == 1) ) THEN               !IF downGOING P-SV WAVE		!IF3b
-							CALL RTCOEF2(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
-                             vf(iz  ,1),vf(iz  ,2),rh(iz), &
+							CALL RTCOEF2(p,vf(iz2-1,1),vf(iz2-1,2),rh(iz2-1), &
+                             vf(iz2  ,1),vf(iz2  ,2),rh(iz2), &
                           ip,arp,ars,atp,ats)
 						ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE			!IF3b
-							CALL RTCOEF2(p,vf(iz  ,1),vf(iz  ,2),rh(iz  ), &
-                             vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
-                          ip,arp,ars,atp,ats)     
-!							CALL RTCOEF2(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
-!                             vf(iz-2,1),vf(iz-2,2),rh(iz-2), &
-!                          ip,arp,ars,atp,ats)            
+							CALL RTCOEF2(p,vf(iz2  ,1),vf(iz2  ,2),rh(iz2  ), &
+                             vf(iz2-1,1),vf(iz2-1,2),rh(iz2-1), &
+                          ip,arp,ars,atp,ats)             
 						END IF																												!IF3b
           END IF																													!IF2a
+          
+!          WRITE(77,*) I,NITR,'AR -----> ',arp,ars,atp,ats,ip
           
           r0 = rand()                       !RANDOM NUMBER FROM 0 TO 1
 
 
-
-          
-          IF (ip  ==  2) THEN                   !IF SH-WAVE								!IF2b
+          IF (ip  ==  3) THEN                   !IF SH-WAVE								!IF2b
 
 						IF (h > 0.) THEN                    !IF GRADIENT, THEN				!IF3c
 !							IF (r0 < (abs(ar)/(abs(ar)+abs(at)))/P0**2) THEN!CHECK FOR REFLECTN !IF4a
@@ -1713,7 +2060,7 @@ SUBROUTINE INTERFACE_NORMAL
 							IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED SV  !IF4d
 								IF (ars < 0) a = -a                 !REVERSE POLARITY
 								ud = -ud                            !UPGOING <-> downGOING
-								ip = 3                              !SV WAVE
+								ip = 2                              !SV WAVE
 							END IF                               !															!IF4d
 
 							rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
@@ -1725,37 +2072,37 @@ SUBROUTINE INTERFACE_NORMAL
 							rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
 							rt_max = rt_max+abs(ats)/rt_sum      !
 							IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV !IF4f
-								ip = 3                              !SV WAVE
+								ip = 2                              !SV WAVE
 							END IF                               !																!IF4f
 						END IF      																										!IF3d
           END IF                                !END IF: SH, OR P-SV				!IF2b
          
          END IF
-        ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE  !IF1
+        ELSE IF (iz2 == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE  !IF1
 					ud = -ud
-					dt1 = (2*corelayer)/vf(iz,iwave)
+					dt1 = (2*corelayer)/vf(iz2,iwave)
 					x = x + 180*deg2km
 					t = t + dt1
 					totald = totald + 2*corelayer
 					s = s + dt1/Q(nlay,iwave)
 					
-				
-				!debug
-!				WRITE(*,*) '--->',r0
-!  						IF (I < 11) WRITE(78,*) 'COEFFICIENTS:',irtr1,r0, &
-!  											abs(arp)/rt_sum,abs(atp)/rt_sum,abs(ars)/rt_sum,abs(ats)/rt_sum,p,'WAVE',ip																															!IF1
-	
         END IF				!IF1
-        
-				!FIX NEXT IF FOR DIFFRACTED WAVES: 
-				IF (irtr1 == 2) THEN             !RAY TURNS IN LAYER FOLLOW 1 LEN
-				ud = -ud
-				ncaust = ncaust + 1                   !# OF CAUSTICS
-				END IF
 				
 !				ip = 2
 				iwave = ip
 				IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
+				
+				END IF
+				
+!				IF ((init_ud == 1).AND.(ud == -1)) iz = iz - 1
+!				IF ((init_ud == -1).AND.(ud == 1)) iz = iz + 1
+				
+				IF (t_last_count > 995) WRITE(6,*) t_last_count,I,NITR,iz,REAL(dt1,4),irtr1!, &
+!				    real(arp,4),real(atp,4),real(ars,4),real(ats,4)
+				
+!       WRITE(6,*) '-> ',I, NITR,iz,iz2,ud,ip        
+!       WRITE(6,*) '-> '
+!       WRITE(6,*) '----------------------------------------------' 
 			
 			RETURN	
 END SUBROUTINE INTERFACE_NORMAL
@@ -1880,6 +2227,9 @@ END SUBROUTINE INTERFACE_NORMAL
 SUBROUTINE RAYTRACE
       
       USE pho_vars
+!      INTEGER   init_ud
+      
+!      init_ud = ud
 	
 		    IF (iz /= 1) THEN
 				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
@@ -1896,9 +2246,14 @@ SUBROUTINE RAYTRACE
         
 					h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
 					imth = 2                              !INTERPOLATION METHOD
+
+!				 if(t_last_count >995)  WRITE(78,*) '              -->',I,NITR,real(1/utop,4),real(1/ubot,4),real(h,4),p
 					
 					CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
 					dtstr1 = dt1/Q(iz,iwave)                    !t* = TIME/QUALITY FACTOR
+					
+					
+!				 if(t_last_count >995)  WRITE(78,*) '              -->',I,NITR,real(dx1,4),real(dt1,4),irtr1
 				ELSE
 					irtr1  = -1
 					dx1    = 0.
@@ -1917,6 +2272,17 @@ SUBROUTINE RAYTRACE
          s = s + dtstr1                 !CUMULATIVE t*
          
         END IF
+        
+      	!FIX NEXT IF FOR DIFFRACTED WAVES: 
+				IF (irtr1 == 2) THEN             !RAY TURNS IN LAYER FOLLOW 1 LEN
+!				WRITE(77,*) I,NITR,'BAAAAAAAHHHH!!!!'
+				ud = -ud
+				
+				ncaust = ncaust + 1                   !# OF CAUSTICS
+				END IF
+        
+! 				IF ((init_ud == 1).AND.(ud == -1)) iz = iz - 1
+!				IF ((init_ud == -1).AND.(ud == 1)) iz = iz + 1
         
 				RETURN 			
 END SUBROUTINE RAYTRACE
@@ -2256,10 +2622,7 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       ENDIF
       
       ! Get the new trajectory
-			 ! ~========================================================
-      ! REF_TRAN_RAY used to be a subroutine but it slowed down TITUS a lot, so
-      ! included in this subroutine
-!      CALL ref_tran_ray(n1,ta,vf(iz_scat,iwave),v2,irt,tb)     
+			 ! ~========================================================  
       
       CALL UNIT_VECTOR_3(n1) 
       CALL UNIT_VECTOR_3(ta)
@@ -2518,5 +2881,126 @@ END SUBROUTINE UNIT_VECTOR_3
 !   RETURN
 !END SUBROUTINE REF_TRAN_RAY
 
+
+SUBROUTINE ISOTROC(q,N,vp,vs,rho,p1,p2)
+
+      IMPLICIT NONE
+      
+!      REAL(4)    q(6),rN(6,6),rvp,rvs,rrho,rp1,rp2
+      COMPLEX(4) vp,vs,rho,p1,p2
+      COMPLEX(4) mu,pp,qdp,qds,qup,qus,norm,tnorm1(3),tnorm2
+      COMPLEX(4) N(6,6),q(6)
+      COMPLEX(4) qN(6)
+      INTEGER    II
+            
+      qN(:) = 0.
+      N(:,:) = 0.
+      
+!      vp = CMPLX(rvp,0)
+!      vs = CMPLX(rvs,0)
+!      rho = CMPLX(rrho,0)
+!      p1 = CMPLX(rp1,0)
+!      p2 = CMPLX(rp2,0)
+
+! FUNCTION [q,N] = ISOTROC(vp,vs,rho,p1,p2);
+! Analytic construction of the fundamental matrix for isotropic
+! media from Fryer and Frazer (1987, eq (4.16)) but modified for
+! a different Fourier transform sign convention.
+!
+! CONVERTED FROM MICHAEL BOSTOCK MATLAB VERSION by JF BLANCHETTE-GUERTIN (2012/11/09)
+
+			mu=  rho*vs*vs;
+			pp=  (p1*p1+p2*p2);
+			qdp= csqrt(1/(vp*vp)-pp);
+			qds= csqrt(1/(vs*vs)-pp);
+			qup= -qdp;
+			qus= -qds;
+		
+!		 WRITE(76,*) 'mu:',mu
+!		 WRITE(76,*) 'pp:',pp
+!		 WRITE(76,*) 'qdp:',qdp
+!		 WRITE(76,*) 'qds:',qds
+!		 WRITE(76,*) 'qup:',qup
+!		 WRITE(76,*) 'qus:',qus
+		
+	
+		! Sort eigenvalues and eigenvectors (don't forget normal vs
+		! conjugate transpose).
+			qN(1:6) = [qdp,qds,qds,qup,qus,qus]  !.';
+			N(1:6,1)= [p1,p2,qdp,2*mu*p1*qdp,2*mu*p2*qdp,(rho-2*mu*pp)] !';
+			N(1:6,2)= [p1,p2,-pp/qds,p1*N(6,1)/qds,p2*N(6,1)/qds,-2*mu*pp] !';
+			N(1:6,3)= [-p2,p1,CMPLX(0,0),-p2*qds*mu,p1*qds*mu,CMPLX(0,0)] !';
+			N(1:6,4)= [p1,p2,qup,2*mu*p1*qup,2*mu*p2*qup,N(6,1)] !';
+			N(1:6,5)= [p1,p2,-pp/qus,p1*N(6,1)/qus,p2*N(6,1)/qus,-2*mu*pp] !';
+			N(1:6,6)= [-p2,p1,CMPLX(0,0),-p2*qus*mu,p1*qus*mu,CMPLX(0,0)] !';
+			
+
+		
+		
+		! Normalize vectors wrt displacement magnitude.
+			DO II = 1,6
+			  tnorm1 = CONJG(N(1:3,II))*CONJG(N(1:3,II))
+			  norm = csqrt(tnorm1(1) + tnorm1(2) + tnorm1(3))
+!				norm= csqrt(N(1:3,II)*conj(N(1:3,j)));
+				N(:,II)=N(:,II)/norm;
+!				WRITE(76,*) 'norm:',norm
+      END DO
+      
+!      WRITE(76,*) 'N:',N(1,:)
+!			WRITE(76,*) 'N:',N(2,:)
+!			WRITE(76,*) 'N:',N(3,:)
+!			WRITE(76,*) 'N:',N(4,:)
+!			WRITE(76,*) 'N:',N(5,:)
+!			WRITE(76,*) 'N:',N(6,:)
+      
+!      rN = REAL(N,4)
+
+      RETURN
+END SUBROUTINE ISOTROC
+
+
+
+
+
+! --------------------------------------------------------------------
+SUBROUTINE GAUSS (a,n)       ! Invert matrix by Gauss method
+! --------------------------------------------------------------------
+			IMPLICIT NONE
+			
+			INTEGER :: n
+			COMPLEX(4) :: a(n,n)
+			
+			! - - - Local Variables - - -
+			COMPLEX(4) :: b(n,n), c, d, temp(n)
+			INTEGER :: i, j, k, m, imax(1), ipvt(n)
+			! - - - - - - - - - - - - - -
+			
+			b = a
+			ipvt = (/ (i, i = 1, n) /)
+			
+			DO k = 1,n
+				 imax = MAXLOC(ABS(b(k:n,k)))
+				 m = k-1+imax(1)
+			
+				 IF (m /= k) THEN
+						ipvt( (/m,k/) ) = ipvt( (/k,m/) )
+						b((/m,k/),:) = b((/k,m/),:)
+				 END IF
+				 d = 1/b(k,k)
+			
+				 temp = b(:,k)
+				 DO j = 1, n
+						c = b(k,j)*d
+						b(:,j) = b(:,j)-temp*c
+						b(k,j) = c
+				 END DO
+				 b(:,k) = temp*(-d)
+				 b(k,k) = d
+			END DO
+			
+			a(:,ipvt) = b
+
+      RETURN
+END SUBROUTINE GAUSS
 
 

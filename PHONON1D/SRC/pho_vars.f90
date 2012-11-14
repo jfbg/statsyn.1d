@@ -107,6 +107,7 @@ MODULE PHO_VARS			! Make variables global
 				REAL(8)        :: s,s1,s2     !! Attenuation & bounds on attenuation for distance
 				REAL(8)        :: scr1,scr2,scr3,scr4 !! Flat earth approximation variables
 				REAL(8)        :: t0,t1,t2,dti,t_last  !! Time variables (bounds & interval)
+				INTEGER        :: t_last_count,tstuck
 				REAL(8)        :: ubot, utop !! Bottom & Top slowness
 				REAL(8)        :: x1, x2     !! Distance bounds
 				
@@ -115,11 +116,20 @@ MODULE PHO_VARS			! Make variables global
 				REAL(8)           p1,p2(2)              !Ray parameters
 				REAL(8)           qdep
 				
+				!INTERFACE
+	      INTEGER     INCI,init_ud
+        REAL(4)     c,rhof,a1,b1,rhos
+        REAL(4)     TdPP, TdSP, RdPP, TuPP, TuPS, RuPP
+        REAL(4)     RuSP, RuPS, RuSS
+        REAL(4)     SumCOEFF
+				
+				! SYSTEM + DEBUG
 				INTEGER        status                !I/O ERROR (0=no READ error)
 				INTEGER        n_iter_last,it_last,ix_last
 				INTEGER     :: nseed
 				INTEGER     :: seed
 				INTEGER (kind=8)     :: nclock,nclock1
 				INTEGER           ntime(8)
+				INTEGER     last_RT
 
 			END MODULE PHO_VARS
