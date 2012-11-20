@@ -42,7 +42,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 cd SRC
-make trackglobal.x
+make trackglobal_JFL03b.x
 cd ..
 
 
