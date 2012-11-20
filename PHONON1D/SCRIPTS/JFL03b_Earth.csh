@@ -7,15 +7,15 @@
 
 set ray_par    = "0.0 0.1668 0.2931"
 @ t_start      = 0
-@ t_max        = 4500			# 75 minutes
+@ t_max        = 8192	# 136 min
 set d_range    = "0 180 91"
-set model      = "2"	#2 for Moon
+set model      = "1"	#2 for Moon
 set mx_scat_dp = "0"
 set n_phonon   = "3000000"
 
 # SCATTERING
 set bg_scat    = 0.
-set prob_scat  = 0.7
+set prob_scat  = 0.
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
@@ -25,13 +25,13 @@ set velperturb = .25
 set dQdfstyle  = 1
 
 
-set file_out   = "G001"
-set model_name = "S_VPREMOON_Qp_novlvl"
+set file_out   = "JFL003b"
+set model_name = "EARTH_MODEL_10km"
 
 
-@ n_depth = 2     ## Number of depths to use
-@ n_freq  = 2     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 6     ## Number of kernels to use per iteration (simultaneous run)
+@ n_depth = 1     ## Number of depths to use
+@ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
+@ n_kern  = 10     ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 10    ## Number of iterations
 
 # Output folder
@@ -53,9 +53,9 @@ cd ..
 while ($l < $n_freq)
 @ l = $l + 1
 
-if ($l == 2) then
- set dt = "0.025"
- set period = "40"
+if ($l == 1) then
+ set dt = "1"
+ set period = "1"
 else
  set dt = "0.150"
  set period = "07"
@@ -69,7 +69,7 @@ endif
 while ($i < $n_depth)
 @ i = $i + 1
 if ($i == 1) then
- set q_depth = 1100
+ set q_depth = 30
 else if ($i == 2) then
  set q_depth = .01
 else
