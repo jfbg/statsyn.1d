@@ -7,11 +7,11 @@
 
 set ray_par    = "0.0 0.1668 0.2931"
 @ t_start      = 0
-@ t_max        = 4500			# 75 minutes
+@ t_max        = 8192			# 75 minutes
 set d_range    = "0 180 91"
 set model      = "2"	#2 for Moon
 set mx_scat_dp = "10"
-set n_phonon   = "3000000"
+set n_phonon   = "10000000"
 
 # SCATTERING
 set bg_scat    = 0.00
@@ -29,9 +29,9 @@ set file_out   = "BENCHMARK_MOON001"
 #set model_name = "EARTH_MODEL_10km"
 set model_name = "S_VPREMOON_Qp_novlvl"
 
-@ n_depth = 2     ## Number of depths to use
+@ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 20     ## Number of kernels to use per iteration (simultaneous run)
+@ n_kern  = 12     ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 3    ## Number of iterations
 
 # Output folder
@@ -57,8 +57,8 @@ if ($l == 2) then
  set dt = "0.025"
  set period = "40"
 else
- set dt = "0.150"
- set period = "07"
+ set dt = "1"
+ set period = "01"
 endif
 
 

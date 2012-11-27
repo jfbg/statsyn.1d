@@ -1,6 +1,7 @@
 close all
 
 modellist = {...
+    'S_VPREMOON_Qp_novlvl'
     ...'VPREMOON_mod'
     ...'VPREMOON_original'
     ...'WEBER_2011_original'
@@ -88,6 +89,7 @@ for ii=1:length(modellist)
     set(gcf, 'PaperPositionMode', 'manual');
     set(gcf, 'PaperPosition', [0 0 ps]);
     print(gcf, '-dpng', ['Figures/' modellist{ii} '_plot.png']);
+    print(gcf, '-dpsc2', ['Figures/' modellist{ii} '_plot.eps']);
     
 end
 
