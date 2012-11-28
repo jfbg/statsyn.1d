@@ -496,7 +496,6 @@ PROGRAM STATSYN_GLOBALSCAT
         
         ! ============ >>
         ! Set scatterer scale-length
-        ! ds_scat = 1   !DEBUG
         scat_time = 0
         ! ============ <<			 
 
@@ -764,18 +763,18 @@ PROGRAM STATSYN_GLOBALSCAT
 										ang1 = asin(p*vf(iz,iwave))
 					
 										IF ( (IT > 1-nts).and.(IT <= nt0+nts) ) THEN
-											IF ( (ip == 1) ) THEN
-												c_mult(1) = cos(ang1) * cos(az)  !! Vertical Amp from P wave
-												c_mult(2) = sin(ang1) * sin(az)  !! Tangential Amp from P wave
-												c_mult(3) = sin(ang1) * cos(az)  !! Radial Amp for P wave
+											IF ( (ip == 1) ) THEN 
+												c_mult(1) = cos(ang1)           * ud     !! Vertical Amp from P wave
+												c_mult(2) = sin(ang1) * sin(az) * x_sign !! Tangential Amp from P wave
+												c_mult(3) = sin(ang1) * cos(az) * x_sign !! Radial Amp for P wave
 											ELSE IF (ip == 2) THEN
-												c_mult(1) = sin(ang1)*cos(az)    !! Vertical amp for SV
-												c_mult(2) = cos(ang1)*sin(az)    !! Tangential amp for SV
-												c_mult(3) = cos(ang1)*cos(az)    !! Radial amp for SV
+												c_mult(1) = sin(ang1)           * ud     !! Vertical amp for SV
+												c_mult(2) = cos(ang1)*sin(az)   * x_sign !! Tangential amp for SV
+												c_mult(3) = cos(ang1)*cos(az)   * x_sign !! Radial amp for SV
 											ELSE IF (ip == 3) THEN
-												c_mult(1) = 0.!cos(ang1)*sin(az) !! Vertical Amp for SH
-												c_mult(2) = cos(az)              !! Tangential Amp for SH
-												c_mult(3) = sin(az)              !! Radial Amp for SH
+												c_mult(1) = 0.                   !! Vertical Amp for SH
+												c_mult(2) = cos(az)             * x_sign !! Tangential Amp for SH
+												c_mult(3) = sin(az)             * x_sign !! Radial Amp for SH
 											END IF
 											
 										!JFL	Not sure why p was redefined here, for an s-wave iwave = 2 (??).
@@ -844,8 +843,6 @@ PROGRAM STATSYN_GLOBALSCAT
 			 ! ====================== <<
 			 ! Close single ray tracing while loop
 			 ! ====================== <<	
-
-    !DEBUG
 
        CALL etime(elapsed,tt8)
        !WRITE(6,*) '        Surface:',tt8-tt7,I							 
@@ -1481,8 +1478,6 @@ SUBROUTINE LAYERTRACE(p,h,utop,ubot,imth,dx,dt,irtr)
          dx=0.            !ray turned above layer
          dt=0.
          irtr=0
-         !DEBUG
-         !IF (I < 11) WRITE(78,*) 'RAY TURNED',p,utop
          RETURN
       END IF
 !
@@ -2386,11 +2381,6 @@ SUBROUTINE GET_DS_SCAT
 			  ds_scat = fac*ds_scat_nf  !Flatten ds_scat_nf (approximation based on mid depth)
 			  
 			  IF (ds_scat == 0) WRITE(*,*) 'ds_scat is 0!!'
-
-      
-      !DEBUG
-!      WRITE(78,*) 'NEXT ds_scat =',ds_scat
-!      WRITE(78,*) ds_scat_nf,z_act,z_mid,r,z_f
 		
 	
 			RETURN			 
@@ -2680,7 +2670,7 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
 
       iwave = iwave2
       ip = ip2
-      p = sin(inc)/vf(iz_scat,iwave2)
+      p = sin(inc)/vf(iz_scat,iwave)
       
       !CALL etime(elapsed,rrr2)
       

@@ -11,11 +11,11 @@ set ray_par    = "0.0 0.1668 0.2931"
 set d_range    = "0 180 91"
 set model      = "2"	#2 for Moon
 set mx_scat_dp = "10"
-set n_phonon   = "5"
+set n_phonon   = "1"
 
 # SCATTERING
-set bg_scat    = 0.00
-set prob_scat  = 0.75
+set bg_scat    = 1
+set prob_scat  = 1
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
@@ -42,7 +42,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 cd SRC
-make trackglobalsingle.x
+make trackglobal.x
 cd ..
 
 
