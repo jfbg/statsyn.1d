@@ -5,7 +5,7 @@ PROGRAM STATSYN_GLOBALSCAT
 ! Scattering is isotropic
 ! Scattering length-scale follows power law (declared in running shell)
 ! Qi is frequency dependent (Need to change form of dQ/df accordingly
-!														(search for rdQdf to modify it)
+!														(search for rdQdf to modify Fit)
 !
 ! Scattering is possible in the surface scattering layer and as a backgroung scattering,
 ! which occurs everywhere outside of the scattering layer and has a low scat probability.
