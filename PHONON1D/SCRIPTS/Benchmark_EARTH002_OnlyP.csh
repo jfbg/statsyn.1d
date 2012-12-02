@@ -31,8 +31,8 @@ set model_name = "EARTH_MODEL_10km"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 1     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 1    ## Number of iterations
+@ n_kern  = 6     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 3    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
