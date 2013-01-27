@@ -1,7 +1,7 @@
 close all
 
 modellist = {...
-    'S_VPREMOON_Qp_novlvl'
+    ...'S_VPREMOON_Qp_novlvl'
     ...'VPREMOON_mod'
     ...'VPREMOON_original'
     ...'WEBER_2011_original'
@@ -11,7 +11,12 @@ modellist = {...
     ...'VPREMOON_Q7000_10km_500m'
     ...'VPREMOON_LIQc_Q7000_10km_500m'
     ...'VPREMOON_Q7000_gc05_nvlvl_10km_500m'
-    'VPREMOON_Q7000_NOCORE_10km_500m'
+    ...'VPREMOON_Q7000_NOCORE_10km_500m'
+    ...'MOON2LAYERS_10km'
+    ...'MOON1LAYER_10km'
+    ...'GG11_thorne'
+    'EARTH_MODEL_10km'
+    'EARTH_MODEL_20km'
     };
 
 
@@ -20,9 +25,11 @@ modellist = {...
 
 %%
 for ii=1:length(modellist)
-
     
+       
     model = load(modellist{ii});
+    
+    yl = model(end,1);
     
     figure(1)
     clf
@@ -45,7 +52,7 @@ for ii=1:length(modellist)
     xlabel('km/s or g/cm^3')
     ylabel('depth (km)')
     grid on
-    ylim([0 1740])
+    ylim([0 yl])
     
     % Q
     subplot(2,4,[3 7])
@@ -55,7 +62,7 @@ for ii=1:length(modellist)
     xlabel('[-]')
 %     ylabel('depth (km)')
     grid on
-    ylim([0 1740])
+    ylim([0 yl])
     xlim([0 1.1*max(model(:,6))])
     title('Q_i')
     
