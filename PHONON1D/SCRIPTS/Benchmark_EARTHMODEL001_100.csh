@@ -25,7 +25,7 @@ set velperturb = .1
 set dQdfstyle  = 1
 
 
-set file_out   = "BENCHMARK_EARTHMODEL001_700"
+set file_out   = "BENCHMARK_EARTHMODEL001_100"
 set model_name = "EARTH_MODEL_20km"
 
 
