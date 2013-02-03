@@ -77,6 +77,7 @@ PROGRAM STATSYN_GLOBALSCAT
       write(*,*) '************************************'
       write(*,*) '*'
       write(*,*) '*    FLAT RHO (p = -2 in FLATTEN)'
+      write(*,*) '*    IsoSourcePartition (1:1:1)'
       write(*,*) '*'
       write(*,*) '************************************'
       write(*,*) ''

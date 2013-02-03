@@ -104,7 +104,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsyn_global_isoE << EOF"                              >  $file_csh
+echo "./bin/statsyn_global_LowP << EOF"                              >  $file_csh
 echo "./MODELS/$model_name"				>> $file_csh
 #echo "1"                                                    >> $file_csh
 echo "$ray_par          \!LIMIT THE RAY PARAMETER"          >> $file_csh
