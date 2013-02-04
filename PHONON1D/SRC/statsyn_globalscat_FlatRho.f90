@@ -493,7 +493,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 
        !Set ray parameter
-        p    = abs(sin(ang1))/vf(iz,iwave)
+        p    = abs(sin(ang1))/vf(iz-1,iwave)   !Phonon travels in (iz-1) next
         
         
         NITR = 0

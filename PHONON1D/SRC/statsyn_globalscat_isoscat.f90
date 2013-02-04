@@ -460,7 +460,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 
        !Set ray parameter
-        p    = abs(sin(ang1))/vf(iz,iwave)
+        p    = abs(sin(ang1))/vf(iz-1,iwave)   !Phonon travels in (iz-1) next
         
         !DEBUG
 !        IF (I < 10001) WRITE(78,*) p,ang1,vf(iz,iwave),iz,iwave,r0
