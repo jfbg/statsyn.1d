@@ -320,13 +320,13 @@ PROGRAM STATSYN_GLOBALSCAT
        mt(I) = 0.
       END DO
 
-      mt(1) = 1.   !Spike to compare with CRFL
+!      mt(1) = 1.   !Spike to compare with CRFL
 
-!      DO I = 1, nts                           !SOURCE-TIME FUNCTION
-!       t0 = dti*float(I-1)-P0
-!       mt(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
-!               *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
-!      END DO
+      DO I = 1, nts                           !SOURCE-TIME FUNCTION
+       t0 = dti*float(I-1)-P0
+       mt(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
+               *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
+      END DO
 			
 			
       !Calculate maximum source power (i.e. no attenuation) to normalize attn
