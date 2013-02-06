@@ -730,8 +730,6 @@ PROGRAM STATSYN_GLOBALSCAT
 !			    iz = 1
 					ud = 1                                !RAY NOW MUST TRAVEL down
 					
-					!IF P or SV wave, check for P-SV reflection
-					IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV
 					
 					!Find index for distance
 					x_index = abs(x)
@@ -821,6 +819,9 @@ PROGRAM STATSYN_GLOBALSCAT
 					! do not record this surface hit (cycle).
 					      surCYC1 = surCYC1 +1
 					END IF
+					
+					!IF P or SV wave, check for P-SV reflection
+					IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV
 					        
         END IF
 

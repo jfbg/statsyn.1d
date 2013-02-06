@@ -595,17 +595,31 @@ PROGRAM STATSYN_GLOBALSCAT
 						
 					 
 							 ! Calculate linear distance to next velocity layer (ds_SL)
-								 IF (abs(vf(iz-1,iwave)) > 0.) THEN
-									 utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
-								 ELSE
-									 utop = 0.
-								 END IF 
-					 
-								 IF (abs(vf(iz,iwave)) > 0.) THEN
-									 ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
-								 ELSE
-									 ubot = 0.
-								 END IF
+                                IF (ud == 1) THEN
+									 IF (abs(vf(iz-1,iwave)) > 0.) THEN
+										 utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
+									 ELSE
+										 utop = 0.
+									 END IF 
+						 
+									 IF (abs(vf(iz,iwave)) > 0.) THEN
+										 ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
+									 ELSE
+										 ubot = 0.
+									 END IF
+								 ELSEIF (ud == -1) THEN
+								     IF (abs(vf(iz,iwave)) > 0.) THEN
+										 utop = 1./vf(iz,iwave)              !SLOWNESS AT TOP OF LAYER
+									 ELSE
+										 utop = 0.
+									 END IF 
+						 
+									 IF (abs(vf(iz-1,iwave)) > 0.) THEN
+										 ubot = 1./vf(iz-1,iwave)                !SLOWNESS AT BOTTOM OF LAYER
+									 ELSE
+										 ubot = 0.
+									 END IF
+							     END IF
 								 
 								 imth = 2	!Interpolation method in Layer trace (2 is linear)
 								 CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
@@ -734,9 +748,6 @@ PROGRAM STATSYN_GLOBALSCAT
 !			    iz = 1
 					ud = 1                                !RAY NOW MUST TRAVEL down
 					
-					!IF P or SV wave, check for P-SV reflection
-					IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV
-					
 					!Find index for distance
 					x_index = abs(x)
 					DO WHILE (x_index >= circum)
@@ -825,6 +836,9 @@ PROGRAM STATSYN_GLOBALSCAT
 					! do not record this surface hit (cycle).
 					      surCYC1 = surCYC1 +1
 					END IF
+					
+					!IF P or SV wave, check for P-SV reflection
+					IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV
 					        
         END IF
 
@@ -2312,17 +2326,31 @@ SUBROUTINE RAYTRACE
 !      init_ud = ud
 	
 		    IF (iz /= 1) THEN
-				  IF (abs(vf(iz-1,iwave)) > 0.) THEN
-				    utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
-				  ELSE
-			    utop = 0.
-				  END IF 
-		
-				IF (abs(vf(iz,iwave)) > 0.) THEN
-						ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
-					ELSE
-					ubot = 0.
-					END IF
+				 IF (ud == 1) THEN
+					 IF (abs(vf(iz-1,iwave)) > 0.) THEN
+						 utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
+					 ELSE
+						 utop = 0.
+					 END IF 
+		 
+					 IF (abs(vf(iz,iwave)) > 0.) THEN
+						 ubot = 1./vf(iz,iwave)                !SLOWNESS AT BOTTOM OF LAYER
+					 ELSE
+						 ubot = 0.
+					 END IF
+				 ELSEIF (ud == -1) THEN
+					 IF (abs(vf(iz,iwave)) > 0.) THEN
+						 utop = 1./vf(iz,iwave)              !SLOWNESS AT TOP OF LAYER
+					 ELSE
+						 utop = 0.
+					 END IF 
+		 
+					 IF (abs(vf(iz-1,iwave)) > 0.) THEN
+						 ubot = 1./vf(iz-1,iwave)                !SLOWNESS AT BOTTOM OF LAYER
+					 ELSE
+						 ubot = 0.
+					 END IF
+				 END IF
         
 					h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
 					imth = 2                              !INTERPOLATION METHOD
