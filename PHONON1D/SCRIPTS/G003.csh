@@ -4,7 +4,7 @@
 # Set synthetic parameters
 #
 
-
+ 
 set ray_par    = "0.0 0.1668 0.2931"
 @ t_start      = 0
 @ t_max        = 4500			# 75 minutes
@@ -31,7 +31,7 @@ set model_name = "S_VPREMOON_Qp_novlvl"
 
 @ n_depth = 2     ## Number of depths to use
 @ n_freq  = 2     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 6     ## Number of kernels to use per iteration (simultaneous run)
+@ n_kern  = 5     ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 10    ## Number of iterations
 
 # Output folder
@@ -42,7 +42,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 cd SRC
-make trackglobal.x
+make trackglobal_FlatRho.x
 cd ..
 
 

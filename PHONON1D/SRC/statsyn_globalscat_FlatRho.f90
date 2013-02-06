@@ -252,7 +252,7 @@ PROGRAM STATSYN_GLOBALSCAT
 			WRITE(6,*) 'Flattened scattering depth =',scat_depth
 
 
-
+ 
 !			^^^^^^ APPLY FLATTENING TRANSFORMATION ^^^^^^
 			
 		
