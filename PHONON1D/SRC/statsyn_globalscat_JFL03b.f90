@@ -367,8 +367,8 @@ PROGRAM STATSYN_GLOBALSCAT
         pow2 = pow2 + b(k)**2                 !CUMULATIVE POWER
        END DO
        DO K = 1, nts1                         !NORMALIZE HILBERTS
-        mts4(I,2,K) = mts4(I,2,K)*pow1/pow2     !
-        mts4(I,4,K) = mts4(I,4,K)*pow1/pow2     !
+        mts4(I,2,K) = mts4(I,2,K)*(pow1/pow2)**.5     !
+        mts4(I,4,K) = mts4(I,4,K)*(pow1/pow2)**.5     !
        END DO
       END DO
       

@@ -322,7 +322,7 @@ PROGRAM STATSYN_GLOBALSCAT
        mt(I) = 0.
       END DO
 
-      mt(1) = 1.   !Spike to compare with CRFL
+      mt(5) = 1.   !Spike to compare with CRFL
 
 !      DO I = 1, nts                           !SOURCE-TIME FUNCTION
 !       t0 = dti*float(I-1)-P0
@@ -362,8 +362,8 @@ PROGRAM STATSYN_GLOBALSCAT
         pow2 = pow2 + b(k)**2                 !CUMULATIVE POWER
        END DO
        DO K = 1, nts1                         !NORMALIZE HILBERTS
-        mts4(I,2,K) = mts4(I,2,K)*pow1/pow2     !
-        mts4(I,4,K) = mts4(I,4,K)*pow1/pow2     !
+        mts4(I,2,K) = mts4(I,2,K)*(pow1/pow2)**.5     !
+        mts4(I,4,K) = mts4(I,4,K)*(pow1/pow2)**.5     !
        END DO
       END DO
       
