@@ -733,6 +733,9 @@ PROGRAM STATSYN_GLOBALSCAT
 !			    iz = 1
 					ud = 1                                !RAY NOW MUST TRAVEL down
 					
+					!IF P or SV wave, check for P-SV reflection
+					IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV
+					
 					!Find index for distance
 					x_index = abs(x)
 					DO WHILE (x_index >= circum)
@@ -2116,7 +2119,74 @@ SUBROUTINE INTERFACE_NORMAL
 			RETURN	
 END SUBROUTINE INTERFACE_NORMAL
 
+SUBROUTINE SURFACE_PSV
 
+! Calculate P-SV reflection coefficients at free surface based on AKI&RICHARDS
+
+      USE pho_vars
+      IMPLICIT NONE
+      
+      REAL(8)    velP,velS,angP,angS,cosi,cosj
+      INTEGER    ip_init
+      REAL(8)    PP,PS,SP,SS
+      REAL(8)    nPP,nPS,nSP,nSS
+      REAL(8)    totc
+      
+
+      ip_init = ip
+      
+      velP = vf(1,1)
+      velS = vf(1,2)
+      angP = asin(p*velP)
+      angS = asin(p*velS) 
+      cosi = cos(angP)
+      cosj = cos(angS)
+      
+      PP = (-(1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)   &
+         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
+      
+      PS =  (4*velP/velS*p*cosi/velP*(1/velS**2-2*p**2))   &
+         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
+      
+      SP =  (4*velS/velP*p*cosj/velS*(1/velS**2-2*p**2))   &
+         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS) 
+      
+      SS = ( (1/velS**2-2*p**2)**2 - 4*p**2*cosi/velP*cosj/velS)   &
+         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
+         
+!      write(6,*) I,'AKI  ',PP,PS,SP,SS
+         
+         
+      r0 = rand()
+      
+      IF (ip == 1) THEN             ! IF P-INCIDENT
+         totc = abs(PP) + abs(PS)
+         nPP = abs(PP) / totc
+         nPS = abs(PS) / totc
+         IF (r0 < nPP) THEN
+           ip = 1
+           IF (PP < 1) a = -a
+         ELSE
+           ip = 2
+           IF (PS < 1) a = -a
+         END IF
+!         write(6,*)       ip_init,ip,nPP,nPS,r0
+      ELSEIF (ip == 2) THEN         ! IF SV-INCIDENT
+         totc = abs(SP) + abs(SS)
+         nSP = abs(SP) / totc
+         nSS = abs(SS) / totc
+         IF (r0 < nSP) THEN
+           ip = 1
+           IF (SP < 1 ) a = -a
+         ELSE
+           ip = 2
+           IF (SS < 1 ) a = -a
+         END IF
+!         write(6,*)       ip_init,ip,nSP,nSS,r0
+      END IF
+      
+      iwave = ip
+END SUBROUTINE SURFACE_PSV
 
 !SUBROUTINE INLAYER_SCATTER
 !      

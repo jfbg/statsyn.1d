@@ -117,11 +117,12 @@ MODULE PHO_VARS			! Make variables global
 				REAL(8)           qdep
 				
 				!INTERFACE
-	      INTEGER     INCI,init_ud
-        REAL(4)     c,rhof,a1,b1,rhos
-        REAL(4)     TdPP, TdSP, RdPP, TuPP, TuPS, RuPP
-        REAL(4)     RuSP, RuPS, RuSS
-        REAL(4)     SumCOEFF
+                INTEGER     INCI,init_ud
+                REAL(4)     c,rhof,a1,b1,rhos
+                REAL(4)     TdPP, TdSP, RdPP, TuPP, TuPS, RuPP
+                REAL(4)     RuSP, RuPS, RuSS
+                REAL(4)     SumCOEFF
+
 				
 				! SYSTEM + DEBUG
 				INTEGER        status                !I/O ERROR (0=no READ error)
