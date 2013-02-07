@@ -482,7 +482,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 
        !Set ray parameter
-        p    = abs(sin(ang1))/vf(iz-1,iwave)   !Phonon travels in (iz-1) next
+        p    = abs(sin(ang1))/vf(iz,iwave)   !Phonon travels in (iz-1) next
         
         
         NITR = 0
@@ -2386,7 +2386,7 @@ SUBROUTINE RAYTRACE
 !				 if(t_last_count >995)  WRITE(78,*) '              -->',I,NITR,real(1/utop,4),real(1/ubot,4),real(h,4),p
 					
 					CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
-					dtstr1 = dt1/Q(iz,iwave)                    !t* = TIME/QUALITY FACTOR
+					dtstr1 = dt1(Qiz-1,iwave)                    !t* = TIME/QUALITY FACTOR
 					
 					
 !				 if(t_last_count >995)  WRITE(78,*) '              -->',I,NITR,real(dx1,4),real(dt1,4),irtr1

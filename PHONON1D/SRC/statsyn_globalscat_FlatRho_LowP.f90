@@ -595,7 +595,6 @@ PROGRAM STATSYN_GLOBALSCAT
 						
 					 
 							 ! Calculate linear distance to next velocity layer (ds_SL)
-                                IF (ud == 1) THEN
 									 IF (abs(vf(iz-1,iwave)) > 0.) THEN
 										 utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
 									 ELSE
@@ -607,19 +606,6 @@ PROGRAM STATSYN_GLOBALSCAT
 									 ELSE
 										 ubot = 0.
 									 END IF
-								 ELSEIF (ud == -1) THEN
-								     IF (abs(vf(iz,iwave)) > 0.) THEN
-										 utop = 1./vf(iz,iwave)              !SLOWNESS AT TOP OF LAYER
-									 ELSE
-										 utop = 0.
-									 END IF 
-						 
-									 IF (abs(vf(iz-1,iwave)) > 0.) THEN
-										 ubot = 1./vf(iz-1,iwave)                !SLOWNESS AT BOTTOM OF LAYER
-									 ELSE
-										 ubot = 0.
-									 END IF
-							     END IF
 								 
 								 imth = 2	!Interpolation method in Layer trace (2 is linear)
 								 CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
@@ -2326,7 +2312,6 @@ SUBROUTINE RAYTRACE
 !      init_ud = ud
 	
 		    IF (iz /= 1) THEN
-				 IF (ud == 1) THEN
 					 IF (abs(vf(iz-1,iwave)) > 0.) THEN
 						 utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
 					 ELSE
@@ -2338,19 +2323,6 @@ SUBROUTINE RAYTRACE
 					 ELSE
 						 ubot = 0.
 					 END IF
-				 ELSEIF (ud == -1) THEN
-					 IF (abs(vf(iz,iwave)) > 0.) THEN
-						 utop = 1./vf(iz,iwave)              !SLOWNESS AT TOP OF LAYER
-					 ELSE
-						 utop = 0.
-					 END IF 
-		 
-					 IF (abs(vf(iz-1,iwave)) > 0.) THEN
-						 ubot = 1./vf(iz-1,iwave)                !SLOWNESS AT BOTTOM OF LAYER
-					 ELSE
-						 ubot = 0.
-					 END IF
-				 END IF
         
 					h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
 					imth = 2                              !INTERPOLATION METHOD
@@ -2358,7 +2330,7 @@ SUBROUTINE RAYTRACE
 !				 if(t_last_count >995)  WRITE(78,*) '              -->',I,NITR,real(1/utop,4),real(1/ubot,4),real(h,4),p
 					
 					CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
-					dtstr1 = dt1/Q(iz,iwave)                    !t* = TIME/QUALITY FACTOR
+					dtstr1 = dt1(Qiz-1,iwave)                    !t* = TIME/QUALITY FACTOR
 					
 					
 !				 if(t_last_count >995)  WRITE(78,*) '              -->',I,NITR,real(dx1,4),real(dt1,4),irtr1

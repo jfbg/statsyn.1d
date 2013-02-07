@@ -496,7 +496,6 @@ PROGRAM STATSYN_GLOBALSCAT
        !Set ray parameter
         p    = abs(sin(ang1))/vf(iz,iwave) 
         
-        
         NITR = 0
         
         n_iter_last = -999
@@ -594,7 +593,6 @@ PROGRAM STATSYN_GLOBALSCAT
 						
 					 
 							 ! Calculate linear distance to next velocity layer (ds_SL)
-							     IF (ud == 1) THEN
 									 IF (abs(vf(iz-1,iwave)) > 0.) THEN
 										 utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
 									 ELSE
@@ -606,19 +604,7 @@ PROGRAM STATSYN_GLOBALSCAT
 									 ELSE
 										 ubot = 0.
 									 END IF
-								 ELSEIF (ud == -1) THEN
-								     IF (abs(vf(iz,iwave)) > 0.) THEN
-										 utop = 1./vf(iz,iwave)              !SLOWNESS AT TOP OF LAYER
-									 ELSE
-										 utop = 0.
-									 END IF 
-						 
-									 IF (abs(vf(iz-1,iwave)) > 0.) THEN
-										 ubot = 1./vf(iz-1,iwave)                !SLOWNESS AT BOTTOM OF LAYER
-									 ELSE
-										 ubot = 0.
-									 END IF
-							     END IF
+
 								 
 								 imth = 2	!Interpolation method in Layer trace (2 is linear)
 								 CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
@@ -852,8 +838,11 @@ PROGRAM STATSYN_GLOBALSCAT
          t_last_count = t_last_count + 1
          IF (t_last_count > 999) THEN
 !           WRITE(77,*) t_last_count,I,NITR         
-           WRITE(6,FMT = 333) iz,t,x,ud,nint(x_sign),ip,p
-           WRITE(6,*) '        ',z_act,iz,ang1/pi*180         
+!           WRITE(6,FMT = 333) iz,t,x,ud,nint(x_sign),ip,p
+!           WRITE(6,*) '        ',z_act,iz,ang1/pi*180    
+           
+333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f10.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f7.5)
+                
            IF (t_last_count > 999) t = 9999.
            tstuck = tstuck + 1
 !           WRITE(77,*) 'STUCK',I,NITR,ud,iz,iz2,ip,p,vf(iz,iwave),vf(iz-1,iwave),arp,atp
@@ -914,7 +903,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(6,*) 'Scattered:',  conv_count(1:6)
       WRITE(6,*) 'Dead stuck:', tstuck		
 
-333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f7.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f7.5)
+
 		
 !			======================================================
 !			----- Output Synthetics -----	
@@ -1585,6 +1574,10 @@ SUBROUTINE LAYERTRACE(p,h,utop,ubot,imth,dx,dt,irtr)
 160   dx=ex/b
       dtau=etau/b
       dt=dtau+p*dx     !convert tau to t
+      
+      IF (dt == 0.) THEN
+        WRITE(6,*) p,utop,ubot
+      END IF
 !
       RETURN
 END SUBROUTINE LAYERTRACE
@@ -2094,7 +2087,7 @@ SUBROUTINE INTERFACE_NORMAL
 					
         END IF				!IF1
 				
-!				ip = 2
+
 				iwave = ip
 				IF (iwave == 3) iwave = 2			          ! ASSUMING ISOTROPY SO v_SH == v_SV
 				
@@ -2102,8 +2095,9 @@ SUBROUTINE INTERFACE_NORMAL
 				
 !				IF ((init_ud == 1).AND.(ud == -1)) iz = iz - 1
 !				IF ((init_ud == -1).AND.(ud == 1)) iz = iz + 1
-				
-				IF (t_last_count > 995) WRITE(6,*) t_last_count,I,NITR,iz,REAL(dt1,4),irtr1!, &
+
+			
+				IF (t_last_count > 995) WRITE(6,*) t_last_count,I,NITR,iz,REAL(dt1,4),irtr1,ud,h!, &
 !				    real(arp,4),real(atp,4),real(ars,4),real(ats,4)
 				
 !       WRITE(6,*) '-> ',I, NITR,iz,iz2,ud,ip        
@@ -2305,7 +2299,6 @@ SUBROUTINE RAYTRACE
 !      init_ud = ud
 	
 		    IF (iz /= 1) THEN
-				   IF (ud == 1) THEN
 					   IF (abs(vf(iz-1,iwave)) > 0.) THEN
 						   utop = 1./vf(iz-1,iwave)              !SLOWNESS AT TOP OF LAYER
 					   ELSE
@@ -2317,30 +2310,13 @@ SUBROUTINE RAYTRACE
 					   ELSE
 						   ubot = 0.
 					   END IF
-				   ELSEIF (ud == -1) THEN
-					   IF (abs(vf(iz,iwave)) > 0.) THEN
-						   utop = 1./vf(iz,iwave)              !SLOWNESS AT TOP OF LAYER
-					   ELSE
-						   utop = 0.
-					   END IF 
-		   
-					   IF (abs(vf(iz-1,iwave)) > 0.) THEN
-						   ubot = 1./vf(iz-1,iwave)                !SLOWNESS AT BOTTOM OF LAYER
-					   ELSE
-						   ubot = 0.
-					   END IF
-				   END IF
         
 					h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
 					imth = 2                              !INTERPOLATION METHOD
 
-!				 if(t_last_count >995)  WRITE(78,*) '              -->',I,NITR,real(1/utop,4),real(1/ubot,4),real(h,4),p
-					
 					CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
-					dtstr1 = dt1/Q(iz,iwave)                    !t* = TIME/QUALITY FACTOR
-					
-					
-!				 if(t_last_count >995)  WRITE(78,*) '              -->',I,NITR,real(dx1,4),real(dt1,4),irtr1
+					dtstr1 = dt1/Q(iz-1,iwave)                    !t* = TIME/QUALITY FACTOR
+				
 				ELSE
 					irtr1  = -1
 					dx1    = 0.
@@ -2362,15 +2338,11 @@ SUBROUTINE RAYTRACE
         
       	!FIX NEXT IF FOR DIFFRACTED WAVES: 
 				IF (irtr1 == 2) THEN             !RAY TURNS IN LAYER FOLLOW 1 LEN
-!				WRITE(77,*) I,NITR,'BAAAAAAAHHHH!!!!'
 				ud = -ud
-				
 				ncaust = ncaust + 1                   !# OF CAUSTICS
 				END IF
-        
-! 				IF ((init_ud == 1).AND.(ud == -1)) iz = iz - 1
-!				IF ((init_ud == -1).AND.(ud == 1)) iz = iz + 1
-        
+     
+       
 				RETURN 			
 END SUBROUTINE RAYTRACE
 
