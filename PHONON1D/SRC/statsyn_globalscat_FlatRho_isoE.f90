@@ -494,7 +494,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 
        !Set ray parameter
-        p    = abs(sin(ang1))/vf(iz-1,iwave)   !Phonon travels in (iz-1) next
+        p    = abs(sin(ang1))/vf(iz,iwave) 
         
         
         NITR = 0
@@ -852,7 +852,8 @@ PROGRAM STATSYN_GLOBALSCAT
          t_last_count = t_last_count + 1
          IF (t_last_count > 999) THEN
 !           WRITE(77,*) t_last_count,I,NITR         
-!           WRITE(6,FMT = 333) iz,t,x,ud,nint(x_sign),ip         
+           WRITE(6,FMT = 333) iz,t,x,ud,nint(x_sign),ip,p
+           WRITE(6,*) '        ',z_act,iz,ang1/pi*180         
            IF (t_last_count > 999) t = 9999.
            tstuck = tstuck + 1
 !           WRITE(77,*) 'STUCK',I,NITR,ud,iz,iz2,ip,p,vf(iz,iwave),vf(iz-1,iwave),arp,atp
@@ -913,7 +914,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(6,*) 'Scattered:',  conv_count(1:6)
       WRITE(6,*) 'Dead stuck:', tstuck		
 
-333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f7.2,', ud=',i2,', x_sign= ',i2', ip= ',i1)
+333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f7.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f7.5)
 		
 !			======================================================
 !			----- Output Synthetics -----	
@@ -1849,23 +1850,16 @@ SUBROUTINE INTERFACE_NORMAL
       last_RT = 0
       init_ud = ud
       iz2 = iz
-!      IF (ud == -1) iz2 = iz
-!      IF (ud ==  1) iz2 = iz-1 
       
-!       WRITE(6,*) '----------------------------------------------'
-!       WRITE(6,*) '-> ',I, NITR,iz,iz2,ud,ip
-      
-			h = abs(z(iz2)-z(iz2-1))
+      h = abs(z(iz2)-z(iz2-1))
 
-!       IF (t > 400000) THEN
       IF (((vf(iz2,2) == 0).OR.(vf(iz2-1,2) == 0)).AND.(ip.ne.3).AND.(h <= 0.).AND.(iz > 1)) THEN
-      				!Solid-Liquid Interface   
- 							!Transverse waves (SH) do not disturb the liquid layer
- 							! RTFLUID assumes that the liquid layer sits on top of the solid one.
- 							Last_RT = 1
- 							
-! 				WRITE(6,*) '-> LIQUID'
-      
+      !Solid-Liquid Interface   
+         !Transverse waves (SH) do not disturb the liquid layer
+         ! RTFLUID assumes that the liquid layer sits on top of the solid one.
+         Last_RT = 1
+
+     
        !Solid over liquid
        IF ((vf(iz2,2) == 0).AND.(vf(iz2-1,2).ne.0)) THEN
           IF (ud ==1)  THEN
@@ -1881,13 +1875,6 @@ SUBROUTINE INTERFACE_NORMAL
           b1 = vf(iz2-1,2)
           rhof = rh(iz2)
           rhos = rh(iz2-1)
-          
-!          WRITE(77,*) 'c:',c
-!          WRITE(77,*) 'a1:',a1
-!          WRITE(77,*) 'b1:',b1
-!          WRITE(77,*) 'rhof:',rhof
-!          WRITE(77,*) 'rhos:',rhos
-          
        END IF
        
        ! Liquid over solid
@@ -1903,10 +1890,6 @@ SUBROUTINE INTERFACE_NORMAL
                  
        CALL  RTFLUID(p,c,rhof,a1,b1,rhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, RuSP, RuPS, RuSS)
        
-       
-       
-       
-
 !       WRITE(6,*) '-> ',iz,iz2, ud,ip,vf(iz2,2),vf(iz2-1,2),INCI
 !      WRITE(6,*) '!!!!!-> ',TdPP, TdSP, RdPP, TuPP, RuSP, RuPP, TuPS, RuSS, RuPS
        
@@ -2015,9 +1998,7 @@ SUBROUTINE INTERFACE_NORMAL
       ELSE  !Solid-Solid Interface
             last_RT = 2
       
-! 				WRITE(6,*) '-> SOLID',vf(iz2,iwave),vf(iz2-1,iwave),iwave
-      
-            
+  
 				IF ( (iz2 > 1).AND.(abs(irtr1) == 1).AND. &												!IF1
 							(iz2 < nlay-1) ) THEN
 							
@@ -2048,7 +2029,6 @@ SUBROUTINE INTERFACE_NORMAL
 						END IF																												!IF3b
           END IF																													!IF2a
           
-!          WRITE(77,*) I,NITR,'AR -----> ',arp,ars,atp,ats,ip
           
           r0 = rand()                       !RANDOM NUMBER FROM 0 TO 1
 
