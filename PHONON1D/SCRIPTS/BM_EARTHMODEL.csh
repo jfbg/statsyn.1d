@@ -7,7 +7,7 @@
 
 set ray_par    = "0.0 0.1668 0.2931"
 @ t_start      = 0
-@ t_max        = 8192			# 75 minutes
+@ t_max        = 4500			# 75 minutes
 set d_range    = "0 180 91"
 set model      = "1"	#2 for Moon
 set mx_scat_dp = "10"
@@ -31,7 +31,7 @@ set model_name = "EARTH_MODEL_20km"
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 6     ## Number of kernels to use per iteration (simultaneous run)
+@ n_kern  = 12     ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 5    ## Number of iterations
 
 # Output folder

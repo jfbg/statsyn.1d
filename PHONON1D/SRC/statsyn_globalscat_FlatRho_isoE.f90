@@ -341,9 +341,9 @@ PROGRAM STATSYN_GLOBALSCAT
 
 !     ======================================================
 !			----- Attenuation + Attenuated source -----
-      datt = .02		! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
-      							! This is datt, not max att. max att will be datt*(101-1) = 2.
-     DO I = 1, 101                           !SOURCES * ATTENUATION
+      datt = .025		! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
+      					! This is datt, not max att. max att will be datt*(1001-1) = 2.
+     DO I = 1, 1501                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
        CALL ATTENUATE(mt,mtsc,nts1,dt4,dtst1,dQdfSTYLE) !
        pow1 = 0.
@@ -369,15 +369,15 @@ PROGRAM STATSYN_GLOBALSCAT
       mts = REAL(mts4,8)
 			
       OPEN(23,FILE='source.out')              !OUTPUT SOURCE
-      WRITE(23,*) nts,101                     !
-      WRITE(23,FMT=888) 999.99,(datt*float(J-1),J=1,101)
+      WRITE(23,*) nts,1501                     !
+      WRITE(23,FMT=888) 999.99,(datt*float(J-1),J=1,1501)
       DO I = 1, nts
-        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,3,I)*1.,J=1,101)
+        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,3,I)*1.,J=1,1501)
       END DO
       CLOSE(23)
  
       OPEN(24,file='mts.out',status='unknown')
-        DO I = 1,101
+        DO I = 1,1501
           DO mm = 1,4
             DO K = 1,nts1
               WRITE(24,*) mts(I,mm,K)
@@ -753,9 +753,14 @@ PROGRAM STATSYN_GLOBALSCAT
 					
 										IT = nint((t +dtsurf      -t1)/dti) + 1 
 										
-								
+								        
+								        
+								        
 										ims = int(s/datt)+1
-										IF (ims > 100) ims = 100
+										
+										IF (ims > 1500) WRITE(6,*) s,t,ims
+										
+										IF (ims > 1500) ims = 1500
 										IF (ims <=   1) ims =   2
 										s1 = float(ims-1)*datt
 										s2 = float(ims  )*datt
