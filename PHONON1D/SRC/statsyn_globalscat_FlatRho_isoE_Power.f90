@@ -78,6 +78,7 @@ PROGRAM STATSYN_GLOBALSCAT
       write(*,*) '*'
       write(*,*) '*    FLAT RHO (p = -2 in FLATTEN)'
       write(*,*) '*    IsoSourcePartition (1:1:1)'
+      write(*,*) '*    Use power of coefficients'
       write(*,*) '*'
       write(*,*) '************************************'
       write(*,*) ''
@@ -758,7 +759,7 @@ PROGRAM STATSYN_GLOBALSCAT
 								        
 										ims = int(s/datt)+1
 										
-										!IF (ims <= 1) WRITE(6,*) s,t,ims,xo
+!										IF (ims <= 1) WRITE(6,*) s,t,ims,xo
 										
 										IF (ims > 2000) ims = 2000
 										IF (ims <=   1) ims =   2
@@ -1174,8 +1175,13 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
 				car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
 				cat   = ctwo*rho1*vb1*cj1/DD
 				
-				ar = REAL(car)
-				at = REAL(cat)
+!				ar = REAL(car)
+!				at = REAL(cat)
+				
+				!POWER
+				ar = REAL(car)**2
+				at = REAL(cat)**2
+				
 				
 				!Check for total internal reflection !fix
 				IF (b2*p > 1) at = 0
@@ -1287,10 +1293,16 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
        ats    = ctwo*rho1*cj1*E/(vb2*DEN)         !trans down S to S down
       END IF
       
-      rrp = REAL(arp)!**2+imag(arp)**2)**0.5
-      rrs = REAL(ars)!**2+imag(ars)**2)**0.5
-      rtp = REAL(atp)!**2+imag(atp)**2)**0.5
-      rts = REAL(ats)!**2+imag(ats)**2)**0.5
+!      rrp = REAL(arp)!**2+imag(arp)**2)**0.5
+!      rrs = REAL(ars)!**2+imag(ars)**2)**0.5
+!      rtp = REAL(atp)!**2+imag(atp)**2)**0.5
+!      rts = REAL(ats)!**2+imag(ats)**2)**0.5
+
+      !POWER
+      rrp = REAL(arp)**2!**2+imag(arp)**2)**0.5
+      rrs = REAL(ars)**2!**2+imag(ars)**2)**0.5
+      rtp = REAL(atp)**2!**2+imag(atp)**2)**0.5
+      rts = REAL(ats)**2!**2+imag(ats)**2)**0.5
       
       ! Check for total internal reflection     !fix
       IF (vp2*pin > 1) THEN
@@ -1399,9 +1411,14 @@ SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, R
 		 		 
 		 dum = matmul(dum,tdum)
 
-		 TdPP=REAL(dum(1,1));
-		 TdSP=REAL(dum(2,1));
-		 RdPP=REAL(dum(3,1));
+!		 TdPP=REAL(dum(1,1));
+!		 TdSP=REAL(dum(2,1));
+!		 RdPP=REAL(dum(3,1));
+
+         !POWER
+		 TdPP=REAL(dum(1,1))**2;
+		 TdSP=REAL(dum(2,1))**2;
+		 RdPP=REAL(dum(3,1))**2;
 		 
 		 ! P-incidence from below.
 		 dum(1,:) = [CMPLX(0.),L(1,1),L(1,2)]
@@ -1411,9 +1428,14 @@ SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, R
      tdum(:,1) =  [-L(1,3),-L(2,3),-L(3,3)]
 		 dum = matmul(dum,tdum)
 		      
-		 TuPP=REAL(dum(1,1));
-		 RuPP=REAL(dum(2,1));
-		 RuSP=REAL(dum(3,1));
+!		 TuPP=REAL(dum(1,1));
+!		 RuPP=REAL(dum(2,1));
+!		 RuSP=REAL(dum(3,1));
+		      
+         !POWER
+		 TuPP=REAL(dum(1,1))**2;
+		 RuPP=REAL(dum(2,1))**2;
+		 RuSP=REAL(dum(3,1))**2;
 		 
 		 ! S-incidence from below.
 		 dum(1,:) = [CMPLX(0.),L(1,1),L(1,2)]
@@ -1424,9 +1446,14 @@ SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, R
      tdum(:,1) =  [-L(1,4),-L(2,4),-L(3,4)]
 		 dum = matmul(dum,tdum)
 
-		 TuPS=REAL(dum(1,1));
-		 RuPS=REAL(dum(2,1));
-		 RuSS=REAL(dum(3,1));
+!		 TuPS=REAL(dum(1,1));
+!		 RuPS=REAL(dum(2,1));
+!		 RuSS=REAL(dum(3,1));
+
+         !POWER
+		 TuPS=REAL(dum(1,1))**2;
+		 RuPS=REAL(dum(2,1))**2;
+		 RuSS=REAL(dum(3,1))**2;
 		 
 		 !DEBUG CRITICAL ANGLE
 		 IF (rc*rp > 1) THEN
@@ -1447,6 +1474,85 @@ SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, R
 		 RETURN
 END SUBROUTINE RTFLUID
 
+SUBROUTINE SURFACE_PSV
+
+! Calculate P-SV reflection coefficients at free surface based on AKI&RICHARDS
+
+      USE pho_vars
+      IMPLICIT NONE
+      
+      REAL(8)    velP,velS,angP,angS,cosi,cosj
+      INTEGER    ip_init
+      REAL(8)    PP,PS,SP,SS
+      REAL(8)    nPP,nPS,nSP,nSS
+      REAL(8)    totc
+      
+
+      ip_init = ip
+      
+      velP = vf(1,1)
+      velS = vf(1,2)
+      angP = asin(p*velP)
+      angS = asin(p*velS) 
+      cosi = cos(angP)
+      cosj = cos(angS)
+      
+!      PP = (-(1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)   &
+!         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
+!      
+!      PS =  (4*velP/velS*p*cosi/velP*(1/velS**2-2*p**2))   &
+!         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
+!      
+!      SP =  (4*velS/velP*p*cosj/velS*(1/velS**2-2*p**2))   &
+!         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS) 
+!      
+!      SS = ( (1/velS**2-2*p**2)**2 - 4*p**2*cosi/velP*cosj/velS)   &
+!         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
+
+      !POWER
+      PP = ((-(1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)   &
+         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS))**2
+      
+      PS =  ((4*velP/velS*p*cosi/velP*(1/velS**2-2*p**2))   &
+         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS))**2
+      
+      SP =  ((4*velS/velP*p*cosj/velS*(1/velS**2-2*p**2))   &
+         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS))**2
+      
+      SS = ( ((1/velS**2-2*p**2)**2 - 4*p**2*cosi/velP*cosj/velS)   &
+         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS))**2
+         
+!      write(6,*) I,'AKI  ',PP,PS,SP,SS
+         
+         
+      r0 = rand()
+      
+      IF (ip == 1) THEN             ! IF P-INCIDENT
+         totc = abs(PP) + abs(PS)
+         nPP = abs(PP) / totc
+         nPS = abs(PS) / totc
+         IF (r0 < nPP) THEN
+           ip = 1
+           IF (PP < 1) a = -a
+         ELSE
+           ip = 2
+           IF (PS < 1) a = -a
+         END IF
+      ELSEIF (ip == 2) THEN         ! IF SV-INCIDENT
+         totc = abs(SP) + abs(SS)
+         nSP = abs(SP) / totc
+         nSS = abs(SS) / totc
+         IF (r0 < nSP) THEN
+           ip = 1
+           IF (SP < 1 ) a = -a
+         ELSE
+           ip = 2
+           IF (SS < 1 ) a = -a
+         END IF
+      END IF
+      
+      iwave = ip
+END SUBROUTINE SURFACE_PSV
 
 SUBROUTINE FLATTEN(z_s,vs,rhs,z_f,vf_f,rh_f,erad)
       REAL(8)     z_s,z_f,vf_f,vs,erad,r,rhs,rh_f,pfac
@@ -2111,75 +2217,6 @@ SUBROUTINE INTERFACE_NORMAL
 			
 			RETURN	
 END SUBROUTINE INTERFACE_NORMAL
-
-SUBROUTINE SURFACE_PSV
-
-! Calculate P-SV reflection coefficients at free surface based on AKI&RICHARDS
-
-      USE pho_vars
-      IMPLICIT NONE
-      
-      REAL(8)    velP,velS,angP,angS,cosi,cosj
-      INTEGER    ip_init
-      REAL(8)    PP,PS,SP,SS
-      REAL(8)    nPP,nPS,nSP,nSS
-      REAL(8)    totc
-      
-
-      ip_init = ip
-      
-      velP = vf(1,1)
-      velS = vf(1,2)
-      angP = asin(p*velP)
-      angS = asin(p*velS) 
-      cosi = cos(angP)
-      cosj = cos(angS)
-      
-      PP = (-(1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)   &
-         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
-      
-      PS =  (4*velP/velS*p*cosi/velP*(1/velS**2-2*p**2))   &
-         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
-      
-      SP =  (4*velS/velP*p*cosj/velS*(1/velS**2-2*p**2))   &
-         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS) 
-      
-      SS = ( (1/velS**2-2*p**2)**2 - 4*p**2*cosi/velP*cosj/velS)   &
-         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
-         
-!      write(6,*) I,'AKI  ',PP,PS,SP,SS
-         
-         
-      r0 = rand()
-      
-      IF (ip == 1) THEN             ! IF P-INCIDENT
-         totc = abs(PP) + abs(PS)
-         nPP = abs(PP) / totc
-         nPS = abs(PS) / totc
-         IF (r0 < nPP) THEN
-           ip = 1
-           IF (PP < 1) a = -a
-         ELSE
-           ip = 2
-           IF (PS < 1) a = -a
-         END IF
-!         write(6,*)       ip_init,ip,nPP,nPS,r0
-      ELSEIF (ip == 2) THEN         ! IF SV-INCIDENT
-         totc = abs(SP) + abs(SS)
-         nSP = abs(SP) / totc
-         nSS = abs(SS) / totc
-         IF (r0 < nSP) THEN
-           ip = 1
-           IF (SP < 1 ) a = -a
-         ELSE
-           ip = 2
-           IF (SS < 1 ) a = -a
-         END IF
-!         write(6,*)       ip_init,ip,nSP,nSS,r0
-      END IF
-      
-      iwave = ip
-END SUBROUTINE SURFACE_PSV
 
 !SUBROUTINE INLAYER_SCATTER
 !      
