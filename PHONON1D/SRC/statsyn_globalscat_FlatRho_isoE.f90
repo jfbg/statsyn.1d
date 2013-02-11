@@ -33,21 +33,20 @@ PROGRAM STATSYN_GLOBALSCAT
 				
 				IMPLICIT NONE
 				
-				INTEGER, PARAMETER :: nt0=180000, nx0=91
+				INTEGER, PARAMETER :: nt0=180000, nx0=91,ns0=2001,nst0=4000
 				DOUBLE PRECISION wf(nx0,nt0,3)        !STACKED DATA
 				REAL(8)             w(nt0)
 			
 				! SOURCE
 				! Leaving source declarations here (and not in pho_vars) speeds up the compilation
 				! time by a lot (nt0 is large).
-				REAL(8)          mts(101,4,nt0)        !ATTENUATED SOURCE
-				REAL             mts4(101,4,nt0)        !ATTENUATED SOURCE
-				REAL          b(nt0), e(nt0)        !HILBERT TRANSFORM & ENVELOPE
-				REAL          mtsc(nt0),datt,dtst1  !SCRATCH SPACE
+				REAL(8)          mts(ns0,4,nst0)        !ATTENUATED SOURCE
+				REAL             mts4(ns0,4,nst0)        !ATTENUATED SOURCE
+				REAL          b(nst0), e(nst0)        !HILBERT TRANSFORM & ENVELOPE
+				REAL          mtsc(nst0),datt,dtst1  !SCRATCH SPACE
 				INTEGER       ims
-				REAL          mt(nt0)               !SOURCE-TIME FUNCTION 
-				COMPLEX       ms(nt0),ss(nx0,nt0)   !SOURCE & STACKED SPECTRA
-				REAL          nn(nx0,nt0)
+				REAL          mt(nst0)               !SOURCE-TIME FUNCTION 
+				COMPLEX       ms(nst0)               !SOURCE
 				REAL          dt4
 							
 				
@@ -342,8 +341,8 @@ PROGRAM STATSYN_GLOBALSCAT
 !     ======================================================
 !			----- Attenuation + Attenuated source -----
       datt = .02		! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
-      					! This is datt, not max att. max att will be datt*(2001-1) = 40.
-     DO I = 1, 2001                           !SOURCES * ATTENUATION
+      					! This is datt, not max att. max att will be datt*(ns0-1) = 40.
+     DO I = 1, ns0                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
        CALL ATTENUATE(mt,mtsc,nts1,dt4,dtst1,dQdfSTYLE) !
        pow1 = 0.
@@ -369,15 +368,15 @@ PROGRAM STATSYN_GLOBALSCAT
       mts = REAL(mts4,8)
 			
       OPEN(23,FILE='source.out')              !OUTPUT SOURCE
-      WRITE(23,*) nts,2001                     !
-      WRITE(23,FMT=888) 999.99,(datt*float(J-1),J=1,2001)
+      WRITE(23,*) nts,ns0                     !
+      WRITE(23,FMT=888) 999.99,(datt*float(J-1),J=1,ns0)
       DO I = 1, nts
-        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,3,I)*1.,J=1,2001)
+        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,3,I)*1.,J=1,ns0)
       END DO
       CLOSE(23)
  
       OPEN(24,file='mts.out',status='unknown')
-        DO I = 1,2001
+        DO I = 1,ns0
           DO mm = 1,4
             DO K = 1,nts1
               WRITE(24,*) mts(I,mm,K)
@@ -760,7 +759,7 @@ PROGRAM STATSYN_GLOBALSCAT
 										
 										!IF (ims <= 1) WRITE(6,*) s,t,ims,xo
 										
-										IF (ims > 2000) ims = 2000
+										IF (ims > ns0-1) ims = ns0-1
 										IF (ims <=   1) ims =   2
 										s1 = float(ims-1)*datt
 										s2 = float(ims  )*datt
