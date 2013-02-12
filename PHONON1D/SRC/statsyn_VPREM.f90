@@ -48,7 +48,7 @@ PROGRAM STATSYN_GLOBALSCAT
         REAL          mt(nst0)               !SOURCE-TIME FUNCTION 
         COMPLEX       ms(nst0)               !SOURCE
         REAL          dt4
-              
+        INTEGER       SourceTYPE              
         
         
         ! DEBUGGING
@@ -139,6 +139,11 @@ PROGRAM STATSYN_GLOBALSCAT
        WRITE(6,'(A)') 'ENTER dQdf STYLE (SEE dQdfSTYLES.txt)'
       READ (5,    *)  dQdfSTYLE
       WRITE(6,*) 'dQdf STYLE:',dQdfSTYLE  
+      
+      WRITE(6,'(A)') 'ENTER SOURCE TYPE:'
+      WRITE(6,'(A)') '(1: delta function) (2: sine) '
+      READ (5,    *)  SourceTYPE
+      WRITE(6,*) 'Source TYPE:',SourceTYPE 
 
       WRITE(6,'(A)') 'ENTER TRACK OUTPUT FILE:'
       READ (5,'(A)')  tfile 
@@ -324,15 +329,20 @@ PROGRAM STATSYN_GLOBALSCAT
        mt(I) = 0.
       END DO
 
-!      mt(5) = 1.   !Spike to compare with CRFL
-
-      DO I = 1, nts                           !SOURCE-TIME FUNCTION
-       t0 = dti*float(I-1)-P0
-       mt(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
+      !SET SOURCE TYPE
+      IF (SourceTYPE.eq.1) THEN
+        mt(5) = 1.   !Spike to compare with CRFL
+        write(6,'(a)') ' SOURCE IS DELTA FUNCTION'
+      ELSE IF (SourceTYPE.eq.2) THEN
+        DO I = 1, nts                           !SOURCE-TIME FUNCTION
+         t0 = dti*float(I-1)-P0
+         mt(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
-      END DO
+        END DO
+        write(6,'(a)') ' SOURCE IS SINE WAVE'
+      END IF
       
-      
+
       !Calculate maximum source power (i.e. no attenuation) to normalize attn
       minattn = 0.
       DO JJ = 1,nts
@@ -436,6 +446,7 @@ PROGRAM STATSYN_GLOBALSCAT
         !
         IF (iz1 == 1)   ip = 1         ! Surface impact = P-wave only
         
+        !SET SOURCE ENERGY PARTITIONING
         IF (iz1 /= 1) THEN
           r0 = rand()
           IF (r0 <= 1./21.) THEN
