@@ -1,22 +1,10 @@
 close all
 
 modellist = {...
-    ...'S_VPREMOON_Qp_novlvl'
-    ...'VPREMOON_mod'
-    ...'VPREMOON_original'
-    ...'WEBER_2011_original'
-    ...'WEBER_2011_original_nocrustgrad'
-    ...'GB_2006_original'
-    ...'VPREMOON_Qp_ori_10km_500m'
-    ...'VPREMOON_Q7000_10km_500m'
-    ...'VPREMOON_LIQc_Q7000_10km_500m'
-    ...'VPREMOON_Q7000_gc05_nvlvl_10km_500m'
-    ...'VPREMOON_Q7000_NOCORE_10km_500m'
-    ...'MOON2LAYERS_10km'
-    ...'MOON1LAYER_10km'
-    ...'GG11_thorne'
-    'EARTH_MODEL_10km'
-    'EARTH_MODEL_20km'
+    'VPREMOON_Qp_nocrust_10km';
+    'VPREMOON_Qp_novlvl_10km';
+    'VPREMOON_Qp_novlvl_liquid_10km';
+    'VPREMOON_Qp_ori_10km'
     };
 
 
@@ -41,9 +29,9 @@ for ii=1:length(modellist)
     hold on
        
 
-    plot(model(:,3),model(:,1),'b-')
-    plot(model(:,4),model(:,1),'r-')
-    plot(model(:,5),model(:,1),'k-')
+    plot(model(:,4),model(:,1),'b-')
+    plot(model(:,5),model(:,1),'r-')
+    plot(model(:,3),model(:,1),'k-')
 
     
     title(sprintf('Velocity Model\n%s',modellist{ii}),'Interpreter','none')
@@ -96,7 +84,7 @@ for ii=1:length(modellist)
     set(gcf, 'PaperPositionMode', 'manual');
     set(gcf, 'PaperPosition', [0 0 ps]);
     print(gcf, '-dpng', ['Figures/' modellist{ii} '_plot.png']);
-    print(gcf, '-dpsc2', ['Figures/' modellist{ii} '_plot.eps']);
+    print(gcf, '-dpsc2', ['Figures/EPS/' modellist{ii} '_plot.eps']);
     
 end
 
