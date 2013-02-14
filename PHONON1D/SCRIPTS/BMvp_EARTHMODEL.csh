@@ -58,8 +58,8 @@ if ($l == 2) then
  set dt = "0.025"
  set period = "40"
 else
- set dt = "0.150"
- set period = "07"
+ set dt = "1.000"
+ set period = "01"
 endif
 
 
@@ -72,7 +72,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 20
 else if ($i == 1) then
- set q_depth = 1100
+ set q_depth = 100
 else
  set q_depth = 0.01
 endif
