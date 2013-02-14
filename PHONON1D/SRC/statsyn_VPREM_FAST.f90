@@ -19,9 +19,9 @@ PROGRAM STATSYN_GLOBALSCAT
 !
 ! 
 !
-! $Revision$
-! $Date$
-! $Author$
+! $Revision: 302 $
+! $Date: 2013-02-12 12:40:36 -0800 (Tue, 12 Feb 2013) $
+! $Author: jguertin $
 !
 !
 !
@@ -67,23 +67,23 @@ PROGRAM STATSYN_GLOBALSCAT
       exTIME = 0
       exNLAY = 0
 
-      write(*,*) 'ISOTROPIC Scattering'
-      write(*,*) 'Last Edited on $Date$'
-      write(*,*) 'Last Edited by $Author$'
-      write(*,*) '$Revision$'
+      WRITE(*,*) 'ISOTROPIC Scattering'
+      WRITE(*,*) 'Last Edited on $Date: 2013-02-12 12:40:36 -0800 (Tue, 12 Feb 2013) $'
+      WRITE(*,*) 'Last Edited by $Author: jguertin $'
+      WRITE(*,*) '$Revision: 302 $'
       
-      write(*,*) ''
-      write(*,*) '************************************'
-      write(*,*) '*'
-      write(*,*) '*    Customized for the VPREM_* runs'
-      write(*,*) '*'
-      write(*,*) '*    FLAT RHO (p = -2 in FLATTEN)'
-      write(*,*) '*    SourcePartitioning (1:10:10)'
-      write(*,*) '*    Sine source function'
-      write(*,*) '*    Circular radiation pattern'
-      write(*,*) '*'
-      write(*,*) '************************************'
-      write(*,*) ''
+      WRITE(*,*) ''
+      WRITE(*,*) '************************************'
+      WRITE(*,*) '*'
+      WRITE(*,*) '*    Customized for the VPREM_* runs'
+      WRITE(*,*) '*'
+      WRITE(*,*) '*    FLAT RHO (p = -2 in FLATTEN)'
+      WRITE(*,*) '*    SourcePartitioning (1:10:10)'
+      WRITE(*,*) '*    Sine source function'
+      WRITE(*,*) '*    Circular radiation pattern'
+      WRITE(*,*) '*'
+      WRITE(*,*) '************************************'
+      WRITE(*,*) ''
       
 
 
@@ -136,7 +136,7 @@ PROGRAM STATSYN_GLOBALSCAT
       READ (5,    *)  vel_perturb
       WRITE(6,*) 'vel_perturb:',vel_perturb
       
-       WRITE(6,'(A)') 'ENTER dQdf STYLE (SEE dQdfSTYLES.txt)'
+      WRITE(6,'(A)') 'ENTER dQdf STYLE (SEE dQdfSTYLES.txt)'
       READ (5,    *)  dQdfSTYLE
       WRITE(6,*) 'dQdf STYLE:',dQdfSTYLE  
       
@@ -332,14 +332,14 @@ PROGRAM STATSYN_GLOBALSCAT
       !SET SOURCE TYPE
       IF (SourceTYPE.eq.1) THEN
         mt(5) = 1.   !Spike to compare with CRFL
-        write(6,'(a)') ' SOURCE IS DELTA FUNCTION'
+        WRITE(6,'(a)') ' SOURCE IS DELTA FUNCTION'
       ELSE IF (SourceTYPE.eq.2) THEN
         DO I = 1, nts                           !SOURCE-TIME FUNCTION
          t0 = dti*float(I-1)-P0
          mt(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
         END DO
-        write(6,'(a)') ' SOURCE IS SINE WAVE'
+        WRITE(6,'(a)') ' SOURCE IS SINE WAVE'
       END IF
       
 
@@ -654,7 +654,7 @@ PROGRAM STATSYN_GLOBALSCAT
                               !New ds_scat
                               CALL GET_DS_SCAT
                               
-!                              write(77,*) ds_scat
+!                              WRITE(77,*) ds_scat
                               
                               
                         ELSE
@@ -677,7 +677,7 @@ PROGRAM STATSYN_GLOBALSCAT
 !                   dh = ds_SL*abs(cos(asin(p*vf(iz_scat,iwave))))   !FLAT
                    IF (ud == 1) dh = abs(z(iz_scat+1) - z_act)
                    IF (ud == -1) dh = abs(z_act - z(iz_scat))
-                   !write(77,*) dh,z_act,z(iz_scat),z(iz_scat+1),ud,z_act + dh*ud
+                   !WRITE(77,*) dh,z_act,z(iz_scat),z(iz_scat+1),ud,z_act + dh*ud
                    CALL RAYTRACE_SCAT
                    
                    
@@ -1042,7 +1042,7 @@ SUBROUTINE ATTENUATE(sin,sout,ndat,dt,tstar,dQdfSTYLE)
       
       pi = atan(1.)*4.                       !SET PI = 3.14....
       dw = 2.*pi*df                          !ANGULAR FREQUENCY SAMPLING INTERVAL
-!      write(6,*) 'dw:',dw,pi,df,dt,ndat,npts
+!      WRITE(6,*) 'dw:',dw,pi,df,dt,ndat,npts
 
       DO I = 1, nfreq
         !Can give rdQdf any form. 
@@ -1326,6 +1326,7 @@ SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, R
       COMPLEX(4)     dum(3,3),tdum(3,3)
       COMPLEX(4)     q(6),N(6,6)
       
+      
 !          WRITE(76,*) '--------- vvvvvvvvvvv ----------'
 !          WRITE(76,*) 'p:',p      
 !          WRITE(76,*) 'c:',c
@@ -1357,7 +1358,7 @@ SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, R
      lm=rhos*a*a-2*mu
      
      !Fluid properties.
-     qf=sqrt(1/c**2-p2)
+     qf=csqrt(1/c**2-p2)
      Ff(1,1) = qf*c 
      Ff(1,2) = -qf*c
      Ff(2,1) = rhof*c
@@ -1430,7 +1431,10 @@ SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, R
      RuPS=REAL(dum(2,1));
      RuSS=REAL(dum(3,1));
      
-     !DEBUG CRITICAL ANGLE
+     !DEAL WITH CRITICAL ANGLE
+     ! EVANESCENT WAVES ARE IGNORED...
+     !IF COMMENT THIS, COEFFICIENTS ARE SAME AS WHEN USING MBOSTOCK CODE
+     ! EXCEPT THAT WE END UP WITH PROBLEMS WHEN THESE ARE GREATER THAN 1
      IF (rc*rp > 1) THEN
         TuPS = 0
         TuPP = 0
@@ -1441,6 +1445,10 @@ SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, R
         TdSP = 0.
         RuPS = 0.
      END IF
+     
+     !DEBUG
+!     WRITE(6,*) '!!!!!'
+!     WRITE(79,*) rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, RuSP, RuPS, RuSS
 
 
 
@@ -1855,237 +1863,216 @@ SUBROUTINE INTERFACE_NORMAL
       
       h = abs(z(iz2)-z(iz2-1))
 
-      IF (((vf(iz2,2) == 0).OR.(vf(iz2-1,2) == 0)).AND.(ip.ne.3).AND.(h <= 0.).AND.(iz > 1)) THEN
-      !Solid-Liquid Interface   
+      IF (((vf(iz2,2) == 0).OR.(vf(iz2-1,2) == 0)).AND.(ip.ne.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
+         !Solid-Liquid Interface with P or SV waves
          !Transverse waves (SH) do not disturb the liquid layer
          ! RTFLUID assumes that the liquid layer sits on top of the solid one.
          Last_RT = 1
 
-     
-       !Solid over liquid
-       IF ((vf(iz2,2) == 0).AND.(vf(iz2-1,2).ne.0)) THEN
-          IF (ud ==1)  THEN
-             INCI = -1  !Upward Incidence in RTFLUID
-!             WRITE(77,*) 'Solid over Liquid - Upward Incidence', ud,ip
-          END IF
-          IF (ud ==-1) THEN
-             INCI = 1  !Downward Incidence in RTFLUID
-!             WRITE(77,*) 'Solid over Liquid - Downward Incidence', ud,ip
-          END IF
-          c = vf(iz2,1)
-          a1 = vf(iz2-1,1)
-          b1 = vf(iz2-1,2)
-          rhof = rh(iz2)
-          rhos = rh(iz2-1)
-       END IF
+         !Solid over liquid
+         IF ((vf(iz2,2) == 0).AND.(vf(iz2-1,2).ne.0)) THEN
+            IF (ud ==1)  THEN
+               INCI = -1  !Upward Incidence in RTFLUID
+            END IF
+            IF (ud ==-1) THEN
+               INCI = 1  !Downward Incidence in RTFLUID
+            END IF
+            c = vf(iz2,1)
+            a1 = vf(iz2-1,1)
+            b1 = vf(iz2-1,2)
+            rhof = rh(iz2)
+            rhos = rh(iz2-1)
+         END IF
        
-       ! Liquid over solid
-       IF ((vf(iz2,2).ne.0).AND.(vf(iz2-1,2) == 0)) THEN
-          c = vf(iz2-1,1)
-          a1 = vf(iz2,1)
-          b1 = vf(iz2,2)
-          rhof = rh(iz2-1)
-          rhos = rh(iz2)       
-          IF (ud ==1) INCI = 1  !Downward Incidence in RTFLUID
-          IF (ud ==-1) INCI = -1  !Upward Incidence in RTFLUID
-       END IF
+         ! Liquid over solid
+         IF ((vf(iz2,2).ne.0).AND.(vf(iz2-1,2) == 0)) THEN
+            c = vf(iz2-1,1)
+            a1 = vf(iz2,1)
+            b1 = vf(iz2,2)
+            rhof = rh(iz2-1)
+            rhos = rh(iz2)       
+            IF (ud ==1) INCI = 1  !Downward Incidence in RTFLUID
+            IF (ud ==-1) INCI = -1  !Upward Incidence in RTFLUID
+         END IF
                  
-       CALL  RTFLUID(p,c,rhof,a1,b1,rhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, RuSP, RuPS, RuSS)
+         CALL  RTFLUID(p,c,rhof,a1,b1,rhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, RuSP, RuPS, RuSS)
        
-!       WRITE(6,*) '-> ',iz,iz2, ud,ip,vf(iz2,2),vf(iz2-1,2),INCI
-!      WRITE(6,*) '!!!!!-> ',TdPP, TdSP, RdPP, TuPP, RuSP, RuPP, TuPS, RuSS, RuPS
-       
-      IF ((ip == 1).AND.(INCI == 1)) THEN
+         IF ((ip == 1).AND.(INCI == 1)) THEN
 
-         IF (isnan(TdPP)) WRITE(6,*) 'TdPP NaN'
-         IF (isnan(TdSP)) WRITE(6,*) 'TdSP NaN'
-         IF (isnan(RdPP)) WRITE(6,*) 'RdPP NaN'
+!           IF (isnan(TdPP)) WRITE(6,*) 'TdPP NaN'
+!           IF (isnan(TdSP)) WRITE(6,*) 'TdSP NaN'
+!           IF (isnan(RdPP)) WRITE(6,*) 'RdPP NaN'
       
-         IF (isnan(TdPP)) TdPP = 0
-         IF (isnan(TdSP)) TdSP = 0
-         IF (isnan(RdPP)) RdPP = 0
+           IF (isnan(TdPP)) TdPP = 0
+           IF (isnan(TdSP)) TdSP = 0
+           IF (isnan(RdPP)) RdPP = 0
       
-         sumCOEFF = abs(TdPP) + abs(TdSP) + abs(RdPP)
-         TdPP = TdPP / sumCOEFF
-         TdSP = TdSP / sumCOEFF
-         RdPP = RdPP / sumCOEFF
+           sumCOEFF = abs(TdPP) + abs(TdSP) + abs(RdPP)
+           TdPP = TdPP / sumCOEFF
+           TdSP = TdSP / sumCOEFF
+           RdPP = RdPP / sumCOEFF
       
-        r0 = rand()
-        IF (r0 <= abs(TdPP)) THEN
-          IF (TdPP < 0) a = -a
-!               if(t_last_count >995) WRITE(6,*) '-> TdPP'
-        ELSEIF ((r0 > abs(TdPP)).AND.(r0 <= abs(TdPP) + abs(TdSP))) THEN
-          IF (TdSP < 0) a = -a
-!               if(t_last_count >995) WRITE(6,*) '-> TdSP'
-          ip = 2
-        ELSE
-          IF (RdPP < 0) a = -a
-!               if(t_last_count >995) WRITE(6,*) '-> RdPP'
-          ud = -ud
-        END iF  
+           r0 = rand()
+           IF (r0 <= abs(TdPP)) THEN
+             IF (TdPP < 0) a = -a
+           ELSEIF ((r0 > abs(TdPP)).AND.(r0 <= abs(TdPP) + abs(TdSP))) THEN
+             IF (TdSP < 0) a = -a
+             ip = 2
+           ELSE
+             IF (RdPP < 0) a = -a
+             ud = -ud
+           END iF  
           
-      ELSEIF ((ip == 1).AND.(INCI == -1)) THEN
-!         WRITE(77,*) I,NITR,ud,'-> RuPP',TuPP,RuSP,RuPP,p,vf(iz2-1,1),vf(iz2,1)
-         sumCOEFF = abs(TuPP) + abs(RuSP) + abs(RuPP)
-
-         IF (isnan(TuPP)) WRITE(6,*) 'TuPP NaN'
-         IF (isnan(RuSP)) WRITE(6,*) 'RuSP NaN'
-         IF (isnan(RuPP)) WRITE(6,*) 'RuPP NaN'
-      
-         IF (isnan(TuPP)) TuPP = 0
-         IF (isnan(RuSP)) RuSP = 0
-         IF (isnan(RuPP)) RuPP = 0
-
-
-         TuPP = TuPP / sumCOEFF
-         RuSP = RuSP / sumCOEFF
-         RuPP = RuPP / sumCOEFF  
+         ELSEIF ((ip == 1).AND.(INCI == -1)) THEN
          
-        r0 = rand()
-        IF (r0 <= abs(TuPP)) THEN
-          IF (TuPP < 0) a = -a
-!               if(t_last_count >995) WRITE(6,*) '-> TuPP'
+!           IF (isnan(TuPP)) WRITE(6,*) 'TuPP NaN'
+!           IF (isnan(RuSP)) WRITE(6,*) 'RuSP NaN'
+!           IF (isnan(RuPP)) WRITE(6,*) 'RuPP NaN'
+      
+           IF (isnan(TuPP)) TuPP = 0
+           IF (isnan(RuSP)) RuSP = 0
+           IF (isnan(RuPP)) RuPP = 0
 
-        ELSEIF ((r0 > abs(TuPP)).AND.(r0 <= abs(TuPP) + abs(RuSP))) THEN
-          IF (RuSP < 0) a = -a
-!               if(t_last_count >995) WRITE(6,*) '-> RuSP'
-          ip = 2
-          ud = -ud
-        ELSE
-          IF (RuPP < 0) a = -a
-!               if(t_last_count >995) WRITE(6,*) '-> RuPP'
-!               WRITE(77,*) I,NITR,ud,'-> RuPP',TuPP,RuSP,RuPP,p,vf(iz2-1,1),vf(iz2,1)
-!               WRITE(77,*) '>>>',p,c,rhof,a1,b1,rhos
-          ud = -ud
-        END iF       
+           sumCOEFF = abs(TuPP) + abs(RuSP) + abs(RuPP)
+
+           TuPP = TuPP / sumCOEFF
+           RuSP = RuSP / sumCOEFF
+           RuPP = RuPP / sumCOEFF  
+         
+           r0 = rand()
+           IF (r0 <= abs(TuPP)) THEN
+             IF (TuPP < 0) a = -a
+           ELSEIF ((r0 > abs(TuPP)).AND.(r0 <= abs(TuPP) + abs(RuSP))) THEN
+             IF (RuSP < 0) a = -a
+             ip = 2
+           ud = -ud
+           ELSE
+             IF (RuPP < 0) a = -a
+             ud = -ud
+           END iF       
         
-      ELSEIF ((ip == 2).AND.(INCI == -1)) THEN
-         IF (isnan(TuPS)) WRITE(6,*) 'TuPS NaN'
-         IF (isnan(RuSS)) WRITE(6,*) 'RuSS NaN'
-         IF (isnan(RuPS)) WRITE(6,*) 'RuPS NaN'
+         ELSEIF ((ip == 2).AND.(INCI == -1)) THEN
+!           IF (isnan(TuPS)) WRITE(6,*) 'TuPS NaN'
+!           IF (isnan(RuSS)) WRITE(6,*) 'RuSS NaN'
+!           IF (isnan(RuPS)) WRITE(6,*) 'RuPS NaN'
       
-         IF (isnan(TuPS)) TuPS = 0
-         IF (isnan(RuSS)) RuSS = 0
-         IF (isnan(RuPS)) RuPS = 0
+           IF (isnan(TuPS)) TuPS = 0
+           IF (isnan(RuSS)) RuSS = 0
+           IF (isnan(RuPS)) RuPS = 0
 
-      
-      
-         sumCOEFF = abs(TuPS) + abs(RuSS) + abs(RuPS)
-         TuPS = TuPS / sumCOEFF
-         RuSS = RuSS / sumCOEFF
-         RuPS = RuPS / sumCOEFF
+           sumCOEFF = abs(TuPS) + abs(RuSS) + abs(RuPS)
+           TuPS = TuPS / sumCOEFF
+           RuSS = RuSS / sumCOEFF
+           RuPS = RuPS / sumCOEFF
          
-        r0 = rand()
-        IF (r0 <= abs(TuPS)) THEN
-          IF (TuPS < 0) a = -a
-!               if(t_last_count >995) WRITE(6,*) '-> TuPS'
-          ip = 1
-        ELSEIF ((r0 > abs(TuPS)).AND.(r0 <= abs(TuPS) + abs(RuSS))) THEN
-          IF (RuSS < 0) a = -a
-!               if(t_last_count >995) WRITE(6,*) '-> RuSS'
-          ud = -ud
-        ELSE
-          IF (RuPS < 0) a = -a
-!               if(t_last_count >995) WRITE(6,*) '-> RuPS'
-          ud = -ud
-          ip = 1
-        END iF  
+           r0 = rand()
+           IF (r0 <= abs(TuPS)) THEN
+             IF (TuPS < 0) a = -a
+             ip = 1
+           ELSEIF ((r0 > abs(TuPS)).AND.(r0 <= abs(TuPS) + abs(RuSS))) THEN
+             IF (RuSS < 0) a = -a
+             ud = -ud
+           ELSE
+             IF (RuPS < 0) a = -a
+             ud = -ud
+             ip = 1
+           END iF  
        
-      END IF  
+         END IF  
       
-
-
-     
+      ELSEIF (((vf(iz2,2) == 0).OR.(vf(iz2-1,2) == 0)).AND.(ip.eq.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
+        !Solid-Liquid Interface with SH waves
+        ud = -ud  !JFBGf
+        a = -a !based on Bostock BSSA 2012 paper where R = -1 for reflected wave at free surface
       
-      ELSE  !Solid-Solid Interface
-            last_RT = 2
+      ELSE                 !IF0
+        !Solid-Solid Interface
+        last_RT = 2
       
   
         IF ( (iz2 > 1).AND.(abs(irtr1) == 1).AND. &                        !IF1
               (iz2 < nlay-1) ) THEN
               
-          IF ((iz2 == 2).AND.(ud == -1)) THEN
+          IF ((iz2 == 2).AND.(ud == -1)) THEN                              !IF1.1 
           ! Skip INTERFACE_NORMAL BECAUSE PHONON IS AT SURFACE
-          ELSE
+          ELSE                                                             !IF1.1
               
-          h = z(iz2)-z(iz2-1)    
+          h = z(iz2)-z(iz2-1) 
+          
+          IF (h <= 0.) THEN                                                 !IF1.2
 
-          IF (ip  ==  3) THEN                                              !IF2a
-            IF ( (ud == 1) ) THEN               !IF downGOING SH WAVE      !IF3a
-              CALL REFTRAN_SH(p,vf(iz2-1,2),vf(iz2,2),rh(iz2-1),rh(iz2), &
+            IF (ip  ==  3) THEN                                              !IF2a
+              IF ( (ud == 1) ) THEN               !IF downGOING SH WAVE      !IF3a
+                CALL REFTRAN_SH(p,vf(iz2-1,2),vf(iz2,2),rh(iz2-1),rh(iz2), &
+                                ar,at)
+              ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE        !IF3a
+                CALL REFTRAN_SH(p,vf(iz2,2),vf(iz2-1,2),rh(iz2),rh(iz2-1), &
                            ar,at)
-            ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE        !IF3a
-              CALL REFTRAN_SH(p,vf(iz2,2),vf(iz2-1,2),rh(iz2),rh(iz2-1), &
-                           ar,at)
-
-            END IF                                                        !IF3a
-          ELSE                                                            !IF2a
-            IF ( (ud == 1) ) THEN               !IF downGOING P-SV WAVE    !IF3b
-              CALL RTCOEF2(p,vf(iz2-1,1),vf(iz2-1,2),rh(iz2-1), &
+              END IF                                                         !IF3a
+            ELSE                                                             !IF2a
+              IF ( (ud == 1) ) THEN               !IF downGOING P-SV WAVE    !IF3b
+                CALL RTCOEF2(p,vf(iz2-1,1),vf(iz2-1,2),rh(iz2-1), &
                              vf(iz2  ,1),vf(iz2  ,2),rh(iz2), &
-                          ip,arp,ars,atp,ats)
-            ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE      !IF3b
-              CALL RTCOEF2(p,vf(iz2  ,1),vf(iz2  ,2),rh(iz2  ), &
+                            ip,arp,ars,atp,ats)
+              ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE      !IF3b
+                CALL RTCOEF2(p,vf(iz2  ,1),vf(iz2  ,2),rh(iz2  ), &
                              vf(iz2-1,1),vf(iz2-1,2),rh(iz2-1), &
-                          ip,arp,ars,atp,ats)             
-            END IF                                                        !IF3b
-          END IF                                                          !IF2a
+                            ip,arp,ars,atp,ats)             
+              END IF                                                        !IF3b
+            END IF                                                          !IF2a
           
-          
-          r0 = rand()                       !RANDOM NUMBER FROM 0 TO 1
+            r0 = rand()                       !RANDOM NUMBER FROM 0 TO 1
 
+            IF (ip  ==  3) THEN                   !IF SH-WAVE                !IF2b
 
-          IF (ip  ==  3) THEN                   !IF SH-WAVE                !IF2b
-
-            IF (h > 0.) THEN                    !IF GRADIENT, THEN        !IF3c
-!              IF (r0 < (abs(ar)/(abs(ar)+abs(at)))/P0**2) THEN!CHECK FOR REFLECTN !IF4a
+              IF (h > 0.) THEN                    !IF GRADIENT, THEN        !IF3c
+!               IF (r0 < (abs(ar)/(abs(ar)+abs(at)))/P0**2) THEN!CHECK FOR REFLECTN !IF4a
 !                 IF (ar < 0) a = -a                !OPPOSITE POLARITY
-!                ud = -ud                           !downGOING/UPGOING
-!              END IF                              !                        !IF4a
-            ELSE                                 !IF INTERFACE THEN        !IF3c
-              IF (r0 < (abs(ar)/(abs(ar)+abs(at)))) THEN!CHECK FOR REFLECTION  !IF4b
-                IF (ar < 0) a = -a                !OPPOSITE POLARITY
-                ud = -ud                           !downGOING/UPGOING
-              END IF                              !                            !IF4b
-            END IF                               !                        !IF3c
+!                 ud = -ud                           !downGOING/UPGOING
+!               END IF                              !                        !IF4a
+              ELSE                                 !IF INTERFACE THEN        !IF3c
+                IF (r0 < (abs(ar)/(abs(ar)+abs(at)))) THEN!CHECK FOR REFLECTION  !IF4b
+                  IF (ar < 0) a = -a                !OPPOSITE POLARITY
+                  ud = -ud                           !downGOING/UPGOING
+                END IF                              !                            !IF4b
+              END IF                               !                        !IF3c
 
-          ELSE                                  !IF P- OR SV-WAVE         !IF2b
-            IF (h <= 0.) THEN                                              !IF3d
+            ELSE                                  !IF P- OR SV-WAVE         !IF2b
+              IF (h <= 0.) THEN                                              !IF3d
                               
-              rt_sum = abs(arp)+abs(atp)+abs(ars)+abs(ats)    !SUM OF REFL/TRAN COEFS
-              
-              rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
-              rt_max = abs(arp)/rt_sum             !
-              IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED P !IF4c
-                IF (arp < 0) a = -a                 !REVERSE POLARITY
-                ud = -ud                            !UPGOING <-> downGOING
-                ip = 1                              !P WAVE      
-              END IF                               !                            !IF4c
-           
+                rt_sum = abs(arp)+abs(atp)+abs(ars)+abs(ats)    !SUM OF REFL/TRAN COEFS
+                rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
+                rt_max = abs(arp)/rt_sum             !
+                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED P !IF4c
+                  IF (arp < 0) a = -a                 !REVERSE POLARITY
+                  ud = -ud                            !UPGOING <-> downGOING
+                  ip = 1                              !P WAVE      
+                END IF                               !                            !IF4c
 
-              rt_min = rt_max                      !RANGE PROBABILITIES 4 SV REFL
-              rt_max = rt_max+abs(ars)/rt_sum      !
-              IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED SV  !IF4d
-                IF (ars < 0) a = -a                 !REVERSE POLARITY
-                ud = -ud                            !UPGOING <-> downGOING
-                ip = 2                              !SV WAVE
-              END IF                               !                              !IF4d
+                rt_min = rt_max                      !RANGE PROBABILITIES 4 SV REFL
+                rt_max = rt_max+abs(ars)/rt_sum      !
+                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED SV  !IF4d
+                  IF (ars < 0) a = -a                 !REVERSE POLARITY
+                  ud = -ud                            !UPGOING <-> downGOING
+                  ip = 2                              !SV WAVE
+                END IF                               !                              !IF4d
 
-              rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
-              rt_max = rt_max+abs(atp)/rt_sum      !
-              IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRAMSITTED P  !IF4e
-                ip = 1                              !P WAVE
-              END IF                               !                              !IF4e
+                rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
+                rt_max = rt_max+abs(atp)/rt_sum      !
+                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRAMSITTED P  !IF4e
+                  ip = 1                              !P WAVE
+                END IF                               !                              !IF4e
 
-              rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
-              rt_max = rt_max+abs(ats)/rt_sum      !
-              IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV !IF4f
-                ip = 2                              !SV WAVE
-              END IF                               !                                !IF4f
-            END IF                                                          !IF3d
-          END IF                                !END IF: SH, OR P-SV        !IF2b
-         
-         END IF
+                rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
+                rt_max = rt_max+abs(ats)/rt_sum      !
+                IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV !IF4f
+                  ip = 2                              !SV WAVE
+                END IF                               !                                !IF4f
+              END IF                                                          !IF3d
+            END IF                                !END IF: SH, OR P-SV        !IF2b
+          END IF  !IF1.2
+          END IF  !IF1.1
+        
         ELSE IF (iz2 == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE  !IF1
           ud = -ud
           dt1 = (2*corelayer)/vf(iz2,iwave)
@@ -2100,19 +2087,10 @@ SUBROUTINE INTERFACE_NORMAL
         iwave = ip
         IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
         
-        END IF
+      END IF    !IF0
         
-!        IF ((init_ud == 1).AND.(ud == -1)) iz = iz - 1
-!        IF ((init_ud == -1).AND.(ud == 1)) iz = iz + 1
-
-      
-!        IF (t_last_count > 995) WRITE(6,*) t_last_count,I,NITR,iz,REAL(dt1,4),irtr1,ud,h!, &
-!            real(arp,4),real(atp,4),real(ars,4),real(ats,4)
-        
-!       WRITE(6,*) '-> ',I, NITR,iz,iz2,ud,ip        
-!       WRITE(6,*) '-> '
-!       WRITE(6,*) '----------------------------------------------' 
-      
+!      IF (t_last_count > 995) WRITE(6,*) I,NITR,ip,iz,REAL(dt1,4),irtr1,ud,h,z(iz2),z(iz2-1)!, &
+       
       RETURN  
 END SUBROUTINE INTERFACE_NORMAL
 
@@ -2151,7 +2129,7 @@ SUBROUTINE SURFACE_PSV
       SS = ( (1/velS**2-2*p**2)**2 - 4*p**2*cosi/velP*cosj/velS)   &
          /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
          
-!      write(6,*) I,'AKI  ',PP,PS,SP,SS
+!      WRITE(6,*) I,'AKI  ',PP,PS,SP,SS
          
          
       r0 = rand()
@@ -2167,7 +2145,7 @@ SUBROUTINE SURFACE_PSV
            ip = 2
            IF (PS < 1) a = -a
          END IF
-!         write(6,*)       ip_init,ip,nPP,nPS,r0
+!         WRITE(6,*)       ip_init,ip,nPP,nPS,r0
       ELSEIF (ip == 2) THEN         ! IF SV-INCIDENT
          totc = abs(SP) + abs(SS)
          nSP = abs(SP) / totc
@@ -2179,7 +2157,7 @@ SUBROUTINE SURFACE_PSV
            ip = 2
            IF (SS < 1 ) a = -a
          END IF
-!         write(6,*)       ip_init,ip,nSP,nSS,r0
+!         WRITE(6,*)       ip_init,ip,nSP,nSS,r0
       END IF
       
       iwave = ip
@@ -2921,7 +2899,7 @@ END SUBROUTINE UNIT_VECTOR_3
 !!   b2_mag = (1.-DOT_PRODUCT_3(b2,b2))**0.5
 !!   
 !!   do jj = 1, 3
-!!!    write(6,*) 'DING',b2_mag
+!!!    WRITE(6,*) 'DING',b2_mag
 !!!    a2(jj) = - b2_mag*n1(jj)*float(itr)
 !!    a2(jj) =  b2_mag*n1(jj)   !*float(itr) reflection is not -1*(vector), depends on n1
 !!    ta2(jj) = b2(jj) + a2(jj)
@@ -2934,12 +2912,12 @@ END SUBROUTINE UNIT_VECTOR_3
 !!     END DO
 !!   END IF  
 !!   
-!!!   write(6,*) 'A1:',a1(1:3)
-!!!   write(6,*) 'B1:',b1(1:3)
-!!!   write(6,*) 'A2:',a2(1:3)
-!!!   write(6,*) 'B2:',b2(1:3)
+!!!   WRITE(6,*) 'A1:',a1(1:3)
+!!!   WRITE(6,*) 'B1:',b1(1:3)
+!!!   WRITE(6,*) 'A2:',a2(1:3)
+!!!   WRITE(6,*) 'B2:',b2(1:3)
 !!!   
-!!!   write(6,*) '|ta2|:',(dot_product(ta2,ta2))**0.5
+!!!   WRITE(6,*) '|ta2|:',(dot_product(ta2,ta2))**0.5
 !   
 !   RETURN
 !END SUBROUTINE REF_TRAN_RAY
