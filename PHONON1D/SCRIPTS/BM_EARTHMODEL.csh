@@ -42,7 +42,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 cd SRC
-make trackglobal_FlatRho_isoE.x
+make statsyn_VPREM.x
 cd ..
 
 
@@ -105,7 +105,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsyn_global_isoE << EOF"                              >  $file_csh
+echo "./bin/statsyn_VPREM << EOF"                              >  $file_csh
 echo "./MODELS/$model_name"				>> $file_csh
 #echo "1"                                                    >> $file_csh
 echo "$ray_par          \!LIMIT THE RAY PARAMETER"          >> $file_csh
