@@ -125,7 +125,7 @@ MODULE PHO_VARS      ! Make variables global
 
         !IF SprCrtcl > 1, then drop energy
         INTEGER       SprCrtcl, SprCrtcl_count
-        REAL(8)       SprCrtcl_time,SprCrtcl_time
+        REAL(8)       SprCrtcl_time
         
         ! SYSTEM + DEBUG
         INTEGER        status                !I/O ERROR (0=no READ error)
