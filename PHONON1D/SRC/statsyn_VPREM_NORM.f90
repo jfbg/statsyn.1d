@@ -48,8 +48,8 @@ PROGRAM STATSYN_GLOBALSCAT
         REAL          mt(nst0)               !SOURCE-TIME FUNCTION 
         COMPLEX       ms(nst0)               !SOURCE
         REAL          dt4
-        INTEGER       SourceTYPE              
-        
+        INTEGER       SourceTYPE   
+         
         
         ! DEBUGGING
         CHARACTER*100 :: debugfile,logEND
@@ -81,6 +81,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*    SourcePartitioning (1:10:10)'
       WRITE(*,*) '*    Sine source function'
       WRITE(*,*) '*    Circular radiation pattern'
+      WRITE(*,*) '*    NORM IS USED FOR COEFFs and supercritical phonons are dropped'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
@@ -413,7 +414,9 @@ PROGRAM STATSYN_GLOBALSCAT
       surfcount = 0.
       CALL etime(elapsed,ttimestart)
       
-      
+      !Set Supercritical phonons count:
+      SprCrtcl_count = 0
+      SprCrtcl_time = 0.
       
       DO I = 1, ntr   !FOR EACH TRACE -- DOLOOP_001
       
@@ -516,6 +519,10 @@ PROGRAM STATSYN_GLOBALSCAT
         scat_time = 0
         ! ============ <<       
 
+        ! ============ >>
+        ! Set SprCrtcl
+        SprCrtcl = 0
+        ! ============ <<    
 
        
        ! ====================== >>
@@ -523,7 +530,7 @@ PROGRAM STATSYN_GLOBALSCAT
        ! ====================== >>
        
        
-       DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
+       DO WHILE ((t < t2).AND.(NITR < 200*nlay).AND.(SprCrtcl.ne.1)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
        
        CALL etime(elapsed,tt2)
        !WRITE(6,*) '       Params:',tt2-tt1,I
@@ -838,7 +845,13 @@ PROGRAM STATSYN_GLOBALSCAT
         ! ============ <<
 
         !GO TO NEXT LAYER
-        iz = iz + ud  
+        iz = iz + ud 
+        IF (p*vf(iz-1,iwave) > 1) THEN
+          SprCrtcl = 1   !If phonon is now supercritical, drop it.
+          SprCrtcl_count = SprCrtcl_count + 1
+          SprCrtcl_time = SprCrtcl_time + t
+        END IF
+         
         
        !Check if time increased since last loop  -- Some phonon gets stuck and I'm not sure why yet...
        IF (t_last == t) THEN
@@ -907,8 +920,10 @@ PROGRAM STATSYN_GLOBALSCAT
 871   FORMAT ('Total time = ',f9.2,'s for ',i8,' phonons (',f7.5,'s/p)')  
       WRITE(6,*) 'Total Surface records = ', surfcount
       WRITE(6,*) 'Too far from receiver = ', surCYC1      
-      WRITE(6,*) 'Scattered:',  conv_count(1:6)
-      WRITE(6,*) 'Dead stuck:', tstuck    
+      WRITE(6,*) '            Scattered = ',  conv_count(1:6)
+      WRITE(6,*) '           Dead stuck = ', tstuck    
+      WRITE(6,*) 'Supercritical Phonons = ', SprCrtcl_count  
+      WRITE(6,*) '    Avg Sprcrtcl Time = ', SprCrtcl_time / REAL(SprCrtcl_count,8)    
 
 
     
@@ -1176,11 +1191,14 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
         car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
         cat   = ctwo*rho1*vb1*cj1/DD
         
-        ar = REAL(car)
-        at = REAL(cat)
-        
+!        ar = REAL(car)
+!        at = REAL(cat)
+         !USE NORM
+         at = (REAL(car)**2 + IMAG(car)**2)**0.5
+         ar = (REAL(cat)**2 + IMAG(car)**2)**0.5
+                 
         !Check for total internal reflection !fix
-        IF (b2*p > 1) at = 0
+!        IF (b2*p > 1) at = 0
 
       END IF
       
@@ -1289,24 +1307,27 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
        ats    = ctwo*rho1*cj1*E/(vb2*DEN)         !trans down S to S down
       END IF
       
-      rrp = REAL(arp)!**2+imag(arp)**2)**0.5
-      rrs = REAL(ars)!**2+imag(ars)**2)**0.5
-      rtp = REAL(atp)!**2+imag(atp)**2)**0.5
-      rts = REAL(ats)!**2+imag(ats)**2)**0.5
+!      rrp = REAL(arp)!**2+imag(arp)**2)**0.5
+!      rrs = REAL(ars)!**2+imag(ars)**2)**0.5
+!      rtp = REAL(atp)!**2+imag(atp)**2)**0.5
+!      rts = REAL(ats)!**2+imag(ats)**2)**0.5
+!! Check for total internal reflection     !fix
+!      IF (vp2*pin > 1) THEN
+!        rtp = 0
+!!        WRITE(77,*) 'YEP vp2',vp2,pin
+!      END IF
+!      IF (vs2*pin > 1) rts = 0
+!      IF (vp1*pin > 1) THEN
+!        rrp = 0
+!!        WRITE(77,*) 'YEP vp1',vp1,pin
+!      END IF
+!      IF (vs1*pin > 1) rrs = 0
       
-      ! Check for total internal reflection     !fix
-      IF (vp2*pin > 1) THEN
-        rtp = 0
-!        WRITE(77,*) 'YEP vp2',vp2,pin
-      END IF
-      IF (vs2*pin > 1) rts = 0
-      IF (vp1*pin > 1) THEN
-        rrp = 0
-!        WRITE(77,*) 'YEP vp1',vp1,pin
-      END IF
-      IF (vs1*pin > 1) rrs = 0
-      
-
+      !USE NORM
+      rrp = (REAL(arp)**2+imag(arp)**2)**0.5
+      rrs = (REAL(ars)**2+imag(ars)**2)**0.5
+      rtp = (REAL(atp)**2+imag(atp)**2)**0.5
+      rts = (REAL(ats)**2+imag(ats)**2)**0.5
       
       RETURN
 END SUBROUTINE RTCOEF2
@@ -1402,9 +1423,13 @@ SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, R
           
      dum = matmul(dum,tdum)
 
-     TdPP=REAL(dum(1,1));
-     TdSP=REAL(dum(2,1));
-     RdPP=REAL(dum(3,1));
+!     TdPP=REAL(dum(1,1));
+!     TdSP=REAL(dum(2,1));
+!     RdPP=REAL(dum(3,1));
+     TdPP=(REAL(dum(1,1))**2+IMAG(dum(1,1)))**0.5
+     TdSP=(REAL(dum(2,1))**2+IMAG(dum(2,1)))**0.5
+     RdPP=(REAL(dum(3,1))**2+IMAG(dum(3,1)))**0.5
+     
      
      ! P-incidence from below.
      dum(1,:) = [CMPLX(0.),L(1,1),L(1,2)]
@@ -1414,10 +1439,13 @@ SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, R
      tdum(:,1) =  [-L(1,3),-L(2,3),-L(3,3)]
      dum = matmul(dum,tdum)
           
-     TuPP=REAL(dum(1,1));
-     RuPP=REAL(dum(2,1));
-     RuSP=REAL(dum(3,1));
-     
+!     TuPP=REAL(dum(1,1));
+!     RuPP=REAL(dum(2,1));
+!     RuSP=REAL(dum(3,1));
+     TuPP=(REAL(dum(1,1))**2+IMAG(dum(1,1)))**0.5
+     RuPP=(REAL(dum(2,1))**2+IMAG(dum(2,1)))**0.5
+     RuSP=(REAL(dum(3,1))**2+IMAG(dum(3,1)))**0.5
+
      ! S-incidence from below.
      dum(1,:) = [CMPLX(0.),L(1,1),L(1,2)]
      dum(2,:) = [CMPLX(-1.),L(2,1),L(2,2)]
@@ -1427,24 +1455,27 @@ SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, R
      tdum(:,1) =  [-L(1,4),-L(2,4),-L(3,4)]
      dum = matmul(dum,tdum)
 
-     TuPS=REAL(dum(1,1));
-     RuPS=REAL(dum(2,1));
-     RuSS=REAL(dum(3,1));
+!     TuPS=REAL(dum(1,1));
+!     RuPS=REAL(dum(2,1));
+!     RuSS=REAL(dum(3,1));
+     TuPS=(REAL(dum(1,1))**2+IMAG(dum(1,1)))**0.5
+     RuPS=(REAL(dum(2,1))**2+IMAG(dum(2,1)))**0.5
+     RuSS=(REAL(dum(3,1))**2+IMAG(dum(3,1)))**0.5
      
      !DEAL WITH CRITICAL ANGLE
      ! EVANESCENT WAVES ARE IGNORED...
      !IF COMMENT THIS, COEFFICIENTS ARE SAME AS WHEN USING MBOSTOCK CODE
      ! EXCEPT THAT WE END UP WITH PROBLEMS WHEN THESE ARE GREATER THAN 1
-     IF (rc*rp > 1) THEN
-        TuPS = 0
-        TuPP = 0
-     END IF
-     IF (rb*rp > 1) TdSP = 0
-     IF (ra*rp > 1) THEN
-        TdPP = 0.
-        TdSP = 0.
-        RuPS = 0.
-     END IF
+!     IF (rc*rp > 1) THEN
+!        TuPS = 0
+!        TuPP = 0
+!     END IF
+!     IF (rb*rp > 1) TdSP = 0
+!     IF (ra*rp > 1) THEN
+!        TdPP = 0.
+!        TdSP = 0.
+!        RuPS = 0.
+!     END IF
      
      !DEBUG
 !     WRITE(6,*) '!!!!!'
@@ -1456,6 +1487,86 @@ SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, R
      
      RETURN
 END SUBROUTINE RTFLUID
+
+SUBROUTINE SURFACE_PSV
+
+! Calculate P-SV reflection coefficients at free surface based on AKI&RICHARDS
+
+      USE pho_vars
+      IMPLICIT NONE
+      
+      REAL(8)       velP,velS,angP,angS,cosi,cosj
+      INTEGER       ip_init
+      COMPLEX(8)    cPP,cPS,cSP,cSS
+      REAL(8)       PP,PS,SP,SS
+      REAL(8)       nPP,nPS,nSP,nSS
+      REAL(8)       totc
+      
+
+      ip_init = ip
+      
+      velP = vf(1,1)
+      velS = vf(1,2)
+      angP = asin(p*velP)
+      angS = asin(p*velS) 
+      cosi = cos(angP)
+      cosj = cos(angS)
+      
+      cPP = (-(1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)   &
+         /  ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
+      
+      cPS =  (4*velP/velS*p*cosi/velP*(1/velS**2-2*p**2))   &
+         /  ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
+      
+      cSP =  (4*velS/velP*p*cosj/velS*(1/velS**2-2*p**2))   &
+         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS) 
+      
+      cSS = ( (1/velS**2-2*p**2)**2 - 4*p**2*cosi/velP*cosj/velS)   &
+         /  ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
+         
+      PP = (REAL(cPP)**2+IMAG(cPP)**2)**0.5
+      PS = (REAL(cPS)**2+IMAG(cPS)**2)**0.5
+      SP = (REAL(cSP)**2+IMAG(cSP)**2)**0.5
+      SS = (REAL(cSS)**2+IMAG(cSS)**2)**0.5   
+         
+!      WRITE(6,*) I,'AKI  ',PP,PS,SP,SS
+			
+			!S to P can lead to supercritical values in P.
+!			IF (p*velP > 1) THEN
+!          SP = 0.
+!      END IF
+         
+         
+      r0 = rand()
+      
+      IF (ip == 1) THEN             ! IF P-INCIDENT
+         totc = abs(PP) + abs(PS)
+         nPP = abs(PP) / totc
+         nPS = abs(PS) / totc
+         IF (r0 < nPP) THEN
+           ip = 1
+           IF (PP < 1) a = -a
+         ELSE
+           ip = 2
+           IF (PS < 1) a = -a
+         END IF
+!         WRITE(6,*)       ip_init,ip,nPP,nPS,r0
+      ELSEIF (ip == 2) THEN         ! IF SV-INCIDENT
+         totc = abs(SP) + abs(SS)
+         nSP = abs(SP) / totc
+         nSS = abs(SS) / totc
+         IF (r0 < nSP) THEN
+           ip = 1
+           IF (SP < 1 ) a = -a
+         ELSE
+           ip = 2
+           IF (SS < 1 ) a = -a
+         END IF
+!         WRITE(6,*)       ip_init,ip,nSP,nSS,r0
+      END IF
+      
+      iwave = ip
+END SUBROUTINE SURFACE_PSV
 
 
 SUBROUTINE FLATTEN(z_s,vs,rhs,z_f,vf_f,rh_f,erad)
@@ -2093,80 +2204,6 @@ SUBROUTINE INTERFACE_NORMAL
        
       RETURN  
 END SUBROUTINE INTERFACE_NORMAL
-
-SUBROUTINE SURFACE_PSV
-
-! Calculate P-SV reflection coefficients at free surface based on AKI&RICHARDS
-
-      USE pho_vars
-      IMPLICIT NONE
-      
-      REAL(8)    velP,velS,angP,angS,cosi,cosj
-      INTEGER    ip_init
-      REAL(8)    PP,PS,SP,SS
-      REAL(8)    nPP,nPS,nSP,nSS
-      REAL(8)    totc
-      
-
-      ip_init = ip
-      
-      velP = vf(1,1)
-      velS = vf(1,2)
-      angP = asin(p*velP)
-      angS = asin(p*velS) 
-      cosi = cos(angP)
-      cosj = cos(angS)
-      
-      PP = (-(1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)   &
-         /  ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
-      
-      PS =  (4*velP/velS*p*cosi/velP*(1/velS**2-2*p**2))   &
-         /  ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
-      
-      SP =  (4*velS/velP*p*cosj/velS*(1/velS**2-2*p**2))   &
-         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS) 
-      
-      SS = ( (1/velS**2-2*p**2)**2 - 4*p**2*cosi/velP*cosj/velS)   &
-         /  ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
-         
-!      WRITE(6,*) I,'AKI  ',PP,PS,SP,SS
-			
-			!S to P can lead to supercritical values in P.
-			IF (p*velP > 1) THEN
-          SP = 0.
-      END
-         
-         
-      r0 = rand()
-      
-      IF (ip == 1) THEN             ! IF P-INCIDENT
-         totc = abs(PP) + abs(PS)
-         nPP = abs(PP) / totc
-         nPS = abs(PS) / totc
-         IF (r0 < nPP) THEN
-           ip = 1
-           IF (PP < 1) a = -a
-         ELSE
-           ip = 2
-           IF (PS < 1) a = -a
-         END IF
-!         WRITE(6,*)       ip_init,ip,nPP,nPS,r0
-      ELSEIF (ip == 2) THEN         ! IF SV-INCIDENT
-         totc = abs(SP) + abs(SS)
-         nSP = abs(SP) / totc
-         nSS = abs(SS) / totc
-         IF (r0 < nSP) THEN
-           ip = 1
-           IF (SP < 1 ) a = -a
-         ELSE
-           ip = 2
-           IF (SS < 1 ) a = -a
-         END IF
-!         WRITE(6,*)       ip_init,ip,nSP,nSS,r0
-      END IF
-      
-      iwave = ip
-END SUBROUTINE SURFACE_PSV
 
 !SUBROUTINE INLAYER_SCATTER
 !      
@@ -3047,3 +3084,21 @@ SUBROUTINE GAUSS (a,n)       ! Invert matrix by Gauss method
 END SUBROUTINE GAUSS
 
 
+! --------------------------------------------------------------------
+SUBROUTINE CNORM(cn,n)
+!  Norm of complex number (cn). n = (imag(cn)**2 + real(cn)**2)**.5
+! --------------------------------------------------------------------
+
+      REAL(8)       n
+      COMPLEX(8)    cn
+      
+      n = (imag(cn)**2 + real(cn)**2)**.5
+      
+      RETURN
+END SUBROUTINE CNORM
+      
+      
+      
+      
+      
+      
