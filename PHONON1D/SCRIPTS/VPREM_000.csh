@@ -10,30 +10,29 @@ set ray_par    = "0.0 0.1668 0.2931"
 @ t_max        = 5400			# 75 minutes
 set d_range    = "0 180 91"
 set model      = "2"	#2 for Moon
-set mx_scat_dp = "10"
+set mx_scat_dp = "0"
 set n_phonon   = "10000000"
-
-
-# SCATTERING
-set bg_scat    = 0.001
-set prob_scat  = 0.5
-set dsmin      = 0.05   # Min scaterrer length scale
-set dsmax      = 10     # Max scaterrer length scale
-set npow       = -0.5   # Power law factor for scatterer lengthscale
-set velperturb = 0.6
-
-# Source attenuation and type
-set dQdfstyle  = 1
 set sourcetype = "2"    #(2 is sine)
 
+# SCATTERING
+set bg_scat    = 0.00
+set prob_scat  = 0.00
+set dsmin      = 5.   # Min scaterrer length scale
+set dsmax      = 5.     # Max scaterrer length scale
+set npow       = -0.5   # Power law factor for scatterer lengthscale
+set velperturb = 0.
 
-set file_out   = "VPREM_nVL_001"
-set model_name = "VPREMOON_Qp_novlvl_10km"
+# Source attenuation
+set dQdfstyle  = 1
+
+
+set file_out   = "VPREM_000"
+set model_name = "VPREMOON_Qp_ori_10km"
 
 @ n_depth = 3     ## Number of depths to use
 @ n_freq  = 2     ## Number of frequency bands (40s and 6.66666s)
 @ n_kern  = 6     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 4    ## Number of iterations
+@ n_iter  = 2    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"

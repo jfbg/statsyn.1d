@@ -15,7 +15,7 @@ set n_phonon   = "10000000"
 
 
 # SCATTERING
-set bg_scat    = 0.001
+set bg_scat    = 0.0
 set prob_scat  = 0.5
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
@@ -27,7 +27,7 @@ set dQdfstyle  = 1
 set sourcetype = "2"    #(2 is sine)
 
 
-set file_out   = "VPREM_nVL_001"
+set file_out   = "VPREM_nVL_005"
 set model_name = "VPREMOON_Qp_novlvl_10km"
 
 @ n_depth = 3     ## Number of depths to use
