@@ -2129,7 +2129,7 @@ SUBROUTINE SURFACE_PSV
 			!S to P can lead to supercritical values in P.
 			IF (p*velP > 1) THEN
           SP = 0.
-      END
+      END IF
          
          
       r0 = rand()
