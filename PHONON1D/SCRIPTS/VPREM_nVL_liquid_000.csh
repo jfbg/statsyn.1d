@@ -27,7 +27,7 @@ set dQdfstyle  = 1
 
 
 set file_out   = "VPREM_nVL_liquid_000"
-set model_name = "VPREMOON_novlvl_liquid_10km"
+set model_name = "VPREMOON_Qp_novlvl_liquid_10km"
 
 @ n_depth = 3     ## Number of depths to use
 @ n_freq  = 2     ## Number of frequency bands (40s and 6.66666s)

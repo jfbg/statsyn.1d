@@ -1992,7 +1992,7 @@ SUBROUTINE INTERFACE_NORMAL
           ! Skip INTERFACE_NORMAL BECAUSE PHONON IS AT SURFACE
           ELSE                                                             !IF1.1
               
-          h = z(iz2)-z(iz2-1) 
+!          h = z(iz2)-z(iz2-1) !Calculate at beginning of subroutine
           
           IF (h <= 0.) THEN                                                 !IF1.2
 
