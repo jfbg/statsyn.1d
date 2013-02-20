@@ -1295,16 +1295,10 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       rts = REAL(ats)!**2+imag(ats)**2)**0.5
       
       ! Check for total internal reflection     !fix
-      IF (vp2*pin > 1) THEN
-        rtp = 0
-!        WRITE(77,*) 'YEP vp2',vp2,pin
-      END IF
-      IF (vs2*pin > 1) rts = 0
-      IF (vp1*pin > 1) THEN
-        rrp = 0
-!        WRITE(77,*) 'YEP vp1',vp1,pin
-      END IF
-      IF (vs1*pin > 1) rrs = 0
+      IF (vp2*pin > 1) rtp = 0.
+      IF (vs2*pin > 1) rts = 0.
+      IF (vp1*pin > 1) rrp = 0.
+      IF (vs1*pin > 1) rrs = 0.
       
 
       
@@ -1979,11 +1973,12 @@ SUBROUTINE INTERFACE_NORMAL
            END iF  
        
          END IF  
-      
+         
+     
       ELSEIF (((vf(iz2,2) == 0).OR.(vf(iz2-1,2) == 0)).AND.(ip.eq.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
         !Solid-Liquid Interface with SH waves
         ud = -ud  !JFBGf
-        a = -a !based on Bostock BSSA 2012 paper where R = -1 for reflected wave at free surface
+!       a = -a !based on Bostock BSSA 2012 paper where R = -1 for reflected wave at free surface
       
       ELSE                 !IF0
         !Solid-Solid Interface

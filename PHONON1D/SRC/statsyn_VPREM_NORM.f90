@@ -1187,7 +1187,7 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
         cj1    = csqrt(cone-sj1**2)
         cj2    = csqrt(cone-sj2**2)  
         
-        DD   = rho1*vb1*cj1+rho2*vb2*cj2
+        DD    = rho1*vb1*cj1+rho2*vb2*cj2
         car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
         cat   = ctwo*rho1*vb1*cj1/DD
         
@@ -1218,7 +1218,7 @@ END SUBROUTINE REFTRAN_SH
 !             vs2     =  S-wave velocity of layer 2
 !             den2    =  density of layer 2
 !             pin     =  horizontal slowness (ray PARAMETER)
-!             PorS    =  1=P-WAVE, 3=SV-WAVE
+!             PorS    =  1=P-WAVE, 2=SV-WAVE
 !  Returns:   rrp     =  down P to P up     (refl)
 !  (REAL)     rrs     =  down P to S up     (refl)
 !             rtp     =  down P to P down   (tran)
