@@ -77,6 +77,12 @@ else
  set q_depth = 0.01
 endif
 
+if ($i == 1) then
+ if ($l == 1) then
+   continue
+ endif
+endif
+
 echo "Depth=:" $q_depth
 
 ##
