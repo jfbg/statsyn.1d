@@ -75,7 +75,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
       WRITE(*,*) '*'
-      WRITE(*,*) '*    Customized for the VPREM_* runs'
+      WRITE(*,*) '*    USING BEN-MENHAMEN!!!'
       WRITE(*,*) '*'
       WRITE(*,*) '*    FLAT RHO (p = -2 in FLATTEN)'
       WRITE(*,*) '*    SourcePartitioning (1:10:10)'
