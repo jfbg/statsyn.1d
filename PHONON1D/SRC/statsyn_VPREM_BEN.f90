@@ -830,7 +830,7 @@ PROGRAM STATSYN_GLOBALSCAT
           END IF
 
           !IF P or SV wave, check for P-SV reflection
-          IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV
+          IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
                   
         END IF
 
@@ -1129,79 +1129,79 @@ SUBROUTINE PADR(f1,n1,n2)
       RETURN
 END SUBROUTINE padr                            !END PADR
       
- SUBROUTINE SURFACE_PSV
-
-! Calculate P-SV reflection coefficients at free surface based on AKI&RICHARDS
-
-      USE pho_vars
-      IMPLICIT NONE
-      
-      REAL(8)    velP,velS,angP,angS,cosi,cosj
-      INTEGER    ip_init
-      REAL(8)    PP,PS,SP,SS
-      REAL(8)    nPP,nPS,nSP,nSS
-      REAL(8)    totc
-      
-
-      ip_init = ip
-      
-      velP = vf(1,1)
-      velS = vf(1,2)
-      angP = asin(p*velP)
-      angS = asin(p*velS) 
-      cosi = cos(angP)
-      cosj = cos(angS)
-      
-      PP = (-(1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)   &
-         /  ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
-      
-      PS =  (4*velP/velS*p*cosi/velP*(1/velS**2-2*p**2))   &
-         /  ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
-      
-      SP =  (4*velS/velP*p*cosj/velS*(1/velS**2-2*p**2))   &
-         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS) 
-      
-      SS = ( (1/velS**2-2*p**2)**2 - 4*p**2*cosi/velP*cosj/velS)   &
-         /  ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
-         
-!      WRITE(6,*) I,'AKI  ',PP,PS,SP,SS
-			
-			!S to P can lead to supercritical values in P.
-			IF (p*velP > 1) THEN
-          SP = 0.
-      END IF
-         
-         
-      r0 = rand()
-      
-      IF (ip == 1) THEN             ! IF P-INCIDENT
-         totc = abs(PP) + abs(PS)
-         nPP = abs(PP) / totc
-         nPS = abs(PS) / totc
-         IF (r0 < nPP) THEN
-           ip = 1
-           IF (PP < 1) a = -a
-         ELSE
-           ip = 2
-           IF (PS < 1) a = -a
-         END IF
-!         WRITE(6,*)       ip_init,ip,nPP,nPS,r0
-      ELSEIF (ip == 2) THEN         ! IF SV-INCIDENT
-         totc = abs(SP) + abs(SS)
-         nSP = abs(SP) / totc
-         nSS = abs(SS) / totc
-         IF (r0 < nSP) THEN
-           ip = 1
-           IF (SP < 1 ) a = -a
-         ELSE
-           ip = 2
-           IF (SS < 1 ) a = -a
-         END IF
-!         WRITE(6,*)       ip_init,ip,nSP,nSS,r0
-      END IF
-      
-      iwave = ip
-END SUBROUTINE SURFACE_PSV
+! SUBROUTINE SURFACE_PSV
+!
+!! Calculate P-SV reflection coefficients at free surface based on AKI&RICHARDS
+!
+!      USE pho_vars
+!      IMPLICIT NONE
+!      
+!      REAL(8)    velP,velS,angP,angS,cosi,cosj
+!      INTEGER    ip_init
+!      REAL(8)    PP,PS,SP,SS
+!      REAL(8)    nPP,nPS,nSP,nSS
+!      REAL(8)    totc
+!      
+!
+!      ip_init = ip
+!      
+!      velP = vf(1,1)
+!      velS = vf(1,2)
+!      angP = asin(p*velP)
+!      angS = asin(p*velS) 
+!      cosi = cos(angP)
+!      cosj = cos(angS)
+!      
+!      PP = (-(1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)   &
+!         /  ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
+!      
+!      PS =  (4*velP/velS*p*cosi/velP*(1/velS**2-2*p**2))   &
+!         /  ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
+!      
+!      SP =  (4*velS/velP*p*cosj/velS*(1/velS**2-2*p**2))   &
+!         /   ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS) 
+!      
+!      SS = ( (1/velS**2-2*p**2)**2 - 4*p**2*cosi/velP*cosj/velS)   &
+!         /  ((1/velS**2-2*p**2)**2 + 4*p**2*cosi/velP*cosj/velS)
+!         
+!!      WRITE(6,*) I,'AKI  ',PP,PS,SP,SS
+!			
+!			!S to P can lead to supercritical values in P.
+!			IF (p*velP > 1) THEN
+!          SP = 0.
+!      END IF
+!         
+!         
+!      r0 = rand()
+!      
+!      IF (ip == 1) THEN             ! IF P-INCIDENT
+!         totc = abs(PP) + abs(PS)
+!         nPP = abs(PP) / totc
+!         nPS = abs(PS) / totc
+!         IF (r0 < nPP) THEN
+!           ip = 1
+!           IF (PP < 1) a = -a
+!         ELSE
+!           ip = 2
+!           IF (PS < 1) a = -a
+!         END IF
+!!         WRITE(6,*)       ip_init,ip,nPP,nPS,r0
+!      ELSEIF (ip == 2) THEN         ! IF SV-INCIDENT
+!         totc = abs(SP) + abs(SS)
+!         nSP = abs(SP) / totc
+!         nSS = abs(SS) / totc
+!         IF (r0 < nSP) THEN
+!           ip = 1
+!           IF (SP < 1 ) a = -a
+!         ELSE
+!           ip = 2
+!           IF (SS < 1 ) a = -a
+!         END IF
+!!         WRITE(6,*)       ip_init,ip,nSP,nSS,r0
+!      END IF
+!      
+!      iwave = ip
+!END SUBROUTINE SURFACE_PSV
 
 SUBROUTINE SURFACE_PSV_BEN
 
@@ -1212,16 +1212,17 @@ SUBROUTINE SURFACE_PSV_BEN
       
       COMPLEX(8)    velP,velS,angP,angS,D1
       INTEGER       ip_init
-      COMPLEX(8)    crP,crS,cp
+      COMPLEX(8)    crP,crS,cp,c0
       REAL(8)       rP,rS,nrP,nrS
       real(8)       totc
       
 
       ip_init = ip
       
-      velP = CMPLX(vf(1,1),0.)
-      velS = CMPLX(vf(1,2),0.)
+      velP = CMPLX(vs(1,1),0.)
+      velS = CMPLX(vs(1,2),0.)
       cp = CMPLX(p,0.)
+      c0 = CMPLX(0.,0.)
       
       angP = asin(cp*velP)
       angS = asin(cp*velS) 
@@ -1236,16 +1237,17 @@ SUBROUTINE SURFACE_PSV_BEN
        rP = (REAL(crP)**2 + IMAG(crP)**2)**0.5
        rS = (REAL(crS)**2 + IMAG(crS)**2)**0.5
        
-         totc = abs(rP) + abs(rS)
-         nrP = abs(rP) / totc
-         nrS = abs(rS) / totc
+!         totc = abs(rP) + abs(rS)
+         totc = rP**2 + sin(2*angS)/sin(2*angP)*rS**2
+         nrP = rP**2 / totc
+         nrS = sin(2*angS)/sin(2*angP)*rS**2 / totc
          r0 = rand()
-         IF (r0 < nrP) THEN
+         IF (r0 <= nrP) THEN
            ip = 1
-           IF (rP < 1) a = -a
+           IF (REAL(crP) < 0) a = -a
          ELSE
            ip = 2
-           IF (rS < 1) a = -a
+           IF (REAL(crS) < 0) a = -a
          END IF
 
       ELSEIF (ip.eq.2) THEN   ! S-incident
@@ -1253,20 +1255,21 @@ SUBROUTINE SURFACE_PSV_BEN
        crP = D1*((velS/velP)*sin(4*angS))
        crS = D1*((velS/velP)**2*sin(2*angP)*sin(2*angS)-(cos(2*angS))**2)
 
-       !Supercritical
-!       IF (p*velP > 1) rP = 0
        rP = (REAL(crP)**2 + IMAG(crP)**2)**0.5
        rS = (REAL(crS)**2 + IMAG(crS)**2)**0.5
+
+       !Supercritical
+       IF (p*vs(1,1) > 1) rP = 0
        
-         totc = abs(rP) + abs(rS)
-         nrP = abs(rP) / totc
-         nrS = abs(rS) / totc
-         IF (r0 < nrP) THEN
+         totc = sin(2*angP)/sin(2*angS)*rP**2 + rS**2
+         nrP = sin(2*angP)/sin(2*angS)*rP**2 / totc
+         nrS = rS**2 / totc
+         IF (r0 <= nrP) THEN
            ip = 1
-           IF (rP < 1 ) a = -a
+           IF (REAL(crP) < 0) a = -a
          ELSE
            ip = 2
-           IF (rS < 1 ) a = -a
+           IF (REAL(crS) < 0) a = -a
          END IF
        
       END IF      
@@ -1274,27 +1277,14 @@ SUBROUTINE SURFACE_PSV_BEN
       iwave = ip
 END SUBROUTINE SURFACE_PSV_BEN     
 
-SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
+SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp)
 ! p.139 of Aki and Richards 2nd edition
-      REAL(8)       p,ar,at
+      REAL(8)       p,ar,at,amp
       REAL(8)       pi,j1,j2,b1,b2,rh1,rh2
       COMPLEX       vb1,rho1,vb2,rho2,psub
-      COMPLEX       cone,ctwo,sj1,sj2,cj1,cj2
+      COMPLEX       cone,ctwo,sj1,sj2,cj1,cj2,c0
       COMPLEX       DD,car,cat
-        REAL        elapsed(2)
-        REAL        totaltimem,ttime1,ttime2
-!      pi   = atan(1.)*4.
-!      r2d = 180./pi
-!      IF (p*b1 <= 1.) THEN
-!       j1   = abs(asin(p*b1))
-!      ELSE
-!       j1 = pi/2.
-!      END IF
-!      IF (p*b2 <= 1.) THEN
-!       j2   = abs(asin(p*b2))
-!      ELSE
-!       j2   = pi/2. 
-!      END IF
+      INTEGER       ud
 
       IF (b2 <= 0) THEN  !Same as free surface if reflects on liquid layer
        ar = 1.
@@ -1309,6 +1299,7 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
         
         cone = cmplx(1,0)
         ctwo = cmplx(2,0)
+        c0   = cmplx(0.,0.)
         
         sj1    = vb1 * psub      
         sj2    = vb2 * psub       
@@ -1319,11 +1310,18 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at)
         car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
         cat   = ctwo*rho1*vb1*cj1/DD
         
-        ar = REAL(car)
-        at = REAL(cat)
+        ar = (REAL(car)**2 + IMAG(car)**2)**0.5
+        at = (REAL(cat)**2 + IMAG(cat)**2)**0.5
         
         !Check for total internal reflection !fix
         IF (b2*p > 1) at = 0
+
+
+        r0 = rand()        
+				IF (r0 < (ar**2/(ar**2+at**2))) THEN!CHECK FOR REFLECTION  !IF4b
+					IF (REAL(car) < 0.) amp = -amp                !OPPOSITE POLARITY
+					ud = -ud                           !DOWNGOING/UPGOING
+				END IF    
 
       END IF
       
@@ -1358,14 +1356,14 @@ END SUBROUTINE REFTRAN_SH
 !        Coefficients are not energy normalized.
 !
 SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
-                         rrp,rrs,rtp,rts)
+                         rrp,rrs,rtp,rts,ip,ud,amp)
       IMPLICIT     NONE
-      REAL(8)         vp1,vs1,den1,vp2,vs2,den2     !VELOCITY & DENSITY
+      REAL(8)      vp1,vs1,den1,vp2,vs2,den2     !VELOCITY & DENSITY
       INTEGER      pors                          !P (1) OR S (2)                          
       COMPLEX      a,b,c,d,e,f,g,H               !TEMPORARY VARIABLES
-      COMPLEX      cone,ctwo                     !COMPLEX  = 1 OR = 2
+      COMPLEX      cone,ctwo,c0                  !COMPLEX  = 1 OR = 2
       COMPLEX      va1,vb1,rho1,va2,vb2,rho2     !VELOCITY & DENSITY (COMPLEX)
-      REAL(8)         pin                           !INPUT SLOWNESS
+      REAL(8)      pin                           !INPUT SLOWNESS
       COMPLEX      psub                          !INPUT SLOWNESS (P OR S)
       COMPLEX      si1,si2,sj1,sj2               !SIN OF ANGLE
       COMPLEX      ci1,ci2,cj1,cj2               !COMPLEX SCRATCH
@@ -1373,9 +1371,9 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       COMPLEX      DEN                           !DENOMINATOR
       COMPLEX      trm1,trm2                     !COMPLEX SCRATCH
       COMPLEX      arp,ars,atp,ats               !REFLECTION & TRANSMISSION COEFS
-      REAL(8)         rrp,rrs,rtp,rts               !REFLECTION & TRANSMISSION COEFS
-         REAL        elapsed(2)
-        REAL        totaltimem,ttime1,ttime2
+      REAL(8)      rrp,rrs,rtp,rts               !REFLECTION & TRANSMISSION COEFS
+      INTEGER      ud,ip
+      REAL(8)      amp,r0,rt_max,rt_min,rt_sum
         
       
       va1    = cmplx(vp1,  0.)                   !MAKE VEL & DENSITY COMPLEX
@@ -1389,6 +1387,7 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       
       cone   = cmplx(1.,0.)                      !COMPLEX 1 & 2
       ctwo   = cmplx(2.,0.)
+      c0     = cmplx(0.,0.)
       
       si1    = va1 * psub                           !SIN OF ANGLE
       si2    = va2 * psub          
@@ -1431,10 +1430,10 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
        ats    = ctwo*rho1*cj1*E/(vb2*DEN)         !trans down S to S down
       END IF
       
-      rrp = REAL(arp)!**2+imag(arp)**2)**0.5
-      rrs = REAL(ars)!**2+imag(ars)**2)**0.5
-      rtp = REAL(atp)!**2+imag(atp)**2)**0.5
-      rts = REAL(ats)!**2+imag(ats)**2)**0.5
+      rrp = (REAL(arp)**2+imag(arp)**2)**0.5
+      rrs = (REAL(ars)**2+imag(ars)**2)**0.5
+      rtp = (REAL(atp)**2+imag(atp)**2)**0.5
+      rts = (REAL(ats)**2+imag(ats)**2)**0.5
       
       ! Check for total internal reflection     !fix
       IF (vp2*pin > 1) rtp = 0.
@@ -1442,8 +1441,43 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       IF (vp1*pin > 1) rrp = 0.
       IF (vs1*pin > 1) rrs = 0.
       
-
       
+      !Pick conversion
+       r0 = rand()      
+      
+			 rt_sum = rrp**2+rtp**2+ars**2+ats**2    !SUM OF REFL/TRAN COEFS
+			 rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
+			 rt_max = arp**2/rt_sum             !
+			 IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED P !IF4c
+				 IF (REAL(arp) < 0.) amp = -amp                 !REVERSE POLARITY
+				 ud = -ud                            !UPGOING <-> DOWNGOING
+				 ip = 1                              !P WAVE      
+			 END IF                               !                            !IF4c
+
+			 rt_min = rt_max                      !RANGE PROBABILITIES 4 SV REFL
+			 rt_max = rt_max+ars**2/rt_sum      !
+			 IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED SV  !IF4d
+				 IF (REAL(ars) < 0.) amp = -amp                 !REVERSE POLARITY
+				 ud = -ud                            !UPGOING <-> DOWNGOING
+				 ip = 2                              !SV WAVE
+			 END IF                               !                              !IF4d
+
+			 rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
+			 rt_max = rt_max+atp**2/rt_sum      !
+			 IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRANSMITTED P  !IF4e
+				 IF (REAL(atp) < 0.) amp = -amp                 !REVERSE POLARITY
+				 ip = 1                              !P WAVE
+			 END IF                               !                              !IF4e
+
+			 rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
+			 rt_max = rt_max+abs(ats)/rt_sum      !
+			 IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV !IF4f
+			   IF (REAL(ats) < 0.) amp = -amp                 !REVERSE POLARITY
+				 ip = 2                              !SV WAVE
+			 END IF                               !                                !IF4f
+      
+      
+            
       RETURN
 END SUBROUTINE RTCOEF2
 
@@ -1602,7 +1636,7 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
       REAL(8)      realp,ra,rb,rc,rrhos,rrhof
       COMPLEX(8)   p,a,b,c,rhos,rhof,tau
       COMPLEX(8)   angP,angS,angPc,D12
-      COMPLEX(8)   crP,crS,ctP
+      COMPLEX(8)   crP,crS,ctP,c0
       REAL(8)      rP,rS,tP,tot,nrP,nrS,ntP,r0,amp
       INTEGER      ud,ip
       
@@ -1612,6 +1646,7 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
       c = CMPLX(rc,0.)
       rhos = CMPLX(rrhos,0.)
       rhof = CMPLX(rrhof,0.)
+      c0 = CMPLX(0.,0.)
       
       angP = asin(p*a)
       angS = asin(p*b)
@@ -1628,68 +1663,75 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
         crP = D12*((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
                 + tau*(c/a)*cos(angP)-(cos(2*angS))**2*cos(angPc))
         
-        crS = D12*(-2*(b/a)*sin(2*angP)*cos(2*angS)*cos(angPc))
+        crS = D12*(-2.*(b/a)*sin(2*angP)*cos(2*angS)*cos(angPc))
         
-        ctP = D12*(2*cos(angP)*cos(2*angS))
+        ctP = D12*(2.*cos(angP)*cos(2*angS))
         
         rP = (REAL(crP)**2+IMAG(crP)**2)**0.5
         rS = (REAL(crS)**2+IMAG(crS)**2)**0.5
         tP = (REAL(ctP)**2+IMAG(ctP)**2)**0.5
         
+        !Supercritical
+        IF (rc*realp > 1) tP = 0.
+        
         !Get new ip
-        tot = rP+rS+tP
-        nrP = rP/tot
-        nrS = rS/tot
-        ntP = tP/tot
+        tot = rP**2 + sin(2*angS)/sin(2*angP)*rS**2 + tau*sin(2*angPc)/sin(2*angP)*tP**2
+        nrP = rP**2/tot
+        nrS = sin(2*angS)/sin(2*angP)*rS**2/tot
+        ntP = tau*sin(2*angPc)/sin(2*angP)*tP**2/tot
         
         r0 = rand()
         
-        IF (r0 < nrP) THEN
+        IF (r0 <= nrP) THEN    !REFLECTED P
           ip = 1
           ud = -ud
-          IF (nrP < 0) a = -a
-        ELSE IF ((r0 >= nrP).AND.(r0 < nrP + nrS)) THEN
+          IF (REAL(crP) < 0.) amp = -amp
+        ELSE IF ((r0 > nrP).AND.(r0 <= nrP + nrS)) THEN   !REFLECTED SV
           ip = 2
           ud = -ud
-          IF (nRS < 0) a = -a
-        ELSE
+          IF (REAL(crS) < 0.) amp = -amp
+        ELSE     !TRANSMITTED P
           ip = 1
-          IF (ntP < 0) a = -a
+          IF (REAL(ctP) < 0.) amp = -amp
         END IF
           
         
-      ELSE IF (ip == 2) THEN
+      ELSE IF (ip == 2) THEN       !INCIDENT SV
       
         crP = D12*((b/a)*sin(4*angS)*cos(angPc))
         
-        crS = D12*((b/a)**2*sin(2*angP)*sin(angS)*cos(angPc) &
-                + tau*(c/a)*cos(angP) - (cos(2*angS))**2*cos(angPc))
+        crS = D12*((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
+                - tau*(c/a)*cos(angP) - (cos(2*angS))**2*cos(angPc))
         
-        ctP = D12*(-2*(b/a)*cos(angP)*sin(2*angS))
+        ctP = D12*(-2.*(b/a)*cos(angP)*sin(2*angS))
         
         rP = (REAL(crP)**2+IMAG(crP)**2)**0.5
         rS = (REAL(crS)**2+IMAG(crS)**2)**0.5
         tP = (REAL(ctP)**2+IMAG(ctP)**2)**0.5
         
+        !Supercritical
+        IF (ra*realp > 1) rP = 0.
+        IF (rc*realp > 1) tP = 0.
+        
         !Get new ip
-        tot = rP+rS+tP
-        nrP = rP/tot
-        nrS = rS/tot
-        ntP = tP/tot
+        tot = sin(2*angP)/sin(2*angS)*rP**2 + rS**2 + tau*sin(2*angPc)/sin(2*angS)*tP**2
+        nrP = sin(2*angP)/sin(2*angS)*rP**2/tot
+        nrS = rS**2/tot
+        ntP = tau*sin(2*angPc)/sin(2*angS)*tP**2/tot
         
         r0 = rand()
         
-        IF (r0 < nrP) THEN   !REFLECTED AS P
+        IF (r0 <= nrP) THEN    !REFLECTED P
           ip = 1
           ud = -ud
-          IF (nrP < 0) a = -a
-        ELSE IF ((r0 >= nrP).AND.(r0 < nrP + nrS)) THEN  !REFLECTED AS S
+          IF (REAL(crP) < 0.) amp = -amp
+        ELSE IF ((r0 > nrP).AND.(r0 <= nrP + nrS)) THEN   !REFLECTED SV
           ip = 2
           ud = -ud
-          IF (nRS < 0) a = -a
-        ELSE    ! TRANSMITTED AS P
+          IF (REAL(crS) < 0.) amp = -amp
+        ELSE     !TRANSMITTED P
           ip = 1
-          IF (ntP < 0) a = -a
+          IF (REAL(ctP) < 0.) amp = -amp
         END IF
         
       END IF
@@ -1706,7 +1748,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
 
       REAL(8)      realp,ra,rb,rc,rrhos,rrhof
       COMPLEX(8)   p,a,b,c,rhos,rhof,tau
-      COMPLEX(8)   angP,angS,angPc,D12
+      COMPLEX(8)   angP,angS,angPc,D12,c0
       COMPLEX(8)   crP,ctP,ctS
       REAL(8)      rP,tS,tP,tot,nrP,ntS,ntP,r0,amp
       INTEGER      ud,ip
@@ -1717,6 +1759,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
       c = CMPLX(rc,0.)
       rhos = CMPLX(rrhos,0.)
       rhof = CMPLX(rrhof,0.)
+      c0 = CMPLX(0.,0.)
       
       angP = asin(p*a)
       angS = asin(p*b)
@@ -1730,7 +1773,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
       !INCIDENT-P
       
         rP = D12*((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
-                + tau*(c/a)*cos(angP)-(cos(2*angS))**2*cos(angPc))
+                - tau*(c/a)*cos(angP)-(cos(2*angS))**2*cos(angPc))
         
         tP = D12*(2*tau*(c/a)*cos(2*angS)*cos(angPc))
         
@@ -1741,24 +1784,28 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
         tP = (REAL(ctP)**2+IMAG(ctP)**2)**0.5
         tS = (REAL(ctS)**2+IMAG(ctS)**2)**0.5
         
+        !Supercritical
+        IF (ra*realp > 1) tP = 0.
+        IF (rb*realp > 1) tS = 0.
+        
         !Get new ip
-        tot = rP+tS+tP
-        nrP = rP/tot
-        ntP = tP/tot
-        ntS = tS/tot
+        tot = rP**2 + 1/tau*sin(2*angP)/sin(2*angPc)*tP**2 + 1/tau*sin(2*angS)/sin(2*angPc)*tS**2
+        nrP = rP**2/tot
+        ntP = 1/tau*sin(2*angP)/sin(2*angPc)*tP**2/tot
+        ntS = 1/tau*sin(2*angS)/sin(2*angPc)*tS**2/tot
         
         r0 = rand()
         
-        IF (r0 < nrP) THEN   !REFLECTED AS P
+        IF (r0 <= nrP) THEN   !REFLECTED AS P
           ip = 1
           ud = -ud
-          IF (nrP < 0) a = -a
-        ELSE IF ((r0 >= nrP).AND.(r0 < nrP + ntP)) THEN  !TRANSMITTED AS P
+          IF (REAL(crP) < 0.) amp = -amp
+        ELSE IF ((r0 > nrP).AND.(r0 <= nrP + ntP)) THEN  !TRANSMITTED AS P
           ip = 1
-          IF (ntP < 0) a = -a
+          IF (REAL(ctP) < 0.) amp = -amp
         ELSE    ! TRANSMITTED AS S
           ip = 2
-          IF (ntS < 0) a = -a
+          IF (REAL(ctS) < 0.) amp = -amp
         END IF
         
       
@@ -2149,11 +2196,11 @@ REAL FUNCTION ARTAN2(y,x)
       REAL(8)        ::  y,x,sign, pi, pi2
       pi = atan(1.)*4D0
       pi2 = pi/2D0
-      IF (x == 0) THEN
+      IF (x == 0.) THEN
        ARTAN2 = sign(pi2,y)
       ELSE
        ARTAN2 = atan(y/x)
-       IF (x < 0) THEN
+       IF (x < 0.) THEN
         ARTAN2 = ARTAN2+sign(pi,y)
        END IF
       END IF
@@ -2170,18 +2217,20 @@ SUBROUTINE INTERFACE_NORMAL
       
       last_RT = 0
       init_ud = ud
-      iz2 = iz
       
-      h = abs(z(iz2)-z(iz2-1))
+      h = abs(z(iz)-z(iz-1))
+      
+      IF ((h <= 0.).AND.(iz > 1)) THEN
 
-      IF (((vs(iz2,2) == 0).OR.(vs(iz2-1,2) == 0)).AND.(ip.ne.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
+      IF (((vs(iz,2) == 0).OR.(vs(iz-1,2) == 0)).AND.(ip.ne.3)) THEN  !IF0
          !SOLID-LIQUID INTERFACE with P and SV waves
          !Figure out if phonon is going from:
          !      solid to liquid (mantle to core) or from
          !      liquid to solid (core to mantle)
+         !      and check direction
          
-         IF (((ud == 1).AND.(vs(iz2,2) == 0.)).OR.((ud == -1).AND.(vs(iz2-1,2) == 0.))) THEN 
-           !FROM SOLID TO LIQUID     
+         IF ((ud == 1).AND.(vs(iz,2) == 0.)) THEN 
+           !FROM SOLID TO LIQUID  --- going down     
               
             ap = vs(iz-1,1)
             bs = vs(iz-1,2)
@@ -2189,9 +2238,20 @@ SUBROUTINE INTERFACE_NORMAL
             rhosol = rhs(iz-1)
             rhoflu = rhs(iz)
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud)
-         
-         ELSEIF (((ud == 1).AND.(vs(iz2-1,2) == 0.)).OR.((ud == -1).AND.(vs(iz2,2) == 0.))) THEN  
-           !FROM LIQUID TO SOLID 
+            
+         ELSEIF ((ud == -1).AND.(vs(iz-1,2) == 0.)) THEN
+           !FROM SOLID TO LIQUID  --- going up
+           
+            ap = vs(iz,1)
+            bs = vs(iz,2)
+            cf = vs(iz-1,1)
+            rhosol = rhs(iz)
+            rhoflu = rhs(iz-1)
+            CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud) 
+           
+           
+         ELSEIF ((ud == 1).AND.(vs(iz-1,2) == 0.)) THEN  
+           !FROM LIQUID TO SOLID  --- going down 
 
             ap = vs(iz,1)
             bs = vs(iz,2)
@@ -2199,102 +2259,99 @@ SUBROUTINE INTERFACE_NORMAL
             rhosol = rhs(iz)
             rhoflu = rhs(iz-1)
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud)         
+          
+         ELSEIF ((ud == -1).AND.(vs(iz,2) == 0.)) THEN
+           !FROM LIQUID TO SOLID  --- going up
+                    
+            ap = vs(iz-1,1)
+            bs = vs(iz-1,2)
+            cf = vs(iz,1)
+            rhosol = rhs(iz-1)
+            rhoflu = rhs(iz)
+            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud)
 
          END IF
 
 
-      ELSEIF (((vs(iz2,2) == 0).OR.(vs(iz2-1,2) == 0)).AND.(ip.eq.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
+      ELSEIF (((vs(iz,2) == 0).OR.(vs(iz-1,2) == 0)).AND.(ip.eq.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
         !Solid-Liquid Interface with SH waves
-        ud = -ud  !JFBGf
-!       a = -a !based on Bostock BSSA 2012 paper where R = -1 for reflected wave at free surface
+        ud = -ud 
       
-      ELSEIF (h <= 0.) THEN               !IF0
+      ELSE               !IF0
         !Solid-Solid Interface
-        last_RT = 2
-      
-  
-        IF ( (iz2 > 1).AND.(abs(irtr1) == 1).AND. &                        !IF1
-              (iz2 < nlay-1) ) THEN
+
+        IF (iz < nlay-1) THEN                        !IF1
+
               
-          IF ((iz2 == 2).AND.(ud == -1)) THEN                              !IF1.1 
+          IF ((iz == 2).AND.(ud == -1)) THEN                              !IF1.1 
           ! Skip INTERFACE_NORMAL BECAUSE PHONON IS AT SURFACE
           ELSE                                                             !IF1.1
               
 
             IF (ip  ==  3) THEN                                              !IF2a
-              IF ( (ud == 1) ) THEN               !IF downGOING SH WAVE      !IF3a
-                CALL REFTRAN_SH(p,vs(iz2-1,2),vs(iz2,2),rhs(iz2-1),rhs(iz2), &
-                                ar,at)
+              IF ( (ud == 1) ) THEN               !IF DOWNGOING SH WAVE      !IF3a
+                CALL REFTRAN_SH(p,vs(iz-1,2),vs(iz,2),rhs(iz-1),rhs(iz),ar,at,ud,a)
               ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE        !IF3a
-                CALL REFTRAN_SH(p,vs(iz2,2),vs(iz2-1,2),rhs(iz2),rhs(iz2-1), &
-                           ar,at)
+                CALL REFTRAN_SH(p,vs(iz,2),vs(iz-1,2),rhs(iz),rhs(iz-1),ar,at,ud,a)
               END IF                                                         !IF3a
             ELSE                                                             !IF2a
-              IF ( (ud == 1) ) THEN               !IF downGOING P-SV WAVE    !IF3b
-                CALL RTCOEF2(p,vs(iz2-1,1),vs(iz2-1,2),rhs(iz2-1), &
-                             vs(iz2  ,1),vs(iz2  ,2),rhs(iz2), &
-                            ip,arp,ars,atp,ats)
+              IF ( (ud == 1) ) THEN               !IF DOWNGOING P-SV WAVE    !IF3b
+                CALL RTCOEF2(p,vs(iz-1,1),vs(iz-1,2),rhs(iz-1), &
+                             vs(iz  ,1),vs(iz  ,2),rhs(iz), &
+                            ip,arp,ars,atp,ats,ip,ud,a)
               ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE      !IF3b
-                CALL RTCOEF2(p,vs(iz2  ,1),vs(iz2  ,2),rhs(iz2  ), &
-                             vs(iz2-1,1),vs(iz2-1,2),rhs(iz2-1), &
-                            ip,arp,ars,atp,ats)             
+                CALL RTCOEF2(p,vs(iz  ,1),vs(iz  ,2),rhs(iz  ), &
+                             vs(iz-1,1),vs(iz-1,2),rhs(iz-1), &
+                            ip,arp,ars,atp,ats,ip,ud,a)             
               END IF                                                        !IF3b
             END IF                                                          !IF2a
           
-            r0 = rand()                       !RANDOM NUMBER FROM 0 TO 1
 
-            IF (ip  ==  3) THEN                   !IF SH-WAVE                !IF2b
-
-              IF (h > 0.) THEN                    !IF GRADIENT, THEN        !IF3c
-!               IF (r0 < (abs(ar)/(abs(ar)+abs(at)))/P0**2) THEN!CHECK FOR REFLECTN !IF4a
-!                 IF (ar < 0) a = -a                !OPPOSITE POLARITY
-!                 ud = -ud                           !downGOING/UPGOING
-!               END IF                              !                        !IF4a
-              ELSE                                 !IF INTERFACE THEN        !IF3c
-                IF (r0 < (abs(ar)/(abs(ar)+abs(at)))) THEN!CHECK FOR REFLECTION  !IF4b
-                  IF (ar < 0) a = -a                !OPPOSITE POLARITY
-                  ud = -ud                           !downGOING/UPGOING
-                END IF                              !                            !IF4b
-              END IF                               !                        !IF3c
-
-            ELSE                                  !IF P- OR SV-WAVE         !IF2b
-              IF (h <= 0.) THEN                                              !IF3d
-                              
-                rt_sum = abs(arp)+abs(atp)+abs(ars)+abs(ats)    !SUM OF REFL/TRAN COEFS
-                rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
-                rt_max = abs(arp)/rt_sum             !
-                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED P !IF4c
-                  IF (arp < 0) a = -a                 !REVERSE POLARITY
-                  ud = -ud                            !UPGOING <-> downGOING
-                  ip = 1                              !P WAVE      
-                END IF                               !                            !IF4c
-
-                rt_min = rt_max                      !RANGE PROBABILITIES 4 SV REFL
-                rt_max = rt_max+abs(ars)/rt_sum      !
-                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED SV  !IF4d
-                  IF (ars < 0) a = -a                 !REVERSE POLARITY
-                  ud = -ud                            !UPGOING <-> downGOING
-                  ip = 2                              !SV WAVE
-                END IF                               !                              !IF4d
-
-                rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
-                rt_max = rt_max+abs(atp)/rt_sum      !
-                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRAMSITTED P  !IF4e
-                  ip = 1                              !P WAVE
-                END IF                               !                              !IF4e
-
-                rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
-                rt_max = rt_max+abs(ats)/rt_sum      !
-                IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV !IF4f
-                  ip = 2                              !SV WAVE
-                END IF                               !                                !IF4f
-              END IF                                                          !IF3d
-            END IF                                !END IF: SH, OR P-SV        !IF2b
+!            IF (ip  ==  3) THEN                   !IF SH-WAVE                !IF2b
+!
+!                IF (r0 < (abs(ar)/(abs(ar)+abs(at)))) THEN!CHECK FOR REFLECTION  !IF4b
+!                  IF (ar < 0) a = -a                !OPPOSITE POLARITY
+!                  ud = -ud                           !DOWNGOING/UPGOING
+!                END IF                              !                            !IF4b
+!
+!            ELSE                                  !IF P- OR SV-WAVE         !IF2b
+!              IF (h <= 0.) THEN                                              !IF3d
+!                              
+!                rt_sum = abs(arp)+abs(atp)+abs(ars)+abs(ats)    !SUM OF REFL/TRAN COEFS
+!                rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
+!                rt_max = abs(arp)/rt_sum             !
+!                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED P !IF4c
+!                  IF (arp < 0) a = -a                 !REVERSE POLARITY
+!                  ud = -ud                            !UPGOING <-> DOWNGOING
+!                  ip = 1                              !P WAVE      
+!                END IF                               !                            !IF4c
+!
+!                rt_min = rt_max                      !RANGE PROBABILITIES 4 SV REFL
+!                rt_max = rt_max+abs(ars)/rt_sum      !
+!                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED SV  !IF4d
+!                  IF (ars < 0) a = -a                 !REVERSE POLARITY
+!                  ud = -ud                            !UPGOING <-> downGOING
+!                  ip = 2                              !SV WAVE
+!                END IF                               !                              !IF4d
+!
+!                rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
+!                rt_max = rt_max+abs(atp)/rt_sum      !
+!                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRAMSITTED P  !IF4e
+!                  ip = 1                              !P WAVE
+!                END IF                               !                              !IF4e
+!
+!                rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
+!                rt_max = rt_max+abs(ats)/rt_sum      !
+!                IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV !IF4f
+!                  ip = 2                              !SV WAVE
+!                END IF                               !                                !IF4f
+!              END IF                                                          !IF3d
+!            END IF                                !END IF: SH, OR P-SV        !IF2b
           END IF  !IF1.1
         
-        ELSE IF (iz2 == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE  !IF1
+        ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE  !IF1
           ud = -ud
-          dt1 = (2*corelayer)/vf(iz2,iwave)
+          dt1 = (2*corelayer)/vf(iz,iwave)
           x = x + 180*deg2km
           t = t + dt1
           totald = totald + 2*corelayer
@@ -2302,13 +2359,14 @@ SUBROUTINE INTERFACE_NORMAL
           
         END IF        !IF1
         
-
-        iwave = ip
-        IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
         
       END IF    !IF0
-        
-!      IF (t_last_count > 995) WRITE(6,*) I,NITR,ip,iz,REAL(dt1,4),irtr1,ud,h,z(iz2),z(iz2-1)!, &
+      
+        iwave = ip
+        IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
+       
+      END IF 
+!      IF (t_last_count > 995) WRITE(6,*) I,NITR,ip,iz,REAL(dt1,4),irtr1,ud,h,z(iz),z(iz-1)!, &
        
       RETURN  
 END SUBROUTINE INTERFACE_NORMAL
@@ -2645,8 +2703,8 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       REAL(8)    p,az,x_sign,r0
       INTEGER    iwave,ip,ud,iz_scat
       REAL(8) :: vel_perturb 
-      REAL(8)    vf(nlay0,2),rh(nlay0)
-      INTEGER       conv_count(6)
+      REAL(8)    vf(nlay0,2),rh(nlay0),a
+      INTEGER       conv_count(6),ip_in,a_in
       
       !For REF_TRAN_RAY
      REAL(8) :: vc !! Velocities of two media
@@ -2657,6 +2715,8 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
 
       iwave_in = iwave
       p_in = p
+      ip_in = ip
+      a = 1
 
       pi = atan(1.)*4D0
       
@@ -2713,27 +2773,29 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       rh2 = rh(iz_scat)*fact                    !! 
       
       
-      IF (ip == 1) THEN                      !! P Incident
-       CALL RTCOEF2(pp,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),vp2,vs2,rh2,1,rt(1),rt(2),rt(3),rt(4)) !! P-SV reflected & transmitted (Pr=1,Sr=2,Pt=3,St=4)
+      IF (ip_in == 1) THEN                      !! P Incident
+       CALL RTCOEF2(pp,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),&
+               vp2,vs2,rh2,1,rt(1),rt(2),rt(3),rt(4),ip,ud,a) !! P-SV reflected & transmitted (Pr=1,Sr=2,Pt=3,St=4)
        rt(1)=rt(1)                         !! P  refl
        rt(5)=rt(2)*sa                      !! SH refl
        rt(2)=rt(2)*ca                      !! SV refl
        rt(3)=rt(3)                         !! P  trans
        rt(6)=rt(4)*sa                      !! SH trans
        rt(4)=rt(4)*ca                      !! SV trans
+       ip = ip_in
        
        DO jj = 1, 10                        !! If errors, zero them 
         IF (isnan(rt(jj))) rt(jj) = 0.
        END DO
        
       ELSE
-       CALL REFTRAN_SH(ps,vf(iz_scat,2),vs2,rh(iz_scat),rh2,rt(9),rt(10))   !! SH reflected & transmitted amplitudes
-       CALL RTCOEF2(ps,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),vp2,vs2,rh2,2,rt(5),rt(6),rt(7),rt(8)) !! SV-P reflected & transmitted (Pr=5,Sr=6,Pt=7,St=8)
+       CALL REFTRAN_SH(ps,vf(iz_scat,2),vs2,rh(iz_scat),rh2,rt(9),rt(10),ud,a)   !! SH reflected & transmitted amplitudes
+       CALL RTCOEF2(ps,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),vp2,vs2,rh2,2,rt(5),rt(6),rt(7),rt(8),ip,ud,a) !! SV-P reflected & transmitted (Pr=5,Sr=6,Pt=7,St=8)
        DO jj = 1, 10                        !! If errors, zero them
         IF (isnan(rt(jj))) rt(jj) = 0.
        END DO    
   
-       IF (ip==2) THEN                     !! SV Incidence   !fix, SV is ip == 2
+       IF (ip_in==2) THEN                     !! SV Incidence   !fix, SV is ip == 2
        
         rt(1)=rt(5)*ca                     !! P  refl
         rt(2)=abs(rt(6))*ca+abs(rt(9))*sa  !! SV refl  !fix
