@@ -80,7 +80,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*    FLAT RHO (p = -2 in FLATTEN)'
       WRITE(*,*) '*    SourcePartitioning (1:1:1)'
       WRITE(*,*) '*    Circular radiation pattern'
-      WRITE(*,*) '*    Using vs for coefficients'
+      WRITE(*,*) '*    Using vflat for coefficients'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
