@@ -765,14 +765,14 @@ PROGRAM STATSYN_GLOBALSCAT
                     s1 = float(ims-1)*datt
                     s2 = float(ims  )*datt
                     frac = (s-s1)/(s2-s1)
-                    IF (ncaust <= 1) THEN
-                      icaust = 1
-                    ELSE
+
+
                       icaust = ncaust
-                      DO WHILE (icaust > 4)
+                      DO WHILE (icaust >= 4)
                         icaust = icaust - 4
                       END DO
-                    END IF
+                        icaust = icaust +1  !index if (ncaust + 1)
+
                     
                     !JFL
                     ! Calculate angle of incidence. This was not done before so the angle used

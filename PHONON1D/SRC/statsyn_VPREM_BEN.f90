@@ -80,6 +80,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*    FLAT RHO (p = -2 in FLATTEN)'
       WRITE(*,*) '*    SourcePartitioning (1:1:1)'
       WRITE(*,*) '*    Circular radiation pattern'
+      WRITE(*,*) '*    Using vs for coefficients'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
@@ -483,7 +484,7 @@ PROGRAM STATSYN_GLOBALSCAT
         totald = 0.                                 !START AT ZERO KM TRAVELED
         x_sign = 1.                            !DISTANCE DIRECTION
         az   = 0.
-        ncaust = 0                             !# OF CAUSTICS STARS AT 0.
+        ncaust = 1                             !# OF CAUSTICS STARS AT 0. (which is index 1)
         
         !Set initial depth index (iz)
          iz = iz1    !iz1 is layer in which the source is.
@@ -729,12 +730,10 @@ PROGRAM STATSYN_GLOBALSCAT
        CALL etime(elapsed,tt7)
        !WRITE(6,*) '       ScatLoop:',tt7-tt3,I        
         
-        
-        
         ! ============ >>
         ! RECORD IF PHONON IS AT SURFACE
-        IF (iz <= 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
-!          iz = 1
+        IF (iz == 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
+
           ud = 1                                !RAY NOW MUST TRAVEL down
           
           !Find index for distance
@@ -766,19 +765,17 @@ PROGRAM STATSYN_GLOBALSCAT
                     s1 = float(ims-1)*datt
                     s2 = float(ims  )*datt
                     frac = (s-s1)/(s2-s1)
-                    IF (ncaust <= 1) THEN
-                      icaust = 1
-                    ELSE
+
+
                       icaust = ncaust
-                      DO WHILE (icaust > 4)
+                      DO WHILE (icaust >= 4)
                         icaust = icaust - 4
                       END DO
-                    END IF
-                    
-                    !JFL
-                    ! Calculate angle of incidence. This was not done before so the angle used
-                    ! was the last one from scattering or the initial take-off angle.
-                    ang1 = asin(p*vf(iz,iwave))
+                        icaust = icaust +1  !index if (ncaust + 1)
+
+                 
+                    ! Calculate angle of incidence. 
+                    ang1 = asin(p*vf(1,iwave))
           
                     IF ( (IT > 1-nts).and.(IT <= nt0+nts) ) THEN
                       IF ( (ip == 1) ) THEN 
@@ -795,11 +792,7 @@ PROGRAM STATSYN_GLOBALSCAT
                         c_mult(3) = sin(az)             * x_sign !! Radial Amp for SH
                       END IF
                       
-                    !JFL  Not sure why p was redefined here, for an s-wave iwave = 2 (??).
-                    ! p is set so it's ang1 that needs to be calculated before rotating
-                    ! the waveform.
-!                    p    = abs(sin(ang1))/vf(1,2)  !vf(iz,2) but iz == 1 at surface
-          
+        
                       n_iter_last = nitr
                       ix_last = ix
                       it_last = it
@@ -839,30 +832,24 @@ PROGRAM STATSYN_GLOBALSCAT
         !GO TO NEXT LAYER
         iz = iz + ud  
         
+
+        
        !Check if time increased since last loop  -- Some phonon gets stuck and I'm not sure why yet...
        IF (t_last == t) THEN
          t_last_count = t_last_count + 1
-         IF (t_last_count > 999) THEN
+         IF (t_last_count > 99) THEN
 !           WRITE(77,*) t_last_count,I,NITR         
 !           WRITE(6,FMT = 333) iz,t,x,ud,nint(x_sign),ip,p
-!           WRITE(6,*) '        ',z_act,iz,ang1/pi*180    
-           
-333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f10.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f7.5)
-                
-           IF (t_last_count > 999) t = 9999.
+!           WRITE(6,*) '        ',z_act,iz,ang1/pi*180            
+           t = 9999.
            tstuck = tstuck + 1
-!           WRITE(77,*) 'STUCK',I,NITR,ud,iz,iz2,ip,p,vf(iz,iwave),vf(iz-1,iwave),arp,atp
-!            WRITE(77,*) '    ->  TdPP, TdSP, RdPP, TuPP, RuSP, RuPP, TuPS, RuSS, RuPS'
-!            WRITE(77,*) '    -> ',TdPP, TdSP, RdPP, TuPP, RuSP, RuPP, TuPS, RuSS, RuPS
-!         ELSEIF (last_RT == 2) THEN
-!            IF (ip == 3) WRITE(77,*) '    --> ip = 3:', ar,at
-!            IF (ip.ne.3) WRITE(77,*) '    --> ip ~= 3:', arp,atp,ars,ats
-!         END IF
          END IF
        ELSE
          t_last_count = 0   !reset t_last_count
          t_last = t
        END IF
+       
+333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f10.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f7.5)
        
        END DO    !CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
        ! ====================== <<
