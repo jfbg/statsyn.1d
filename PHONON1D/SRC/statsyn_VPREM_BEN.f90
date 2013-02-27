@@ -78,8 +78,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*    USING BEN-MENHAMEN!!!'
       WRITE(*,*) '*'
       WRITE(*,*) '*    FLAT RHO (p = -2 in FLATTEN)'
-      WRITE(*,*) '*    SourcePartitioning (1:10:10)'
-      WRITE(*,*) '*    Sine source function'
+      WRITE(*,*) '*    SourcePartitioning (1:1:1)'
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
@@ -449,9 +448,9 @@ PROGRAM STATSYN_GLOBALSCAT
         !SET SOURCE ENERGY PARTITIONING
         IF (iz1 /= 1) THEN
           r0 = rand()
-          IF (r0 <= 1./21.) THEN
+          IF (r0 <= 1./3.) THEN
             ip = 1 !P
-          ELSE IF ((r0 >= 1./21.).and.(r0 < 11./21.)) THEN
+          ELSE IF ((r0 >= 1./3.).and.(r0 < 2./3.)) THEN
             ip = 2 !SV
           ELSE 
             ip = 3 !SH
