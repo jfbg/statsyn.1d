@@ -19,9 +19,9 @@ PROGRAM STATSYN_GLOBALSCAT
 !
 ! 
 !
-! $Revision$
-! $Date$
-! $Author$
+! $Revision: 334 $
+! $Date: 2013-02-27 11:06:51 -0800 (Wed, 27 Feb 2013) $
+! $Author: jguertin $
 !
 !
 !
@@ -68,9 +68,9 @@ PROGRAM STATSYN_GLOBALSCAT
       exNLAY = 0
 
       WRITE(*,*) 'ISOTROPIC Scattering'
-      WRITE(*,*) 'Last Edited on $Date$'
-      WRITE(*,*) 'Last Edited by $Author$'
-      WRITE(*,*) '$Revision$'
+      WRITE(*,*) 'Last Edited on $Date: 2013-02-27 11:06:51 -0800 (Wed, 27 Feb 2013) $'
+      WRITE(*,*) 'Last Edited by $Author: jguertin $'
+      WRITE(*,*) '$Revision: 334 $'
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
@@ -80,6 +80,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*    FLAT RHO (p = -2 in FLATTEN)'
       WRITE(*,*) '*    SourcePartitioning (1:1:1)'
       WRITE(*,*) '*    Circular radiation pattern'
+      WRITE(*,*) '*    Using vs for coefficients'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
@@ -2230,58 +2231,58 @@ SUBROUTINE INTERFACE_NORMAL
       
       IF ((h <= 0.).AND.(iz > 1)) THEN
 
-      IF (((vf(iz,2) == 0).OR.(vf(iz-1,2) == 0)).AND.(ip.ne.3)) THEN  !IF0
+      IF (((vs(iz,2) == 0).OR.(vs(iz-1,2) == 0)).AND.(ip.ne.3)) THEN  !IF0
          !SOLID-LIQUID INTERFACE with P and SV waves
          !Figure out if phonon is going from:
          !      solid to liquid (mantle to core) or from
          !      liquid to solid (core to mantle)
          !      and check direction
          
-         IF ((ud == 1).AND.(vf(iz,2) == 0.)) THEN 
+         IF ((ud == 1).AND.(vs(iz,2) == 0.)) THEN 
            !FROM SOLID TO LIQUID  --- going down     
               
-            ap = vf(iz-1,1)
-            bs = vf(iz-1,2)
-            cf = vf(iz,1)
-            rhosol = rh(iz-1)
-            rhoflu = rh(iz)
+            ap = vs(iz-1,1)
+            bs = vs(iz-1,2)
+            cf = vs(iz,1)
+            rhosol = rhs(iz-1)
+            rhoflu = rhs(iz)
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud)
             
-         ELSEIF ((ud == -1).AND.(vf(iz-1,2) == 0.)) THEN
+         ELSEIF ((ud == -1).AND.(vs(iz-1,2) == 0.)) THEN
            !FROM SOLID TO LIQUID  --- going up
            
-            ap = vf(iz,1)
-            bs = vf(iz,2)
-            cf = vf(iz-1,1)
-            rhosol = rh(iz)
-            rhoflu = rh(iz-1)
+            ap = vs(iz,1)
+            bs = vs(iz,2)
+            cf = vs(iz-1,1)
+            rhosol = rhs(iz)
+            rhoflu = rhs(iz-1)
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud) 
            
            
-         ELSEIF ((ud == 1).AND.(vf(iz-1,2) == 0.)) THEN  
+         ELSEIF ((ud == 1).AND.(vs(iz-1,2) == 0.)) THEN  
            !FROM LIQUID TO SOLID  --- going down 
 
-            ap = vf(iz,1)
-            bs = vf(iz,2)
-            cf = vf(iz-1,1)
-            rhosol = rh(iz)
-            rhoflu = rh(iz-1)
+            ap = vs(iz,1)
+            bs = vs(iz,2)
+            cf = vs(iz-1,1)
+            rhosol = rhs(iz)
+            rhoflu = rhs(iz-1)
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud)         
           
-         ELSEIF ((ud == -1).AND.(vf(iz,2) == 0.)) THEN
+         ELSEIF ((ud == -1).AND.(vs(iz,2) == 0.)) THEN
            !FROM LIQUID TO SOLID  --- going up
                     
-            ap = vf(iz-1,1)
-            bs = vf(iz-1,2)
-            cf = vf(iz,1)
-            rhosol = rh(iz-1)
-            rhoflu = rh(iz)
+            ap = vs(iz-1,1)
+            bs = vs(iz-1,2)
+            cf = vs(iz,1)
+            rhosol = rhs(iz-1)
+            rhoflu = rhs(iz)
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud)
 
          END IF
 
 
-      ELSEIF (((vf(iz,2) == 0).OR.(vf(iz-1,2) == 0)).AND.(ip.eq.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
+      ELSEIF (((vs(iz,2) == 0).OR.(vs(iz-1,2) == 0)).AND.(ip.eq.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
         !Solid-Liquid Interface with SH waves
         ud = -ud 
       
@@ -2298,18 +2299,18 @@ SUBROUTINE INTERFACE_NORMAL
 
             IF (ip  ==  3) THEN                                              !IF2a
               IF ( (ud == 1) ) THEN               !IF DOWNGOING SH WAVE      !IF3a
-                CALL RTCOEF_SH(p,vf(iz-1,2),vf(iz,2),rh(iz-1),rh(iz),ar,at,ud,a)
+                CALL RTCOEF_SH(p,vs(iz-1,2),vs(iz,2),rhs(iz-1),rhs(iz),ar,at,ud,a)
               ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE        !IF3a
-                CALL RTCOEF_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1),ar,at,ud,a)
+                CALL RTCOEF_SH(p,vs(iz,2),vs(iz-1,2),rhs(iz),rhs(iz-1),ar,at,ud,a)
               END IF                                                         !IF3a
             ELSE                                                             !IF2a
               IF ( (ud == 1) ) THEN               !IF DOWNGOING P-SV WAVE    !IF3b
-                CALL RTCOEF_PSV(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
-                             vf(iz  ,1),vf(iz  ,2),rh(iz), &
+                CALL RTCOEF_PSV(p,vs(iz-1,1),vs(iz-1,2),rhs(iz-1), &
+                             vs(iz  ,1),vs(iz  ,2),rhs(iz), &
                             arp,ars,atp,ats,ip,ud,a)
               ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE      !IF3b
-                CALL RTCOEF_PSV(p,vf(iz  ,1),vf(iz  ,2),rh(iz  ), &
-                             vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
+                CALL RTCOEF_PSV(p,vs(iz  ,1),vs(iz  ,2),rhs(iz  ), &
+                             vs(iz-1,1),vs(iz-1,2),rhs(iz-1), &
                             arp,ars,atp,ats,ip,ud,a)             
               END IF                                                        !IF3b
             END IF                                                          !IF2a
