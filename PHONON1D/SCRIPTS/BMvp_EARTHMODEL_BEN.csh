@@ -11,7 +11,7 @@ set ray_par    = "0.0 0.1668 0.2931"
 set d_range    = "0 180 91"
 set model      = "1"	#2 for Moon
 set mx_scat_dp = "10"
-set n_phonon   = "2000000"
+set n_phonon   = "1000000"
 
 
 # SCATTERING
@@ -33,7 +33,7 @@ set model_name = "EARTH_MODEL_20km"
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
 @ n_kern  = 15     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 4    ## Number of iterations
+@ n_iter  = 8    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"

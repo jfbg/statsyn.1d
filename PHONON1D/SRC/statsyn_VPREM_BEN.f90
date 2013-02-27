@@ -1276,7 +1276,7 @@ SUBROUTINE SURFACE_PSV_BEN
       iwave = ip
 END SUBROUTINE SURFACE_PSV_BEN     
 
-SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp)
+SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp)
 ! p.139 of Aki and Richards 2nd edition
       REAL(8)       p,ar,at,amp
       REAL(8)       pi,j1,j2,b1,b2,rh1,rh2
@@ -1309,23 +1309,23 @@ SUBROUTINE REFTRAN_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp)
         car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
         cat   = ctwo*rho1*vb1*cj1/DD
         
-        ar = (REAL(car)**2 + IMAG(car)**2)**0.5
-        at = (REAL(cat)**2 + IMAG(cat)**2)**0.5
+        ar = ((REAL(car)**2 + IMAG(car)**2)**0.5)**2 * 1
+        at = ((REAL(cat)**2 + IMAG(cat)**2)**0.5)**2 * rh2*b2*cos(asin(p*b2))/rh1/b1/cos(asin(p*b1))
         
         !Check for total internal reflection !fix
         IF (b2*p > 1) at = 0
 
 
         r0 = rand()        
-				IF (r0 < (ar**2/(ar**2+at**2))) THEN!CHECK FOR REFLECTION  !IF4b
-					IF (REAL(car) < 0.) amp = -amp                !OPPOSITE POLARITY
+				IF (r0 < (ar/(ar+at))) THEN          !CHECK FOR REFLECTION
+					IF (REAL(car) < 0.) amp = -amp     !OPPOSITE POLARITY
 					ud = -ud                           !DOWNGOING/UPGOING
 				END IF    
 
       END IF
       
       RETURN
-END SUBROUTINE REFTRAN_SH
+END SUBROUTINE RTCOEF_SH
 
 
 ! SUBROUTINE RTCOEF calculates reflection/transmission coefficients
@@ -1354,11 +1354,11 @@ END SUBROUTINE REFTRAN_SH
 !        All output variables are REAL.
 !        Coefficients are not energy normalized.
 !
-SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
+SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
                          rrp,rrs,rtp,rts,ip,ud,amp)
       IMPLICIT     NONE
       REAL(8)      vp1,vs1,den1,vp2,vs2,den2     !VELOCITY & DENSITY
-      INTEGER      pors                          !P (1) OR S (2)                          
+      INTEGER      ip                            !P (1) OR S (2)                          
       COMPLEX      a,b,c,d,e,f,g,H               !TEMPORARY VARIABLES
       COMPLEX      cone,ctwo,c0                  !COMPLEX  = 1 OR = 2
       COMPLEX      va1,vb1,rho1,va2,vb2,rho2     !VELOCITY & DENSITY (COMPLEX)
@@ -1371,8 +1371,9 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       COMPLEX      trm1,trm2                     !COMPLEX SCRATCH
       COMPLEX      arp,ars,atp,ats               !REFLECTION & TRANSMISSION COEFS
       REAL(8)      rrp,rrs,rtp,rts               !REFLECTION & TRANSMISSION COEFS
-      INTEGER      ud,ip
+      INTEGER      ud
       REAL(8)      amp,r0,rt_max,rt_min,rt_sum
+      REAL(8)      convfac(4)                    !Amplitude to energy conversion factors (p.146 AKI)
         
       
       va1    = cmplx(vp1,  0.)                   !MAKE VEL & DENSITY COMPLEX
@@ -1411,28 +1412,38 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       H      = a-d*ci2*cj1/(va2*vb1)
       DEN    = E*F+G*H*psub*psub
 !
-      IF (PorS  ==  1) THEN
-       trm1   = b*ci1/va1-c*ci2/va2          
-       trm2   = a+d*ci1*cj2/(va1*vb2)
-       arp    = (trm1*F-trm2*H*psub*psub)/DEN           !refl down P to P up
-       trm1   = a*b+c*d*ci2*cj2/(va2*vb2)       
-       ars    = (-ctwo*ci1*trm1*psub)/(vb1*DEN)      !refl down P to S up
-       atp    = ctwo*rho1*ci1*F/(va2*DEN)         !trans down P to P down
-       ats    = ctwo*rho1*ci1*H*psub/(vb2*DEN)       !trans down P to S down
-      ELSE
-       trm1   = a*b+c*d*ci2*cj2/(va2*vb2)       
-       arp    = (-ctwo*cj1*trm1*psub)/(va1*DEN)      !refl down S to P up
-       trm1   = b*cj1/vb1-c*cj2/vb2               
-       trm2   = a+d*ci2*cj1/(va2*vb1)
-       ars    = -(trm1*E-trm2*G*psub*psub)/DEN          !refl down S to S up
-       atp    = -ctwo*rho1*cj1*G*psub/(va2*DEN)      !trans down S to P down 
-       ats    = ctwo*rho1*cj1*E/(vb2*DEN)         !trans down S to S down
+      IF (ip  ==  1) THEN    !INCIDENT P-WAVE
+         trm1   = b*ci1/va1-c*ci2/va2          
+         trm2   = a+d*ci1*cj2/(va1*vb2)
+         arp    = (trm1*F-trm2*H*psub*psub)/DEN           !refl down P to P up
+         trm1   = a*b+c*d*ci2*cj2/(va2*vb2)       
+         ars    = (-ctwo*ci1*trm1*psub)/(vb1*DEN)      !refl down P to S up
+         atp    = ctwo*rho1*ci1*F/(va2*DEN)         !trans down P to P down
+         ats    = ctwo*rho1*ci1*H*psub/(vb2*DEN)       !trans down P to S down
+         
+         convfac(1) = 1			                                                   !rp
+         convfac(2) = vs1*cos(asin(pin*vs1))/vp1/cos(asin(pin*vp1))            !rs
+         convfac(3) = den2*vp2*cos(asin(pin*vp2))/den1/vp1/cos(asin(pin*vp1))  !tp
+         convfac(4) = den2*vs2*cos(asin(pin*vs2))/den1/vp1/cos(asin(pin*vp1))  !ts
+      ELSE                   !INCIDENT S-WAVE
+         trm1   = a*b+c*d*ci2*cj2/(va2*vb2)       
+         arp    = (-ctwo*cj1*trm1*psub)/(va1*DEN)      !refl down S to P up
+         trm1   = b*cj1/vb1-c*cj2/vb2               
+         trm2   = a+d*ci2*cj1/(va2*vb1)
+         ars    = -(trm1*E-trm2*G*psub*psub)/DEN          !refl down S to S up
+         atp    = -ctwo*rho1*cj1*G*psub/(va2*DEN)      !trans down S to P down 
+         ats    = ctwo*rho1*cj1*E/(vb2*DEN)         !trans down S to S down
+         
+         convfac(1) = vp1*cos(asin(pin*vp1))/vs1/cos(asin(pin*vs1))            !rp
+         convfac(2) = 1                                                        !rs
+         convfac(3) = den2*vp2*cos(asin(pin*vp2))/den1/vs1/cos(asin(pin*vs1))  !tp
+         convfac(4) = den2*vs2*cos(asin(pin*vs2))/den1/vs1/cos(asin(pin*vs1))  !ts
       END IF
       
-      rrp = (REAL(arp)**2+imag(arp)**2)**0.5
-      rrs = (REAL(ars)**2+imag(ars)**2)**0.5
-      rtp = (REAL(atp)**2+imag(atp)**2)**0.5
-      rts = (REAL(ats)**2+imag(ats)**2)**0.5
+      rrp = ((REAL(arp)**2+imag(arp)**2)**0.5)**2  * convfac(1)
+      rrs = ((REAL(ars)**2+imag(ars)**2)**0.5)**2  * convfac(2)
+      rtp = ((REAL(atp)**2+imag(atp)**2)**0.5)**2  * convfac(3)
+      rts = ((REAL(ats)**2+imag(ats)**2)**0.5)**2  * convfac(4)
       
       ! Check for total internal reflection     !fix
       IF (vp2*pin > 1) rtp = 0.
@@ -1444,41 +1455,39 @@ SUBROUTINE RTCOEF2(pin,vp1,vs1,den1,vp2,vs2,den2,pors, &
       !Pick conversion
        r0 = rand()      
       
-			 rt_sum = rrp**2+rtp**2+ars**2+ats**2    !SUM OF REFL/TRAN COEFS
-			 rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
-			 rt_max = arp**2/rt_sum             !
-			 IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED P !IF4c
-				 IF (REAL(arp) < 0.) amp = -amp                 !REVERSE POLARITY
-				 ud = -ud                            !UPGOING <-> DOWNGOING
-				 ip = 1                              !P WAVE      
-			 END IF                               !                            !IF4c
+			 rt_sum = rrp+rrs+rtp+rts                     !SUM OF REFL/TRAN COEFS
+			 rt_min = 0.                                  !RANGE PROBABILITIES FOR P REFL
+			 rt_max = rrp/rt_sum             
+			 IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN !CHECK IF REFLECTED P    !IF4c
+				 IF (REAL(arp) < 0.) amp = -amp             !REVERSE POLARITY
+				 ud = -ud                                   !UPGOING <-> DOWNGOING
+				 ip = 1                                     !P WAVE      
+			 END IF                                                                !IF4c
 
-			 rt_min = rt_max                      !RANGE PROBABILITIES 4 SV REFL
-			 rt_max = rt_max+ars**2/rt_sum      !
-			 IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED SV  !IF4d
-				 IF (REAL(ars) < 0.) amp = -amp                 !REVERSE POLARITY
-				 ud = -ud                            !UPGOING <-> DOWNGOING
-				 ip = 2                              !SV WAVE
-			 END IF                               !                              !IF4d
+			 rt_min = rt_max                              !RANGE PROBABILITIES 4 SV REFL
+			 rt_max = rt_max+rrs/rt_sum     
+			 IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN !CHECK IF REFLECTED SV   !IF4d
+				 IF (REAL(ars) < 0.) amp = -amp             !REVERSE POLARITY
+				 ud = -ud                                   !UPGOING <-> DOWNGOING
+				 ip = 2                                     !SV WAVE
+			 END IF                                                                !IF4d
 
-			 rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
-			 rt_max = rt_max+atp**2/rt_sum      !
-			 IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRANSMITTED P  !IF4e
-				 IF (REAL(atp) < 0.) amp = -amp                 !REVERSE POLARITY
-				 ip = 1                              !P WAVE
-			 END IF                               !                              !IF4e
+			 rt_min = rt_max                              !RANGE PROBABILITIES 4 P TRANS
+			 rt_max = rt_max+rtp/rt_sum      
+			 IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN !CHECK IF TRANSMITTED P  !IF4e
+				 IF (REAL(atp) < 0.) amp = -amp             !REVERSE POLARITY
+				 ip = 1                                     !P WAVE
+			 END IF                                                                !IF4e
 
-			 rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
-			 rt_max = rt_max+abs(ats)/rt_sum      !
-			 IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV !IF4f
-			   IF (REAL(ats) < 0.) amp = -amp                 !REVERSE POLARITY
-				 ip = 2                              !SV WAVE
-			 END IF                               !                                !IF4f
-      
-      
-            
+			 rt_min = rt_max                              !RANGE PROBABILITIES 4 SV TRANS
+			 rt_max = rt_max+rts/rt_sum      !
+			 IF ( (r0 >= rt_min).AND.(r0 <= rt_max)) THEN !CHECK IF TRANSMITTED SV !IF4f
+			   IF (REAL(ats) < 0.) amp = -amp             !REVERSE POLARITY
+				 ip = 2                                     !SV WAVE
+			 END IF                                                                !IF4f
+           
       RETURN
-END SUBROUTINE RTCOEF2
+END SUBROUTINE RTCOEF_PSV
 
 
 SUBROUTINE RTFLUID(rp,rc,rrhof,ra,rb,rrhos,TdPP, TdSP, RdPP, TuPP, TuPS, RuPP, RuSP, RuPS, RuSS)
@@ -2289,19 +2298,19 @@ SUBROUTINE INTERFACE_NORMAL
 
             IF (ip  ==  3) THEN                                              !IF2a
               IF ( (ud == 1) ) THEN               !IF DOWNGOING SH WAVE      !IF3a
-                CALL REFTRAN_SH(p,vf(iz-1,2),vf(iz,2),rh(iz-1),rh(iz),ar,at,ud,a)
+                CALL RTCOEF_SH(p,vf(iz-1,2),vf(iz,2),rh(iz-1),rh(iz),ar,at,ud,a)
               ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE        !IF3a
-                CALL REFTRAN_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1),ar,at,ud,a)
+                CALL RTCOEF_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1),ar,at,ud,a)
               END IF                                                         !IF3a
             ELSE                                                             !IF2a
               IF ( (ud == 1) ) THEN               !IF DOWNGOING P-SV WAVE    !IF3b
-                CALL RTCOEF2(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
+                CALL RTCOEF_PSV(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
                              vf(iz  ,1),vf(iz  ,2),rh(iz), &
-                            ip,arp,ars,atp,ats,ip,ud,a)
+                            arp,ars,atp,ats,ip,ud,a)
               ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE      !IF3b
-                CALL RTCOEF2(p,vf(iz  ,1),vf(iz  ,2),rh(iz  ), &
+                CALL RTCOEF_PSV(p,vf(iz  ,1),vf(iz  ,2),rh(iz  ), &
                              vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
-                            ip,arp,ars,atp,ats,ip,ud,a)             
+                            arp,ars,atp,ats,ip,ud,a)             
               END IF                                                        !IF3b
             END IF                                                          !IF2a
           
@@ -2773,8 +2782,8 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       
       
       IF (ip_in == 1) THEN                      !! P Incident
-       CALL RTCOEF2(pp,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),&
-               vp2,vs2,rh2,1,rt(1),rt(2),rt(3),rt(4),ip,ud,a) !! P-SV reflected & transmitted (Pr=1,Sr=2,Pt=3,St=4)
+       CALL RTCOEF_PSV(pp,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),&
+               vp2,vs2,rh2,rt(1),rt(2),rt(3),rt(4),ip,ud,a) !! P-SV reflected & transmitted (Pr=1,Sr=2,Pt=3,St=4)
        rt(1)=rt(1)                         !! P  refl
        rt(5)=rt(2)*sa                      !! SH refl
        rt(2)=rt(2)*ca                      !! SV refl
@@ -2788,8 +2797,9 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
        END DO
        
       ELSE
-       CALL REFTRAN_SH(ps,vf(iz_scat,2),vs2,rh(iz_scat),rh2,rt(9),rt(10),ud,a)   !! SH reflected & transmitted amplitudes
-       CALL RTCOEF2(ps,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),vp2,vs2,rh2,2,rt(5),rt(6),rt(7),rt(8),ip,ud,a) !! SV-P reflected & transmitted (Pr=5,Sr=6,Pt=7,St=8)
+       CALL RTCOEF_SH(ps,vf(iz_scat,2),vs2,rh(iz_scat),rh2,rt(9),rt(10),ud,a)   !! SH reflected & transmitted amplitudes
+       CALL RTCOEF_PSV(ps,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),vp2,vs2,rh2,rt(5),rt(6),rt(7),rt(8),ip,ud,a) !! SV-P reflected & transmitted (Pr=5,Sr=6,Pt=7,St=8)
+       ip = ip_in
        DO jj = 1, 10                        !! If errors, zero them
         IF (isnan(rt(jj))) rt(jj) = 0.
        END DO    
