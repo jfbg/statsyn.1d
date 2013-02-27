@@ -19,9 +19,9 @@ PROGRAM STATSYN_GLOBALSCAT
 !
 ! 
 !
-! $Revision: 334 $
-! $Date: 2013-02-27 11:06:51 -0800 (Wed, 27 Feb 2013) $
-! $Author: jguertin $
+! $Revision$
+! $Date$
+! $Author$
 !
 !
 !
@@ -68,9 +68,9 @@ PROGRAM STATSYN_GLOBALSCAT
       exNLAY = 0
 
       WRITE(*,*) 'ISOTROPIC Scattering'
-      WRITE(*,*) 'Last Edited on $Date: 2013-02-27 11:06:51 -0800 (Wed, 27 Feb 2013) $'
-      WRITE(*,*) 'Last Edited by $Author: jguertin $'
-      WRITE(*,*) '$Revision: 334 $'
+      WRITE(*,*) 'Last Edited on $Date$'
+      WRITE(*,*) 'Last Edited by $Author$'
+      WRITE(*,*) '$Revision$'
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
