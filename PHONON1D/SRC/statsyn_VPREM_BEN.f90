@@ -2629,8 +2629,10 @@ SUBROUTINE GET_DS_SCAT
       IF ((z_nf == 0).OR.(z_act == 0)) THEN
          fac = 1
       ELSE
-         fac = z_act/z_nf
+         fac = z_act/z_nf         
       END IF
+      
+!        write(79,*) ds_scat
 
         ds_scat = fac*ds_scat_nf  !Flatten ds_scat_nf (approximation based on mid depth)
         
