@@ -7,7 +7,7 @@
 
 set ray_par    = "0.0 0.1668 0.2931"
 @ t_start      = 0
-@ t_max        = 5400			# 75 minutes
+@ t_max        = 4500			# 75 minutes
 set d_range    = "0 180 91"
 set model      = "2"	#2 for Moon
 set mx_scat_dp = "10"
