@@ -29,14 +29,14 @@
       
       CLOSE (1)
       
-      WRITE(6,*) 'Velocity model checks:'
-      WRITE(6,*) '   --> Total pre-checks layers: ',I
+      WRITE(6,*) '   VELOCITY MODELS CHECKS:'
+      WRITE(6,*) '     ** Total pre-checks layers: ',I
       
       iz1 = 1
 			DO WHILE (scat_depth >= z_st(iz1+1))      !FIND WHICH LAYER THE SCAT LAYER IS ABOVE
 			 iz1 = iz1 +1														 !NEW VEL LAYER WILL BE AT (iz1 + 1)
 			END DO
-			WRITE(6,*) '   --> Scattering layer at or below initial layer:', iz1
+			WRITE(6,*) '     ** Scattering layer at or below initial layer:', iz1
 			
 			
     
@@ -58,7 +58,7 @@
 					END IF
 				 
 					IF ((K == iz1 +1).AND.(check_scat == 1)) THEN
-					 WRITE(6,*) '   --> Adding velocity layer at the base of the scattering layer'
+					 WRITE(6,*) '     ** Adding velocity layer at the base of the scattering layer'
 							z_s(K) = scat_depth
 							r_s(K) = erad-scat_depth
 							vs(K,1) = (vst(K,1)-vst(K-1,1))/(z_st(K) - z_st(K-1)) * (scat_depth - z_st(K-1)) + vst(K-1,1)
@@ -93,7 +93,7 @@
 						rh(nlay) = rht(nlay-1)
 						Q(nlay,1) = Qt(nlay-1)    		  
 			 ELSE
-				 WRITE(6,*) '   --> Adding thin layer near core'
+				 WRITE(6,*) '     ** Adding thin layer near core'
 						z_s(nlay-1) = z_st(I) - corelayer
 						z_s(nlay)   = z_st(I)
 						r_s(nlay-1) = r_st(I) + corelayer
@@ -124,8 +124,8 @@
 			DO WHILE (qdep >= z_s(iz2+1))      !FIND WHICH LAYER THE SCAT LAYER IS ABOVE
 			 iz2 = iz2 +1														 !NEW VEL LAYER WILL BE AT (iz1 + 1)
 			END DO
-			WRITE(6,*) '   --> Source is in or on initial layer:', iz2
-			WRITE(6,*) '          Distance between source and layer is (km):',qdep-z_s(iz2)			
+			WRITE(6,*) '     ** Source is in or on initial layer:', iz2
+			WRITE(6,*) '        * Distance between source and layer is (km):',qdep-z_s(iz2)			
 			IF (qdep - z_s(iz2) < 2)  check_source = 0
 			
 			qdepdiff = qdep !-.1
@@ -154,7 +154,7 @@
 					END IF
 					
 					IF (K == iz2 +1) THEN
-					 WRITE(6,*) '   --> Adding velocity layer at source depth'
+					 WRITE(6,*) '     ** Adding velocity layer at source depth'
 							z_s(K) = qdepdiff
 							r_s(K) = erad-qdepdiff
 							vs(K,1) = (vst(K,1)-vst(K-1,1))/(z_st(K) - z_st(K-1)) * (qdepdiff - z_st(K-1)) + vst(K-1,1)
@@ -190,8 +190,18 @@
       CLOSE(45)
       
       rhs = rh  !Will transform rhs in flattening subroutine
-     	
 
+  		! Depth of last layer is radius
+  		erad = z_s(nlay)
+  		deg2km = erad*d2r
+      circum = 2*pi*erad
+      
+  		WRITE(6,*) '     ** Planet''s radius=',erad
+  		     	
+  		WRITE(6,*) '     ** Number of layers after model checks:',nlay
+  		
+  		! Depth of last layer is radius
+  		erad = z_s(nlay)
 
       RETURN
 
