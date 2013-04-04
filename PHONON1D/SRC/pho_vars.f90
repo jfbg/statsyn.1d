@@ -123,9 +123,9 @@ MODULE PHO_VARS      ! Make variables global
         REAL(4)     RuSP, RuPS, RuSS
         REAL(4)     SumCOEFF
 
-        !IF SprCrtcl > 1, then drop energy
-        INTEGER       SprCrtcl, SprCrtcl_count
-        REAL(8)       SprCrtcl_time
+!       !IF SprCrtcl > 1, then drop energy
+!					INTEGER       SprCrtcl, SprCrtcl_count
+!					REAL(8)       SprCrtcl_time
         
         ! SYSTEM + DEBUG
         INTEGER        status                !I/O ERROR (0=no READ error)
