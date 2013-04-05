@@ -27,14 +27,14 @@ set sourcetype = 1    # 1 = delta, 2 = sine
 set rPrSVrSH   = "1 1 1"  # Energy partioning at source
 
 
-set file_out   = "BM_VPREMOON_SPIKE_nRHOzero"
+set file_out   = "BM_VPREMOON_SPIKE_nRHOzero2"
 set model_name = "VPREMOON_Qp_ori_10km"
 set pfac       = 2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
 @ n_kern  = 8     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 1    ## Number of iterations
+@ n_iter  = 4    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -57,7 +57,7 @@ while ($l < $n_freq)
 
 if ($l == 1) then
  set dt = "1.000"
- set period = "40"
+ set period = "01"
 else
  set dt = "0.150"
  set period = "07"
