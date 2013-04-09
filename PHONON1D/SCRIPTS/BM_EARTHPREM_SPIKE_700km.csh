@@ -23,7 +23,7 @@ set velperturb = 0.0
 
 # Source attenuation and type
 set dQdfstyle  = 1
-set sourcetype = 1    # delta (1), sine (2)
+set sourcetype = 2    # delta (1), sine (2)
 set rPrSVrSH   = "1 1 1"  # Energy partioning at source
 set samtype    = 3   # Sampling over takeoff angles (1), or slownesses (2)
 
