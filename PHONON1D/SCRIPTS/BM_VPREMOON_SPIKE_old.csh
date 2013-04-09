@@ -23,9 +23,8 @@ set velperturb = 0.0
 
 # Source attenuation and type
 set dQdfstyle  = 1
-set sourcetype = 1    # delta (1), sine (2)
+set sourcetype = 1    # 1 = delta, 2 = sine
 set rPrSVrSH   = "1 1 1"  # Energy partioning at source
-set samtype    = 2   # Sampling over takeoff angles (1), or slownesses (2)
 
 
 set file_out   = "BM_VPREMOON_SPIKE2"
@@ -34,7 +33,7 @@ set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 8     ## Number of kernels to use per iteration (simultaneous run)
+@ n_kern  = 6     ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 4    ## Number of iterations
 
 # Output folder
@@ -119,7 +118,6 @@ echo "$n_phonon         \!NUMBER OF PHONONS TO FIRE       "   >> $file_csh
 echo "$q_depth          \!DEPTH OF SOURCE                 "   >> $file_csh
 echo "$sourcetype        \!Source Type            "           >> $file_csh
 echo "$rPrSVrSH        \!Energy partitioning      "           >> $file_csh
-echo "$samtype        \!sampling                  "           >> $file_csh
 echo "$mx_scat_dp       \!MAX SCATTERING DEPTH            "   >> $file_csh
 echo "$prob_scat          \!SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh
 echo "$bg_scat          \!BACKGROUND SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh

@@ -10,7 +10,7 @@ set ray_par    = "0.0 0.1668 0.2931"
 @ t_max        = 8192			# 75 minutes
 set d_range    = "0 180 91"
 set mx_scat_dp = "0"
-set n_phonon   = "3000000"
+set n_phonon   = "3002400"
 
 
 # SCATTERING
@@ -25,17 +25,17 @@ set velperturb = 0.0
 set dQdfstyle  = 1
 set sourcetype = 1    # delta (1), sine (2)
 set rPrSVrSH   = "1 1 1"  # Energy partioning at source
-set samtype    = 2   # Sampling over takeoff angles (1), or slownesses (2)
+set samtype    = 3   # Sampling over takeoff angles (1), or slownesses (2)
 
 
-set file_out   = "BM_VPREMOON_SPIKE2"
-set model_name = "VPREMOON_Qp_ori_10km"
+set file_out   = "BM_EARTHPREM_SPIKE_100km"
+set model_name = "EARTH_MODEL_20km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 8     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 4    ## Number of iterations
+@ n_kern  = 15     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 3    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"

@@ -18,9 +18,9 @@ PROGRAM STATSYN_GLOBALSCAT
 !
 ! 
 !
-! $Revision$
-! $Date$
-! $Author$
+! $Revision: 353 $
+! $Date: 2013-04-04 12:33:39 -0700 (Thu, 04 Apr 2013) $
+! $Author: jguertin $
 !
 !
 !
@@ -62,7 +62,11 @@ PROGRAM STATSYN_GLOBALSCAT
         INTEGER          ::  logperc
         INTEGER (kind=8) ::  scat_time
         INTEGER              kernelnum
- 
+        
+        REAL(8)	 Cc2, Ccwil, Ccwir, Cc1
+				INTEGER	 Cnp,Cnp1,CI,Cindex
+				REAL(8)  Cc2r, Cc1r, Cdp, Cp(3600)
+
             
 !      ^^^^^ DECLARATIONS ^^^^^
 
@@ -72,9 +76,9 @@ PROGRAM STATSYN_GLOBALSCAT
       exNLAY = 0
 
       WRITE(*,*) 'ISOTROPIC Scattering'
-      WRITE(*,*) 'Last Edited on $Date$'
-      WRITE(*,*) 'Last Edited by $Author$'
-      WRITE(*,*) '$Revision$'
+      WRITE(*,*) 'Last Edited on $Date: 2013-04-04 12:33:39 -0700 (Thu, 04 Apr 2013) $'
+      WRITE(*,*) 'Last Edited by $Author: jguertin $'
+      WRITE(*,*) '$Revision: 353 $'
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
@@ -168,6 +172,27 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(6,*) 'KERNELNUM =',kernelnum
 !      ^^^^^ GET INPUTS ^^^^^
 
+!  FOR CRFL BENCHMARKING
+
+					 Cc2 = 4.6 
+					 Ccwil = 0
+					 Ccwir = 320
+					 Cc1 = 420
+					 Cnp = 3600
+					 
+					 
+					 Cc2r=1./Cc2
+           Cc1r=1./Cc1
+           Cnp1=Cnp-1
+           Cdp=(Cc2r-Cc1r)/float(Cnp1)
+           
+           DO CI = 1,Cnp
+             Cp(CI)=float(CI-1)*Cdp+Cc1r
+           END DO
+           
+           Cindex = 1
+
+!      OPEN(6610,FILE='raytest.txt',STATUS='UNKNOWN')
 
 !     ======================================================
 !      ----- INITIALIZE PARAMETERS -----
@@ -358,7 +383,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 !     ======================================================
 !      ----- Attenuation + Attenuated source -----
-      WRITE(6,'(a)',ADVANCE='no') 'CALCULATING ATTENUATED SOURCES LIBRARY'        !CALCULATING SOURCE
+      WRITE(6,*) 'CALCULATING ATTENUATED SOURCES LIBRARY'        !CALCULATING SOURCE
       datt = .02    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
                 ! This is datt, not max att. max att will be datt*(ns0-1) = 40.
      DO I = 1, ns0                           !SOURCES * ATTENUATION
@@ -385,8 +410,6 @@ PROGRAM STATSYN_GLOBALSCAT
       END DO
       
       mts = REAL(mts4,8)
-      
-      WRITE(6,*) ns0,'x datt    - DONE'
       
 !      OPEN(23,FILE='source.out')              !OUTPUT SOURCE
 !      WRITE(23,*) nts,ns0                     !
@@ -515,6 +538,41 @@ PROGRAM STATSYN_GLOBALSCAT
         IF (samplingtype.eq.2) THEN               ! Sample slownesses
           p = maxp*r0
           ang1 = asin(p*vf(iz,iwave))
+        ELSEIF (samplingtype.eq.3) THEN						! Sample from p range (same as CRFL)
+        
+!							Cc2 = 10 
+!							Ccwil = 14
+!							Ccwir = 320
+!							Cc1 = 420
+!							Cnp = 36
+!							Cc2r=1./c2
+!							Cc1r=1./c1
+!							Cnp1=Cnp-1
+!							Cdp=(Cc2r-Cc1r)/float(Cnp1)
+!					 
+!							DO CI = 1,Cnp
+!								Cp(i)=float(i-1)*Cdp+Cc1r
+!							END DO
+
+        
+!           DO WHILE (Cindex > Cnp)
+!            Cindex = Cindex - Cnp
+!           END DO
+           
+!           Cindex = nint(r0*float(Cnp))
+!           IF (Cindex < 1) Cindex = 1
+!           IF (Cindex > Cnp) Cindex = Cnp
+           
+           p = Cp(Cindex)
+           ang1 = asin(p*vf(iz,iwave))
+           
+!           WRITE(6610,*) p,Cindex
+
+           Cindex = Cindex + 1
+           IF (Cindex > Cnp) Cindex   = Cindex - Cnp
+
+        
+        
         ELSE    !IF (samplingtype.eq.1) THEN      ! Sample Angles
           ang1 = angst*r0                        !Randomly select angle
           p    = abs(sin(ang1))/vf(iz,iwave)
@@ -781,6 +839,7 @@ PROGRAM STATSYN_GLOBALSCAT
                     s1 = float(ims-1)*datt
                     s2 = float(ims  )*datt
                     frac = (s-s1)/(s2-s1)
+                    
 
 
                       icaust = ncaust
@@ -813,8 +872,7 @@ PROGRAM STATSYN_GLOBALSCAT
                       ix_last = ix
                       it_last = it
                       
-                      
-              
+                                  
                       DO ic = 1, 3
                         DO JJ = 1, nts
                           JT = IT + JJ - 1
@@ -914,6 +972,10 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(6,*) 'Too far from receiver = ', surCYC1      
       WRITE(6,*) 'Scattered:',  conv_count(1:6)
       WRITE(6,*) 'Dead stuck:', tstuck    
+      
+      
+      !CRFL
+!      CLOSE(6610)
 
 
     
@@ -1053,10 +1115,11 @@ SUBROUTINE ATTENUATE(sin,sout,ndat,dt,tstar,dQdfSTYLE)
         !Can give rdQdf any form. 
         IF (dQdfSTYLE == 1) THEN
              rdQdf(I) = 1.      !Q constant at all frequencies
+!                               WRITE(6,*) 'Atte6'
         ELSE IF (dQdfSTYLE == 2) THEN
              rdQdf(I) = 1. + ((df*float(I-1)-1)*.3)
         ELSE
-             rdQdf(I) = 1.  ! If not properly specified do == 1
+             rdQdf(I) = 1.
         END IF
       END DO
       
@@ -1241,10 +1304,10 @@ SUBROUTINE SURFACE_PSV_BEN
        rP = (REAL(crP)**2 + IMAG(crP)**2)**0.5
        rS = (REAL(crS)**2 + IMAG(crS)**2)**0.5
        
-
+!         totc = abs(rP) + abs(rS)
          totc = rP**2 + sin(2*angS)/sin(2*angP)*rS**2
          nrP = rP**2 / totc
-!         nrS = sin(2*angS)/sin(2*angP)*rS**2 / totc
+         nrS = sin(2*angS)/sin(2*angP)*rS**2 / totc
          r0 = rand()
          IF (r0 <= nrP) THEN
            ip = 1
@@ -1267,7 +1330,7 @@ SUBROUTINE SURFACE_PSV_BEN
        
          totc = sin(2*angP)/sin(2*angS)*rP**2 + rS**2
          nrP = sin(2*angP)/sin(2*angS)*rP**2 / totc
-!         nrS = rS**2 / totc
+         nrS = rS**2 / totc
          IF (r0 <= nrP) THEN
            ip = 1
            IF (REAL(crP) < 0) a = -a
