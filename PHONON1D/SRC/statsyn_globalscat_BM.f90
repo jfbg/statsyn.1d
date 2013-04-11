@@ -174,8 +174,8 @@ PROGRAM STATSYN_GLOBALSCAT
 
 !  FOR CRFL BENCHMARKING
 
-					 Cc2 = 4.6 
-					 Ccwil = 0
+					 Cc2 = 8.3 
+					 Ccwil = 10
 					 Ccwir = 320
 					 Cc1 = 420
 					 Cnp = 3600
@@ -361,7 +361,7 @@ PROGRAM STATSYN_GLOBALSCAT
       !SET SOURCE TYPE
       IF (SourceTYPE.eq.1) THEN
         mt(5) = 1.   !Spike to compare with CRFL
-        WRITE(6,'(a)') ' SOURCE IS DELTA FUNCTION'
+        WRITE(6,'(a)') ' SOURCE IS SPIKE'
       ELSE IF (SourceTYPE.eq.2) THEN
         DO I = 1, nts                           !SOURCE-TIME FUNCTION
          t0 = dti*float(I-1)-P0
@@ -383,7 +383,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 !     ======================================================
 !      ----- Attenuation + Attenuated source -----
-      WRITE(6,*) 'CALCULATING ATTENUATED SOURCES LIBRARY'        !CALCULATING SOURCE
+      WRITE(6,'(a)',ADVANCE='no') 'CALCULATING ATTENUATED SOURCES LIBRARY'        !CALCULATING SOURCE
       datt = .02    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
                 ! This is datt, not max att. max att will be datt*(ns0-1) = 40.
      DO I = 1, ns0                           !SOURCES * ATTENUATION
@@ -411,6 +411,8 @@ PROGRAM STATSYN_GLOBALSCAT
       
       mts = REAL(mts4,8)
       
+
+      
 !      OPEN(23,FILE='source.out')              !OUTPUT SOURCE
 !      WRITE(23,*) nts,ns0                     !
 !      WRITE(23,FMT=888) 999.99,(datt*float(J-1),J=1,ns0)
@@ -418,6 +420,8 @@ PROGRAM STATSYN_GLOBALSCAT
 !        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,3,I)*1.,J=1,ns0)
 !      END DO
 !      CLOSE(23)
+      
+      WRITE(6,*) ns0,'x datt    - DONE'
 ! 
 !      OPEN(24,file='mts.out',status='unknown')
 !        DO I = 1,ns0

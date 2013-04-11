@@ -2220,7 +2220,7 @@ SUBROUTINE INTERFACE_NORMAL
         
         ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE  !IF1
           ud = -ud
-          dt1 = (2*corelayer)/vf(iz,iwave)
+          dt1 = (2*corelayer)/vf(nlay,iwave)
           x = x + 180*deg2km
           t = t + dt1
           totald = totald + 2*corelayer
