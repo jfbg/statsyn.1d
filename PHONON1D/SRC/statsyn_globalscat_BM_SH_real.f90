@@ -1384,8 +1384,8 @@ SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp)
         car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
         cat   = ctwo*rho1*vb1*cj1/DD
         
-        ar = ((REAL(car))!**2 + IMAG(car)**2)**0.5)**2 * 1
-        at = ((REAL(cat))!**2 + IMAG(cat)**2)**0.5)**2 * rh2*b2*cos(asin(p*b2))/rh1/b1/cos(asin(p*b1))
+        ar = ((REAL(car)))!**2 + IMAG(car)**2)**0.5)**2 * 1
+        at = ((REAL(cat)))!**2 + IMAG(cat)**2)**0.5)**2 * rh2*b2*cos(asin(p*b2))/rh1/b1/cos(asin(p*b1))
         
         !Check for total internal reflection !fix
         IF (b2*p > 1) at = 0
