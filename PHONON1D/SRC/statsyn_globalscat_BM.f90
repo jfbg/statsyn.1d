@@ -86,6 +86,8 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Using vflat for coefficients'
       WRITE(*,*) '*'
+      WRITE(*,*) '*    USE FOR BENCHMARKING - DISCRETE p VALUES'
+      WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
       
