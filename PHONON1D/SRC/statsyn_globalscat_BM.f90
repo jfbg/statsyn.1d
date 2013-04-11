@@ -66,9 +66,12 @@ PROGRAM STATSYN_GLOBALSCAT
         REAL(8)	 Cc2, Ccwil, Ccwir, Cc1
 				INTEGER	 Cnp,Cnp1,CI,Cindex
 				REAL(8)  Cc2r, Cc1r, Cdp, Cp(3600)
+				REAL(8)  maxs
 
             
 !      ^^^^^ DECLARATIONS ^^^^^
+
+     maxs = 0.
 
       !DEBUG
       surCYC1 = 0
@@ -493,8 +496,7 @@ PROGRAM STATSYN_GLOBALSCAT
             ip = 3 !SH
           END IF
         END IF
-        
-        
+                
          
         iwave = ip
         IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
@@ -846,8 +848,8 @@ PROGRAM STATSYN_GLOBALSCAT
                     s2 = float(ims  )*datt
                     frac = (s-s1)/(s2-s1)
                     
-
-
+                    if (s > maxs) maxs = s
+										
                       icaust = ncaust
                       DO WHILE (icaust >= 4)
                         icaust = icaust - 4
