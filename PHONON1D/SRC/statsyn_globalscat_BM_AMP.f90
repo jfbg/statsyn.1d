@@ -1387,8 +1387,8 @@ SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp)
         car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
         cat   = ctwo*rho1*vb1*cj1/DD
         
-        ar = ((REAL(car)**2 + IMAG(car)**2)**0.5)**2 * 1.
-        at = ((REAL(cat)**2 + IMAG(cat)**2)**0.5)**2 * 1.!rh2*b2*cos(asin(p*b2))/rh1/b1/cos(asin(p*b1))
+        ar = ((REAL(car)**2 + IMAG(car)**2)**0.5)!**2 * 1.
+        at = ((REAL(cat)**2 + IMAG(cat)**2)**0.5)!**2 * 1.!rh2*b2*cos(asin(p*b2))/rh1/b1/cos(asin(p*b1))
         
         !Check for total internal reflection !fix
         IF (b2*p > 1) at = 0
@@ -1518,10 +1518,10 @@ SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
          convfac(4) = 1.!den2*vs2*cos(asin(pin*vs2))/den1/vs1/cos(asin(pin*vs1))  !ts
       END IF
       
-      rrp = ((REAL(arp)**2+imag(arp)**2)**0.5)**2  * convfac(1)
-      rrs = ((REAL(ars)**2+imag(ars)**2)**0.5)**2  * convfac(2)
-      rtp = ((REAL(atp)**2+imag(atp)**2)**0.5)**2  * convfac(3)
-      rts = ((REAL(ats)**2+imag(ats)**2)**0.5)**2  * convfac(4)
+      rrp = ((REAL(arp)**2+imag(arp)**2)**0.5)!**2  * convfac(1)
+      rrs = ((REAL(ars)**2+imag(ars)**2)**0.5)!**2  * convfac(2)
+      rtp = ((REAL(atp)**2+imag(atp)**2)**0.5)!**2  * convfac(3)
+      rts = ((REAL(ats)**2+imag(ats)**2)**0.5)!**2  * convfac(4)
       
       ! Check for total internal reflection     !fix
       IF (vp2*pin > 1) rtp = 0.
@@ -1617,10 +1617,15 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
         IF (rc*realp > 1) tP = 0.
         
         !Get new ip
-        tot = rP**2 + sin(2*angS)/sin(2*angP)*rS**2 + tau*sin(2*angPc)/sin(2*angP)*tP**2
-        nrP = rP**2/tot
-        nrS = sin(2*angS)/sin(2*angP)*rS**2/tot
-        ntP = tau*sin(2*angPc)/sin(2*angP)*tP**2/tot
+!        tot = rP**2 + sin(2*angS)/sin(2*angP)*rS**2 + tau*sin(2*angPc)/sin(2*angP)*tP**2
+!        nrP = rP**2/tot
+!        nrS = sin(2*angS)/sin(2*angP)*rS**2/tot
+!        ntP = tau*sin(2*angPc)/sin(2*angP)*tP**2/tot
+        
+        tot = rP + rS + tP
+        nrP = rP/tot
+        nrS = rS/tot
+        ntP = tP/tot       
         
         r0 = rand()
         
@@ -1731,10 +1736,15 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
         IF (rb*realp > 1) tS = 0.
         
         !Get new ip
-        tot = rP**2 + 1/tau*sin(2*angP)/sin(2*angPc)*tP**2 + 1/tau*sin(2*angS)/sin(2*angPc)*tS**2
-        nrP = rP**2/tot
-        ntP = 1/tau*sin(2*angP)/sin(2*angPc)*tP**2/tot
-        ntS = 1/tau*sin(2*angS)/sin(2*angPc)*tS**2/tot
+!        tot = rP**2 + 1/tau*sin(2*angP)/sin(2*angPc)*tP**2 + 1/tau*sin(2*angS)/sin(2*angPc)*tS**2
+!        nrP = rP**2/tot
+!        ntP = 1/tau*sin(2*angP)/sin(2*angPc)*tP**2/tot
+!        ntS = 1/tau*sin(2*angS)/sin(2*angPc)*tS**2/tot
+
+        tot = rP + tP + tS
+        nrP = rP/tot
+        ntP = tP/tot
+        ntS = tS/tot
         
         r0 = rand()
         
