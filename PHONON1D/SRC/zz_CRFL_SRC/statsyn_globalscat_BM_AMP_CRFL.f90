@@ -66,12 +66,12 @@ PROGRAM STATSYN_GLOBALSCAT
         REAL(8)	 Cc2, Ccwil, Ccwir, Cc1
 				INTEGER	 Cnp,Cnp1,CI,Cindex
 				REAL(8)  Cc2r, Cc1r, Cdp, Cp(3600)
-				REAL(8)  maxs
 
+        REAL(8)	 Cc2_SH, Ccwil_SH, Ccwir_SH, Cc1_SH
+				INTEGER	 Cnp_SH,Cnp1_SH,CI_SH,Cindex_SH
+				REAL(8)  Cc2r_SH, Cc1r_SH, Cdp_SH, Cp_SH(3600)
             
 !      ^^^^^ DECLARATIONS ^^^^^
-
-     maxs = 0.
 
       !DEBUG
       surCYC1 = 0
@@ -89,7 +89,8 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Using vflat for coefficients'
       WRITE(*,*) '*'
-      WRITE(*,*) '*'
+      WRITE(*,*) '*    USE FOR BENCHMARKING - DISCRETE p VALUES'
+      WRITE(*,*) '*    USE AMPLITUDE CONSERVATION'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
@@ -177,6 +178,49 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(6,*) 'KERNELNUM =',kernelnum
 !      ^^^^^ GET INPUTS ^^^^^
 
+!  FOR CRFL BENCHMARKING
+
+					 Cc2 = 8.3 
+					 Ccwil = 10
+					 Ccwir = 320
+					 Cc1 = 420
+					 Cnp = 3600
+					 
+					 
+					 Cc2r=1./Cc2
+           Cc1r=1./Cc1
+           Cnp1=Cnp-1
+           Cdp=(Cc2r-Cc1r)/float(Cnp1)
+           
+           DO CI = 1,Cnp
+             Cp(CI)=float(CI-1)*Cdp+Cc1r
+           END DO
+           
+           Cindex = 1
+
+
+! SH
+
+					 Cc2_SH = 3.2 
+					 Ccwil_SH = 10
+					 Ccwir_SH = 320
+					 Cc1_SH = 420
+					 Cnp_SH = 3600
+					 
+					 
+					 Cc2r_SH=1./Cc2_SH
+           Cc1r_SH=1./Cc1_SH
+           Cnp1_SH=Cnp_SH-1
+           Cdp_SH=(Cc2r_SH-Cc1r_SH)/float(Cnp1_SH)
+           
+           DO CI_SH = 1,Cnp_SH
+             Cp_SH(CI_SH)=float(CI_SH-1)*Cdp_SH+Cc1r_SH
+           END DO
+           
+           Cindex_SH = 1
+
+!      OPEN(6610,FILE='raytest.txt',STATUS='UNKNOWN')
+
 !     ======================================================
 !      ----- INITIALIZE PARAMETERS -----
       
@@ -223,6 +267,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(6,*) ''    
 !      ^^^^^ CHECKS  ^^^^^        
       
+
 !     ======================================================
 !      ----- APPLY FLATTENING TRANSFORMATION -----
 
@@ -472,7 +517,10 @@ PROGRAM STATSYN_GLOBALSCAT
           ELSE 
             ip = 3 !SH
           END IF
-        END IF       
+        END IF
+         
+        !DEBUG
+        ip = 3 
          
         iwave = ip
         IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
@@ -522,7 +570,22 @@ PROGRAM STATSYN_GLOBALSCAT
         IF (samplingtype.eq.2) THEN               ! Sample slownesses
           p = maxp*r0
           ang1 = asin(p*vf(iz,iwave))
-!        ELSEIF (samplingtype.eq.3) THEN						! Sample from p range (same as CRFL)
+        ELSEIF (samplingtype.eq.3) THEN						! Sample from p range (same as CRFL)
+        
+
+        IF (ip.eq.3) THEN
+           p = Cp_SH(Cindex_SH)
+           ang1 = asin(p*vf(iz,iwave))
+           Cindex_SH = Cindex_SH + 1
+           IF (Cindex_SH > Cnp_SH) Cindex_SH   = Cindex_SH - Cnp_SH
+        ELSE        
+           p = Cp(Cindex)
+           ang1 = asin(p*vf(iz,iwave))
+           Cindex = Cindex + 1
+           IF (Cindex > Cnp) Cindex   = Cindex - Cnp
+        ENDIF
+        
+        
         ELSE    !IF (samplingtype.eq.1) THEN      ! Sample Angles
           ang1 = angst*r0                        !Randomly select angle
           p    = abs(sin(ang1))/vf(iz,iwave)
@@ -781,7 +844,9 @@ PROGRAM STATSYN_GLOBALSCAT
                     IT = nint((t +dtsurf      -t1)/dti) + 1 
                     
                     ims = int(s/datt)+1
-                    
+
+                    !DEBUG
+                    WRITE(6,*)'IMS:',ims,s,ip,t,I,p
                     
                     !IF (ims <= 1) WRITE(6,*) s,t,ims,xo
                     
@@ -791,8 +856,8 @@ PROGRAM STATSYN_GLOBALSCAT
                     s2 = float(ims  )*datt
                     frac = (s-s1)/(s2-s1)
                     
-                    if (s > maxs) maxs = s
-										
+
+
                       icaust = ncaust
                       DO WHILE (icaust >= 4)
                         icaust = icaust - 4
@@ -1328,8 +1393,8 @@ SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp)
         car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
         cat   = ctwo*rho1*vb1*cj1/DD
         
-        ar = ((REAL(car)**2 + IMAG(car)**2)**0.5)**2 * 1
-        at = ((REAL(cat)**2 + IMAG(cat)**2)**0.5)**2 * rh2*b2*cos(asin(p*b2))/rh1/b1/cos(asin(p*b1))
+        ar = ((REAL(car)**2 + IMAG(car)**2)**0.5)!**2 * 1.
+        at = ((REAL(cat)**2 + IMAG(cat)**2)**0.5)!**2 * 1.!rh2*b2*cos(asin(p*b2))/rh1/b1/cos(asin(p*b1))
         
         !Check for total internal reflection !fix
         IF (b2*p > 1) at = 0
@@ -1440,10 +1505,10 @@ SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
          atp    = ctwo*rho1*ci1*F/(va2*DEN)         !trans down P to P down
          ats    = ctwo*rho1*ci1*H*psub/(vb2*DEN)       !trans down P to S down
          
-         convfac(1) = 1                                                         !rp
-         convfac(2) = vs1*cos(asin(pin*vs1))/vp1/cos(asin(pin*vp1))            !rs
-         convfac(3) = den2*vp2*cos(asin(pin*vp2))/den1/vp1/cos(asin(pin*vp1))  !tp
-         convfac(4) = den2*vs2*cos(asin(pin*vs2))/den1/vp1/cos(asin(pin*vp1))  !ts
+         convfac(1) = 1.                                                         !rp
+         convfac(2) = 1.!vs1*cos(asin(pin*vs1))/vp1/cos(asin(pin*vp1))            !rs
+         convfac(3) = 1.!den2*vp2*cos(asin(pin*vp2))/den1/vp1/cos(asin(pin*vp1))  !tp
+         convfac(4) = 1.!den2*vs2*cos(asin(pin*vs2))/den1/vp1/cos(asin(pin*vp1))  !ts
       ELSE                   !INCIDENT S-WAVE
          trm1   = a*b+c*d*ci2*cj2/(va2*vb2)       
          arp    = (-ctwo*cj1*trm1*psub)/(va1*DEN)      !refl down S to P up
@@ -1453,16 +1518,16 @@ SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
          atp    = -ctwo*rho1*cj1*G*psub/(va2*DEN)      !trans down S to P down 
          ats    = ctwo*rho1*cj1*E/(vb2*DEN)         !trans down S to S down
          
-         convfac(1) = vp1*cos(asin(pin*vp1))/vs1/cos(asin(pin*vs1))            !rp
-         convfac(2) = 1                                                        !rs
-         convfac(3) = den2*vp2*cos(asin(pin*vp2))/den1/vs1/cos(asin(pin*vs1))  !tp
-         convfac(4) = den2*vs2*cos(asin(pin*vs2))/den1/vs1/cos(asin(pin*vs1))  !ts
+         convfac(1) = 1.!vp1*cos(asin(pin*vp1))/vs1/cos(asin(pin*vs1))            !rp
+         convfac(2) = 1.                                                       !rs
+         convfac(3) = 1.!den2*vp2*cos(asin(pin*vp2))/den1/vs1/cos(asin(pin*vs1))  !tp
+         convfac(4) = 1.!den2*vs2*cos(asin(pin*vs2))/den1/vs1/cos(asin(pin*vs1))  !ts
       END IF
       
-      rrp = ((REAL(arp)**2+imag(arp)**2)**0.5)**2  * convfac(1)
-      rrs = ((REAL(ars)**2+imag(ars)**2)**0.5)**2  * convfac(2)
-      rtp = ((REAL(atp)**2+imag(atp)**2)**0.5)**2  * convfac(3)
-      rts = ((REAL(ats)**2+imag(ats)**2)**0.5)**2  * convfac(4)
+      rrp = ((REAL(arp)**2+imag(arp)**2)**0.5)!**2  * convfac(1)
+      rrs = ((REAL(ars)**2+imag(ars)**2)**0.5)!**2  * convfac(2)
+      rtp = ((REAL(atp)**2+imag(atp)**2)**0.5)!**2  * convfac(3)
+      rts = ((REAL(ats)**2+imag(ats)**2)**0.5)!**2  * convfac(4)
       
       ! Check for total internal reflection     !fix
       IF (vp2*pin > 1) rtp = 0.
@@ -1558,10 +1623,15 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
         IF (rc*realp > 1) tP = 0.
         
         !Get new ip
-        tot = rP**2 + sin(2*angS)/sin(2*angP)*rS**2 + tau*sin(2*angPc)/sin(2*angP)*tP**2
-        nrP = rP**2/tot
-        nrS = sin(2*angS)/sin(2*angP)*rS**2/tot
-        ntP = tau*sin(2*angPc)/sin(2*angP)*tP**2/tot
+!        tot = rP**2 + sin(2*angS)/sin(2*angP)*rS**2 + tau*sin(2*angPc)/sin(2*angP)*tP**2
+!        nrP = rP**2/tot
+!        nrS = sin(2*angS)/sin(2*angP)*rS**2/tot
+!        ntP = tau*sin(2*angPc)/sin(2*angP)*tP**2/tot
+        
+        tot = rP + rS + tP
+        nrP = rP/tot
+        nrS = rS/tot
+        ntP = tP/tot       
         
         r0 = rand()
         
@@ -1672,10 +1742,15 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
         IF (rb*realp > 1) tS = 0.
         
         !Get new ip
-        tot = rP**2 + 1/tau*sin(2*angP)/sin(2*angPc)*tP**2 + 1/tau*sin(2*angS)/sin(2*angPc)*tS**2
-        nrP = rP**2/tot
-        ntP = 1/tau*sin(2*angP)/sin(2*angPc)*tP**2/tot
-        ntS = 1/tau*sin(2*angS)/sin(2*angPc)*tS**2/tot
+!        tot = rP**2 + 1/tau*sin(2*angP)/sin(2*angPc)*tP**2 + 1/tau*sin(2*angS)/sin(2*angPc)*tS**2
+!        nrP = rP**2/tot
+!        ntP = 1/tau*sin(2*angP)/sin(2*angPc)*tP**2/tot
+!        ntS = 1/tau*sin(2*angS)/sin(2*angPc)*tS**2/tot
+
+        tot = rP + tP + tS
+        nrP = rP/tot
+        ntP = tP/tot
+        ntS = tS/tot
         
         r0 = rand()
         

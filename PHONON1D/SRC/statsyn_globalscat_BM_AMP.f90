@@ -63,13 +63,6 @@ PROGRAM STATSYN_GLOBALSCAT
         INTEGER (kind=8) ::  scat_time
         INTEGER              kernelnum
         
-        REAL(8)	 Cc2, Ccwil, Ccwir, Cc1
-				INTEGER	 Cnp,Cnp1,CI,Cindex
-				REAL(8)  Cc2r, Cc1r, Cdp, Cp(3600)
-
-        REAL(8)	 Cc2_SH, Ccwil_SH, Ccwir_SH, Cc1_SH
-				INTEGER	 Cnp_SH,Cnp1_SH,CI_SH,Cindex_SH
-				REAL(8)  Cc2r_SH, Cc1r_SH, Cdp_SH, Cp_SH(3600)
             
 !      ^^^^^ DECLARATIONS ^^^^^
 
@@ -89,7 +82,6 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Using vflat for coefficients'
       WRITE(*,*) '*'
-      WRITE(*,*) '*    USE FOR BENCHMARKING - DISCRETE p VALUES'
       WRITE(*,*) '*    USE AMPLITUDE CONSERVATION'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
@@ -177,49 +169,6 @@ PROGRAM STATSYN_GLOBALSCAT
       READ (5,*)  kernelnum
       WRITE(6,*) 'KERNELNUM =',kernelnum
 !      ^^^^^ GET INPUTS ^^^^^
-
-!  FOR CRFL BENCHMARKING
-
-					 Cc2 = 8.3 
-					 Ccwil = 10
-					 Ccwir = 320
-					 Cc1 = 420
-					 Cnp = 3600
-					 
-					 
-					 Cc2r=1./Cc2
-           Cc1r=1./Cc1
-           Cnp1=Cnp-1
-           Cdp=(Cc2r-Cc1r)/float(Cnp1)
-           
-           DO CI = 1,Cnp
-             Cp(CI)=float(CI-1)*Cdp+Cc1r
-           END DO
-           
-           Cindex = 1
-
-
-! SH
-
-					 Cc2_SH = 3.2 
-					 Ccwil_SH = 10
-					 Ccwir_SH = 320
-					 Cc1_SH = 420
-					 Cnp_SH = 3600
-					 
-					 
-					 Cc2r_SH=1./Cc2_SH
-           Cc1r_SH=1./Cc1_SH
-           Cnp1_SH=Cnp_SH-1
-           Cdp_SH=(Cc2r_SH-Cc1r_SH)/float(Cnp1_SH)
-           
-           DO CI_SH = 1,Cnp_SH
-             Cp_SH(CI_SH)=float(CI_SH-1)*Cdp_SH+Cc1r_SH
-           END DO
-           
-           Cindex_SH = 1
-
-!      OPEN(6610,FILE='raytest.txt',STATUS='UNKNOWN')
 
 !     ======================================================
 !      ----- INITIALIZE PARAMETERS -----
@@ -519,6 +468,9 @@ PROGRAM STATSYN_GLOBALSCAT
           END IF
         END IF
          
+        !DEBUG
+        ip = 3 
+         
         iwave = ip
         IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
         
@@ -567,22 +519,6 @@ PROGRAM STATSYN_GLOBALSCAT
         IF (samplingtype.eq.2) THEN               ! Sample slownesses
           p = maxp*r0
           ang1 = asin(p*vf(iz,iwave))
-        ELSEIF (samplingtype.eq.3) THEN						! Sample from p range (same as CRFL)
-        
-
-        IF (ip.eq.3) THEN
-           p = Cp_SH(Cindex_SH)
-           ang1 = asin(p*vf(iz,iwave))
-           Cindex_SH = Cindex_SH + 1
-           IF (Cindex_SH > Cnp_SH) Cindex_SH   = Cindex_SH - Cnp_SH
-        ELSE        
-           p = Cp(Cindex)
-           ang1 = asin(p*vf(iz,iwave))
-           Cindex = Cindex + 1
-           IF (Cindex > Cnp) Cindex   = Cindex - Cnp
-        ENDIF
-        
-        
         ELSE    !IF (samplingtype.eq.1) THEN      ! Sample Angles
           ang1 = angst*r0                        !Randomly select angle
           p    = abs(sin(ang1))/vf(iz,iwave)
@@ -841,6 +777,9 @@ PROGRAM STATSYN_GLOBALSCAT
                     IT = nint((t +dtsurf      -t1)/dti) + 1 
                     
                     ims = int(s/datt)+1
+
+                    !DEBUG
+                    WRITE(6,*)'IMS:',ims,s,ip,t,I,p
                     
                     !IF (ims <= 1) WRITE(6,*) s,t,ims,xo
                     
@@ -984,8 +923,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(6,*) 'Dead stuck:', tstuck    
       
       
-      !CRFL
-!      CLOSE(6610)
+
 
 
     

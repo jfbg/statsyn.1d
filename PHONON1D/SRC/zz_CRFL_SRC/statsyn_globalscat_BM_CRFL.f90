@@ -89,7 +89,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Using vflat for coefficients'
       WRITE(*,*) '*'
-      WRITE(*,*) '*'
+      WRITE(*,*) '*    USE FOR BENCHMARKING - DISCRETE p VALUES'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
@@ -176,6 +176,28 @@ PROGRAM STATSYN_GLOBALSCAT
       READ (5,*)  kernelnum
       WRITE(6,*) 'KERNELNUM =',kernelnum
 !      ^^^^^ GET INPUTS ^^^^^
+
+!  FOR CRFL BENCHMARKING
+
+					 Cc2 = 8.3 
+					 Ccwil = 10
+					 Ccwir = 320
+					 Cc1 = 420
+					 Cnp = 3600
+					 
+					 
+					 Cc2r=1./Cc2
+           Cc1r=1./Cc1
+           Cnp1=Cnp-1
+           Cdp=(Cc2r-Cc1r)/float(Cnp1)
+           
+           DO CI = 1,Cnp
+             Cp(CI)=float(CI-1)*Cdp+Cc1r
+           END DO
+           
+           Cindex = 1
+
+!      OPEN(6610,FILE='raytest.txt',STATUS='UNKNOWN')
 
 !     ======================================================
 !      ----- INITIALIZE PARAMETERS -----
@@ -472,7 +494,10 @@ PROGRAM STATSYN_GLOBALSCAT
           ELSE 
             ip = 3 !SH
           END IF
-        END IF       
+        END IF
+              
+         !DEBUG
+         ip = 3       
          
         iwave = ip
         IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
@@ -522,7 +547,41 @@ PROGRAM STATSYN_GLOBALSCAT
         IF (samplingtype.eq.2) THEN               ! Sample slownesses
           p = maxp*r0
           ang1 = asin(p*vf(iz,iwave))
-!        ELSEIF (samplingtype.eq.3) THEN						! Sample from p range (same as CRFL)
+        ELSEIF (samplingtype.eq.3) THEN						! Sample from p range (same as CRFL)
+        
+!							Cc2 = 10 
+!							Ccwil = 14
+!							Ccwir = 320
+!							Cc1 = 420
+!							Cnp = 36
+!							Cc2r=1./c2
+!							Cc1r=1./c1
+!							Cnp1=Cnp-1
+!							Cdp=(Cc2r-Cc1r)/float(Cnp1)
+!					 
+!							DO CI = 1,Cnp
+!								Cp(i)=float(i-1)*Cdp+Cc1r
+!							END DO
+
+        
+!           DO WHILE (Cindex > Cnp)
+!            Cindex = Cindex - Cnp
+!           END DO
+           
+!           Cindex = nint(r0*float(Cnp))
+!           IF (Cindex < 1) Cindex = 1
+!           IF (Cindex > Cnp) Cindex = Cnp
+           
+           p = Cp(Cindex)
+           ang1 = asin(p*vf(iz,iwave))
+           
+!           WRITE(6610,*) p,Cindex
+
+           Cindex = Cindex + 1
+           IF (Cindex > Cnp) Cindex   = Cindex - Cnp
+
+        
+        
         ELSE    !IF (samplingtype.eq.1) THEN      ! Sample Angles
           ang1 = angst*r0                        !Randomly select angle
           p    = abs(sin(ang1))/vf(iz,iwave)
@@ -782,6 +841,8 @@ PROGRAM STATSYN_GLOBALSCAT
                     
                     ims = int(s/datt)+1
                     
+                    !DEBUG
+                    WRITE(6,*)'IMS:',ims,s,ip,t,I,p,ang1
                     
                     !IF (ims <= 1) WRITE(6,*) s,t,ims,xo
                     

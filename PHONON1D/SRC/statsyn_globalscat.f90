@@ -47,8 +47,9 @@ PROGRAM STATSYN_GLOBALSCAT
         REAL          mt(nst0)               !SOURCE-TIME FUNCTION 
         COMPLEX       ms(nst0)               !SOURCE
         REAL          dt4,r_P,r_SV,r_SH     !r_* is energy ratio at source (1:10:10)
-        INTEGER       SourceTYPE,samplingtype  
+        INTEGER       SourceTYPE,samplingtype,sI
         REAL(8)       maxp 
+        CHARACTER*100 SourceFILE
         
         ! FLATTENING
         REAL(8)       pfac           
@@ -120,7 +121,12 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(6,'(A)') '(1: delta function) (2: sine) '
       READ (5,    *)  SourceTYPE
       WRITE(6,*) 'Source TYPE:',SourceTYPE 
-
+      
+      IF (SourceTYPE.eq.9) THEN
+       WRITE(6,'(A)') 'CUSTOM SOURCE -- ENTER SOURCE FILENAME (Must be in SOURCES folder):'
+       READ (5,'(A)')  SourceFILE
+      END IF
+      
       WRITE(6,'(A)') 'ENTER SOURCE ENERGY RATIOS (P:SV:SH) eg. ''1 10 10'':'
       READ (5,    *)  r_P,r_SV,r_SH
       WRITE(6,*) 'P:SV:SH=',r_P,r_SV,r_SH
@@ -334,18 +340,25 @@ PROGRAM STATSYN_GLOBALSCAT
       END DO
 
       !SET SOURCE TYPE
-      IF (SourceTYPE.eq.1) THEN
-        mt(5) = 1.   !Spike to compare with CRFL
-        WRITE(6,'(a)') ' SOURCE IS DELTA FUNCTION'
-      ELSE IF (SourceTYPE.eq.2) THEN
+      IF (SourceTYPE.eq.2) THEN
         DO I = 1, nts                           !SOURCE-TIME FUNCTION
          t0 = dti*float(I-1)-P0
          mt(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
         END DO
         WRITE(6,'(a)') ' SOURCE IS SINE WAVE'
+      ELSEIF (SourceTYPE.eq.9) THEN      !CUSTOM SOURCE
+         WRITE(6,'(a)') ' CUSTOM SOURCE'
+         CALL READIN_SOURCE(nts1,mt,SourceFILE)
+!         OPEN(3334,FILE='customsource.out',STATUS='UNKNOWN')
+!         WRITE(3334,FMT=3335) (mt(sI),sI=1,nts1)
+!         CLOSE(3334)
+      ELSE !IF (SourceTYPE.eq.1) THEN
+        mt(5) = 1.   !Spike to compare with CRFL
+        WRITE(6,'(a)') ' SOURCE IS DELTA FUNCTION'
       END IF
       
+3335  FORMAT(500(F10.6,1X))
 
       !Calculate maximum source power (i.e. no attenuation) to normalize attn
       minattn = 0.
@@ -2890,7 +2903,27 @@ SUBROUTINE UNIT_VECTOR_3(n)
    RETURN
 END SUBROUTINE UNIT_VECTOR_3
 
+SUBROUTINE READIN_SOURCE(nts1,mt,SourceFILE)
 
+      IMPLICIT NONE
+      INTEGER       nts1,nts0,j
+      REAL          mt(*)
+      CHARACTER*100 SourceFILE
+           
+      WRITE(6,'(a)') '     READING IN SOURCE FROM:',SourceFILE
+      
+      OPEN(3334,FILE=SourceFILE,STATUS='OLD')
+  
+      READ(3334,*) nts1
+      READ(3334,FMT=3335) (mt(j),j=1,nts1)
+      
+      CLOSE(3334)
+      
+      RETURN
+      
+3335  FORMAT(500(F10.6,1X))
+
+END SUBROUTINE READIN_SOURCE
 
 
 SUBROUTINE CHECK_TOTALTIME(nt,nt0,dti,t1,t2)
