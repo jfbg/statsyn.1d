@@ -350,6 +350,7 @@ PROGRAM STATSYN_GLOBALSCAT
       ELSEIF (SourceTYPE.eq.9) THEN      !CUSTOM SOURCE
          WRITE(6,'(a)') ' CUSTOM SOURCE'
          CALL READIN_SOURCE(nts1,mt,SourceFILE)
+         nts = nts1
 !         OPEN(3334,FILE='customsource.out',STATUS='UNKNOWN')
 !         WRITE(3334,FMT=3335) (mt(sI),sI=1,nts1)
 !         CLOSE(3334)
