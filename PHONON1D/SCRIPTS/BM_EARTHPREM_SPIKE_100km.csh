@@ -35,7 +35,7 @@ set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
 @ n_kern  = 15     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 3    ## Number of iterations
+@ n_iter  = 6    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -45,7 +45,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 cd SRC
-make statsyn_global_BM.x
+make statsyn_global_CRFL.x
 cd ..
 
 
@@ -109,7 +109,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsyn_globalscat_BM << EOF"                         >  $file_csh
+echo "./bin/statsyn_globalscat_CRFL << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
 echo "$ray_par          \!LIMIT THE RAY PARAMETER"            >> $file_csh
