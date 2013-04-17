@@ -90,7 +90,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*    Using vflat for coefficients'
       WRITE(*,*) '*'
       WRITE(*,*) '*    USE FOR BENCHMARKING - DISCRETE p VALUES'
-      WRITE(*,*) '*    USE AMPLITUDE CONSERVATION'
+      WRITE(*,*) '*    USE ENERGY CONSERVATION'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
