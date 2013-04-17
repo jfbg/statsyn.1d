@@ -517,10 +517,7 @@ PROGRAM STATSYN_GLOBALSCAT
           ELSE 
             ip = 3 !SH
           END IF
-        END IF
-         
-        !DEBUG
-        ip = 3 
+        END IF 
          
         iwave = ip
         IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
@@ -845,8 +842,6 @@ PROGRAM STATSYN_GLOBALSCAT
                     
                     ims = int(s/datt)+1
 
-                    !DEBUG
-                    WRITE(6,*)'IMS:',ims,s,ip,t,I,p
                     
                     !IF (ims <= 1) WRITE(6,*) s,t,ims,xo
                     
