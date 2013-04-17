@@ -82,6 +82,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*'
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Using vflat for coefficients'
+      WRITE(*,*) '*    Uses complex conversion factor for disp --> energy coefficients'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
@@ -1233,6 +1234,7 @@ SUBROUTINE SURFACE_PSV_BEN
       COMPLEX(8)    crP,crS,cp,c0
       REAL(8)       rP,rS,nrP,nrS
       real(8)       totc
+      COMPLEX(8)    convfac(2)
       
 
       ip_init = ip
@@ -1252,13 +1254,16 @@ SUBROUTINE SURFACE_PSV_BEN
        crP = D1*((velS/velP)**2*sin(2*angP)*sin(2*angS)-(cos(2*angS))**2)
        crS = D1*(-2.*(velS/velP)*sin(2*angP)*cos(2*angS))
        
-       rP = (REAL(crP)**2 + IMAG(crP)**2)**0.5
-       rS = (REAL(crS)**2 + IMAG(crS)**2)**0.5
+       convfac(1) = CMPLX(1.,0.)
+       convfac(2) = SQRT(sin(2*angS)/sin(2*angP))
+       
+       rP = (REAL(crP*convfac(1))**2 + IMAG(crP*convfac(1))**2)**0.5
+       rS = (REAL(crS*convfac(2))**2 + IMAG(crS*convfac(2))**2)**0.5
        
 
-         totc = rP**2 + sin(2*angS)/sin(2*angP)*rS**2
-         nrP = rP**2 / totc
-!         nrS = sin(2*angS)/sin(2*angP)*rS**2 / totc
+         totc = rP + rS
+         nrP = rP / totc
+!         nrS = rS / totc
          r0 = rand()
          IF (r0 <= nrP) THEN
            ip = 1
@@ -1273,15 +1278,18 @@ SUBROUTINE SURFACE_PSV_BEN
        crP = D1*((velS/velP)*sin(4*angS))
        crS = D1*((velS/velP)**2*sin(2*angP)*sin(2*angS)-(cos(2*angS))**2)
 
-       rP = (REAL(crP)**2 + IMAG(crP)**2)**0.5
-       rS = (REAL(crS)**2 + IMAG(crS)**2)**0.5
+       convfac(1) = SQRT(sin(2*angP)/sin(2*angS))
+       convfac(2) = CMPLX(1.,0.)
 
+       rP = (REAL(crP*convfac(1))**2 + IMAG(crP*convfac(1))**2)**0.5
+       rS = (REAL(crS*convfac(2))**2 + IMAG(crS*convfac(2))**2)**0.5
+       
        !Supercritical
        IF (p*vs(1,1) > 1) rP = 0
        
-         totc = sin(2*angP)/sin(2*angS)*rP**2 + rS**2
-         nrP = sin(2*angP)/sin(2*angS)*rP**2 / totc
-!         nrS = rS**2 / totc
+         totc = rP + rS
+         nrP = rP / totc
+!         nrS = rS / totc
          IF (r0 <= nrP) THEN
            ip = 1
            IF (REAL(crP) < 0) a = -a
@@ -1303,6 +1311,7 @@ SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp)
       COMPLEX       cone,ctwo,sj1,sj2,cj1,cj2,c0
       COMPLEX       DD,car,cat
       INTEGER       ud
+      COMPLEX       convfac(2)
 
       IF (b2 <= 0) THEN  !Same as free surface if reflects on liquid layer
        ar = 1.
@@ -1328,8 +1337,11 @@ SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp)
         car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
         cat   = ctwo*rho1*vb1*cj1/DD
         
-        ar = ((REAL(car)**2 + IMAG(car)**2)**0.5)**2 * 1
-        at = ((REAL(cat)**2 + IMAG(cat)**2)**0.5)**2 * rh2*b2*cos(asin(p*b2))/rh1/b1/cos(asin(p*b1))
+        convfac(1) = CMPLX(1.,0.)
+        convfac(2) = SQRT((rho2*vb2*cj2)/(rho1*vb1*cj1))
+                
+        ar = ((REAL(car*convfac(1))**2 + IMAG(car*convfac(1))**2)**0.5)!**2
+        at = ((REAL(cat*convfac(2))**2 + IMAG(cat*convfac(2))**2)**0.5)!**2 * rh2*b2*cos(asin(p*b2))/rh1/b1/cos(asin(p*b1))
         
         !Check for total internal reflection !fix
         IF (b2*p > 1) at = 0
@@ -1392,7 +1404,8 @@ SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
       REAL(8)      rrp,rrs,rtp,rts               !REFLECTION & TRANSMISSION COEFS
       INTEGER      ud
       REAL(8)      amp,r0,rt_max,rt_min,rt_sum
-      REAL(8)      convfac(4)                    !Amplitude to energy conversion factors (p.146 AKI)
+!      REAL(8)      convfac(4)                    !Amplitude to energy conversion factors (p.146 AKI)
+      COMPLEX(8)   convfac(4)                    !Amplitude to energy conversion factors (p.146 AKI)
         
       
       va1    = cmplx(vp1,  0.)                   !MAKE VEL & DENSITY COMPLEX
@@ -1440,10 +1453,15 @@ SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
          atp    = ctwo*rho1*ci1*F/(va2*DEN)         !trans down P to P down
          ats    = ctwo*rho1*ci1*H*psub/(vb2*DEN)       !trans down P to S down
          
-         convfac(1) = 1                                                         !rp
-         convfac(2) = vs1*cos(asin(pin*vs1))/vp1/cos(asin(pin*vp1))            !rs
-         convfac(3) = den2*vp2*cos(asin(pin*vp2))/den1/vp1/cos(asin(pin*vp1))  !tp
-         convfac(4) = den2*vs2*cos(asin(pin*vs2))/den1/vp1/cos(asin(pin*vp1))  !ts
+!         convfac(1) = 1                                                         !rp
+!         convfac(2) = vs1*cos(asin(pin*vs1))/vp1/cos(asin(pin*vp1))            !rs
+!         convfac(3) = den2*vp2*cos(asin(pin*vp2))/den1/vp1/cos(asin(pin*vp1))  !tp
+!         convfac(4) = den2*vs2*cos(asin(pin*vs2))/den1/vp1/cos(asin(pin*vp1))  !ts
+         convfac(1) = CMPLX(1.,0.)                                             !rp
+         convfac(2) = SQRT((vb1*cj1)/(va1*ci1))            !rs
+         convfac(3) = SQRT((rho2*va2*ci2)/(rho1*va1*ci1))  !tp
+         convfac(4) = SQRT((rho2*vb2*cj2)/(rho1*va1*ci1))  !ts
+
       ELSE                   !INCIDENT S-WAVE
          trm1   = a*b+c*d*ci2*cj2/(va2*vb2)       
          arp    = (-ctwo*cj1*trm1*psub)/(va1*DEN)      !refl down S to P up
@@ -1453,17 +1471,27 @@ SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
          atp    = -ctwo*rho1*cj1*G*psub/(va2*DEN)      !trans down S to P down 
          ats    = ctwo*rho1*cj1*E/(vb2*DEN)         !trans down S to S down
          
-         convfac(1) = vp1*cos(asin(pin*vp1))/vs1/cos(asin(pin*vs1))            !rp
-         convfac(2) = 1                                                        !rs
-         convfac(3) = den2*vp2*cos(asin(pin*vp2))/den1/vs1/cos(asin(pin*vs1))  !tp
-         convfac(4) = den2*vs2*cos(asin(pin*vs2))/den1/vs1/cos(asin(pin*vs1))  !ts
+!         convfac(1) = vp1*cos(asin(pin*vp1))/vs1/cos(asin(pin*vs1))            !rp
+!         convfac(2) = 1                                                        !rs
+!         convfac(3) = den2*vp2*cos(asin(pin*vp2))/den1/vs1/cos(asin(pin*vs1))  !tp
+!         convfac(4) = den2*vs2*cos(asin(pin*vs2))/den1/vs1/cos(asin(pin*vs1))  !ts
+         convfac(1) = SQRT((va1*ci1)/(vb1*cj1))           !rp
+         convfac(2) = CMPLX(1.,0.)                                             !rs
+         convfac(3) = SQRT((rho2*va2*ci2)/(rho1*vb1*cj1))  !tp
+         convfac(4) = SQRT((rho2*vb2*cj2)/(rho1*vb1*cj1))  !ts
+         
       END IF
       
-      rrp = ((REAL(arp)**2+imag(arp)**2)**0.5)**2  * convfac(1)
-      rrs = ((REAL(ars)**2+imag(ars)**2)**0.5)**2  * convfac(2)
-      rtp = ((REAL(atp)**2+imag(atp)**2)**0.5)**2  * convfac(3)
-      rts = ((REAL(ats)**2+imag(ats)**2)**0.5)**2  * convfac(4)
+!      rrp = ((REAL(arp)**2+imag(arp)**2)**0.5)**2  * convfac(1)
+!      rrs = ((REAL(ars)**2+imag(ars)**2)**0.5)**2  * convfac(2)
+!      rtp = ((REAL(atp)**2+imag(atp)**2)**0.5)**2  * convfac(3)
+!      rts = ((REAL(ats)**2+imag(ats)**2)**0.5)**2  * convfac(4)
       
+      rrp = ((REAL(arp*convfac(1))**2+imag(arp*convfac(1))**2)**0.5)!**2
+      rrs = ((REAL(ars*convfac(2))**2+imag(ars*convfac(2))**2)**0.5)!**2
+      rtp = ((REAL(atp*convfac(3))**2+imag(atp*convfac(3))**2)**0.5)!**2
+      rts = ((REAL(ats*convfac(4))**2+imag(ats*convfac(4))**2)**0.5)!**2
+            
       ! Check for total internal reflection     !fix
       IF (vp2*pin > 1) rtp = 0.
       IF (vs2*pin > 1) rts = 0.
@@ -1522,6 +1550,7 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
       COMPLEX(8)   crP,crS,ctP,c0
       REAL(8)      rP,rS,tP,tot,nrP,nrS,ntP,r0,amp
       INTEGER      ud,ip
+      COMPLEX(8)   convfac(3)
       
       p = CMPLX(realp,0.)
       a = CMPLX(ra,0.)
@@ -1550,18 +1579,22 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
         
         ctP = D12*(2.*cos(angP)*cos(2*angS))
         
-        rP = (REAL(crP)**2+IMAG(crP)**2)**0.5
-        rS = (REAL(crS)**2+IMAG(crS)**2)**0.5
-        tP = (REAL(ctP)**2+IMAG(ctP)**2)**0.5
+        convfac(1) = CMPLX(1.,0)
+        convfac(2) = SQRT(sin(2*angS)/sin(2*angP))
+        convfac(3) = SQRT(tau*sin(2*angPc)/sin(2*angP))
+        
+        rP = (REAL(crP*convfac(1))**2+IMAG(crP*convfac(1))**2)**0.5
+        rS = (REAL(crS*convfac(2))**2+IMAG(crS*convfac(2))**2)**0.5
+        tP = (REAL(ctP*convfac(3))**2+IMAG(ctP*convfac(3))**2)**0.5
         
         !Supercritical
         IF (rc*realp > 1) tP = 0.
         
         !Get new ip
-        tot = rP**2 + sin(2*angS)/sin(2*angP)*rS**2 + tau*sin(2*angPc)/sin(2*angP)*tP**2
-        nrP = rP**2/tot
-        nrS = sin(2*angS)/sin(2*angP)*rS**2/tot
-        ntP = tau*sin(2*angPc)/sin(2*angP)*tP**2/tot
+        tot = rP + rS + tP
+        nrP = rP/tot
+        nrS = rS/tot
+        ntP = tP/tot
         
         r0 = rand()
         
@@ -1588,19 +1621,23 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
         
         ctP = D12*(-2.*(b/a)*cos(angP)*sin(2*angS))
         
-        rP = (REAL(crP)**2+IMAG(crP)**2)**0.5
-        rS = (REAL(crS)**2+IMAG(crS)**2)**0.5
-        tP = (REAL(ctP)**2+IMAG(ctP)**2)**0.5
+        convfac(1) = SQRT(sin(2*angP)/sin(2*angS))
+        convfac(2) = CMPLX(1.,0.)
+        convfac(3) = SQRT(tau*sin(2*angPc)/sin(2*angS))
+        
+        rP = (REAL(crP*convfac(1))**2+IMAG(crP*convfac(1))**2)**0.5
+        rS = (REAL(crS*convfac(2))**2+IMAG(crS*convfac(2))**2)**0.5
+        tP = (REAL(ctP*convfac(3))**2+IMAG(ctP*convfac(3))**2)**0.5
         
         !Supercritical
         IF (ra*realp > 1) rP = 0.
         IF (rc*realp > 1) tP = 0.
         
         !Get new ip
-        tot = sin(2*angP)/sin(2*angS)*rP**2 + rS**2 + tau*sin(2*angPc)/sin(2*angS)*tP**2
-        nrP = sin(2*angP)/sin(2*angS)*rP**2/tot
-        nrS = rS**2/tot
-        ntP = tau*sin(2*angPc)/sin(2*angS)*tP**2/tot
+        tot = rP + rS + tP
+        nrP = rP/tot
+        nrS = rS/tot
+        ntP = tP/tot
         
         r0 = rand()
         
@@ -1635,6 +1672,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
       COMPLEX(8)   crP,ctP,ctS
       REAL(8)      rP,tS,tP,tot,nrP,ntS,ntP,r0,amp
       INTEGER      ud,ip
+      COMPLEX(8)   convfac(3)   !Conversion factors from amplitude to energy coefficients) BEN-MENAHEM p. 478
       
       p = CMPLX(realp,0.)
       a = CMPLX(ra,0.)
@@ -1662,20 +1700,23 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
         
         tS = D12*(-4*tau*(c/a)*cos(angP)*sin(angS)*cos(angPc))
         
+        convfac(1) = CMPLX(1.,0.)
+        convfac(2) = SQRT(1/tau*sin(2*angP)/sin(2*angPc))
+        convfac(3) = SQRT(1/tau*sin(2*angS)/sin(2*angPc))
         
-        rP = (REAL(crP)**2+IMAG(crP)**2)**0.5
-        tP = (REAL(ctP)**2+IMAG(ctP)**2)**0.5
-        tS = (REAL(ctS)**2+IMAG(ctS)**2)**0.5
+        rP = (REAL(crP*convfac(1))**2+IMAG(crP*convfac(1))**2)**0.5
+        tP = (REAL(ctP*convfac(2))**2+IMAG(ctP*convfac(2))**2)**0.5
+        tS = (REAL(ctS*convfac(3))**2+IMAG(ctS*convfac(3))**2)**0.5
         
         !Supercritical
         IF (ra*realp > 1) tP = 0.
         IF (rb*realp > 1) tS = 0.
         
         !Get new ip
-        tot = rP**2 + 1/tau*sin(2*angP)/sin(2*angPc)*tP**2 + 1/tau*sin(2*angS)/sin(2*angPc)*tS**2
-        nrP = rP**2/tot
-        ntP = 1/tau*sin(2*angP)/sin(2*angPc)*tP**2/tot
-        ntS = 1/tau*sin(2*angS)/sin(2*angPc)*tS**2/tot
+        tot = rP + tP + tS
+        nrP = rP/tot
+        ntP = tP/tot
+        ntS = tS/tot
         
         r0 = rand()
         
