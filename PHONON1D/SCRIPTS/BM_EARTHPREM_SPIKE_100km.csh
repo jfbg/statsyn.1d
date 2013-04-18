@@ -110,7 +110,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsyn_globalscat << EOF"                         >  $file_csh
+echo "./bin/statsyn_globalscat_CRFL << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
 echo "$ray_par          \!LIMIT THE RAY PARAMETER"            >> $file_csh
