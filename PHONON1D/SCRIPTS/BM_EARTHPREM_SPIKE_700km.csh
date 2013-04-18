@@ -23,7 +23,8 @@ set velperturb = 0.0
 
 # Source attenuation and type
 set dQdfstyle  = 1
-set sourcetype = 1    # delta (1), sine (2)
+set sourcetype = 9    # delta (1), sine (2), custom (9)
+set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "1 1 1"  # Energy partioning at source
 set samtype    = 3   # Sampling over takeoff angles (1), or slownesses (2)
 
@@ -35,7 +36,7 @@ set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
 @ n_kern  = 15     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 3    ## Number of iterations
+@ n_iter  = 6    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -109,7 +110,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsyn_globalscat_CRFL << EOF"                         >  $file_csh
+echo "./bin/statsyn_globalscat << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
 echo "$ray_par          \!LIMIT THE RAY PARAMETER"            >> $file_csh
@@ -118,6 +119,11 @@ echo "$d_range          \!LIMIT THE DISTANCE (DEGREES)    "   >> $file_csh
 echo "$n_phonon         \!NUMBER OF PHONONS TO FIRE       "   >> $file_csh
 echo "$q_depth          \!DEPTH OF SOURCE                 "   >> $file_csh
 echo "$sourcetype        \!Source Type            "           >> $file_csh
+
+if ($sourcetype == 9) then
+echo "SOURCES/$customsourcefile"        >> $file_csh
+endif
+
 echo "$rPrSVrSH        \!Energy partitioning      "           >> $file_csh
 echo "$samtype        \!sampling                  "           >> $file_csh
 echo "$mx_scat_dp       \!MAX SCATTERING DEPTH            "   >> $file_csh
@@ -130,7 +136,7 @@ echo "$outTRACK_dir/$file_track"                              >> $file_csh
 echo "$out_dir/$file_whole"                                   >> $file_csh
 echo "$log_dir/$file_log"                                     >> $file_csh
 echo "$kernelnum        \!Kernel number"                      >> $file_csh
-echo "EOF"                                                    >> $file_csh
+echo "EOF"                                                   >> $file_csh
 
 echo " " >> $file_csh
 

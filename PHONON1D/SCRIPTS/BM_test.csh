@@ -10,7 +10,7 @@ set ray_par    = "0.0 0.1668 0.2931"
 @ t_max        = 8192			# 75 minutes
 set d_range    = "0 180 91"
 set mx_scat_dp = "0"
-set n_phonon   = "1000"
+set n_phonon   = "10000"
 
 
 # SCATTERING
@@ -23,13 +23,12 @@ set velperturb = 0.0
 
 # Source attenuation and type
 set dQdfstyle  = 1
-set sourcetype = 9    # delta (1), sine (2), custom (9)
-set customsourcefile = 'LP_20s_dt1s.source'
+set sourcetype = 1    # delta (1), sine (2)
 set rPrSVrSH   = "1 1 1"  # Energy partioning at source
 set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2)
 
 
-set file_out   = "BM_EARTHPREM_LONGPERIODS_SPIKE_100km"
+set file_out   = "BM_test"
 set model_name = "EARTH_MODEL_20km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
@@ -46,7 +45,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 cd SRC
-make statsyn_global.x
+make statsyn_global_CRFL.x
 cd ..
 
 
@@ -75,7 +74,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 20
 else if ($i == 1) then
- set q_depth = 100
+ set q_depth = 700
 else
  set q_depth = 0.01
 endif
@@ -99,7 +98,7 @@ while ($j < $n_kern)
 
 @ kernelnum = $j
 
-sleep 4
+#sleep 4
 
 ## 
 # Start phonon synthetics
@@ -110,7 +109,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsyn_globalscat << EOF"                         >  $file_csh
+echo "./bin/statsyn_globalscat_CRFL << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
 echo "$ray_par          \!LIMIT THE RAY PARAMETER"            >> $file_csh
@@ -119,11 +118,6 @@ echo "$d_range          \!LIMIT THE DISTANCE (DEGREES)    "   >> $file_csh
 echo "$n_phonon         \!NUMBER OF PHONONS TO FIRE       "   >> $file_csh
 echo "$q_depth          \!DEPTH OF SOURCE                 "   >> $file_csh
 echo "$sourcetype        \!Source Type            "           >> $file_csh
-
-if ($sourcetype == 9) then
-  echo "SOURCES/$customsourcefile"        >> $file_csh
-endif
-
 echo "$rPrSVrSH        \!Energy partitioning      "           >> $file_csh
 echo "$samtype        \!sampling                  "           >> $file_csh
 echo "$mx_scat_dp       \!MAX SCATTERING DEPTH            "   >> $file_csh

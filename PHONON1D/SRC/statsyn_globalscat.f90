@@ -2137,6 +2137,9 @@ SUBROUTINE INTERFACE_NORMAL
       USE pho_vars
       IMPLICIT NONE
       REAL(8)     ap,bs,cf,rhosol,rhoflu
+!      INTEGER     ip_init
+      
+!      ip_init = ip
       
       
       last_RT = 0
@@ -2144,7 +2147,7 @@ SUBROUTINE INTERFACE_NORMAL
       
       h = abs(z(iz)-z(iz-1))
       
-      IF ((h <= 0.).AND.(iz > 1)) THEN
+      IF ((h <= 0.).AND.(iz > 1).AND.(iz < nlay-1)) THEN
 
       IF (((vf(iz,2) == 0).OR.(vf(iz-1,2) == 0)).AND.(ip.ne.3)) THEN  !IF0
          !SOLID-LIQUID INTERFACE with P and SV waves
@@ -2204,7 +2207,8 @@ SUBROUTINE INTERFACE_NORMAL
       ELSE               !IF0
         !Solid-Solid Interface
 
-        IF (iz < nlay-1) THEN                        !IF1
+        !DEBUG
+!        WRITE(6,*) '    ==> iz <nlay-1',iz,nlay,nlay-1
 
               
           IF ((iz == 2).AND.(ud == -1)) THEN                              !IF1.1 
@@ -2229,62 +2233,19 @@ SUBROUTINE INTERFACE_NORMAL
                             arp,ars,atp,ats,ip,ud,a)             
               END IF                                                        !IF3b
             END IF                                                          !IF2a
-          
-
-!            IF (ip  ==  3) THEN                   !IF SH-WAVE                !IF2b
-!
-!                IF (r0 < (abs(ar)/(abs(ar)+abs(at)))) THEN!CHECK FOR REFLECTION  !IF4b
-!                  IF (ar < 0) a = -a                !OPPOSITE POLARITY
-!                  ud = -ud                           !DOWNGOING/UPGOING
-!                END IF                              !                            !IF4b
-!
-!            ELSE                                  !IF P- OR SV-WAVE         !IF2b
-!              IF (h <= 0.) THEN                                              !IF3d
-!                              
-!                rt_sum = abs(arp)+abs(atp)+abs(ars)+abs(ats)    !SUM OF REFL/TRAN COEFS
-!                rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
-!                rt_max = abs(arp)/rt_sum             !
-!                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED P !IF4c
-!                  IF (arp < 0) a = -a                 !REVERSE POLARITY
-!                  ud = -ud                            !UPGOING <-> DOWNGOING
-!                  ip = 1                              !P WAVE      
-!                END IF                               !                            !IF4c
-!
-!                rt_min = rt_max                      !RANGE PROBABILITIES 4 SV REFL
-!                rt_max = rt_max+abs(ars)/rt_sum      !
-!                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED SV  !IF4d
-!                  IF (ars < 0) a = -a                 !REVERSE POLARITY
-!                  ud = -ud                            !UPGOING <-> downGOING
-!                  ip = 2                              !SV WAVE
-!                END IF                               !                              !IF4d
-!
-!                rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
-!                rt_max = rt_max+abs(atp)/rt_sum      !
-!                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRAMSITTED P  !IF4e
-!                  ip = 1                              !P WAVE
-!                END IF                               !                              !IF4e
-!
-!                rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
-!                rt_max = rt_max+abs(ats)/rt_sum      !
-!                IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV !IF4f
-!                  ip = 2                              !SV WAVE
-!                END IF                               !                                !IF4f
-!              END IF                                                          !IF3d
-!            END IF                                !END IF: SH, OR P-SV        !IF2b
+         
+   
           END IF  !IF1.1
-        
-        ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE  !IF1
-          ud = -ud
-          dt1 = (2*corelayer)/vf(nlay,iwave)
+          
+      END IF    !IF0
+      
+      ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE 
+          ud = -1   ! GOING UP NOW
+          dt1 = (2*corelayer)/vf(iz,iwave)
           x = x + 180*deg2km
           t = t + dt1
           totald = totald + 2*corelayer
           s = s + dt1/Q(nlay,iwave)
-          
-        END IF        !IF1
-        
-        
-      END IF    !IF0
       
         iwave = ip
         IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
@@ -2294,7 +2255,6 @@ SUBROUTINE INTERFACE_NORMAL
        
       RETURN  
 END SUBROUTINE INTERFACE_NORMAL
-
 
 
 !SUBROUTINE INLAYER_SCATTER

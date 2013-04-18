@@ -49,6 +49,7 @@ PROGRAM STATSYN_GLOBALSCAT
         REAL          dt4,r_P,r_SV,r_SH     !r_* is energy ratio at source (1:10:10)
         INTEGER       SourceTYPE,samplingtype  
         REAL(8)       maxp 
+        CHARACTER*100 SourceFILE
         
         ! FLATTENING
         REAL(8)       pfac           
@@ -130,6 +131,11 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(6,'(A)') '(1: delta function) (2: sine) '
       READ (5,    *)  SourceTYPE
       WRITE(6,*) 'Source TYPE:',SourceTYPE 
+
+      IF (SourceTYPE.eq.9) THEN
+       WRITE(6,'(A)') 'CUSTOM SOURCE -- ENTER SOURCE FILENAME (Must be in SOURCES folder):'
+       READ (5,'(A)')  SourceFILE
+      END IF
 
       WRITE(6,'(A)') 'ENTER SOURCE ENERGY RATIOS (P:SV:SH) eg. ''1 10 10'':'
       READ (5,    *)  r_P,r_SV,r_SH
@@ -386,17 +392,26 @@ PROGRAM STATSYN_GLOBALSCAT
       END DO
 
       !SET SOURCE TYPE
-      IF (SourceTYPE.eq.1) THEN
-        mt(5) = 1.   !Spike to compare with CRFL
-        WRITE(6,'(a)') ' SOURCE IS SPIKE'
-      ELSE IF (SourceTYPE.eq.2) THEN
+      IF (SourceTYPE.eq.2) THEN
         DO I = 1, nts                           !SOURCE-TIME FUNCTION
          t0 = dti*float(I-1)-P0
          mt(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
         END DO
         WRITE(6,'(a)') ' SOURCE IS SINE WAVE'
+      ELSEIF (SourceTYPE.eq.9) THEN      !CUSTOM SOURCE
+         WRITE(6,'(a)') ' CUSTOM SOURCE'
+         CALL READIN_SOURCE(nts1,mt,SourceFILE)
+         nts = nts1
+!         OPEN(3334,FILE='customsource.out',STATUS='UNKNOWN')
+!         WRITE(3334,FMT=3335) (mt(sI),sI=1,nts1)
+!         CLOSE(3334)
+      ELSE !IF (SourceTYPE.eq.1) THEN
+        mt(5) = 1.   !Spike 
+        WRITE(6,'(a)') ' SOURCE IS DELTA FUNCTION'
       END IF
+      
+3335  FORMAT(500(F10.6,1X))
       
 
       !Calculate maximum source power (i.e. no attenuation) to normalize attn
@@ -587,6 +602,10 @@ PROGRAM STATSYN_GLOBALSCAT
           ang1 = angst*r0                        !Randomly select angle
           p    = abs(sin(ang1))/vf(iz,iwave)
         END IF
+        
+        !DEBUG
+!        p = 0.
+!        ang1 = 0.
 
 
 !        WRITE(77,*) p,ang1
@@ -1322,7 +1341,7 @@ SUBROUTINE SURFACE_PSV_BEN
 
          totc = rP + rS
          nrP = rP / totc
-!         nrS = rS / totc
+         nrS = rS / totc
          r0 = rand()
          IF (r0 <= nrP) THEN
            ip = 1
@@ -1348,7 +1367,7 @@ SUBROUTINE SURFACE_PSV_BEN
        
          totc = rP + rS
          nrP = rP / totc
-!         nrS = rS / totc
+         nrS = rS / totc
          IF (r0 <= nrP) THEN
            ip = 1
            IF (REAL(crP) < 0) a = -a
@@ -1360,6 +1379,9 @@ SUBROUTINE SURFACE_PSV_BEN
       END IF      
     
       iwave = ip
+      
+      !DEBUG
+!      write(6,*) 'SURFACE:', ip_init,ip,convfac(1),convfac(2)
 END SUBROUTINE SURFACE_PSV_BEN     
 
 SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp)
@@ -2196,6 +2218,9 @@ SUBROUTINE INTERFACE_NORMAL
       USE pho_vars
       IMPLICIT NONE
       REAL(8)     ap,bs,cf,rhosol,rhoflu
+      INTEGER     ip_init
+      
+      ip_init = ip
       
       
       last_RT = 0
@@ -2203,7 +2228,7 @@ SUBROUTINE INTERFACE_NORMAL
       
       h = abs(z(iz)-z(iz-1))
       
-      IF ((h <= 0.).AND.(iz > 1)) THEN
+      IF ((h <= 0.).AND.(iz > 1).AND.(iz < nlay-1)) THEN
 
       IF (((vf(iz,2) == 0).OR.(vf(iz-1,2) == 0)).AND.(ip.ne.3)) THEN  !IF0
          !SOLID-LIQUID INTERFACE with P and SV waves
@@ -2263,7 +2288,8 @@ SUBROUTINE INTERFACE_NORMAL
       ELSE               !IF0
         !Solid-Solid Interface
 
-        IF (iz < nlay-1) THEN                        !IF1
+        !DEBUG
+!        WRITE(6,*) '    ==> iz <nlay-1',iz,nlay,nlay-1
 
               
           IF ((iz == 2).AND.(ud == -1)) THEN                              !IF1.1 
@@ -2287,63 +2313,26 @@ SUBROUTINE INTERFACE_NORMAL
                              vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
                             arp,ars,atp,ats,ip,ud,a)             
               END IF                                                        !IF3b
+              
+              
+             !DEBUG
+         WRITE(6,*) '-->', iz,ip_init,ip
             END IF                                                          !IF2a
-          
+         
 
-!            IF (ip  ==  3) THEN                   !IF SH-WAVE                !IF2b
-!
-!                IF (r0 < (abs(ar)/(abs(ar)+abs(at)))) THEN!CHECK FOR REFLECTION  !IF4b
-!                  IF (ar < 0) a = -a                !OPPOSITE POLARITY
-!                  ud = -ud                           !DOWNGOING/UPGOING
-!                END IF                              !                            !IF4b
-!
-!            ELSE                                  !IF P- OR SV-WAVE         !IF2b
-!              IF (h <= 0.) THEN                                              !IF3d
-!                              
-!                rt_sum = abs(arp)+abs(atp)+abs(ars)+abs(ats)    !SUM OF REFL/TRAN COEFS
-!                rt_min = 0.                          !RANGE PROBABILITIES FOR P REFL
-!                rt_max = abs(arp)/rt_sum             !
-!                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED P !IF4c
-!                  IF (arp < 0) a = -a                 !REVERSE POLARITY
-!                  ud = -ud                            !UPGOING <-> DOWNGOING
-!                  ip = 1                              !P WAVE      
-!                END IF                               !                            !IF4c
-!
-!                rt_min = rt_max                      !RANGE PROBABILITIES 4 SV REFL
-!                rt_max = rt_max+abs(ars)/rt_sum      !
-!                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF REFLECTED SV  !IF4d
-!                  IF (ars < 0) a = -a                 !REVERSE POLARITY
-!                  ud = -ud                            !UPGOING <-> downGOING
-!                  ip = 2                              !SV WAVE
-!                END IF                               !                              !IF4d
-!
-!                rt_min = rt_max                      !RANGE PROBABILITIES 4 P TRANS
-!                rt_max = rt_max+abs(atp)/rt_sum      !
-!                IF ( (r0 >= rt_min).AND.(r0 < rt_max) ) THEN!CHECK IF TRAMSITTED P  !IF4e
-!                  ip = 1                              !P WAVE
-!                END IF                               !                              !IF4e
-!
-!                rt_min = rt_max                      !RANGE PROBABILITIES 4 SV TRANS
-!                rt_max = rt_max+abs(ats)/rt_sum      !
-!                IF ( (r0 >= rt_min).AND.(r0 <= rt_max) ) THEN!CHECK IF TRANSMITTED SV !IF4f
-!                  ip = 2                              !SV WAVE
-!                END IF                               !                                !IF4f
-!              END IF                                                          !IF3d
-!            END IF                                !END IF: SH, OR P-SV        !IF2b
+         
+         
           END IF  !IF1.1
-        
-        ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE  !IF1
-          ud = -ud
+          
+      END IF    !IF0
+      
+      ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE 
+          ud = -1   ! GOING UP NOW
           dt1 = (2*corelayer)/vf(iz,iwave)
           x = x + 180*deg2km
           t = t + dt1
           totald = totald + 2*corelayer
           s = s + dt1/Q(nlay,iwave)
-          
-        END IF        !IF1
-        
-        
-      END IF    !IF0
       
         iwave = ip
         IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
@@ -2521,6 +2510,9 @@ SUBROUTINE RAYTRACE
         ud = -ud
         ncaust = ncaust + 1                   !# OF CAUSTICS
         END IF
+        
+        !DEBUG
+!        WRITE(6,*) iz,t,x,s,irtr1,ud,nlay
      
        
         RETURN       
@@ -3004,6 +2996,27 @@ SUBROUTINE UNIT_VECTOR_3(n)
    RETURN
 END SUBROUTINE UNIT_VECTOR_3
 
+SUBROUTINE READIN_SOURCE(nts1,mt,SourceFILE)
+
+      IMPLICIT NONE
+      INTEGER       nts1,nts0,j
+      REAL          mt(*)
+      CHARACTER*100 SourceFILE
+           
+      WRITE(6,'(a)') '     READING IN SOURCE FROM:',SourceFILE
+      
+      OPEN(3334,FILE=SourceFILE,STATUS='OLD')
+  
+      READ(3334,*) nts1
+      READ(3334,FMT=3335) (mt(j),j=1,nts1)
+      
+      CLOSE(3334)
+      
+      RETURN
+      
+3335  FORMAT(500(F10.6,1X))
+
+END SUBROUTINE READIN_SOURCE
 
 
 
