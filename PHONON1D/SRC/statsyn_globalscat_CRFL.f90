@@ -2316,7 +2316,7 @@ SUBROUTINE INTERFACE_NORMAL
               
               
              !DEBUG
-         WRITE(6,*) '-->', iz,ip_init,ip
+!         WRITE(6,*) '-->', iz,ip_init,ip
             END IF                                                          !IF2a
          
 
