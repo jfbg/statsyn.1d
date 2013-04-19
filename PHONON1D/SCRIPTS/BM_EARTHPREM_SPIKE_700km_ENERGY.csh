@@ -20,7 +20,7 @@ set rPrSVrSH   = "1 1 1"  # Energy partioning at source
 set samtype    = 3   # Sampling over takeoff angles (1), or slownesses (2)
 
 # Code Parameters
-set cons_EorA = 1  #Conserve Amplitude (1) or Energy (2) at interfaces
+set cons_EorA = 2  #Conserve Amplitude (1) or Energy (2) at interfaces
 
 # SCATTERING
 set bg_scat    = 0.0
@@ -30,7 +30,7 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.0
 
-set file_out   = "BM_EARTHPREM_SPIKE_100km_AMPLITUDE"
+set file_out   = "BM_EARTHPREM_SPIKE_700km_ENERGY"
 set model_name = "EARTH_MODEL_20km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
@@ -76,7 +76,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 20
 else if ($i == 1) then
- set q_depth = 100
+ set q_depth = 700
 else
  set q_depth = 0.01
 endif

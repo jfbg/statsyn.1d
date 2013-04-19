@@ -30,7 +30,7 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.0
 
-set file_out   = "BM_EARTHPREM_SPIKE_100km_AMPLITUDE"
+set file_out   = "BM_EARTHPREM_SPIKE_700km_AMPLITUDE"
 set model_name = "EARTH_MODEL_20km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
@@ -76,7 +76,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 20
 else if ($i == 1) then
- set q_depth = 100
+ set q_depth = 700
 else
  set q_depth = 0.01
 endif
