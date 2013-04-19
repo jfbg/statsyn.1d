@@ -158,8 +158,13 @@ PROGRAM STATSYN_GLOBALSCAT
       
       WRITE(6,'(A)') 'ENTER dQdf STYLE (SEE dQdfSTYLES.txt)'
       READ (5,    *)  dQdfSTYLE
-      WRITE(6,*) 'dQdf STYLE:',dQdfSTYLE  
-
+      WRITE(6,*) 'dQdf STYLE:',dQdfSTYLE 
+      
+      WRITE(6,'(A)') 'CONSERVE AMPLITUDE (1) OR ENERGY (2) AT INTERFACES?'
+      READ (5,    *)  cons_EorA
+      IF (cons_EorA.eq.1) WRITE(6,*) 'CONSERVE AMPLITUDE' 
+      IF (cons_EorA.eq.2) WRITE(6,*) 'CONSERVE ENERGY' 
+      
       WRITE(6,'(A)') 'ENTER TRACK OUTPUT FILE:'
       READ (5,'(A)')  tfile 
       WRITE(6,*) 'Tfile:',tfile
@@ -350,8 +355,7 @@ PROGRAM STATSYN_GLOBALSCAT
         WRITE(6,'(a)') ' SOURCE IS SINE WAVE'
       ELSEIF (SourceTYPE.eq.9) THEN      !CUSTOM SOURCE
          WRITE(6,'(a)') ' CUSTOM SOURCE'
-         CALL READIN_SOURCE(nts1,mt,SourceFILE)
-         nts = nts1
+         CALL READIN_SOURCE(nts,mt,SourceFILE)
 !         OPEN(3334,FILE='customsource.out',STATUS='UNKNOWN')
 !         WRITE(3334,FMT=3335) (mt(sI),sI=1,nts1)
 !         CLOSE(3334)
@@ -609,7 +613,7 @@ PROGRAM STATSYN_GLOBALSCAT
             r0 = rand()
             IF ((scat_prob > 0.).AND.(iz > 1).AND.(r0 < scat_prob)) THEN   !CALL INTERFACE_SCATTER
                 ud_pre = ud  !save current ud before scattering it.
-                CALL REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh)  !Scatter  
+                CALL REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh,cons_EorA)  !Scatter  
                 !Fix iz if direction has changed
                 IF ((ud_pre == 1).AND.(ud == -1))  iz = iz-1
                 IF ((ud_pre == -1).AND.(ud == 1))  iz = iz+1
@@ -676,7 +680,7 @@ PROGRAM STATSYN_GLOBALSCAT
                               !Is phonon scattered at scatterer or does it go through?
                               r0 = rand()
                               IF (r0 < scat_prob) THEN
-                                 CALL REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh)   !Scatter
+                                 CALL REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh,cons_EorA)   !Scatter
                               END IF                            
                               
                               ! Calculate new ds_SL based on new ud and p (if it got scattered)
@@ -1234,7 +1238,6 @@ SUBROUTINE SURFACE_PSV_BEN
       COMPLEX(8)    crP,crS,cp,c0
       REAL(8)       rP,rS,nrP,nrS
       real(8)       totc
-      COMPLEX(8)    convfac(2)
       
 
       ip_init = ip
@@ -1254,13 +1257,9 @@ SUBROUTINE SURFACE_PSV_BEN
        crP = D1*((velS/velP)**2*sin(2*angP)*sin(2*angS)-(cos(2*angS))**2)
        crS = D1*(-2.*(velS/velP)*sin(2*angP)*cos(2*angS))
        
-       convfac(1) = CMPLX(1.,0.)
-       convfac(2) = SQRT(sin(2*angS)/sin(2*angP))
+       rP = ((REAL(crP)**2 + IMAG(crP)**2)**0.5)**cons_EorA
+       rS = ((REAL(crS)**2 + IMAG(crS)**2)**0.5)**cons_EorA
        
-       rP = (REAL(crP*convfac(1))**2 + IMAG(crP*convfac(1))**2)**0.5
-       rS = (REAL(crS*convfac(2))**2 + IMAG(crS*convfac(2))**2)**0.5
-       
-
          totc = rP + rS
          nrP = rP / totc
 !         nrS = rS / totc
@@ -1278,11 +1277,8 @@ SUBROUTINE SURFACE_PSV_BEN
        crP = D1*((velS/velP)*sin(4*angS))
        crS = D1*((velS/velP)**2*sin(2*angP)*sin(2*angS)-(cos(2*angS))**2)
 
-       convfac(1) = SQRT(sin(2*angP)/sin(2*angS))
-       convfac(2) = CMPLX(1.,0.)
-
-       rP = (REAL(crP*convfac(1))**2 + IMAG(crP*convfac(1))**2)**0.5
-       rS = (REAL(crS*convfac(2))**2 + IMAG(crS*convfac(2))**2)**0.5
+       rP = ((REAL(crP)**2 + IMAG(crP)**2)**0.5)**cons_EorA
+       rS = ((REAL(crS)**2 + IMAG(crS)**2)**0.5)**cons_EorA
        
        !Supercritical
        IF (p*vs(1,1) > 1) rP = 0
@@ -1301,9 +1297,12 @@ SUBROUTINE SURFACE_PSV_BEN
       END IF      
     
       iwave = ip
+      
+      !DE
+      
 END SUBROUTINE SURFACE_PSV_BEN     
 
-SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp)
+SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp,cons_EorA)
 ! p.139 of Aki and Richards 2nd edition
       REAL(8)       p,ar,at,amp
       REAL(8)       pi,j1,j2,b1,b2,rh1,rh2
@@ -1311,8 +1310,8 @@ SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp)
       COMPLEX       cone,ctwo,sj1,sj2,cj1,cj2,c0
       COMPLEX       DD,car,cat
       INTEGER       ud
-      COMPLEX       convfac(2)
-
+      INTEGER       cons_EorA
+      
       IF (b2 <= 0) THEN  !Same as free surface if reflects on liquid layer
        ar = 1.
        at = 0.
@@ -1337,11 +1336,9 @@ SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp)
         car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
         cat   = ctwo*rho1*vb1*cj1/DD
         
-        convfac(1) = CMPLX(1.,0.)
-        convfac(2) = SQRT((rho2*vb2*cj2)/(rho1*vb1*cj1))
-                
-        ar = ((REAL(car*convfac(1))**2 + IMAG(car*convfac(1))**2)**0.5)!**2
-        at = ((REAL(cat*convfac(2))**2 + IMAG(cat*convfac(2))**2)**0.5)!**2 * rh2*b2*cos(asin(p*b2))/rh1/b1/cos(asin(p*b1))
+                            
+        ar = ((REAL(car)**2 + IMAG(car)**2)**0.5)**cons_EorA
+        at = ((REAL(cat)**2 + IMAG(cat)**2)**0.5)**cons_EorA
         
         !Check for total internal reflection !fix
         IF (b2*p > 1) at = 0
@@ -1386,7 +1383,7 @@ END SUBROUTINE RTCOEF_SH
 !        Coefficients are not energy normalized.
 !
 SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
-                         rrp,rrs,rtp,rts,ip,ud,amp)
+                         rrp,rrs,rtp,rts,ip,ud,amp,cons_EorA)
       IMPLICIT     NONE
       REAL(8)      vp1,vs1,den1,vp2,vs2,den2     !VELOCITY & DENSITY
       INTEGER      ip                            !P (1) OR S (2)                          
@@ -1404,9 +1401,7 @@ SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
       REAL(8)      rrp,rrs,rtp,rts               !REFLECTION & TRANSMISSION COEFS
       INTEGER      ud
       REAL(8)      amp,r0,rt_max,rt_min,rt_sum
-!      REAL(8)      convfac(4)                    !Amplitude to energy conversion factors (p.146 AKI)
-      COMPLEX(8)   convfac(4)                    !Amplitude to energy conversion factors (p.146 AKI)
-        
+      INTEGER      cons_EorA  
       
       va1    = cmplx(vp1,  0.)                   !MAKE VEL & DENSITY COMPLEX
       vb1    = cmplx(vs1,  0.)
@@ -1453,15 +1448,7 @@ SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
          atp    = ctwo*rho1*ci1*F/(va2*DEN)         !trans down P to P down
          ats    = ctwo*rho1*ci1*H*psub/(vb2*DEN)       !trans down P to S down
          
-!         convfac(1) = 1                                                         !rp
-!         convfac(2) = vs1*cos(asin(pin*vs1))/vp1/cos(asin(pin*vp1))            !rs
-!         convfac(3) = den2*vp2*cos(asin(pin*vp2))/den1/vp1/cos(asin(pin*vp1))  !tp
-!         convfac(4) = den2*vs2*cos(asin(pin*vs2))/den1/vp1/cos(asin(pin*vp1))  !ts
-         convfac(1) = CMPLX(1.,0.)                                             !rp
-         convfac(2) = SQRT((vb1*cj1)/(va1*ci1))            !rs
-         convfac(3) = SQRT((rho2*va2*ci2)/(rho1*va1*ci1))  !tp
-         convfac(4) = SQRT((rho2*vb2*cj2)/(rho1*va1*ci1))  !ts
-
+      
       ELSE                   !INCIDENT S-WAVE
          trm1   = a*b+c*d*ci2*cj2/(va2*vb2)       
          arp    = (-ctwo*cj1*trm1*psub)/(va1*DEN)      !refl down S to P up
@@ -1471,26 +1458,12 @@ SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
          atp    = -ctwo*rho1*cj1*G*psub/(va2*DEN)      !trans down S to P down 
          ats    = ctwo*rho1*cj1*E/(vb2*DEN)         !trans down S to S down
          
-!         convfac(1) = vp1*cos(asin(pin*vp1))/vs1/cos(asin(pin*vs1))            !rp
-!         convfac(2) = 1                                                        !rs
-!         convfac(3) = den2*vp2*cos(asin(pin*vp2))/den1/vs1/cos(asin(pin*vs1))  !tp
-!         convfac(4) = den2*vs2*cos(asin(pin*vs2))/den1/vs1/cos(asin(pin*vs1))  !ts
-         convfac(1) = SQRT((va1*ci1)/(vb1*cj1))           !rp
-         convfac(2) = CMPLX(1.,0.)                                             !rs
-         convfac(3) = SQRT((rho2*va2*ci2)/(rho1*vb1*cj1))  !tp
-         convfac(4) = SQRT((rho2*vb2*cj2)/(rho1*vb1*cj1))  !ts
-         
       END IF
       
-!      rrp = ((REAL(arp)**2+imag(arp)**2)**0.5)**2  * convfac(1)
-!      rrs = ((REAL(ars)**2+imag(ars)**2)**0.5)**2  * convfac(2)
-!      rtp = ((REAL(atp)**2+imag(atp)**2)**0.5)**2  * convfac(3)
-!      rts = ((REAL(ats)**2+imag(ats)**2)**0.5)**2  * convfac(4)
-      
-      rrp = ((REAL(arp*convfac(1))**2+imag(arp*convfac(1))**2)**0.5)!**2
-      rrs = ((REAL(ars*convfac(2))**2+imag(ars*convfac(2))**2)**0.5)!**2
-      rtp = ((REAL(atp*convfac(3))**2+imag(atp*convfac(3))**2)**0.5)!**2
-      rts = ((REAL(ats*convfac(4))**2+imag(ats*convfac(4))**2)**0.5)!**2
+      rrp = ((REAL(arp)**2+imag(arp)**2)**0.5)**cons_EorA
+      rrs = ((REAL(ars)**2+imag(ars)**2)**0.5)**cons_EorA
+      rtp = ((REAL(atp)**2+imag(atp)**2)**0.5)**cons_EorA
+      rts = ((REAL(ats)**2+imag(ats)**2)**0.5)**cons_EorA
             
       ! Check for total internal reflection     !fix
       IF (vp2*pin > 1) rtp = 0.
@@ -1538,7 +1511,7 @@ END SUBROUTINE RTCOEF_PSV
 
 
 
-SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
+SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
 
 ! Going from Mantle to Core, solid to liquid
 
@@ -1550,7 +1523,7 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
       COMPLEX(8)   crP,crS,ctP,c0
       REAL(8)      rP,rS,tP,tot,nrP,nrS,ntP,r0,amp
       INTEGER      ud,ip
-      COMPLEX(8)   convfac(3)
+      INTEGER      cons_EorA
       
       p = CMPLX(realp,0.)
       a = CMPLX(ra,0.)
@@ -1578,14 +1551,10 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
         crS = D12*(-2.*(b/a)*sin(2*angP)*cos(2*angS)*cos(angPc))
         
         ctP = D12*(2.*cos(angP)*cos(2*angS))
-        
-        convfac(1) = CMPLX(1.,0)
-        convfac(2) = SQRT(sin(2*angS)/sin(2*angP))
-        convfac(3) = SQRT(tau*sin(2*angPc)/sin(2*angP))
-        
-        rP = (REAL(crP*convfac(1))**2+IMAG(crP*convfac(1))**2)**0.5
-        rS = (REAL(crS*convfac(2))**2+IMAG(crS*convfac(2))**2)**0.5
-        tP = (REAL(ctP*convfac(3))**2+IMAG(ctP*convfac(3))**2)**0.5
+
+        rP = ((REAL(crP)**2+IMAG(crP)**2)**0.5)**cons_EorA
+        rS = ((REAL(crS)**2+IMAG(crS)**2)**0.5)**cons_EorA
+        tP = ((REAL(ctP)**2+IMAG(ctP)**2)**0.5)**cons_EorA
         
         !Supercritical
         IF (rc*realp > 1) tP = 0.
@@ -1620,14 +1589,11 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
                 - tau*(c/a)*cos(angP) - (cos(2*angS))**2*cos(angPc))
         
         ctP = D12*(-2.*(b/a)*cos(angP)*sin(2*angS))
-        
-        convfac(1) = SQRT(sin(2*angP)/sin(2*angS))
-        convfac(2) = CMPLX(1.,0.)
-        convfac(3) = SQRT(tau*sin(2*angPc)/sin(2*angS))
-        
-        rP = (REAL(crP*convfac(1))**2+IMAG(crP*convfac(1))**2)**0.5
-        rS = (REAL(crS*convfac(2))**2+IMAG(crS*convfac(2))**2)**0.5
-        tP = (REAL(ctP*convfac(3))**2+IMAG(ctP*convfac(3))**2)**0.5
+
+
+        rP = ((REAL(crP)**2+IMAG(crP)**2)**0.5)**cons_EorA
+        rS = ((REAL(crS)**2+IMAG(crS)**2)**0.5)**cons_EorA
+        tP = ((REAL(ctP)**2+IMAG(ctP)**2)**0.5)**cons_EorA
         
         !Supercritical
         IF (ra*realp > 1) rP = 0.
@@ -1660,7 +1626,7 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
       
 END SUBROUTINE RTFLUID_BEN_S2L
 
-SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
+SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
 
 ! Going from Core to Mantle, liquid to solid
 
@@ -1672,7 +1638,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
       COMPLEX(8)   crP,ctP,ctS
       REAL(8)      rP,tS,tP,tot,nrP,ntS,ntP,r0,amp
       INTEGER      ud,ip
-      COMPLEX(8)   convfac(3)   !Conversion factors from amplitude to energy coefficients) BEN-MENAHEM p. 478
+      INTEGER      cons_EorA
       
       p = CMPLX(realp,0.)
       a = CMPLX(ra,0.)
@@ -1699,14 +1665,11 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud)
         tP = D12*(2*tau*(c/a)*cos(2*angS)*cos(angPc))
         
         tS = D12*(-4*tau*(c/a)*cos(angP)*sin(angS)*cos(angPc))
-        
-        convfac(1) = CMPLX(1.,0.)
-        convfac(2) = SQRT(1/tau*sin(2*angP)/sin(2*angPc))
-        convfac(3) = SQRT(1/tau*sin(2*angS)/sin(2*angPc))
-        
-        rP = (REAL(crP*convfac(1))**2+IMAG(crP*convfac(1))**2)**0.5
-        tP = (REAL(ctP*convfac(2))**2+IMAG(ctP*convfac(2))**2)**0.5
-        tS = (REAL(ctS*convfac(3))**2+IMAG(ctS*convfac(3))**2)**0.5
+
+                
+        rP = ((REAL(crP)**2+IMAG(crP)**2)**0.5)**cons_EorA
+        tP = ((REAL(ctP)**2+IMAG(ctP)**2)**0.5)**cons_EorA
+        tS = ((REAL(ctS)**2+IMAG(ctS)**2)**0.5)**cons_EorA
         
         !Supercritical
         IF (ra*realp > 1) tP = 0.
@@ -2164,7 +2127,7 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz,1)
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
-            CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud)
+            CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)
             
          ELSEIF ((ud == -1).AND.(vf(iz-1,2) == 0.)) THEN
            !FROM SOLID TO LIQUID  --- going up
@@ -2174,7 +2137,7 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz-1,1)
             rhosol = rh(iz)
             rhoflu = rh(iz-1)
-            CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud) 
+            CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA) 
            
            
          ELSEIF ((ud == 1).AND.(vf(iz-1,2) == 0.)) THEN  
@@ -2185,7 +2148,7 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz-1,1)
             rhosol = rh(iz)
             rhoflu = rh(iz-1)
-            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud)         
+            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)         
           
          ELSEIF ((ud == -1).AND.(vf(iz,2) == 0.)) THEN
            !FROM LIQUID TO SOLID  --- going up
@@ -2195,7 +2158,7 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz,1)
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
-            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud)
+            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)
 
          END IF
 
@@ -2218,19 +2181,19 @@ SUBROUTINE INTERFACE_NORMAL
 
             IF (ip  ==  3) THEN                                              !IF2a
               IF ( (ud == 1) ) THEN               !IF DOWNGOING SH WAVE      !IF3a
-                CALL RTCOEF_SH(p,vf(iz-1,2),vf(iz,2),rh(iz-1),rh(iz),ar,at,ud,a)
+                CALL RTCOEF_SH(p,vf(iz-1,2),vf(iz,2),rh(iz-1),rh(iz),ar,at,ud,a,cons_EorA)
               ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE        !IF3a
-                CALL RTCOEF_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1),ar,at,ud,a)
+                CALL RTCOEF_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1),ar,at,ud,a,cons_EorA)
               END IF                                                         !IF3a
             ELSE                                                             !IF2a
               IF ( (ud == 1) ) THEN               !IF DOWNGOING P-SV WAVE    !IF3b
                 CALL RTCOEF_PSV(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
                              vf(iz  ,1),vf(iz  ,2),rh(iz), &
-                            arp,ars,atp,ats,ip,ud,a)
+                            arp,ars,atp,ats,ip,ud,a,cons_EorA)
               ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE      !IF3b
                 CALL RTCOEF_PSV(p,vf(iz  ,1),vf(iz  ,2),rh(iz  ), &
                              vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
-                            arp,ars,atp,ats,ip,ud,a)             
+                            arp,ars,atp,ats,ip,ud,a,cons_EorA)             
               END IF                                                        !IF3b
             END IF                                                          !IF2a
          
@@ -2563,7 +2526,7 @@ SUBROUTINE GET_DS_SL
       RETURN
 END SUBROUTINE GET_DS_SL
 
-SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh)
+SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh,cons_EorA)
 !      USE pho_vars
       IMPLICIT NONE
       
@@ -2585,7 +2548,7 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       REAL       rrr1,rrr2
       INTEGER    jj
       REAL(8)    pi
-      
+      INTEGER    cons_EorA
       REAL(8)    p,az,x_sign,r0
       INTEGER    iwave,ip,ud,iz_scat
       REAL(8) :: vel_perturb 
@@ -2661,7 +2624,7 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       
       IF (ip_in == 1) THEN                      !! P Incident
        CALL RTCOEF_PSV(pp,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),&
-               vp2,vs2,rh2,rt(1),rt(2),rt(3),rt(4),ip,ud,a) !! P-SV reflected & transmitted (Pr=1,Sr=2,Pt=3,St=4)
+               vp2,vs2,rh2,rt(1),rt(2),rt(3),rt(4),ip,ud,a,cons_EorA) !! P-SV reflected & transmitted (Pr=1,Sr=2,Pt=3,St=4)
        rt(1)=rt(1)                         !! P  refl
        rt(5)=rt(2)*sa                      !! SH refl
        rt(2)=rt(2)*ca                      !! SV refl
@@ -2675,8 +2638,8 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
        END DO
        
       ELSE
-       CALL RTCOEF_SH(ps,vf(iz_scat,2),vs2,rh(iz_scat),rh2,rt(9),rt(10),ud,a)   !! SH reflected & transmitted amplitudes
-       CALL RTCOEF_PSV(ps,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),vp2,vs2,rh2,rt(5),rt(6),rt(7),rt(8),ip,ud,a) !! SV-P reflected & transmitted (Pr=5,Sr=6,Pt=7,St=8)
+       CALL RTCOEF_SH(ps,vf(iz_scat,2),vs2,rh(iz_scat),rh2,rt(9),rt(10),ud,a,cons_EorA)   !! SH reflected & transmitted amplitudes
+       CALL RTCOEF_PSV(ps,vf(iz_scat,1),vf(iz_scat,2),rh(iz_scat),vp2,vs2,rh2,rt(5),rt(6),rt(7),rt(8),ip,ud,a,cons_EorA) !! SV-P reflected & transmitted (Pr=5,Sr=6,Pt=7,St=8)
        ip = ip_in
        DO jj = 1, 10                        !! If errors, zero them
         IF (isnan(rt(jj))) rt(jj) = 0.
@@ -2905,10 +2868,10 @@ SUBROUTINE UNIT_VECTOR_3(n)
    RETURN
 END SUBROUTINE UNIT_VECTOR_3
 
-SUBROUTINE READIN_SOURCE(nts1,mt,SourceFILE)
+SUBROUTINE READIN_SOURCE(nts,mt,SourceFILE)
 
       IMPLICIT NONE
-      INTEGER       nts1,nts0,j
+      INTEGER       nts,nts0,j
       REAL          mt(*)
       CHARACTER*100 SourceFILE
            
@@ -2916,8 +2879,8 @@ SUBROUTINE READIN_SOURCE(nts1,mt,SourceFILE)
       
       OPEN(3334,FILE=SourceFILE,STATUS='OLD')
   
-      READ(3334,*) nts1
-      READ(3334,FMT=3335) (mt(j),j=1,nts1)
+      READ(3334,*) nts
+      READ(3334,FMT=3335) (mt(j),j=1,nts)
       
       CLOSE(3334)
       

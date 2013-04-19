@@ -115,6 +115,7 @@ MODULE PHO_VARS      ! Make variables global
         CHARACTER*3    cmp(3)
         REAL(8)           p1,p2(2)              !Ray parameters
         REAL(8)           qdep
+        INTEGER        cons_EorA
         
         !INTERFACE
         INTEGER     INCI,init_ud
