@@ -10,14 +10,14 @@ set ray_par    = "0.0 0.1668 0.2931"
 @ t_max        = 8192			# 75 minutes
 set d_range    = "0 180 91"
 set mx_scat_dp = "0"
-set n_phonon   = "300"
+set n_phonon   = "30000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
 set sourcetype = 9    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "1 1 1"  # Energy partioning at source
-set samtype    = 3   # Sampling over takeoff angles (1), or slownesses (2)
+set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
 
 # Code Parameters
 set cons_EorA = 1  #Conserve Amplitude (1) or Energy (2) at interfaces
@@ -47,7 +47,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 cd SRC
-make statsyn_global_CRFL.x
+make statsyn_global_CRFL_noATT.x
 cd ..
 
 
@@ -76,7 +76,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 20
 else if ($i == 1) then
- set q_depth = 700
+ set q_depth = 100
 else
  set q_depth = 0.01
 endif
@@ -111,7 +111,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsyn_globalscat_CRFL << EOF"                         >  $file_csh
+echo "./bin/statsyn_globalscat_CRFL_noATT << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
 echo "$ray_par          \!LIMIT THE RAY PARAMETER"            >> $file_csh

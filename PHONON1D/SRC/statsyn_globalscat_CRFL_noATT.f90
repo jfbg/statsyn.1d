@@ -18,9 +18,9 @@ PROGRAM STATSYN_GLOBALSCAT
 !
 ! 
 !
-! $Revision$
-! $Date$
-! $Author$
+! $Revision: 378 $
+! $Date: 2013-04-18 17:57:38 -0700 (Thu, 18 Apr 2013) $
+! $Author: jguertin $
 !
 !
 !
@@ -72,7 +72,7 @@ PROGRAM STATSYN_GLOBALSCAT
 				INTEGER	 Cnp_SH,Cnp1_SH,CI_SH,Cindex_SH
 				REAL(8)  Cc2r_SH, Cc1r_SH, Cdp_SH, Cp_SH(3600)
 				
-				REAL(8)  tmax
+
             
 !      ^^^^^ DECLARATIONS ^^^^^
 
@@ -82,9 +82,9 @@ PROGRAM STATSYN_GLOBALSCAT
       exNLAY = 0
 
       WRITE(*,*) 'ISOTROPIC Scattering'
-      WRITE(*,*) 'Last Edited on $Date$'
-      WRITE(*,*) 'Last Edited by $Author$'
-      WRITE(*,*) '$Revision$'
+      WRITE(*,*) 'Last Edited on $Date: 2013-04-18 17:57:38 -0700 (Thu, 18 Apr 2013) $'
+      WRITE(*,*) 'Last Edited by $Author: jguertin $'
+      WRITE(*,*) '$Revision: 378 $'
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
@@ -94,6 +94,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*'
       WRITE(*,*) '*    USE FOR BENCHMARKING - DISCRETE p VALUES'
       WRITE(*,*) '*    USE ENERGY CONSERVATION'
+      WRITE(*,*) '*    NO ATTENUATION'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
@@ -549,7 +550,7 @@ PROGRAM STATSYN_GLOBALSCAT
         t = 0.                                 !SET START TIME = ZERO
         x = 0.                                 !START LOCATION = ZERO
         s = 0.                                 !SET START ATTENUATION = ZERO
-        a = 1.                                 !START AMPLITUDE = 1.
+        a = 0.01                                 !START AMPLITUDE = 1.
         ! a    = cos(ang1*2.-pi/4.)              !SOURCE AMPLITUDE
         totald = 0.                                 !START AT ZERO KM TRAVELED
         x_sign = 1.                            !DISTANCE DIRECTION
@@ -557,8 +558,6 @@ PROGRAM STATSYN_GLOBALSCAT
         ncaust = 1                             !# OF CAUSTICS STARS AT 0. (which is index 1)
         
         
-        !DEBUG
-        tmax = 0.
         
         !Set initial depth index (iz)
          iz = iz1    !iz1 is layer in which the source is.
@@ -860,7 +859,8 @@ PROGRAM STATSYN_GLOBALSCAT
           
                     IT = nint((t +dtsurf      -t1)/dti) + 1 
                     
-                    ims = int(s/datt)+1
+!                    ims = int(s/datt)+1
+                    ims = 2
                     
                     !IF (ims <= 1) WRITE(6,*) s,t,ims,xo
                     
@@ -868,7 +868,8 @@ PROGRAM STATSYN_GLOBALSCAT
                     IF (ims <=   1) ims =   2
                     s1 = float(ims-1)*datt
                     s2 = float(ims  )*datt
-                    frac = (s-s1)/(s2-s1)
+!                    frac = (s-s1)/(s2-s1)
+                    frac = 0.
 
 
                       icaust = ncaust
@@ -955,10 +956,6 @@ PROGRAM STATSYN_GLOBALSCAT
        
 333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f10.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f7.5)
        
-       !DEBUG
-!       WRITE(6,*)I,NITR,t,tmax
-       IF (t.lt.tmax) WRITE(6,*) I,tmax,t
-       tmax = t
        
        END DO    !CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
        ! ====================== <<
@@ -993,13 +990,7 @@ PROGRAM STATSYN_GLOBALSCAT
        CALL etime(elapsed,ttime4)      
       !WRITE(6,*) '---->',I,ttime4-ttime3,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
 
-      !DEBUG
-      IF (tmax.lt.t2)  THEN
-         WRITE(6,*)I,tmax,'!!!!!!!!!!!!'
-      ELSE
-!         WRITE(6,*)I,tmax
-      END IF
-      
+     
 
       END DO  !CLOSE MAIN RAY TRACING LOOP - DOLOOP_001
 !     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
