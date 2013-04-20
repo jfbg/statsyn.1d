@@ -30,7 +30,7 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.0
 
-set file_out   = "BM_EARTHPREM_SPIKE_100km_ENERGY_noATT"
+set file_out   = "BM_EARTHPREM_SPIKE_100km_ENERGY_noATT_2"
 set model_name = "EARTH_MODEL_20km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
