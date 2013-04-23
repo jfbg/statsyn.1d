@@ -558,7 +558,7 @@ PROGRAM STATSYN_GLOBALSCAT
         
         
         !DEBUG
-        tmax = 0.
+!        tmax = 0.
         
         !Set initial depth index (iz)
          iz = iz1    !iz1 is layer in which the source is.
@@ -957,8 +957,8 @@ PROGRAM STATSYN_GLOBALSCAT
        
        !DEBUG
 !       WRITE(6,*)I,NITR,t,tmax
-       IF (t.lt.tmax) WRITE(6,*) I,tmax,t
-       tmax = t
+!       IF (t.lt.tmax) WRITE(6,*) I,tmax,t
+!       tmax = t
        
        END DO    !CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
        ! ====================== <<
@@ -994,11 +994,11 @@ PROGRAM STATSYN_GLOBALSCAT
       !WRITE(6,*) '---->',I,ttime4-ttime3,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
 
       !DEBUG
-      IF (tmax.lt.t2)  THEN
-         WRITE(6,*)I,tmax,'!!!!!!!!!!!!'
-      ELSE
+!      IF (tmax.lt.t2)  THEN
+!         WRITE(6,*)I,tmax,'!!!!!!!!!!!!'
+!      ELSE
 !         WRITE(6,*)I,tmax
-      END IF
+!      END IF
       
 
       END DO  !CLOSE MAIN RAY TRACING LOOP - DOLOOP_001
