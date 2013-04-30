@@ -64,15 +64,19 @@ PROGRAM STATSYN_GLOBALSCAT
         INTEGER (kind=8) ::  scat_time
 
          
-        REAL(8)	 Cc2, Ccwil, Ccwir, Cc1
-				INTEGER	 Cnp,Cnp1,CI,Cindex
-				REAL(8)  Cc2r, Cc1r, Cdp, Cp(3600)
+        REAL(8)   Cc2, Ccwil, Ccwir, Cc1
+        INTEGER   Cnp,Cnp1,CI,Cindex
+        REAL(8)  Cc2r, Cc1r, Cdp, Cp(3600)
 
-        REAL(8)	 Cc2_SH, Ccwil_SH, Ccwir_SH, Cc1_SH
-				INTEGER	 Cnp_SH,Cnp1_SH,CI_SH,Cindex_SH
-				REAL(8)  Cc2r_SH, Cc1r_SH, Cdp_SH, Cp_SH(3600)
-				
-				REAL(8)  tmax
+        REAL(8)   Cc2_SH, Ccwil_SH, Ccwir_SH, Cc1_SH
+        INTEGER   Cnp_SH,Cnp1_SH,CI_SH,Cindex_SH
+        REAL(8)  Cc2r_SH, Cc1r_SH, Cdp_SH, Cp_SH(3600)
+
+        REAL(8)  tmax
+        
+        REAL(8) debugval
+        REAL(8) Drrp,Drrs,Drtp,Drts
+        REAL(8) Dpin,Dvp1,Dvs1,Dden1,Dvp2,Dvs2,Dden2
             
 !      ^^^^^ DECLARATIONS ^^^^^
 
@@ -187,9 +191,11 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(6,*) 'TRACK FILE:',tfile
       
       WRITE(6,'(A)') 'ENTER OUTPUT FILE NAME:'!REQUEST OUTPUT FILE NAME
+      READ (5,'(A)')  ofile
       WRITE(6,*) 'OUTPUT FILE:',ofile                   !
       
       WRITE(6,'(A)') 'ENTER LOG FILE NAME:'!REQUEST LOG FILE NAME
+      READ (5,'(A)')  logfile
       WRITE(6,*) 'LOG FILE:',logfile                   !
       
       WRITE(6,'(A)') 'ENTER KERNEL NUMBER:'!FOR TRACKING IN TERMINAL WHEN MANY KERNELS ARE RUNNING AT ONCE
@@ -200,44 +206,46 @@ PROGRAM STATSYN_GLOBALSCAT
 
 !  FOR CRFL BENCHMARKING
 
-					 Cc2 = 8.3 
-					 Ccwil = 10
-					 Ccwir = 320
-					 Cc1 = 420
-					 Cnp = 3600
-					 
-					 
-					 Cc2r=1./Cc2
-           Cc1r=1./Cc1
-           Cnp1=Cnp-1
-           Cdp=(Cc2r-Cc1r)/float(Cnp1)
+        Cc2 = 8.3
+        Ccwil = 10
+        Ccwir = 320
+!        Cc1 = 420
+        !DEBUG
+        Cc1 = 50000
+        Cnp = 3600
            
-           DO CI = 1,Cnp
-             Cp(CI)=float(CI-1)*Cdp+Cc1r
-           END DO
            
-           Cindex = 1
+        Cc2r=1./Cc2
+        Cc1r=1./Cc1
+        Cnp1=Cnp-1
+        Cdp=(Cc2r-Cc1r)/float(Cnp1)
+           
+        DO CI = 1,Cnp
+          Cp(CI)=float(CI-1)*Cdp+Cc1r
+        END DO
+           
+        Cindex = 1
 
 
 ! SH
 
-					 Cc2_SH = 3.2 
-					 Ccwil_SH = 10
-					 Ccwir_SH = 320
-					 Cc1_SH = 420
-					 Cnp_SH = 3600
-					 
-					 
-					 Cc2r_SH=1./Cc2_SH
-           Cc1r_SH=1./Cc1_SH
-           Cnp1_SH=Cnp_SH-1
-           Cdp_SH=(Cc2r_SH-Cc1r_SH)/float(Cnp1_SH)
+        Cc2_SH = 3.2
+        Ccwil_SH = 10
+        Ccwir_SH = 320
+        Cc1_SH = 420
+        Cnp_SH = 3600
            
-           DO CI_SH = 1,Cnp_SH
-             Cp_SH(CI_SH)=float(CI_SH-1)*Cdp_SH+Cc1r_SH
-           END DO
            
-           Cindex_SH = 1
+        Cc2r_SH=1./Cc2_SH
+        Cc1r_SH=1./Cc1_SH
+        Cnp1_SH=Cnp_SH-1
+        Cdp_SH=(Cc2r_SH-Cc1r_SH)/float(Cnp1_SH)
+           
+        DO CI_SH = 1,Cnp_SH
+          Cp_SH(CI_SH)=float(CI_SH-1)*Cdp_SH+Cc1r_SH
+        END DO
+           
+        Cindex_SH = 1
 
 !      OPEN(6610,FILE='raytest.txt',STATUS='UNKNOWN')
 !     ======================================================
@@ -307,18 +315,17 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(6,'(A)')'             vp1  vs1        vp2  vs2       p1     p2      s1      s2'
       
       DO i = 2, nlay 
-       IF (z(i) == z(i-1)) THEN                !ZERO LAYER THICK=DISCONTINUITY
-        scr1=1./vf(i-1,1)                      !P-VELOCITY UPPER
-        scr2=1./vf(i,1)                        !P-VELOCITY LOWER 
-        scr3=.999                              !FLAG IF S VELOCITY = ZERO
-        IF (vf(i-1,2) /= 0.) scr3=1./vf(i-1,2) !S-VELOCITY UPPER
-        scr4=.999                              !FLAG IF S VELOCITY = ZERO
-        IF (vf(i  ,2) /= 0.) scr4=1./vf(i  ,2) !S-VELOCITY LOWER
-         WRITE(6,FMT=22) z_s(i),i-1,vs(i-1,1),vs(i-1,2), &
-                        i,vs(i,1),vs(i,2),scr1,scr2,scr3,scr4
-           
-        
-       END IF
+          IF (z(i) == z(i-1)) THEN                !ZERO LAYER THICK=DISCONTINUITY
+              scr1=1./vf(i-1,1)                      !P-VELOCITY UPPER
+              scr2=1./vf(i,1)                        !P-VELOCITY LOWER
+              scr3=.999                              !FLAG IF S VELOCITY = ZERO
+              IF (vf(i-1,2) /= 0.) scr3=1./vf(i-1,2) !S-VELOCITY UPPER
+              scr4=.999                              !FLAG IF S VELOCITY = ZERO
+              IF (vf(i  ,2) /= 0.) scr4=1./vf(i  ,2) !S-VELOCITY LOWER
+              WRITE(6,FMT=22) z_s(i),i-1,vs(i-1,1),vs(i-1,2), &
+                  i,vs(i,1),vs(i,2),scr1,scr2,scr3,scr4
+
+          END IF
        
       END DO
 22    FORMAT (f6.1,2(i5,f6.2,f5.2),2x,2f9.6,2x,2f9.6)
@@ -357,6 +364,34 @@ PROGRAM STATSYN_GLOBALSCAT
         END DO
       END DO  
 !      ^^^^^ INITIALIZE TRACKING PARAMETERS ^^^^^
+
+
+
+!     DEBUG STUFF:
+!      Dpin = 0.001
+!      Dvp1 = 13.71
+!      Dvs1 = 7.26
+!      Dden1 = 5.5665
+!      Dvp2 = 8.06
+!      Dvs2 = 0.0
+!      Dden2 = 9.90350
+!      Drrp =0.
+!      Drrs = 0.
+!      Drtp = 0.
+!      Drts = 0.
+!      ip = 1
+!      ud = 1
+!      a = 1
+!      cons_EorA = 1
+!      CALL RTCOEF_PSV(Dpin,Dvp1,Dvs1,Dden1,Dvp2,Dvs2,Dden2,Drrp,Drrs,Drtp,Drts,ip,ud,a,cons_EorA)
+!      CALL RTFLUID_BEN_S2L(Dpin,ip,Dvp1,Dvs1,Dvp2,Dden1,Dden2,a,ud,cons_EorA)
+
+!      WRITE(6,*) '!!!!!!!!!!!!'
+!      WRITE(6,*) Drrp,Drrs,Drtp,Drts
+!      WRITE(6,*) ip,ud
+!      WRITE(6,*) '!!!!!!!!!!!!'
+
+!      stop
 
   
 
@@ -599,7 +634,7 @@ PROGRAM STATSYN_GLOBALSCAT
         IF (samplingtype.eq.2) THEN               ! Sample slownesses
           p = maxp*r0
           ang1 = asin(p*vf(iz,iwave))
-        ELSEIF (samplingtype.eq.3) THEN						! Sample from p range (same as CRFL)
+        ELSEIF (samplingtype.eq.3) THEN            ! Sample from p range (same as CRFL)
           IF (ip.eq.3) THEN
              p = Cp_SH(Cindex_SH)
              ang1 = asin(p*vf(iz,iwave))
@@ -654,10 +689,10 @@ PROGRAM STATSYN_GLOBALSCAT
       
       
         ! ============ >>
-				! Track phonon's position
+        ! Track phonon's position
         IF (I < 10000) THEN
-				IF (t-t_last > 0) THEN
-				
+        IF (t-t_last > 0) THEN
+        
           !Find index for distance
           x_index = abs(x)
           DO WHILE (x_index >= circum)
@@ -665,81 +700,81 @@ PROGRAM STATSYN_GLOBALSCAT
           END DO
           IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
           ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
-				
-				
-					ixdeg = nint((abs(x)/deg2km-x1))
-					ixtemp = ixdeg
-					!xo = x1 + float(ixdeg-1)*dxi
-					!IF ( abs(xo-abs(x)/deg2km) > 0.1) cycle
+        
+        
+          ixdeg = nint((abs(x)/deg2km-x1))
+          ixtemp = ixdeg
+          !xo = x1 + float(ixdeg-1)*dxi
+          !IF ( abs(xo-abs(x)/deg2km) > 0.1) cycle
 
-					DO WHILE (ixdeg > 360) 
-						ixdeg = ixdeg - 360
-					END DO
-					IF (ixdeg > 180) ixdeg = 180 - (ixdeg-180)
-					IF (ixdeg < 0) ixdeg = -ixdeg 
-					
-					ixtrack = nint(ixdeg/dxi) + 1
-					
-					
-					itt = nint(t/REAL(nttrack_dt)+.5)
-					
-				
-					! Calculate attenuation
-					IT = nint((t       -t1)/dti) + 1		! Time index
-					
-					IF (Watt.eq.0) THEN
-						ims = 2
-				        frac = 0.
-					ELSE
-						ims = int(s/datt)+1
-						IF (ims > ns0-1) ims = ns0-1
-						IF (ims <=   1) ims =   2
-						s1 = float(ims-1)*datt
-						s2 = float(ims  )*datt
-						frac = (s-s1)/(s2-s1)
-					END IF
-					
-					IF (ncaust <= 1) THEN
-						icaust = 1
-					ELSE
-						icaust = ncaust
-						DO WHILE (icaust > 4)
-							icaust = icaust - 4
-						END DO
-					END IF
-					
-					
-					! Do [power]/[initial power (no att)] 
-					!       of attenuated source at time t
-					
-					attn = 0.
-					DO JJ = 1,nts
-						attn = attn + ((1.-frac)*mts(ims-1,icaust,JJ) &
+          DO WHILE (ixdeg > 360) 
+            ixdeg = ixdeg - 360
+          END DO
+          IF (ixdeg > 180) ixdeg = 180 - (ixdeg-180)
+          IF (ixdeg < 0) ixdeg = -ixdeg 
+          
+          ixtrack = nint(ixdeg/dxi) + 1
+          
+          
+          itt = nint(t/REAL(nttrack_dt)+.5)
+          
+        
+          ! Calculate attenuation
+          IT = nint((t       -t1)/dti) + 1    ! Time index
+          
+          IF (Watt.eq.0) THEN
+            ims = 2
+                frac = 0.
+          ELSE
+            ims = int(s/datt)+1
+            IF (ims > ns0-1) ims = ns0-1
+            IF (ims <=   1) ims =   2
+            s1 = float(ims-1)*datt
+            s2 = float(ims  )*datt
+            frac = (s-s1)/(s2-s1)
+          END IF
+          
+          IF (ncaust <= 1) THEN
+            icaust = 1
+          ELSE
+            icaust = ncaust
+            DO WHILE (icaust > 4)
+              icaust = icaust - 4
+            END DO
+          END IF
+          
+          
+          ! Do [power]/[initial power (no att)] 
+          !       of attenuated source at time t
+          
+          attn = 0.
+          DO JJ = 1,nts
+            attn = attn + ((1.-frac)*mts(ims-1,icaust,JJ) &
                           + (frac)*mts(ims  ,icaust,JJ) )**2 !Power
-					END DO
-					
-!					WRITE(6,*) t, attn, frac, ims, icaust !DEBUG
-					
-					IF (z_s(iz) - z_s(iz-1) == 0) THEN
-						iztrack = iz+1
-					ELSE
-						iztrack = iz
-					END IF
-					
-					IF (itt > nttrack) itt = nttrack
-					
-					!DEBUG
-					!IF ((iztrack > nlay).OR.(ixtrack > nx)) THEN
-					!	write(*,*) ixtrack,nx,iztrack,nlay,itt  !DEBUG
-					!END IF
-					
-					trackcount(ixtrack,iztrack,itt) = trackcount(ixtrack,iztrack,itt) + attn/minattn
-					
+          END DO
+          
+!          WRITE(6,*) t, attn, frac, ims, icaust !DEBUG
+          
+          IF (z_s(iz) - z_s(iz-1) == 0) THEN
+            iztrack = iz+1
+          ELSE
+            iztrack = iz
+          END IF
+          
+          IF (itt > nttrack) itt = nttrack
+          
+          !DEBUG
+          !IF ((iztrack > nlay).OR.(ixtrack > nx)) THEN
+          !  write(*,*) ixtrack,nx,iztrack,nlay,itt  !DEBUG
+          !END IF
+          
+          trackcount(ixtrack,iztrack,itt) = trackcount(ixtrack,iztrack,itt) + attn/minattn
+          
 
-					 
-				 
-				END IF
-				END IF
+           
+         
+        END IF
+        END IF
 
         ! Track phonon's position
         ! ============ <<
@@ -943,11 +978,16 @@ PROGRAM STATSYN_GLOBALSCAT
           xo = x1 + float(ix-1)*dxi          !Distance_index in degrees
           
           IF ( abs(xo-x_index/deg2km) <= dreceiver) THEN
+
+
             ! phonon is closer THEN 0.05 (dreceiver) deg to a recorder, RECORD AT SURFACE    
 
                     !Time correction if phonon doesn't hit the surface
                     ! right on the receiver. Max time is when ang1 is 90.          
                     dtsurf = (xo-x_index/deg2km)*deg2km*p 
+
+            !DEBUG
+            IF ((xo.eq.10).AND.(t.lt.500)) WRITE(6,*) p,t+dtsurf
           
                     IT = nint((t +dtsurf      -t1)/dti) + 1 
                     
@@ -1684,7 +1724,7 @@ END SUBROUTINE RTCOEF_PSV
 
 
 
-SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
+SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
 
 ! Going from Mantle to Core, solid to liquid
 
@@ -1697,6 +1737,7 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
       REAL(8)      rP,rS,tP,tot,nrP,nrS,ntP,r0,amp
       INTEGER      ud,ip
       INTEGER      cons_EorA
+      INTEGER      I
       
       p = CMPLX(realp,0.)
       a = CMPLX(ra,0.)
@@ -1729,6 +1770,7 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
         rS = ((REAL(crS)**2+IMAG(crS)**2)**0.5)**cons_EorA
         tP = ((REAL(ctP)**2+IMAG(ctP)**2)**0.5)**cons_EorA
         
+
         !Supercritical
         IF (rc*realp > 1) tP = 0.
         
@@ -1738,6 +1780,10 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
         nrS = rS/tot
         ntP = tP/tot
         
+!        !DEBUG
+!        WRITE(6,*) '===========>>>>',I,realp,nrP,nrS,ntP
+
+
         r0 = rand()
         
         IF (r0 <= nrP) THEN    !REFLECTED P
@@ -2300,7 +2346,7 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz,1)
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
-            CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)
+            CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
             
          ELSEIF ((ud == -1).AND.(vf(iz-1,2) == 0.)) THEN
            !FROM SOLID TO LIQUID  --- going up
@@ -2310,7 +2356,7 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz-1,1)
             rhosol = rh(iz)
             rhoflu = rh(iz-1)
-            CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA) 
+            CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
            
            
          ELSEIF ((ud == 1).AND.(vf(iz-1,2) == 0.)) THEN  
