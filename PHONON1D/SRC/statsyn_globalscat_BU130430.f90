@@ -18,9 +18,9 @@ PROGRAM STATSYN_GLOBALSCAT
 !
 ! 
 !
-! $Revision$
-! $Date$
-! $Author$
+! $Revision: 378 $
+! $Date: 2013-04-18 17:57:38 -0700 (Thu, 18 Apr 2013) $
+! $Author: jguertin $
 !
 !
 !
@@ -62,17 +62,8 @@ PROGRAM STATSYN_GLOBALSCAT
         INTEGER (kind=8) ::  surCYC1,exTIME,exNLAY
         INTEGER          ::  logperc
         INTEGER (kind=8) ::  scat_time
-
-         
-        REAL(8)	 Cc2, Ccwil, Ccwir, Cc1
-				INTEGER	 Cnp,Cnp1,CI,Cindex
-				REAL(8)  Cc2r, Cc1r, Cdp, Cp(3600)
-
-        REAL(8)	 Cc2_SH, Ccwil_SH, Ccwir_SH, Cc1_SH
-				INTEGER	 Cnp_SH,Cnp1_SH,CI_SH,Cindex_SH
-				REAL(8)  Cc2r_SH, Cc1r_SH, Cdp_SH, Cp_SH(3600)
-				
-				REAL(8)  tmax
+        INTEGER              kernelnum
+ 
             
 !      ^^^^^ DECLARATIONS ^^^^^
 
@@ -82,19 +73,16 @@ PROGRAM STATSYN_GLOBALSCAT
       exNLAY = 0
 
       WRITE(*,*) 'ISOTROPIC Scattering'
-      WRITE(*,*) 'Last Edited on $Date$'
-      WRITE(*,*) 'Last Edited by $Author$'
-      WRITE(*,*) '$Revision$'
+      WRITE(*,*) 'Last Edited on $Date: 2013-04-18 17:57:38 -0700 (Thu, 18 Apr 2013) $'
+      WRITE(*,*) 'Last Edited by $Author: jguertin $'
+      WRITE(*,*) '$Revision: 378 $'
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
       WRITE(*,*) '*'
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Using vflat for coefficients'
-      WRITE(*,*) '*'
-      WRITE(*,*) '*    USE FOR BENCHMARKING - DISCRETE p VALUES'
-      WRITE(*,*) '*          IF SAMPLINGTYPE.eq.3'
-      WRITE(*,*) '*    USE ENERGY CONSERVATION'
+      WRITE(*,*) '*    Uses complex conversion factor for disp --> energy coefficients'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
@@ -168,11 +156,6 @@ PROGRAM STATSYN_GLOBALSCAT
       READ (5,    *)  vel_perturb
       WRITE(6,*) 'vel_perturb:',vel_perturb
       
-      WRITE(6,'(A)') 'CALCULATE WAVE ATTENUATION:  WITH ATTENUATION (1), WITHOUT (0)'
-      READ (5,    *)  Watt
-      IF (Watt.eq.1) WRITE(6,*) 'WITH WAVE ATTENUATION' 
-      IF (Watt.eq.2) WRITE(6,*) 'NO ATTENUATION' 
-      
       WRITE(6,'(A)') 'ENTER dQdf STYLE (SEE dQdfSTYLES.txt)'
       READ (5,    *)  dQdfSTYLE
       WRITE(6,*) 'dQdf STYLE:',dQdfSTYLE 
@@ -184,13 +167,13 @@ PROGRAM STATSYN_GLOBALSCAT
       
       WRITE(6,'(A)') 'ENTER TRACK OUTPUT FILE:'
       READ (5,'(A)')  tfile 
-      WRITE(6,*) 'TRACK FILE:',tfile
+      WRITE(6,*) 'Tfile:',tfile
       
       WRITE(6,'(A)') 'ENTER OUTPUT FILE NAME:'!REQUEST OUTPUT FILE NAME
-      WRITE(6,*) 'OUTPUT FILE:',ofile                   !
+      READ (5,'(A)')  ofile                   !
       
       WRITE(6,'(A)') 'ENTER LOG FILE NAME:'!REQUEST LOG FILE NAME
-      WRITE(6,*) 'LOG FILE:',logfile                   !
+      READ (5,'(A)')  logfile                   !
       
       WRITE(6,'(A)') 'ENTER KERNEL NUMBER:'!FOR TRACKING IN TERMINAL WHEN MANY KERNELS ARE RUNNING AT ONCE
       READ (5,*)  kernelnum
@@ -198,48 +181,6 @@ PROGRAM STATSYN_GLOBALSCAT
 !      ^^^^^ GET INPUTS ^^^^^
 
 
-!  FOR CRFL BENCHMARKING
-
-					 Cc2 = 8.3 
-					 Ccwil = 10
-					 Ccwir = 320
-					 Cc1 = 420
-					 Cnp = 3600
-					 
-					 
-					 Cc2r=1./Cc2
-           Cc1r=1./Cc1
-           Cnp1=Cnp-1
-           Cdp=(Cc2r-Cc1r)/float(Cnp1)
-           
-           DO CI = 1,Cnp
-             Cp(CI)=float(CI-1)*Cdp+Cc1r
-           END DO
-           
-           Cindex = 1
-
-
-! SH
-
-					 Cc2_SH = 3.2 
-					 Ccwil_SH = 10
-					 Ccwir_SH = 320
-					 Cc1_SH = 420
-					 Cnp_SH = 3600
-					 
-					 
-					 Cc2r_SH=1./Cc2_SH
-           Cc1r_SH=1./Cc1_SH
-           Cnp1_SH=Cnp_SH-1
-           Cdp_SH=(Cc2r_SH-Cc1r_SH)/float(Cnp1_SH)
-           
-           DO CI_SH = 1,Cnp_SH
-             Cp_SH(CI_SH)=float(CI_SH-1)*Cdp_SH+Cc1r_SH
-           END DO
-           
-           Cindex_SH = 1
-
-!      OPEN(6610,FILE='raytest.txt',STATUS='UNKNOWN')
 !     ======================================================
 !      ----- INITIALIZE PARAMETERS -----
       
@@ -342,20 +283,20 @@ PROGRAM STATSYN_GLOBALSCAT
     
 !     ======================================================
 !      ----- INITIALIZE TRACKING PARAMETERS -----    
-      
-      WRITE(6,*) '!!!!!!!!!!!!!!!!!!!!!'  !DEBUG
-      WRITE(6,*) ' ',nx,nlay,nttrack      !DEBUG
-
-      !Allocate memory for tracking number of phonons in each area
-     ALLOCATE(trackcount(nx,nlay,nttrack))              
-      
-      DO kk = 1,nx
-        DO ll = 1,nlay
-          DO mm = 1,nttrack
-            trackcount(kk,ll,mm) = 0.
-          END DO
-        END DO
-      END DO  
+!      
+!      WRITE(6,*) '!!!!!!!!!!!!!!!!!!!!!'  !DEBUG
+!      WRITE(6,*) ' ',nx,nlay,nttrack      !DEBUG
+!
+!      !Allocate memory for tracking number of phonons in each area
+!     ALLOCATE(trackcount(nx,nlay,nttrack))              
+!      
+!      DO kk = 1,nx
+!        DO ll = 1,nlay
+!          DO mm = 1,nttrack
+!            trackcount(kk,ll,mm) = 0.
+!          END DO
+!        END DO
+!      END DO  
 !      ^^^^^ INITIALIZE TRACKING PARAMETERS ^^^^^
 
   
@@ -415,11 +356,9 @@ PROGRAM STATSYN_GLOBALSCAT
       ELSEIF (SourceTYPE.eq.9) THEN      !CUSTOM SOURCE
          WRITE(6,'(a)') ' CUSTOM SOURCE'
          CALL READIN_SOURCE(nts,mt,SourceFILE)
-         IF (kernelnum.eq.1) THEN   !ONLY WRITE OUT TO FILES IF FIRST KERNEL
-           OPEN(3334,FILE='customsource.out',STATUS='UNKNOWN')
-           WRITE(3334,FMT=3335) (mt(sI),sI=1,nts1)
-           CLOSE(3334)
-         END IF
+!         OPEN(3334,FILE='customsource.out',STATUS='UNKNOWN')
+!         WRITE(3334,FMT=3335) (mt(sI),sI=1,nts1)
+!         CLOSE(3334)
       ELSE !IF (SourceTYPE.eq.1) THEN
         mt(5) = 1.   !Spike to compare with CRFL
         WRITE(6,'(a)') ' SOURCE IS DELTA FUNCTION'
@@ -429,7 +368,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
       !Calculate maximum source power (i.e. no attenuation) to normalize attn
       minattn = 0.
-      DO JJ = 1,nts1
+      DO JJ = 1,nts
         minattn = minattn + mt(JJ)**2
       END DO
 
@@ -564,10 +503,6 @@ PROGRAM STATSYN_GLOBALSCAT
         az   = 0.
         ncaust = 1                             !# OF CAUSTICS STARS AT 0. (which is index 1)
         
-        
-        !DEBUG
-!        tmax = 0.
-        
         !Set initial depth index (iz)
          iz = iz1    !iz1 is layer in which the source is.
         
@@ -599,18 +534,6 @@ PROGRAM STATSYN_GLOBALSCAT
         IF (samplingtype.eq.2) THEN               ! Sample slownesses
           p = maxp*r0
           ang1 = asin(p*vf(iz,iwave))
-        ELSEIF (samplingtype.eq.3) THEN						! Sample from p range (same as CRFL)
-          IF (ip.eq.3) THEN
-             p = Cp_SH(Cindex_SH)
-             ang1 = asin(p*vf(iz,iwave))
-             Cindex_SH = Cindex_SH + 1
-             IF (Cindex_SH > Cnp_SH) Cindex_SH   = Cindex_SH - Cnp_SH
-          ELSE        
-             p = Cp(Cindex)
-             ang1 = asin(p*vf(iz,iwave))
-             Cindex = Cindex + 1
-             IF (Cindex > Cnp) Cindex   = Cindex - Cnp
-          ENDIF
         ELSE    !IF (samplingtype.eq.1) THEN      ! Sample Angles
           ang1 = angst*r0                        !Randomly select angle
           p    = abs(sin(ang1))/vf(iz,iwave)
@@ -654,93 +577,10 @@ PROGRAM STATSYN_GLOBALSCAT
       
       
         ! ============ >>
-				! Track phonon's position
-        IF (I < 10000) THEN
-				IF (t-t_last > 0) THEN
-				
-          !Find index for distance
-          x_index = abs(x)
-          DO WHILE (x_index >= circum)
-            x_index = x_index - circum
-          END DO
-          IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
-          ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
-				
-				
-					ixdeg = nint((abs(x)/deg2km-x1))
-					ixtemp = ixdeg
-					!xo = x1 + float(ixdeg-1)*dxi
-					!IF ( abs(xo-abs(x)/deg2km) > 0.1) cycle
-
-					DO WHILE (ixdeg > 360) 
-						ixdeg = ixdeg - 360
-					END DO
-					IF (ixdeg > 180) ixdeg = 180 - (ixdeg-180)
-					IF (ixdeg < 0) ixdeg = -ixdeg 
-					
-					ixtrack = nint(ixdeg/dxi) + 1
-					
-					
-					itt = nint(t/REAL(nttrack_dt)+.5)
-					
-				
-					! Calculate attenuation
-					IT = nint((t       -t1)/dti) + 1		! Time index
-					
-					IF (Watt.eq.0) THEN
-						ims = 2
-				        frac = 0.
-					ELSE
-						ims = int(s/datt)+1
-						IF (ims > ns0-1) ims = ns0-1
-						IF (ims <=   1) ims =   2
-						s1 = float(ims-1)*datt
-						s2 = float(ims  )*datt
-						frac = (s-s1)/(s2-s1)
-					END IF
-					
-					IF (ncaust <= 1) THEN
-						icaust = 1
-					ELSE
-						icaust = ncaust
-						DO WHILE (icaust > 4)
-							icaust = icaust - 4
-						END DO
-					END IF
-					
-					
-					! Do [power]/[initial power (no att)] 
-					!       of attenuated source at time t
-					
-					attn = 0.
-					DO JJ = 1,nts
-						attn = attn + ((1.-frac)*mts(ims-1,icaust,JJ) &
-                          + (frac)*mts(ims  ,icaust,JJ) )**2 !Power
-					END DO
-					
-!					WRITE(6,*) t, attn, frac, ims, icaust !DEBUG
-					
-					IF (z_s(iz) - z_s(iz-1) == 0) THEN
-						iztrack = iz+1
-					ELSE
-						iztrack = iz
-					END IF
-					
-					IF (itt > nttrack) itt = nttrack
-					
-					!DEBUG
-					!IF ((iztrack > nlay).OR.(ixtrack > nx)) THEN
-					!	write(*,*) ixtrack,nx,iztrack,nlay,itt  !DEBUG
-					!END IF
-					
-					trackcount(ixtrack,iztrack,itt) = trackcount(ixtrack,iztrack,itt) + attn/minattn
-					
-
-					 
-				 
-				END IF
-				END IF
-
+        ! Track phonon's position
+        !
+        ! CAN ADD TRACKING FROM statsyn_TRACK.f90 HERE
+        ! 
         ! Track phonon's position
         ! ============ <<
         
@@ -951,17 +791,16 @@ PROGRAM STATSYN_GLOBALSCAT
           
                     IT = nint((t +dtsurf      -t1)/dti) + 1 
                     
-                    IF (Watt.eq.0) THEN
-                      ims = 2
-                      frac = 0.
-                    ELSE
-                      ims = int(s/datt)+1
-                      IF (ims > ns0-1) ims = ns0-1
-                      IF (ims <=   1) ims =   2
-                      s1 = float(ims-1)*datt
-                      s2 = float(ims  )*datt
-                      frac = (s-s1)/(s2-s1)
-                    END IF
+                    ims = int(s/datt)+1
+                    
+                    !IF (ims <= 1) WRITE(6,*) s,t,ims,xo
+                    
+                    IF (ims > ns0-1) ims = ns0-1
+                    IF (ims <=   1) ims =   2
+                    s1 = float(ims-1)*datt
+                    s2 = float(ims  )*datt
+                    frac = (s-s1)/(s2-s1)
+
 
                       icaust = ncaust
                       DO WHILE (icaust >= 4)
@@ -1047,11 +886,6 @@ PROGRAM STATSYN_GLOBALSCAT
        
 333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f10.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f7.5)
        
-       !DEBUG
-!       WRITE(6,*)I,NITR,t,tmax
-!       IF (t.lt.tmax) WRITE(6,*) I,tmax,t
-!       tmax = t
-       
        END DO    !CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
        ! ====================== <<
        ! Close single ray tracing while loop
@@ -1085,13 +919,6 @@ PROGRAM STATSYN_GLOBALSCAT
        CALL etime(elapsed,ttime4)      
       !WRITE(6,*) '---->',I,ttime4-ttime3,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
 
-      !DEBUG
-!      IF (tmax.lt.t2)  THEN
-!         WRITE(6,*)I,tmax,'!!!!!!!!!!!!'
-!      ELSE
-!         WRITE(6,*)I,tmax
-!      END IF
-      
 
       END DO  !CLOSE MAIN RAY TRACING LOOP - DOLOOP_001
 !     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

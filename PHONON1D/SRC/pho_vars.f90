@@ -10,7 +10,8 @@ MODULE PHO_VARS      ! Make variables global
         CHARACTER*100 :: tfile
         DOUBLE PRECISION,ALLOCATABLE,DIMENSION(:,:,:) :: trackcount !Phonon Tracking array
         REAL(8)       ::  attn, minattn
-        INTEGER       :: nttrack    !track time points
+        INTEGER       ::  nttrack,ixtrack    !track time points
+        INTEGER     :: iztrack,ixtrackm
         INTEGER       ::  nttrack_dt            !time interval for saving phonon position
         REAL(8)       ::  normfactor            !Normalization factor for cell size
 
@@ -35,7 +36,6 @@ MODULE PHO_VARS      ! Make variables global
         REAL(8)       pi,P0
         INTEGER       n180,idelt1,idelt2
         REAL(8)     :: angst                 !! Starting angle for trace
-        INTEGER     :: iztrack,ixtrackm
         REAL(8)     :: deg2km
         REAL(8)       corelayer
         
@@ -71,7 +71,8 @@ MODULE PHO_VARS      ! Make variables global
         INTEGER       conv_count(6)
         
         ! ATTENUATION
-        INTEGER       dQdfSTYLE        !Let user choose dQdf behaviour based on list.    
+        INTEGER       dQdfSTYLE        !Let user choose dQdf behaviour based on list.   
+        INTEGER       Watt             !(1) With Attenuation, (0) No attenuation 
         
         INTEGER       ncaust,icaust         !NUMBER OF CAUSTICS IN A RAY TRACE
         INTEGER       ud
@@ -136,5 +137,6 @@ MODULE PHO_VARS      ! Make variables global
         INTEGER (kind=8)     :: nclock,nclock1
         INTEGER           ntime(8)
         INTEGER     last_RT
-
+        INTEGER              kernelnum
+        
 END MODULE PHO_VARS

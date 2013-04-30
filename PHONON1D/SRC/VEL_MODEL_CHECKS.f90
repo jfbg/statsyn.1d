@@ -181,13 +181,13 @@
 			 IF (vs(I,2) == 0) Q(I,2) = 1
 			END DO
 			
-      OPEN(45,FILE='model_modified.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL
-      
-      DO I = 1,nlay
-      	WRITE(45,*) z_s(I),vs(I,1),vs(I,2),rh(I),Q(I,1),Q(I,2)
-      END DO
-      
-      CLOSE(45)
+      IF (kernelnum.eq.1) THEN   !ONLY WRITE OUT TO FILES IF FIRST KERNEL
+        OPEN(45,FILE='model_modified.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL
+        DO I = 1,nlay
+        	WRITE(45,*) z_s(I),vs(I,1),vs(I,2),rh(I),Q(I,1),Q(I,2)
+        END DO
+        CLOSE(45)
+      END IF
       
       rhs = rh  !Will transform rhs in flattening subroutine
 

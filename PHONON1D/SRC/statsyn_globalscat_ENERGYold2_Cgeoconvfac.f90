@@ -18,9 +18,9 @@ PROGRAM STATSYN_GLOBALSCAT
 !
 ! 
 !
-! $Revision$
-! $Date$
-! $Author$
+! $Revision: 374 $
+! $Date: 2013-04-18 12:02:17 -0700 (Thu, 18 Apr 2013) $
+! $Author: jguertin $
 !
 !
 !
@@ -62,17 +62,8 @@ PROGRAM STATSYN_GLOBALSCAT
         INTEGER (kind=8) ::  surCYC1,exTIME,exNLAY
         INTEGER          ::  logperc
         INTEGER (kind=8) ::  scat_time
-
-         
-        REAL(8)	 Cc2, Ccwil, Ccwir, Cc1
-				INTEGER	 Cnp,Cnp1,CI,Cindex
-				REAL(8)  Cc2r, Cc1r, Cdp, Cp(3600)
-
-        REAL(8)	 Cc2_SH, Ccwil_SH, Ccwir_SH, Cc1_SH
-				INTEGER	 Cnp_SH,Cnp1_SH,CI_SH,Cindex_SH
-				REAL(8)  Cc2r_SH, Cc1r_SH, Cdp_SH, Cp_SH(3600)
-				
-				REAL(8)  tmax
+        INTEGER              kernelnum
+ 
             
 !      ^^^^^ DECLARATIONS ^^^^^
 
@@ -82,19 +73,16 @@ PROGRAM STATSYN_GLOBALSCAT
       exNLAY = 0
 
       WRITE(*,*) 'ISOTROPIC Scattering'
-      WRITE(*,*) 'Last Edited on $Date$'
-      WRITE(*,*) 'Last Edited by $Author$'
-      WRITE(*,*) '$Revision$'
+      WRITE(*,*) 'Last Edited on $Date: 2013-04-18 12:02:17 -0700 (Thu, 18 Apr 2013) $'
+      WRITE(*,*) 'Last Edited by $Author: jguertin $'
+      WRITE(*,*) '$Revision: 374 $'
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
       WRITE(*,*) '*'
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Using vflat for coefficients'
-      WRITE(*,*) '*'
-      WRITE(*,*) '*    USE FOR BENCHMARKING - DISCRETE p VALUES'
-      WRITE(*,*) '*          IF SAMPLINGTYPE.eq.3'
-      WRITE(*,*) '*    USE ENERGY CONSERVATION'
+      WRITE(*,*) '*    Uses complex conversion factor for disp --> energy coefficients'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
@@ -168,29 +156,24 @@ PROGRAM STATSYN_GLOBALSCAT
       READ (5,    *)  vel_perturb
       WRITE(6,*) 'vel_perturb:',vel_perturb
       
-      WRITE(6,'(A)') 'CALCULATE WAVE ATTENUATION:  WITH ATTENUATION (1), WITHOUT (0)'
-      READ (5,    *)  Watt
-      IF (Watt.eq.1) WRITE(6,*) 'WITH WAVE ATTENUATION' 
-      IF (Watt.eq.2) WRITE(6,*) 'NO ATTENUATION' 
-      
       WRITE(6,'(A)') 'ENTER dQdf STYLE (SEE dQdfSTYLES.txt)'
       READ (5,    *)  dQdfSTYLE
       WRITE(6,*) 'dQdf STYLE:',dQdfSTYLE 
       
-      WRITE(6,'(A)') 'CONSERVE AMPLITUDE (1) OR ENERGY (2) AT INTERFACES?'
+      WRITE(6,'(A)') 'CONSERVE ENERGY (1) OR AMPLITUDE (2) AT INTERFACES?'
       READ (5,    *)  cons_EorA
-      IF (cons_EorA.eq.1) WRITE(6,*) 'CONSERVE AMPLITUDE' 
-      IF (cons_EorA.eq.2) WRITE(6,*) 'CONSERVE ENERGY' 
+      IF (cons_EorA.eq.1) WRITE(6,*) 'CONSERVE ENERGY' 
+      IF (cons_EorA.eq.2) WRITE(6,*) 'CONSERVE AMPLITUDE' 
       
       WRITE(6,'(A)') 'ENTER TRACK OUTPUT FILE:'
       READ (5,'(A)')  tfile 
-      WRITE(6,*) 'TRACK FILE:',tfile
+      WRITE(6,*) 'Tfile:',tfile
       
       WRITE(6,'(A)') 'ENTER OUTPUT FILE NAME:'!REQUEST OUTPUT FILE NAME
-      WRITE(6,*) 'OUTPUT FILE:',ofile                   !
+      READ (5,'(A)')  ofile                   !
       
       WRITE(6,'(A)') 'ENTER LOG FILE NAME:'!REQUEST LOG FILE NAME
-      WRITE(6,*) 'LOG FILE:',logfile                   !
+      READ (5,'(A)')  logfile                   !
       
       WRITE(6,'(A)') 'ENTER KERNEL NUMBER:'!FOR TRACKING IN TERMINAL WHEN MANY KERNELS ARE RUNNING AT ONCE
       READ (5,*)  kernelnum
@@ -198,48 +181,6 @@ PROGRAM STATSYN_GLOBALSCAT
 !      ^^^^^ GET INPUTS ^^^^^
 
 
-!  FOR CRFL BENCHMARKING
-
-					 Cc2 = 8.3 
-					 Ccwil = 10
-					 Ccwir = 320
-					 Cc1 = 420
-					 Cnp = 3600
-					 
-					 
-					 Cc2r=1./Cc2
-           Cc1r=1./Cc1
-           Cnp1=Cnp-1
-           Cdp=(Cc2r-Cc1r)/float(Cnp1)
-           
-           DO CI = 1,Cnp
-             Cp(CI)=float(CI-1)*Cdp+Cc1r
-           END DO
-           
-           Cindex = 1
-
-
-! SH
-
-					 Cc2_SH = 3.2 
-					 Ccwil_SH = 10
-					 Ccwir_SH = 320
-					 Cc1_SH = 420
-					 Cnp_SH = 3600
-					 
-					 
-					 Cc2r_SH=1./Cc2_SH
-           Cc1r_SH=1./Cc1_SH
-           Cnp1_SH=Cnp_SH-1
-           Cdp_SH=(Cc2r_SH-Cc1r_SH)/float(Cnp1_SH)
-           
-           DO CI_SH = 1,Cnp_SH
-             Cp_SH(CI_SH)=float(CI_SH-1)*Cdp_SH+Cc1r_SH
-           END DO
-           
-           Cindex_SH = 1
-
-!      OPEN(6610,FILE='raytest.txt',STATUS='UNKNOWN')
 !     ======================================================
 !      ----- INITIALIZE PARAMETERS -----
       
@@ -342,20 +283,20 @@ PROGRAM STATSYN_GLOBALSCAT
     
 !     ======================================================
 !      ----- INITIALIZE TRACKING PARAMETERS -----    
-      
-      WRITE(6,*) '!!!!!!!!!!!!!!!!!!!!!'  !DEBUG
-      WRITE(6,*) ' ',nx,nlay,nttrack      !DEBUG
-
-      !Allocate memory for tracking number of phonons in each area
-     ALLOCATE(trackcount(nx,nlay,nttrack))              
-      
-      DO kk = 1,nx
-        DO ll = 1,nlay
-          DO mm = 1,nttrack
-            trackcount(kk,ll,mm) = 0.
-          END DO
-        END DO
-      END DO  
+!      
+!      WRITE(6,*) '!!!!!!!!!!!!!!!!!!!!!'  !DEBUG
+!      WRITE(6,*) ' ',nx,nlay,nttrack      !DEBUG
+!
+!      !Allocate memory for tracking number of phonons in each area
+!     ALLOCATE(trackcount(nx,nlay,nttrack))              
+!      
+!      DO kk = 1,nx
+!        DO ll = 1,nlay
+!          DO mm = 1,nttrack
+!            trackcount(kk,ll,mm) = 0.
+!          END DO
+!        END DO
+!      END DO  
 !      ^^^^^ INITIALIZE TRACKING PARAMETERS ^^^^^
 
   
@@ -415,11 +356,9 @@ PROGRAM STATSYN_GLOBALSCAT
       ELSEIF (SourceTYPE.eq.9) THEN      !CUSTOM SOURCE
          WRITE(6,'(a)') ' CUSTOM SOURCE'
          CALL READIN_SOURCE(nts,mt,SourceFILE)
-         IF (kernelnum.eq.1) THEN   !ONLY WRITE OUT TO FILES IF FIRST KERNEL
-           OPEN(3334,FILE='customsource.out',STATUS='UNKNOWN')
-           WRITE(3334,FMT=3335) (mt(sI),sI=1,nts1)
-           CLOSE(3334)
-         END IF
+!         OPEN(3334,FILE='customsource.out',STATUS='UNKNOWN')
+!         WRITE(3334,FMT=3335) (mt(sI),sI=1,nts1)
+!         CLOSE(3334)
       ELSE !IF (SourceTYPE.eq.1) THEN
         mt(5) = 1.   !Spike to compare with CRFL
         WRITE(6,'(a)') ' SOURCE IS DELTA FUNCTION'
@@ -429,7 +368,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
       !Calculate maximum source power (i.e. no attenuation) to normalize attn
       minattn = 0.
-      DO JJ = 1,nts1
+      DO JJ = 1,nts
         minattn = minattn + mt(JJ)**2
       END DO
 
@@ -564,10 +503,6 @@ PROGRAM STATSYN_GLOBALSCAT
         az   = 0.
         ncaust = 1                             !# OF CAUSTICS STARS AT 0. (which is index 1)
         
-        
-        !DEBUG
-!        tmax = 0.
-        
         !Set initial depth index (iz)
          iz = iz1    !iz1 is layer in which the source is.
         
@@ -599,18 +534,6 @@ PROGRAM STATSYN_GLOBALSCAT
         IF (samplingtype.eq.2) THEN               ! Sample slownesses
           p = maxp*r0
           ang1 = asin(p*vf(iz,iwave))
-        ELSEIF (samplingtype.eq.3) THEN						! Sample from p range (same as CRFL)
-          IF (ip.eq.3) THEN
-             p = Cp_SH(Cindex_SH)
-             ang1 = asin(p*vf(iz,iwave))
-             Cindex_SH = Cindex_SH + 1
-             IF (Cindex_SH > Cnp_SH) Cindex_SH   = Cindex_SH - Cnp_SH
-          ELSE        
-             p = Cp(Cindex)
-             ang1 = asin(p*vf(iz,iwave))
-             Cindex = Cindex + 1
-             IF (Cindex > Cnp) Cindex   = Cindex - Cnp
-          ENDIF
         ELSE    !IF (samplingtype.eq.1) THEN      ! Sample Angles
           ang1 = angst*r0                        !Randomly select angle
           p    = abs(sin(ang1))/vf(iz,iwave)
@@ -654,93 +577,10 @@ PROGRAM STATSYN_GLOBALSCAT
       
       
         ! ============ >>
-				! Track phonon's position
-        IF (I < 10000) THEN
-				IF (t-t_last > 0) THEN
-				
-          !Find index for distance
-          x_index = abs(x)
-          DO WHILE (x_index >= circum)
-            x_index = x_index - circum
-          END DO
-          IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
-          ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
-				
-				
-					ixdeg = nint((abs(x)/deg2km-x1))
-					ixtemp = ixdeg
-					!xo = x1 + float(ixdeg-1)*dxi
-					!IF ( abs(xo-abs(x)/deg2km) > 0.1) cycle
-
-					DO WHILE (ixdeg > 360) 
-						ixdeg = ixdeg - 360
-					END DO
-					IF (ixdeg > 180) ixdeg = 180 - (ixdeg-180)
-					IF (ixdeg < 0) ixdeg = -ixdeg 
-					
-					ixtrack = nint(ixdeg/dxi) + 1
-					
-					
-					itt = nint(t/REAL(nttrack_dt)+.5)
-					
-				
-					! Calculate attenuation
-					IT = nint((t       -t1)/dti) + 1		! Time index
-					
-					IF (Watt.eq.0) THEN
-						ims = 2
-				        frac = 0.
-					ELSE
-						ims = int(s/datt)+1
-						IF (ims > ns0-1) ims = ns0-1
-						IF (ims <=   1) ims =   2
-						s1 = float(ims-1)*datt
-						s2 = float(ims  )*datt
-						frac = (s-s1)/(s2-s1)
-					END IF
-					
-					IF (ncaust <= 1) THEN
-						icaust = 1
-					ELSE
-						icaust = ncaust
-						DO WHILE (icaust > 4)
-							icaust = icaust - 4
-						END DO
-					END IF
-					
-					
-					! Do [power]/[initial power (no att)] 
-					!       of attenuated source at time t
-					
-					attn = 0.
-					DO JJ = 1,nts
-						attn = attn + ((1.-frac)*mts(ims-1,icaust,JJ) &
-                          + (frac)*mts(ims  ,icaust,JJ) )**2 !Power
-					END DO
-					
-!					WRITE(6,*) t, attn, frac, ims, icaust !DEBUG
-					
-					IF (z_s(iz) - z_s(iz-1) == 0) THEN
-						iztrack = iz+1
-					ELSE
-						iztrack = iz
-					END IF
-					
-					IF (itt > nttrack) itt = nttrack
-					
-					!DEBUG
-					!IF ((iztrack > nlay).OR.(ixtrack > nx)) THEN
-					!	write(*,*) ixtrack,nx,iztrack,nlay,itt  !DEBUG
-					!END IF
-					
-					trackcount(ixtrack,iztrack,itt) = trackcount(ixtrack,iztrack,itt) + attn/minattn
-					
-
-					 
-				 
-				END IF
-				END IF
-
+        ! Track phonon's position
+        !
+        ! CAN ADD TRACKING FROM statsyn_TRACK.f90 HERE
+        ! 
         ! Track phonon's position
         ! ============ <<
         
@@ -951,17 +791,16 @@ PROGRAM STATSYN_GLOBALSCAT
           
                     IT = nint((t +dtsurf      -t1)/dti) + 1 
                     
-                    IF (Watt.eq.0) THEN
-                      ims = 2
-                      frac = 0.
-                    ELSE
-                      ims = int(s/datt)+1
-                      IF (ims > ns0-1) ims = ns0-1
-                      IF (ims <=   1) ims =   2
-                      s1 = float(ims-1)*datt
-                      s2 = float(ims  )*datt
-                      frac = (s-s1)/(s2-s1)
-                    END IF
+                    ims = int(s/datt)+1
+                    
+                    !IF (ims <= 1) WRITE(6,*) s,t,ims,xo
+                    
+                    IF (ims > ns0-1) ims = ns0-1
+                    IF (ims <=   1) ims =   2
+                    s1 = float(ims-1)*datt
+                    s2 = float(ims  )*datt
+                    frac = (s-s1)/(s2-s1)
+
 
                       icaust = ncaust
                       DO WHILE (icaust >= 4)
@@ -1047,11 +886,6 @@ PROGRAM STATSYN_GLOBALSCAT
        
 333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f10.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f7.5)
        
-       !DEBUG
-!       WRITE(6,*)I,NITR,t,tmax
-!       IF (t.lt.tmax) WRITE(6,*) I,tmax,t
-!       tmax = t
-       
        END DO    !CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
        ! ====================== <<
        ! Close single ray tracing while loop
@@ -1085,13 +919,6 @@ PROGRAM STATSYN_GLOBALSCAT
        CALL etime(elapsed,ttime4)      
       !WRITE(6,*) '---->',I,ttime4-ttime3,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
 
-      !DEBUG
-!      IF (tmax.lt.t2)  THEN
-!         WRITE(6,*)I,tmax,'!!!!!!!!!!!!'
-!      ELSE
-!         WRITE(6,*)I,tmax
-!      END IF
-      
 
       END DO  !CLOSE MAIN RAY TRACING LOOP - DOLOOP_001
 !     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1411,6 +1238,7 @@ SUBROUTINE SURFACE_PSV_BEN
       COMPLEX(8)    crP,crS,cp,c0
       REAL(8)       rP,rS,nrP,nrS
       real(8)       totc
+      COMPLEX(8)    convfac(2)
       
 
       ip_init = ip
@@ -1430,9 +1258,18 @@ SUBROUTINE SURFACE_PSV_BEN
        crP = D1*((velS/velP)**2*sin(2*angP)*sin(2*angS)-(cos(2*angS))**2)
        crS = D1*(-2.*(velS/velP)*sin(2*angP)*cos(2*angS))
        
-       rP = ((REAL(crP)**2 + IMAG(crP)**2)**0.5)**cons_EorA
-       rS = ((REAL(crS)**2 + IMAG(crS)**2)**0.5)**cons_EorA
+       IF (cons_EorA.eq.2) THEN
+         convfac(1) = CMPLX(1.,0.)
+         convfac(2) = CMPLX(1.,0.)
+       ELSE
+         convfac(1) = CMPLX(1.,0.)
+         convfac(2) = SQRT(sin(2*angS)/sin(2*angP))
+       END IF
        
+       rP = (REAL(crP*convfac(1))**2 + IMAG(crP*convfac(1))**2)**0.5
+       rS = (REAL(crS*convfac(2))**2 + IMAG(crS*convfac(2))**2)**0.5
+       
+
          totc = rP + rS
          nrP = rP / totc
 !         nrS = rS / totc
@@ -1450,8 +1287,18 @@ SUBROUTINE SURFACE_PSV_BEN
        crP = D1*((velS/velP)*sin(4*angS))
        crS = D1*((velS/velP)**2*sin(2*angP)*sin(2*angS)-(cos(2*angS))**2)
 
-       rP = ((REAL(crP)**2 + IMAG(crP)**2)**0.5)**cons_EorA
-       rS = ((REAL(crS)**2 + IMAG(crS)**2)**0.5)**cons_EorA
+       IF (cons_EorA.eq.2) THEN
+         convfac(1) = CMPLX(1.,0.)
+         convfac(2) = CMPLX(1.,0.)
+       ELSE
+         convfac(1) = SQRT(sin(2*angP)/sin(2*angS))
+         convfac(2) = CMPLX(1.,0.)
+       END IF
+       
+
+
+       rP = (REAL(crP*convfac(1))**2 + IMAG(crP*convfac(1))**2)**0.5
+       rS = (REAL(crS*convfac(2))**2 + IMAG(crS*convfac(2))**2)**0.5
        
        !Supercritical
        IF (p*vs(1,1) > 1) rP = 0
@@ -1483,6 +1330,7 @@ SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp,cons_EorA)
       COMPLEX       cone,ctwo,sj1,sj2,cj1,cj2,c0
       COMPLEX       DD,car,cat
       INTEGER       ud
+      COMPLEX       convfac(2)
       INTEGER       cons_EorA
       
       IF (b2 <= 0) THEN  !Same as free surface if reflects on liquid layer
@@ -1509,9 +1357,16 @@ SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp,cons_EorA)
         car   = (rho1*vb1*cj1-rho2*vb2*cj2)/DD
         cat   = ctwo*rho1*vb1*cj1/DD
         
+        IF(cons_EorA.eq.2) THEN
+          convfac(1) = CMPLX(1.,0.)
+          convfac(2) = CMPLX(1.,0.)
+        ELSE
+          convfac(1) = CMPLX(1.,0.)
+          convfac(2) = SQRT((rho2*vb2*cj2)/(rho1*vb1*cj1))
+        END IF
                             
-        ar = ((REAL(car)**2 + IMAG(car)**2)**0.5)**cons_EorA
-        at = ((REAL(cat)**2 + IMAG(cat)**2)**0.5)**cons_EorA
+        ar = ((REAL(car*convfac(1))**2 + IMAG(car*convfac(1))**2)**0.5)!**2
+        at = ((REAL(cat*convfac(2))**2 + IMAG(cat*convfac(2))**2)**0.5)!**2 * rh2*b2*cos(asin(p*b2))/rh1/b1/cos(asin(p*b1))
         
         !Check for total internal reflection !fix
         IF (b2*p > 1) at = 0
@@ -1574,6 +1429,8 @@ SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
       REAL(8)      rrp,rrs,rtp,rts               !REFLECTION & TRANSMISSION COEFS
       INTEGER      ud
       REAL(8)      amp,r0,rt_max,rt_min,rt_sum
+!      REAL(8)      convfac(4)                    !Amplitude to energy conversion factors (p.146 AKI)
+      COMPLEX(8)   convfac(4)                    !Amplitude to energy conversion factors (p.146 AKI)
       INTEGER      cons_EorA  
       
       va1    = cmplx(vp1,  0.)                   !MAKE VEL & DENSITY COMPLEX
@@ -1621,7 +1478,18 @@ SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
          atp    = ctwo*rho1*ci1*F/(va2*DEN)         !trans down P to P down
          ats    = ctwo*rho1*ci1*H*psub/(vb2*DEN)       !trans down P to S down
          
-      
+         IF (cons_EorA.eq.2) THEN   !CONSERVE AMPLITUDE
+           convfac(1) = CMPLX(1.,0.)                          !rp
+           convfac(2) = CMPLX(1.,0.)!rs
+           convfac(3) = CMPLX(1.,0.)!tp
+           convfac(4) = CMPLX(1.,0.)!ts
+         ELSE
+           convfac(1) = CMPLX(1.,0.)                                             !rp
+           convfac(2) = SQRT((vb1*cj1)/(va1*ci1))            !rs
+           convfac(3) = SQRT((rho2*va2*ci2)/(rho1*va1*ci1))  !tp
+           convfac(4) = SQRT((rho2*vb2*cj2)/(rho1*va1*ci1))  !ts
+         END IF
+         
       ELSE                   !INCIDENT S-WAVE
          trm1   = a*b+c*d*ci2*cj2/(va2*vb2)       
          arp    = (-ctwo*cj1*trm1*psub)/(va1*DEN)      !refl down S to P up
@@ -1631,12 +1499,24 @@ SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
          atp    = -ctwo*rho1*cj1*G*psub/(va2*DEN)      !trans down S to P down 
          ats    = ctwo*rho1*cj1*E/(vb2*DEN)         !trans down S to S down
          
+         IF (cons_EorA.eq.2) THEN
+           convfac(1) = CMPLX(1.,0.)                          !rp
+           convfac(2) = CMPLX(1.,0.)!rs
+           convfac(3) = CMPLX(1.,0.)!tp
+           convfac(4) = CMPLX(1.,0.)!ts
+         ELSE
+           convfac(1) = SQRT((va1*ci1)/(vb1*cj1))           !rp
+           convfac(2) = CMPLX(1.,0.)                                             !rs
+           convfac(3) = SQRT((rho2*va2*ci2)/(rho1*vb1*cj1))  !tp
+           convfac(4) = SQRT((rho2*vb2*cj2)/(rho1*vb1*cj1))  !ts
+         END IF
+
       END IF
       
-      rrp = ((REAL(arp)**2+imag(arp)**2)**0.5)**cons_EorA
-      rrs = ((REAL(ars)**2+imag(ars)**2)**0.5)**cons_EorA
-      rtp = ((REAL(atp)**2+imag(atp)**2)**0.5)**cons_EorA
-      rts = ((REAL(ats)**2+imag(ats)**2)**0.5)**cons_EorA
+      rrp = ((REAL(arp*convfac(1))**2+imag(arp*convfac(1))**2)**0.5)!**2
+      rrs = ((REAL(ars*convfac(2))**2+imag(ars*convfac(2))**2)**0.5)!**2
+      rtp = ((REAL(atp*convfac(3))**2+imag(atp*convfac(3))**2)**0.5)!**2
+      rts = ((REAL(ats*convfac(4))**2+imag(ats*convfac(4))**2)**0.5)!**2
             
       ! Check for total internal reflection     !fix
       IF (vp2*pin > 1) rtp = 0.
@@ -1696,6 +1576,7 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
       COMPLEX(8)   crP,crS,ctP,c0
       REAL(8)      rP,rS,tP,tot,nrP,nrS,ntP,r0,amp
       INTEGER      ud,ip
+      COMPLEX(8)   convfac(3)
       INTEGER      cons_EorA
       
       p = CMPLX(realp,0.)
@@ -1725,9 +1606,19 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
         
         ctP = D12*(2.*cos(angP)*cos(2*angS))
 
-        rP = ((REAL(crP)**2+IMAG(crP)**2)**0.5)**cons_EorA
-        rS = ((REAL(crS)**2+IMAG(crS)**2)**0.5)**cons_EorA
-        tP = ((REAL(ctP)**2+IMAG(ctP)**2)**0.5)**cons_EorA
+        IF (cons_EorA.eq.2) THEN
+         convfac(1) = CMPLX(1.,0)
+         convfac(2) = CMPLX(1.,0)
+         convfac(3) = CMPLX(1.,0)
+        ELSE
+         convfac(1) = CMPLX(1.,0)
+         convfac(2) = SQRT(sin(2*angS)/sin(2*angP))
+         convfac(3) = SQRT(tau*sin(2*angPc)/sin(2*angP))
+        END IF
+
+        rP = (REAL(crP*convfac(1))**2+IMAG(crP*convfac(1))**2)**0.5
+        rS = (REAL(crS*convfac(2))**2+IMAG(crS*convfac(2))**2)**0.5
+        tP = (REAL(ctP*convfac(3))**2+IMAG(ctP*convfac(3))**2)**0.5
         
         !Supercritical
         IF (rc*realp > 1) tP = 0.
@@ -1764,9 +1655,20 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
         ctP = D12*(-2.*(b/a)*cos(angP)*sin(2*angS))
 
 
-        rP = ((REAL(crP)**2+IMAG(crP)**2)**0.5)**cons_EorA
-        rS = ((REAL(crS)**2+IMAG(crS)**2)**0.5)**cons_EorA
-        tP = ((REAL(ctP)**2+IMAG(ctP)**2)**0.5)**cons_EorA
+        IF (cons_EorA.eq.2) THEN
+         convfac(1) = CMPLX(1.,0)
+         convfac(2) = CMPLX(1.,0)
+         convfac(3) = CMPLX(1.,0)
+        ELSE
+         convfac(1) = SQRT(sin(2*angP)/sin(2*angS))
+         convfac(2) = CMPLX(1.,0.)
+         convfac(3) = SQRT(tau*sin(2*angPc)/sin(2*angS))
+        END IF
+        
+  
+        rP = (REAL(crP*convfac(1))**2+IMAG(crP*convfac(1))**2)**0.5
+        rS = (REAL(crS*convfac(2))**2+IMAG(crS*convfac(2))**2)**0.5
+        tP = (REAL(ctP*convfac(3))**2+IMAG(ctP*convfac(3))**2)**0.5
         
         !Supercritical
         IF (ra*realp > 1) rP = 0.
@@ -1811,6 +1713,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
       COMPLEX(8)   crP,ctP,ctS
       REAL(8)      rP,tS,tP,tot,nrP,ntS,ntP,r0,amp
       INTEGER      ud,ip
+      COMPLEX(8)   convfac(3)   !Conversion factors from amplitude to energy coefficients) BEN-MENAHEM p. 478
       INTEGER      cons_EorA
       
       p = CMPLX(realp,0.)
@@ -1839,10 +1742,19 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
         
         tS = D12*(-4*tau*(c/a)*cos(angP)*sin(angS)*cos(angPc))
 
+        IF (cons_EorA.eq.2) THEN
+         convfac(1) = CMPLX(1.,0)
+         convfac(2) = CMPLX(1.,0)
+         convfac(3) = CMPLX(1.,0)
+        ELSE
+         convfac(1) = CMPLX(1.,0.)
+         convfac(2) = SQRT(1/tau*sin(2*angP)/sin(2*angPc))
+         convfac(3) = SQRT(1/tau*sin(2*angS)/sin(2*angPc))
+        END IF
                 
-        rP = ((REAL(crP)**2+IMAG(crP)**2)**0.5)**cons_EorA
-        tP = ((REAL(ctP)**2+IMAG(ctP)**2)**0.5)**cons_EorA
-        tS = ((REAL(ctS)**2+IMAG(ctS)**2)**0.5)**cons_EorA
+        rP = (REAL(crP*convfac(1))**2+IMAG(crP*convfac(1))**2)**0.5
+        tP = (REAL(ctP*convfac(2))**2+IMAG(ctP*convfac(2))**2)**0.5
+        tS = (REAL(ctS*convfac(3))**2+IMAG(ctS*convfac(3))**2)**0.5
         
         !Supercritical
         IF (ra*realp > 1) tP = 0.

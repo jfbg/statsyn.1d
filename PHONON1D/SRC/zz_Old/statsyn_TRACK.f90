@@ -535,7 +535,8 @@ PROGRAM statsyn_TRACK
 					END IF
 					
 					
-					! Do total power/energy of attenuated source at time t
+					! Do [power/(initial power, no att)] 
+					!       of attenuated source at time t
 					
 					attn = 0.
 					DO JJ = 1,nts
