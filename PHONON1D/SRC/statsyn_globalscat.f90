@@ -98,7 +98,7 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*'
       WRITE(*,*) '*    USE FOR BENCHMARKING - DISCRETE p VALUES'
       WRITE(*,*) '*          IF SAMPLINGTYPE.eq.3'
-      WRITE(*,*) '*    USE ENERGY CONSERVATION -- TEST --'
+      WRITE(*,*) '*    USE ENERGY CONSERVATION'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
