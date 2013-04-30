@@ -25,7 +25,7 @@ PROGRAM STATSYN_GLOBALSCAT
 !
 !
 !     ======================================================
-!      ----- DECLARATIONS -----
+!      ----- DECLARATIONS ----
         
         ! All declarations in pho_vars except debugging and some source variables
         USE pho_vars
