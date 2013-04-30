@@ -10,17 +10,18 @@ set ray_par    = "0.0 0.1668 0.2931"
 @ t_max        = 8192			# 75 minutes
 set d_range    = "0 180 91"
 set mx_scat_dp = "0"
-set n_phonon   = "30000"
+set n_phonon   = "300"
 
 # Source attenuation and type
 set dQdfstyle  = 1
 set sourcetype = 9    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "1 1 1"  # Energy partioning at source
-set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
+set samtype    = 3   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
 
 # Code Parameters
 set cons_EorA = 1  #Conserve Amplitude (1) or Energy (2) at interfaces
+set Watt      = 1  # With attenuation (1) or without (0)
 
 # SCATTERING
 set bg_scat    = 0.0
@@ -47,7 +48,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 cd SRC
-make statsyn_global_CRFL_noATT.x
+make statsyn_global.x
 cd ..
 
 
@@ -111,7 +112,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsyn_globalscat_CRFL_noATT << EOF"                         >  $file_csh
+echo "./bin/statsyn_globalscat << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
 echo "$ray_par          \!LIMIT THE RAY PARAMETER"            >> $file_csh
@@ -132,6 +133,7 @@ echo "$prob_scat          \!SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh
 echo "$bg_scat          \!BACKGROUND SCATTERING PROB (SIMILAR TO RMS)" >> $file_csh
 echo "$dsmin $dsmax $npow \!SCATERER SCALE-LENGTHS"           >> $file_csh
 echo "$velperturb         \!VELOCITY PERTURBATION"            >> $file_csh
+echo "$Watt             \!With or withour attenuation"        >> $file_csh
 echo "$dQdfstyle        \!dQ/df Style            "            >> $file_csh
 echo "$cons_EorA        \!Conserve Energy or Amplitde"        >> $file_csh
 echo "$outTRACK_dir/$file_track"                              >> $file_csh
