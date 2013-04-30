@@ -209,9 +209,7 @@ PROGRAM STATSYN_GLOBALSCAT
         Cc2 = 8.3
         Ccwil = 10
         Ccwir = 320
-!        Cc1 = 420
-        !DEBUG
-        Cc1 = 50000
+        Cc1 = 420
         Cnp = 3600
            
            
@@ -689,92 +687,92 @@ PROGRAM STATSYN_GLOBALSCAT
       
       
         ! ============ >>
-        ! Track phonon's position
-        IF (I < 10000) THEN
-        IF (t-t_last > 0) THEN
-        
-          !Find index for distance
-          x_index = abs(x)
-          DO WHILE (x_index >= circum)
-            x_index = x_index - circum
-          END DO
-          IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
-          ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
-        
-        
-          ixdeg = nint((abs(x)/deg2km-x1))
-          ixtemp = ixdeg
-          !xo = x1 + float(ixdeg-1)*dxi
-          !IF ( abs(xo-abs(x)/deg2km) > 0.1) cycle
-
-          DO WHILE (ixdeg > 360) 
-            ixdeg = ixdeg - 360
-          END DO
-          IF (ixdeg > 180) ixdeg = 180 - (ixdeg-180)
-          IF (ixdeg < 0) ixdeg = -ixdeg 
-          
-          ixtrack = nint(ixdeg/dxi) + 1
-          
-          
-          itt = nint(t/REAL(nttrack_dt)+.5)
-          
-        
-          ! Calculate attenuation
-          IT = nint((t       -t1)/dti) + 1    ! Time index
-          
-          IF (Watt.eq.0) THEN
-            ims = 2
-                frac = 0.
-          ELSE
-            ims = int(s/datt)+1
-            IF (ims > ns0-1) ims = ns0-1
-            IF (ims <=   1) ims =   2
-            s1 = float(ims-1)*datt
-            s2 = float(ims  )*datt
-            frac = (s-s1)/(s2-s1)
-          END IF
-          
-          IF (ncaust <= 1) THEN
-            icaust = 1
-          ELSE
-            icaust = ncaust
-            DO WHILE (icaust > 4)
-              icaust = icaust - 4
-            END DO
-          END IF
-          
-          
-          ! Do [power]/[initial power (no att)] 
-          !       of attenuated source at time t
-          
-          attn = 0.
-          DO JJ = 1,nts
-            attn = attn + ((1.-frac)*mts(ims-1,icaust,JJ) &
-                          + (frac)*mts(ims  ,icaust,JJ) )**2 !Power
-          END DO
-          
-!          WRITE(6,*) t, attn, frac, ims, icaust !DEBUG
-          
-          IF (z_s(iz) - z_s(iz-1) == 0) THEN
-            iztrack = iz+1
-          ELSE
-            iztrack = iz
-          END IF
-          
-          IF (itt > nttrack) itt = nttrack
-          
-          !DEBUG
-          !IF ((iztrack > nlay).OR.(ixtrack > nx)) THEN
-          !  write(*,*) ixtrack,nx,iztrack,nlay,itt  !DEBUG
-          !END IF
-          
-          trackcount(ixtrack,iztrack,itt) = trackcount(ixtrack,iztrack,itt) + attn/minattn
-          
-
-           
-         
-        END IF
-        END IF
+!        ! Track phonon's position
+!        IF (I < 10000) THEN
+!        IF (t-t_last > 0) THEN
+!
+!          !Find index for distance
+!          x_index = abs(x)
+!          DO WHILE (x_index >= circum)
+!            x_index = x_index - circum
+!          END DO
+!          IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
+!          ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE
+!
+!
+!          ixdeg = nint((abs(x)/deg2km-x1))
+!          ixtemp = ixdeg
+!          !xo = x1 + float(ixdeg-1)*dxi
+!          !IF ( abs(xo-abs(x)/deg2km) > 0.1) cycle
+!
+!          DO WHILE (ixdeg > 360)
+!            ixdeg = ixdeg - 360
+!          END DO
+!          IF (ixdeg > 180) ixdeg = 180 - (ixdeg-180)
+!          IF (ixdeg < 0) ixdeg = -ixdeg
+!
+!          ixtrack = nint(ixdeg/dxi) + 1
+!
+!
+!          itt = nint(t/REAL(nttrack_dt)+.5)
+!
+!
+!          ! Calculate attenuation
+!          IT = nint((t       -t1)/dti) + 1    ! Time index
+!
+!          IF (Watt.eq.0) THEN
+!            ims = 2
+!                frac = 0.
+!          ELSE
+!            ims = int(s/datt)+1
+!            IF (ims > ns0-1) ims = ns0-1
+!            IF (ims <=   1) ims =   2
+!            s1 = float(ims-1)*datt
+!            s2 = float(ims  )*datt
+!            frac = (s-s1)/(s2-s1)
+!          END IF
+!
+!          IF (ncaust <= 1) THEN
+!            icaust = 1
+!          ELSE
+!            icaust = ncaust
+!            DO WHILE (icaust > 4)
+!              icaust = icaust - 4
+!            END DO
+!          END IF
+!
+!
+!          ! Do [power]/[initial power (no att)]
+!          !       of attenuated source at time t
+!
+!          attn = 0.
+!          DO JJ = 1,nts
+!            attn = attn + ((1.-frac)*mts(ims-1,icaust,JJ) &
+!                          + (frac)*mts(ims  ,icaust,JJ) )**2 !Power
+!          END DO
+!
+!         ! WRITE(6,*) t, attn, frac, ims, icaust !DEBUG
+!
+!          IF (z_s(iz) - z_s(iz-1) == 0) THEN
+!            iztrack = iz+1
+!          ELSE
+!            iztrack = iz
+!          END IF
+!
+!          IF (itt > nttrack) itt = nttrack
+!
+!          !DEBUG
+!          !IF ((iztrack > nlay).OR.(ixtrack > nx)) THEN
+!          !  write(*,*) ixtrack,nx,iztrack,nlay,itt  !DEBUG
+!          !END IF
+!
+!          trackcount(ixtrack,iztrack,itt) = trackcount(ixtrack,iztrack,itt) + attn/minattn
+!
+!
+!
+!
+!        END IF
+!        END IF
 
         ! Track phonon's position
         ! ============ <<
@@ -986,8 +984,8 @@ PROGRAM STATSYN_GLOBALSCAT
                     ! right on the receiver. Max time is when ang1 is 90.          
                     dtsurf = (xo-x_index/deg2km)*deg2km*p 
 
-            !DEBUG
-            IF ((xo.eq.10).AND.(t.lt.500)) WRITE(6,*) p,t+dtsurf
+!            !DEBUG
+!            IF ((xo.eq.10).AND.(t.lt.500)) WRITE(6,*) p,t+dtsurf
           
                     IT = nint((t +dtsurf      -t1)/dti) + 1 
                     
