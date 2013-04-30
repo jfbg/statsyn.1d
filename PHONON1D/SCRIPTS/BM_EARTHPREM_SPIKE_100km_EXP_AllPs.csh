@@ -10,7 +10,7 @@ set ray_par    = "0.0 0.1668 0.2931"
 @ t_max        = 8192			# 75 minutes
 set d_range    = "0 180 91"
 set mx_scat_dp = "0"
-set n_phonon   = "360000"
+set n_phonon   = "3000000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
@@ -20,7 +20,7 @@ set rPrSVrSH   = "1 0 0"  # Energy partioning at source
 set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
 
 # Code Parameters
-set cons_EorA = 1  #Conserve Amplitude (1) or Energy (2) at interfaces
+set cons_EorA = 2  #Conserve Amplitude (1) or Energy (2) at interfaces
 set Watt      = 1  # With attenuation (1) or without (0)
 
 # SCATTERING
@@ -31,14 +31,14 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.0
 
-set file_out   = "BM_test"
+set file_out   = "BM_EARTHPREM_SPIKE_100km_EXP_AllPs"
 set model_name = "EARTH_MODEL_20km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 1     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 1    ## Number of iterations
+@ n_kern  = 18     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 3    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
