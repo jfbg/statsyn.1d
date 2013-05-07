@@ -11,11 +11,13 @@ MODULE PHO_VARS      ! Make variables global
         DOUBLE PRECISION,ALLOCATABLE,DIMENSION(:,:,:) :: trackcount !Phonon Tracking array
         REAL(8)       ::  attn, minattn
         INTEGER       ::  nttrack,ixtrack    !track time points
-        INTEGER     :: iztrack,ixtrackm
+        INTEGER       ::  iztrack,ixtrackm
         INTEGER       ::  nttrack_dt            !time interval for saving phonon position
         REAL(8)       ::  normfactor            !Normalization factor for cell size
-
-        REAL(8)       d2r,re,rm,circum
+        REAL(8)       ::  dt_track
+        REAL(8)           d2r,re,rm,circum
+        INTEGER           dotrack
+        
         INTEGER       EorM                  !1=EARTH, 2=MOON
         
         ! VELOCITY MODEL CHECKS

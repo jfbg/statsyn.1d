@@ -20,8 +20,9 @@ set rPrSVrSH   = "1 0 0"  # Energy partioning at source
 set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
 
 # Code Parameters
-set cons_EorA = 1  #Conserve Amplitude (1) or Energy (2) at interfaces
+set cons_EorA = 1  # Conserve Amplitude (1) or Energy (2) at interfaces
 set Watt      = 1  # With attenuation (1) or without (0)
+set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
 
 # SCATTERING
 set bg_scat    = 0.0

@@ -98,7 +98,6 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(*,*) '*'
       WRITE(*,*) '*    USE FOR BENCHMARKING - DISCRETE p VALUES'
       WRITE(*,*) '*          IF SAMPLINGTYPE.eq.3'
-      WRITE(*,*) '*    USE ENERGY CONSERVATION'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
@@ -260,7 +259,7 @@ PROGRAM STATSYN_GLOBALSCAT
       d2r = pi/180.
       
       nttrack = 5                !Set number of time intervals to track
-      nttrack_dt = t2/nttrack
+      nttrack_dt = (t2-t1)/nttrack
       
       n180 = nint(180/dxi)      !Number of intervals in 180deg
       
@@ -556,7 +555,7 @@ PROGRAM STATSYN_GLOBALSCAT
        seed = abs((nclock*r2s))! + 11 * (/ (k - 1, k = 1, nseed) /)      
        CALL srand(seed)    
        r0 = rand()    !First rand output not random
-                        ! It is seed (clock) depENDent
+                        ! It is seed (clock) dependent
       ! ============ <<
        
          
@@ -577,8 +576,6 @@ PROGRAM STATSYN_GLOBALSCAT
             ip = 3 !SH
           END IF
         END IF
-        
-        
          
         iwave = ip
         IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
@@ -648,26 +645,16 @@ PROGRAM STATSYN_GLOBALSCAT
           ang1 = angst*r0                        !Randomly select angle
           p    = abs(sin(ang1))/vf(iz,iwave)
         END IF
-
-
-!        WRITE(77,*) p,ang1
         ! ============ <<
-        
-        
-
         
         ! ============ >>
         ! Set scatterer scale-length
         scat_time = 0
         ! ============ <<       
 
-
-       
        ! ====================== >>
        ! Start single ray tracing while loop
-       ! ====================== >>
-       
-       
+       ! ====================== >>   
        DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
        
        CALL etime(elapsed,tt2)
@@ -687,9 +674,9 @@ PROGRAM STATSYN_GLOBALSCAT
       
       
         ! ============ >>
-!        ! Track phonon's position
-!        IF (I < 10000) THEN
-!        IF (t-t_last > 0) THEN
+        ! Track phonon's position
+        !IF (I < 10000) THEN
+!        IF (dt_track > 0) THEN
 !
 !          !Find index for distance
 !          x_index = abs(x)
@@ -698,31 +685,19 @@ PROGRAM STATSYN_GLOBALSCAT
 !          END DO
 !          IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
 !          ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE
-!
-!
-!          ixdeg = nint((abs(x)/deg2km-x1))
-!          ixtemp = ixdeg
-!          !xo = x1 + float(ixdeg-1)*dxi
-!          !IF ( abs(xo-abs(x)/deg2km) > 0.1) cycle
-!
-!          DO WHILE (ixdeg > 360)
-!            ixdeg = ixdeg - 360
-!          END DO
-!          IF (ixdeg > 180) ixdeg = 180 - (ixdeg-180)
-!          IF (ixdeg < 0) ixdeg = -ixdeg
-!
-!          ixtrack = nint(ixdeg/dxi) + 1
-!
-!
-!          itt = nint(t/REAL(nttrack_dt)+.5)
-!
-!
-!          ! Calculate attenuation
-!          IT = nint((t       -t1)/dti) + 1    ! Time index
-!
+!!
+!!          ixtrack = ix
+!!
+!!
+!          itt = nint((t-t1)	/REAL(nttrack_dt)+.5)
+!!
+!!
+!!          ! Calculate attenuation
+!!          IT = nint((t       -t1)/dti) + 1    ! Time index
+!!
 !          IF (Watt.eq.0) THEN
 !            ims = 2
-!                frac = 0.
+!            frac = 0.
 !          ELSE
 !            ims = int(s/datt)+1
 !            IF (ims > ns0-1) ims = ns0-1
@@ -732,44 +707,17 @@ PROGRAM STATSYN_GLOBALSCAT
 !            frac = (s-s1)/(s2-s1)
 !          END IF
 !
-!          IF (ncaust <= 1) THEN
-!            icaust = 1
-!          ELSE
-!            icaust = ncaust
-!            DO WHILE (icaust > 4)
-!              icaust = icaust - 4
-!            END DO
-!          END IF
-!
-!
-!          ! Do [power]/[initial power (no att)]
-!          !       of attenuated source at time t
-!
 !          attn = 0.
 !          DO JJ = 1,nts
-!            attn = attn + ((1.-frac)*mts(ims-1,icaust,JJ) &
-!                          + (frac)*mts(ims  ,icaust,JJ) )**2 !Power
+!            attn = attn + ((1.-frac)*mts(ims-1,1,JJ) &
+!                          + (frac)*mts(ims  ,1,JJ) )**2 !Power
 !          END DO
 !
-!         ! WRITE(6,*) t, attn, frac, ims, icaust !DEBUG
-!
-!          IF (z_s(iz) - z_s(iz-1) == 0) THEN
-!            iztrack = iz+1
-!          ELSE
-!            iztrack = iz
-!          END IF
+!          iztrack = iz -1
 !
 !          IF (itt > nttrack) itt = nttrack
 !
-!          !DEBUG
-!          !IF ((iztrack > nlay).OR.(ixtrack > nx)) THEN
-!          !  write(*,*) ixtrack,nx,iztrack,nlay,itt  !DEBUG
-!          !END IF
-!
-!          trackcount(ixtrack,iztrack,itt) = trackcount(ixtrack,iztrack,itt) + attn/minattn
-!
-!
-!
+!          trackcount(ix,iz-1,itt) = trackcount(ix,iz-1,itt) + attn/minattn*dt_track
 !
 !        END IF
 !        END IF
@@ -1070,6 +1018,7 @@ PROGRAM STATSYN_GLOBALSCAT
         
        !Check if time increased since last loop  -- Some phonon gets stuck and I'm not sure why yet...
        IF (t_last == t) THEN
+         dt_track = 0.
          t_last_count = t_last_count + 1
          IF (t_last_count > 99) THEN
 !           WRITE(77,*) t_last_count,I,NITR         
@@ -1080,6 +1029,7 @@ PROGRAM STATSYN_GLOBALSCAT
          END IF
        ELSE
          t_last_count = 0   !reset t_last_count
+         dt_track = t-t_last 
          t_last = t
        END IF
        
@@ -1122,13 +1072,6 @@ PROGRAM STATSYN_GLOBALSCAT
        
        CALL etime(elapsed,ttime4)      
       !WRITE(6,*) '---->',I,ttime4-ttime3,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
-
-      !DEBUG
-!      IF (tmax.lt.t2)  THEN
-!         WRITE(6,*)I,tmax,'!!!!!!!!!!!!'
-!      ELSE
-!         WRITE(6,*)I,tmax
-!      END IF
       
 
       END DO  !CLOSE MAIN RAY TRACING LOOP - DOLOOP_001
