@@ -937,7 +937,7 @@ PROGRAM STATSYN_GLOBALSCAT
           
                     IT = nint((t +dtsurf      -t1)/dti) + 1 
                     
-                    IF (Watt.eq.0) THEN
+                    IF (Watt.eq.0) THEN  
                       ims = 2
                       frac = 0.
                     ELSE

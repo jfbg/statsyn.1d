@@ -31,7 +31,7 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.0
 
-set file_out   = "BM_MOON2LAYERS_bpSPIKE_100km_AllPs_ENERGY"
+set file_out   = "BM_MOON2LAYERS_bpSPIKE_100km_AllPs_PART1_ENERGY"
 set model_name = "MOON2LAYERS_10km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
