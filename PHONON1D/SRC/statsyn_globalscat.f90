@@ -205,8 +205,8 @@ PROGRAM STATSYN_GLOBALSCAT
 
 !  FOR CRFL BENCHMARKING
 
-        Cc2 = 8.3
-        Ccwil = 10
+        Cc2 = 7.3
+        Ccwil = 8.0
         Ccwir = 320
         Cc1 = 420
         Cnp = 3600
@@ -226,8 +226,8 @@ PROGRAM STATSYN_GLOBALSCAT
 
 ! SH
 
-        Cc2_SH = 3.2
-        Ccwil_SH = 10
+        Cc2_SH = 4.1
+        Ccwil_SH = 5.0
         Ccwir_SH = 320
         Cc1_SH = 420
         Cnp_SH = 3600
