@@ -37,7 +37,7 @@ set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 18     ## Number of kernels to use per iteration (simultaneous run)
+@ n_kern  = 9     ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 4    ## Number of iterations
 
 # Output folder
