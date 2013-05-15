@@ -31,7 +31,7 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.0
 
-set file_out   = "BM_MOON2LAYERS_bpSPIKE_100km_CRFLPs_noATT_ENERGY"
+set file_out   = "BM_MOON2LAYERS_bpSPIKE_700km_CRFLPs_noATT_ENERGY"
 set model_name = "MOON2LAYERS_10km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
@@ -77,7 +77,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 20
 else if ($i == 1) then
- set q_depth = 100
+ set q_depth = 700
 else
  set q_depth = 0.01
 endif

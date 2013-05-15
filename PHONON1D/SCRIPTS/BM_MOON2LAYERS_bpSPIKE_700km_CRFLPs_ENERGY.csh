@@ -21,7 +21,7 @@ set samtype    = 3   # Sampling over takeoff angles (1), or slownesses (2),or BM
 
 # Code Parameters
 set cons_EorA = 2  #Conserve Amplitude (1) or Energy (2) at interfaces
-set Watt      = 0  # With attenuation (1) or without (0)
+set Watt      = 1  # With attenuation (1) or without (0)
 
 # SCATTERING
 set bg_scat    = 0.0
@@ -31,13 +31,13 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.0
 
-set file_out   = "BM_MOON2LAYERS_bpSPIKE_100km_CRFLPs_noATT_ENERGY"
+set file_out   = "BM_MOON2LAYERS_bpSPIKE_700km_CRFLPs_ENERGY"
 set model_name = "MOON2LAYERS_10km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 18     ## Number of kernels to use per iteration (simultaneous run)
+@ n_kern  = 9     ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 4    ## Number of iterations
 
 # Output folder
@@ -77,7 +77,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 20
 else if ($i == 1) then
- set q_depth = 100
+ set q_depth = 700
 else
  set q_depth = 0.01
 endif

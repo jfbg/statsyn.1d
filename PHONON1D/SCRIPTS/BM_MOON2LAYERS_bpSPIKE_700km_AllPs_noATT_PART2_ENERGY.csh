@@ -10,14 +10,14 @@ set ray_par    = "0.0 0.1668 0.2931"
 @ t_max        = 8192			# 75 minutes
 set d_range    = "0 180 91"
 set mx_scat_dp = "0"
-set n_phonon   = "3002400"
+set n_phonon   = "3000000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
 set sourcetype = 9    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "1 1 1"  # Energy partioning at source
-set samtype    = 3   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
+set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
 
 # Code Parameters
 set cons_EorA = 2  #Conserve Amplitude (1) or Energy (2) at interfaces
@@ -31,13 +31,13 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.0
 
-set file_out   = "BM_MOON2LAYERS_bpSPIKE_100km_CRFLPs_noATT_ENERGY"
+set file_out   = "BM_MOON2LAYERS_bpSPIKE_700km_AllPs_noATT_PART2_ENERGY"
 set model_name = "MOON2LAYERS_10km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 18     ## Number of kernels to use per iteration (simultaneous run)
+@ n_kern  = 9     ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 4    ## Number of iterations
 
 # Output folder
@@ -77,7 +77,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 20
 else if ($i == 1) then
- set q_depth = 100
+ set q_depth = 700
 else
  set q_depth = 0.01
 endif
