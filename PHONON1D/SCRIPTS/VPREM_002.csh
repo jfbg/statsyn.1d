@@ -9,7 +9,7 @@ set ray_par    = "0.0 0.1668 0.2931"
 @ t_start      = 0
 @ t_max        = 7200			# 75 minutes
 set d_range    = "0 180 91"
-set n_phonon   = "3"
+set n_phonon   = "3000000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
@@ -103,7 +103,7 @@ while ($j < $n_kern)
 
 @ kernelnum = $j
 
-sleep 4
+sleep 6
 
 ## 
 # Start phonon synthetics
