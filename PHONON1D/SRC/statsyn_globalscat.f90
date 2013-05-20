@@ -363,35 +363,6 @@ PROGRAM STATSYN_GLOBALSCAT
 !      ^^^^^ INITIALIZE TRACKING PARAMETERS ^^^^^
 
 
-
-!     DEBUG STUFF:
-!      Dpin = 0.001
-!      Dvp1 = 13.71
-!      Dvs1 = 7.26
-!      Dden1 = 5.5665
-!      Dvp2 = 8.06
-!      Dvs2 = 0.0
-!      Dden2 = 9.90350
-!      Drrp =0.
-!      Drrs = 0.
-!      Drtp = 0.
-!      Drts = 0.
-!      ip = 1
-!      ud = 1
-!      a = 1
-!      cons_EorA = 1
-!      CALL RTCOEF_PSV(Dpin,Dvp1,Dvs1,Dden1,Dvp2,Dvs2,Dden2,Drrp,Drrs,Drtp,Drts,ip,ud,a,cons_EorA)
-!      CALL RTFLUID_BEN_S2L(Dpin,ip,Dvp1,Dvs1,Dvp2,Dden1,Dden2,a,ud,cons_EorA)
-
-!      WRITE(6,*) '!!!!!!!!!!!!'
-!      WRITE(6,*) Drrp,Drrs,Drtp,Drts
-!      WRITE(6,*) ip,ud
-!      WRITE(6,*) '!!!!!!!!!!!!'
-
-!      stop
-
-  
-
 !     ======================================================
 !      ----- Initialize stacks variable -----      
 !      WRITE(6,*) 'ZEROING STACKS:'            !ZERO STACKS
