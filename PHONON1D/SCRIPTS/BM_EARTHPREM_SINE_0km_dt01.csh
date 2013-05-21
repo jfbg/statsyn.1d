@@ -60,8 +60,8 @@ while ($l < $n_freq)
 @ l = $l + 1
 
 if ($l == 1) then
- set dt = "0.200"
- set period = "05"
+ set dt = "0.100"
+ set period = "10"
 else
  set dt = "0.150"
  set period = "07"
@@ -77,7 +77,7 @@ while ($i < $n_depth)
 if ($i == 2) then
  set q_depth = 20
 else if ($i == 1) then
- set q_depth = 100
+ set q_depth = 0.01
 else
  set q_depth = 0.01
 endif
