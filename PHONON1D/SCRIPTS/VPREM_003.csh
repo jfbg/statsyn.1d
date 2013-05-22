@@ -4,8 +4,6 @@
 # Set synthetic parameters
 #
 
-
-set ray_par    = "0.0 0.1668 0.2931"
 @ t_start      = 0
 @ t_max        = 7200			# 75 minutes
 set d_range    = "0 180 91"
@@ -117,7 +115,6 @@ set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 echo "./bin/statsyn_globalscat << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
-echo "$ray_par          \!LIMIT THE RAY PARAMETER"            >> $file_csh
 echo "$t_start $t_max $dt \!LIMIT THE TIME WINDOW (SECONDS) " >> $file_csh
 echo "$d_range          \!LIMIT THE DISTANCE (DEGREES)    "   >> $file_csh
 echo "$n_phonon         \!NUMBER OF PHONONS TO FIRE       "   >> $file_csh

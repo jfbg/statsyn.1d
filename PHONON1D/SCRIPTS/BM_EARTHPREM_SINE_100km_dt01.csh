@@ -5,10 +5,10 @@
 #
 
 @ t_start      = 0
-@ t_max        = 4096			# 75 minutes
-set d_range    = "0 180 91"
+@ t_max        = 6000
+set d_range    = "0 180 181"
 set mx_scat_dp = "0"
-set n_phonon   = "1000000"
+set n_phonon   = "3000000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
@@ -29,14 +29,14 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.0
 
-set file_out   = "BM_EARTHPREM_SINE_100km_dt02"
+set file_out   = "BM_EARTHPREM_SINE_100km_dt01"
 set model_name = "EARTH_MODEL_20km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 18     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 6    ## Number of iterations
+@ n_kern  = 22     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 10    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -58,8 +58,8 @@ while ($l < $n_freq)
 @ l = $l + 1
 
 if ($l == 1) then
- set dt = "0.200"
- set period = "05"
+ set dt = "0.100"
+ set period = "10"
 else
  set dt = "0.150"
  set period = "07"

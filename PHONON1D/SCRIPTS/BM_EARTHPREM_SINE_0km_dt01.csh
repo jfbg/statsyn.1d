@@ -4,13 +4,11 @@
 # Set synthetic parameters
 #
 
-
-set ray_par    = "0.0 0.1668 0.2931"
 @ t_start      = 0
 @ t_max        = 6000
-set d_range    = "0 180 91"
+set d_range    = "0 180 181"
 set mx_scat_dp = "0"
-set n_phonon   = "1000000"
+set n_phonon   = "3000000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
@@ -37,8 +35,8 @@ set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 18     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 6    ## Number of iterations
+@ n_kern  = 22     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 10    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -115,7 +113,6 @@ set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 echo "./bin/statsyn_globalscat << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
-echo "$ray_par          \!LIMIT THE RAY PARAMETER"            >> $file_csh
 echo "$t_start $t_max $dt \!LIMIT THE TIME WINDOW (SECONDS) " >> $file_csh
 echo "$d_range          \!LIMIT THE DISTANCE (DEGREES)    "   >> $file_csh
 echo "$n_phonon         \!NUMBER OF PHONONS TO FIRE       "   >> $file_csh

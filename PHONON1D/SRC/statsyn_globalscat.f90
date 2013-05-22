@@ -32,7 +32,7 @@ PROGRAM STATSYN_GLOBALSCAT
         
         IMPLICIT NONE
         
-        INTEGER, PARAMETER :: nt0=190000, nx0=91,ns0=2001,nst0=4000
+        INTEGER, PARAMETER :: nt0=190000, nx0=181,ns0=2001,nst0=4000
         DOUBLE PRECISION      wf(nx0,nt0,3)        !STACKED DATA
         REAL(8)               w(nt0)
       
@@ -114,8 +114,8 @@ PROGRAM STATSYN_GLOBALSCAT
       READ (5,    *)  pfac
       WRITE(6,*) 'PFAC =',pfac
 
-25    WRITE(6,'(A)') 'ENTER RAY PARAMETER RANGE (p1, p2(P), p2(S)):'
-      READ (5,    *)  p1, p2(1), p2(2)
+!25    WRITE(6,'(A)') 'ENTER RAY PARAMETER RANGE (p1, p2(P), p2(S)):'
+!      READ (5,    *)  p1, p2(1), p2(2)
 
 50    WRITE(6,'(A)') 'ENTER TIME WINDOW & SAMPLING INTERVAL (t1, t2, dt):'
       READ (5, *) t1,t2,dti                    !TIME WINDOW & # OF TIME STEPS
@@ -347,19 +347,19 @@ PROGRAM STATSYN_GLOBALSCAT
 !     ======================================================
 !      ----- INITIALIZE TRACKING PARAMETERS -----    
       
-      WRITE(6,*) '!!!!!!!!!!!!!!!!!!!!!'  !DEBUG
-      WRITE(6,*) ' ',nx,nlay,nttrack      !DEBUG
-
-      !Allocate memory for tracking number of phonons in each area
-     ALLOCATE(trackcount(nx,nlay,nttrack))              
-      
-      DO kk = 1,nx
-        DO ll = 1,nlay
-          DO mm = 1,nttrack
-            trackcount(kk,ll,mm) = 0.
-          END DO
-        END DO
-      END DO  
+!      WRITE(6,*) '!!!!!!!!!!!!!!!!!!!!!'  !DEBUG
+!      WRITE(6,*) ' ',nx,nlay,nttrack      !DEBUG
+!
+!      !Allocate memory for tracking number of phonons in each area
+!     ALLOCATE(trackcount(nx,nlay,nttrack))              
+!      
+!      DO kk = 1,nx
+!        DO ll = 1,nlay
+!          DO mm = 1,nttrack
+!            trackcount(kk,ll,mm) = 0.
+!          END DO
+!        END DO
+!      END DO  
 !      ^^^^^ INITIALIZE TRACKING PARAMETERS ^^^^^
 
 
