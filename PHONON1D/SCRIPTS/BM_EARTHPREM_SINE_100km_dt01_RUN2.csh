@@ -5,40 +5,38 @@
 #
 
 @ t_start      = 0
-@ t_max        = 7200			# 75 minutes
-set d_range    = "0 180 91"
-set n_phonon   = "1000"
+@ t_max        = 6000
+set d_range    = "0 180 181"
+set mx_scat_dp = "0"
+set n_phonon   = "10000000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
 set sourcetype = 2    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
-set rPrSVrSH   = "1 10 10"  # Energy partioning at source
+set rPrSVrSH   = "1 1 1"  # Energy partioning at source
 set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
 
 # Code Parameters
-set cons_EorA = 2  # Conserve Amplitude (1) or Energy (2) at interfaces (Benchmark works with 2)
+set cons_EorA = 2  #Conserve Amplitude (1) or Energy (2) at interfaces
 set Watt      = 1  # With attenuation (1) or without (0)
-set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
-                   # This is actually not activated in the code yet.
 
 # SCATTERING
-set mx_scat_dp = "10"   # Depth of scattering layer
-set bg_scat    = 0.0    # Global scattering probability (keep low....!)
-set prob_scat  = 0.5    # Scattering Layer scattering probability
+set bg_scat    = 0.0
+set prob_scat  = 0.0
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
-set velperturb = 0.6
+set velperturb = 0.0
 
-set file_out   = "TEMPLATE"
-set model_name = "VPREMOON_Qp_ori_10km"
+set file_out   = "BM_EARTHPREM_SINE_100km_dt01_RUN2"
+set model_name = "EARTH_MODEL_20km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 1     ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 1     ## Number of iterations
+@ n_kern  = 22     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 30    ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -59,9 +57,9 @@ cd ..
 while ($l < $n_freq)
 @ l = $l + 1
 
-if ($l == 2) then
- set dt = "0.025"
- set period = "40"
+if ($l == 1) then
+ set dt = "0.100"
+ set period = "10"
 else
  set dt = "0.150"
  set period = "07"
@@ -74,10 +72,10 @@ endif
 @ i  =  0
 while ($i < $n_depth)
 @ i = $i + 1
-if ($i == 1) then
- set q_depth = 0.01
-else if ($i == 2) then
- set q_depth = 0.01
+if ($i == 2) then
+ set q_depth = 20
+else if ($i == 1) then
+ set q_depth = 100
 else
  set q_depth = 0.01
 endif
@@ -101,7 +99,7 @@ while ($j < $n_kern)
 
 @ kernelnum = $j
 
-sleep 6
+sleep 4
 
 ## 
 # Start phonon synthetics
