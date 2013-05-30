@@ -879,7 +879,9 @@ PROGRAM STATSYN_GLOBALSCAT
         
         ! ============ >>
         ! RECORD IF PHONON IS AT SURFACE
-        IF (iz == 1) THEN                      !IF RAY HITS SUFACE THEN RECORD
+        IF (iz == 1) THEN
+!        IF ((iz == 1).AND.(t > 0.)) THEN        !IF RAY HITS SUFACE THEN RECORD, EXCEPT
+                                                ! IF IT'S A DEPARTING PHONON FROM THE SURFACE (IMPACT)
 
           ud = 1                                !RAY NOW MUST TRAVEL down
           
