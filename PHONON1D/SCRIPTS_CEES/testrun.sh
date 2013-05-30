@@ -1,5 +1,5 @@
- -N TestJob
-#PBS -l nodes=1:ppn=8
+#!/bin/tcsh
+#PBS -N TestJob#PBS -l nodes=1:ppn=8
 #PBS -q default
 #PBS -V
 #PBS -m e
