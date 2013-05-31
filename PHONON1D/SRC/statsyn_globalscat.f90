@@ -1374,8 +1374,8 @@ SUBROUTINE SURFACE_PSV_BEN
       cp = CMPLX(p,0.)
       c0 = CMPLX(0.,0.)
       
-      angP = asin(cp*velP)
-      angS = asin(cp*velS) 
+      angP = CMPLX(asin(p*vs(1,1)),0.)
+      angS = CMPLX(asin(p*vs(1,2)),0.) 
       
       D1 = ((velS/velP)**2.*sin(2.*angP)*sin(2.*angS)+(cos(2.*angS))**2.)**(-1.)
       
