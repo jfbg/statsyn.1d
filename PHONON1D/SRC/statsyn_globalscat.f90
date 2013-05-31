@@ -1781,9 +1781,9 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
       rhof = CMPLX(rrhof,0.)
       c0 = CMPLX(0.,0.)
       
-      angP = asin(p*a)
-      angS = asin(p*b)
-      angPc = asin(p*c)
+      angP = CMPLX(asin(realp*ra),0.)
+      angS = CMPLX(asin(realp*rb),0.)
+      angPc = CMPLX(asin(realp*rc),0.)
 
  
       tau = rhof/rhos
