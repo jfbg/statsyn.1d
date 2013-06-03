@@ -1,19 +1,11 @@
-#!/bin/csh
-#PBS -N PHONON1D_TEST        ## name of job
-#PBS -l nodes=1:ppn=6  ## request 1 compute node, and 8 processors.
-#PBS -q jfl                ## run the job on the 'default' queue
-#PBS -V                             ## use the current environment
-cd $PBS_O_WORKDIR
-
-
 #
 # Set synthetic parameters
 #
 
 @ t_start      = 0
-@ t_max        = 7200			# 75 minutes
+@ t_max        = 4000			# 75 minutes
 set d_range    = "0 180 91"
-set n_phonon   = "1000"
+set n_phonon   = "100"
 
 # Source attenuation and type
 set dQdfstyle  = 1
@@ -43,7 +35,7 @@ set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 6     ## Number of kernels to use per iteration (simultaneous run)
+@ n_kern  = 1     ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 1     ## Number of iterations
 
 # Output folder

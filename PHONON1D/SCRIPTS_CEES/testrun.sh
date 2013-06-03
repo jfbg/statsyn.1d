@@ -10,6 +10,5 @@
 #
 #
 #
-cd $PBS_O_WORKDIR
 #
 mpirun hellompi >> OUT
