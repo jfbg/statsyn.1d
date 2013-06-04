@@ -5,7 +5,7 @@
 #
 
 @ t_start      = 0
-@ t_max        = 4500			# 90 minutes
+@ t_max        = 5400			# 90 minutes
 set d_range    = "0 180 91"
 set n_phonon   = "8500000"
 
@@ -23,7 +23,7 @@ set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
                    # This is actually not activated in the code yet.
 
 # SCATTERING
-set mx_scat_dp = 25   # Depth of scattering layer
+set mx_scat_dp = 10   # Depth of scattering layer
 set bg_scat    = 0.5    # Global scattering probability (keep low....!)
 set prob_scat  = 0.001    # Scattering Layer scattering probability
 set dsmin      = 0.05   # Min scaterrer length scale
@@ -31,8 +31,8 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "VPREM_003"
-set model_name = "VPREMOON_Qp_ori_10km"
+set file_out   = "VPREM_nVL_012"
+set model_name = "VPREMOON_Qp_novlvl_10km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 3     ## Number of depths to use
@@ -59,7 +59,7 @@ cd ..
 while ($l < $n_freq)
 @ l = $l + 1
 
-if ($l == 1) then
+if ($l == 2) then
  set dt = "0.025"
  set period = "40"
 else
@@ -75,11 +75,11 @@ endif
 while ($i < $n_depth)
 @ i = $i + 1
 if ($i == 1) then
- set q_depth = 0.01
+ set q_depth = 100
 else if ($i == 2) then
- set q_depth = 20
+ set q_depth = 500
 else
- set q_depth = 1000
+ set q_depth = 750
 endif
 
 echo "Depth=:" $q_depth

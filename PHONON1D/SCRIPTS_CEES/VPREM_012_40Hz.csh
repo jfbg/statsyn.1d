@@ -23,7 +23,7 @@ set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
                    # This is actually not activated in the code yet.
 
 # SCATTERING
-set mx_scat_dp = 25   # Depth of scattering layer
+set mx_scat_dp = 10   # Depth of scattering layer
 set bg_scat    = 0.5    # Global scattering probability (keep low....!)
 set prob_scat  = 0.001    # Scattering Layer scattering probability
 set dsmin      = 0.05   # Min scaterrer length scale
@@ -31,7 +31,7 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "VPREM_003"
+set file_out   = "VPREM_012"
 set model_name = "VPREMOON_Qp_ori_10km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
@@ -75,11 +75,11 @@ endif
 while ($i < $n_depth)
 @ i = $i + 1
 if ($i == 1) then
- set q_depth = 0.01
+ set q_depth = 100
 else if ($i == 2) then
- set q_depth = 20
+ set q_depth = 500
 else
- set q_depth = 1000
+ set q_depth = 750
 endif
 
 echo "Depth=:" $q_depth

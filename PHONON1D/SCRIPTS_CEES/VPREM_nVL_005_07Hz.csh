@@ -7,7 +7,7 @@
 @ t_start      = 0
 @ t_max        = 5400			# 90 minutes
 set d_range    = "0 180 91"
-set n_phonon   = "5000000"
+set n_phonon   = "8500000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
