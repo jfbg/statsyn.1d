@@ -1,5 +1,6 @@
 #!/bin/tcsh
 
+
 qsub qsub_VPREM_001_07Hz.sh
 sleep 4
 qsub qsub_VPREM_001_40Hz.sh
@@ -35,6 +36,10 @@ sleep 4
 qsub qsub_VPREM_nVL_005_07Hz.sh
 sleep 4
 qsub qsub_VPREM_nVL_005_40Hz.sh
+sleep 4
+qsub qsub_VPREM_nVL_007_07Hz.sh
+sleep 4
+qsub qsub_VPREM_nVL_007_40Hz.sh
 sleep 4
 qsub qsub_VPREM_nVL_010_07Hz.sh
 sleep 4
