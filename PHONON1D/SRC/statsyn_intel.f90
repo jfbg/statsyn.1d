@@ -502,7 +502,8 @@ PROGRAM STATSYN_GLOBALSCAT
 
       !Debug
       surfcount = 0.
-      CALL etime(elapsed,ttimestart)
+!      CALL etime(elapsed,ttimestart)
+      CALL cpu_time(ttimestart)
       
       
       
@@ -510,7 +511,8 @@ PROGRAM STATSYN_GLOBALSCAT
       
     
       
-      CALL etime(elapsed,tt1)
+!      CALL etime(elapsed,tt1)
+      CALL cpu_time(tt1)
       
       
     ! ============ >>
@@ -629,7 +631,8 @@ PROGRAM STATSYN_GLOBALSCAT
        ! ====================== >>   
        DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
        
-       CALL etime(elapsed,tt2)
+!       CALL etime(elapsed,tt2)
+       CALL cpu_time(tt2)
        !WRITE(6,*) '       Params:',tt2-tt1,I
       
        NITR = NITR + 1
@@ -734,7 +737,8 @@ PROGRAM STATSYN_GLOBALSCAT
 
             IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
             
-       CALL etime(elapsed,tt3)
+!       CALL etime(elapsed,tt3)
+       CALL cpu_time(tt3)
        !WRITE(6,*) '       Prescat :',tt3-tt2,I
 !       WRITE(76,*) tt3-tt2
 
@@ -836,7 +840,8 @@ PROGRAM STATSYN_GLOBALSCAT
                    CALL INTERFACE_NORMAL
                    
                    
-       CALL etime(elapsed,tt4)
+!       CALL etime(elapsed,tt4)
+       CALL cpu_time(tt4)
        !WRITE(6,*) '       Allscat:',tt4-tt3,I
                    
          
@@ -850,7 +855,8 @@ PROGRAM STATSYN_GLOBALSCAT
                      ! RAY TRACING IN LAYER  
                      ! ============ <<
                      
-       CALL etime(elapsed,tt5)
+!       CALL etime(elapsed,tt5)
+       CALL cpu_time(tt5) 
        !WRITE(6,*) '   NoscatInscat:',tt5-tt3,I
                      
                END IF
@@ -868,14 +874,16 @@ PROGRAM STATSYN_GLOBALSCAT
           ! RAY TRACING IN LAYER  
           ! ============ <<
           
-       CALL etime(elapsed,tt6)
+!       CALL etime(elapsed,tt6)
+       CALL cpu_time(tt6)
        !WRITE(6,*) '       Noscat  :',tt6-tt3,I
           
         END IF !SCATTERING LAYER IF              
         ! SCATTERING LAYER
         ! ============ <<
         
-       CALL etime(elapsed,tt7)
+!       CALL etime(elapsed,tt7)
+       CALL cpu_time(tt7)
        !WRITE(6,*) '       ScatLoop:',tt7-tt3,I        
         
         ! ============ >>
@@ -1019,7 +1027,8 @@ PROGRAM STATSYN_GLOBALSCAT
        ! Close single ray tracing while loop
        ! ====================== <<  
 
-       CALL etime(elapsed,tt8)
+!       CALL etime(elapsed,tt8)
+       CALL cpu_time(tt8)
        !WRITE(6,*) '        Surface:',tt8-tt7,I               
               
        IF (mod(float(I),float(ntr)/20.) == 0) THEN !STATUS REPORT
@@ -1041,10 +1050,12 @@ PROGRAM STATSYN_GLOBALSCAT
 !        trackcount = trackcount / 100.
 
 
-       CALL etime(elapsed,tt9)
+!       CALL etime(elapsed,tt9)
+       CALL cpu_time(tt9)
        !WRITE(6,*) '           Rest:',tt9-tt8,I        
        
-       CALL etime(elapsed,ttime4)      
+!       CALL etime(elapsed,ttime4)      
+       CALL cpu_time(ttime4)
       !WRITE(6,*) '---->',I,ttime4-ttime3,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
       
 
@@ -1054,7 +1065,8 @@ PROGRAM STATSYN_GLOBALSCAT
 !     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !      ======================================================
 
-      CALL etime(elapsed,totaltime)
+!      CALL etime(elapsed,totaltime)
+      CALL cpu_time(totaltime)
       WRITE(6,FMT = 871) totaltime-ttimestart,I-1,(totaltime-ttimestart)/(I-1)
 871   FORMAT ('Total time = ',f9.2,'s for ',i8,' phonons (',f8.5,'s/p)')  
       WRITE(6,*) 'Total Surface records = ', surfcount
