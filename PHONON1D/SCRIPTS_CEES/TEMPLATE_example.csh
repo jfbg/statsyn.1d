@@ -1,13 +1,11 @@
-#!/bin/csh
-
 #
 # Set synthetic parameters
 #
 
 @ t_start      = 0
-@ t_max        = 5400			# 90 minutes
+@ t_max        = 7200
 set d_range    = "0 180 91"
-set n_phonon   = "5000000"
+set n_phonon   = "10000000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
@@ -31,14 +29,14 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "TEMPLATE_TEST"
+set file_out   = "TEMPLATE"
 set model_name = "VPREMOON_Qp_ori_10km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 16    ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 5     ## Number of iterations
+@ n_kern  = 6     ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 1     ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -48,7 +46,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 cd SRC
-make statsyn_intel.x
+make statsyn_global.x
 cd ..
 
 
@@ -112,7 +110,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsyn_intel << EOF"                         >  $file_csh
+echo "./bin/statsyn_globalscat << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
 echo "$t_start $t_max $dt \!LIMIT THE TIME WINDOW (SECONDS) " >> $file_csh
