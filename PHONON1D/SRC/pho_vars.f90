@@ -135,7 +135,7 @@ MODULE PHO_VARS      ! Make variables global
         INTEGER        status                !I/O ERROR (0=no READ error)
         INTEGER        n_iter_last,it_last,ix_last
         INTEGER     :: nseed
-        INTEGER     :: seed
+        INTEGER     :: seed2
         INTEGER (kind=8)     :: nclock,nclock1
         INTEGER           ntime(8)
         INTEGER     last_RT
