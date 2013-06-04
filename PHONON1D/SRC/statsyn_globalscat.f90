@@ -1006,7 +1006,7 @@ PROGRAM STATSYN_GLOBALSCAT
          t_last = t
        END IF
        
-333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f10.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f7.5)
+333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f10.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f8.5)
        
        !DEBUG
 !       WRITE(6,*)I,NITR,t,tmax
@@ -1023,7 +1023,7 @@ PROGRAM STATSYN_GLOBALSCAT
               
        IF (mod(float(I),float(ntr)/20.) == 0) THEN !STATUS REPORT
         WRITE(6,FMT = 854) nint(float(I)/float(ntr)*100),kernelnum
-!        WRITE(6,FMT = 854) nint(float(I)/float(ntr)*100),'% COMPLETE'
+        WRITE(79,FMT = 854) nint(float(I)/float(ntr)*100),kernelnum
        END IF
 
 854   FORMAT (10x,i3,' % COMPLETE  -- kernel ',i2)
@@ -1055,7 +1055,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
       CALL etime(elapsed,totaltime)
       WRITE(6,FMT = 871) totaltime-ttimestart,I-1,(totaltime-ttimestart)/(I-1)
-871   FORMAT ('Total time = ',f9.2,'s for ',i8,' phonons (',f7.5,'s/p)')  
+871   FORMAT ('Total time = ',f9.2,'s for ',i8,' phonons (',f8.5,'s/p)')  
       WRITE(6,*) 'Total Surface records = ', surfcount
       WRITE(6,*) 'Too far from receiver = ', surCYC1      
       WRITE(6,*) 'Scattered:',  conv_count(1:6)
