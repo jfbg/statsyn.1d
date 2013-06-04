@@ -523,8 +523,8 @@ PROGRAM STATSYN_GLOBALSCAT
        nclock = ntime(5)*ntime(6)*ntime(7)*ntime(8)
        
        CALL RANDOM_NUMBER(r2s)
-       seed = abs((nclock*r2s))! + 11 * (/ (k - 1, k = 1, nseed) /)      
-       CALL srand(seed)    
+       seed2 = abs((nclock*r2s))! + 11 * (/ (k - 1, k = 1, nseed) /)      
+       CALL srand(seed2)    
        r0 = rand()    !First rand output not random
                         ! It is seed (clock) dependent
       ! ============ <<
@@ -1139,16 +1139,16 @@ PROGRAM STATSYN_GLOBALSCAT
 
 SUBROUTINE INIT_RANDOM_SEED()
     INTEGER :: i, n, nclock
-    INTEGER, DIMENSION(:), ALLOCATABLE :: seed
+    INTEGER, DIMENSION(:), ALLOCATABLE :: seed2
     n=100000
     CALL RANDOM_SEED(size = n)
-    ALLOCATE(seed(n))
+    ALLOCATE(seed2(n))
          
     CALL SYSTEM_CLOCK(COUNT=nclock)
-    seed = nclock + 37 * (/ (i - 1, i = 1, n) /)
-    CALL RANDOM_SEED(PUT = seed)
+    seed2 = nclock + 37 * (/ (i - 1, i = 1, n) /)
+    CALL RANDOM_SEED(PUT = seed2)
           
-    DEALLOCATE(seed)
+    DEALLOCATE(seed2)
 END SUBROUTINE INIT_RANDOM_SEED
       
       
