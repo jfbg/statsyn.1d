@@ -101,7 +101,7 @@ while ($j < $n_kern)
 
 @ kernelnum = $j
 
-sleep 6
+sleep 25
 
 ## 
 # Start phonon synthetics
