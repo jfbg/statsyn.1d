@@ -47,9 +47,9 @@ set log_dir    = "./LOG"
 
 
 # Compile statistical phonon code
-cd SRC
-make statsyn_intel.x
-cd ..
+#cd SRC
+#make statsyn_intel.x
+#cd ..
 
 
 ##
