@@ -2581,7 +2581,7 @@ END SUBROUTINE RAYTRACE_SCAT
       
 SUBROUTINE GET_DS_SCAT
       !Subroutine is used to calculate ds_scat (distance between scatterers). The method
-      ! depENDs on the depth of scattering.
+      ! depends on the depth of scattering.
       !
       !The output dscat has been
       
