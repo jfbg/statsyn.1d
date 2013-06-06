@@ -81,7 +81,7 @@ program average_output
    
    
 888   FORMAT(F10.2,1X,500(F10.6,1X))
-889   format(f10.4,1X,500(f12.8,1x))
+889   format(f10.4,1X,500(f10.6,1x))
 
 
 
