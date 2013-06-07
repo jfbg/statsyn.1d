@@ -1,7 +1,7 @@
 clear all
 clc
 
-%{    
+%%{    
 % UNCOMMENT TO RETRIEVE OUTPUT FILE LIST FROM CEES SERVER
 !getout
 %}
@@ -42,12 +42,14 @@ qsubfolder = './QSUB_SCRIPTS/';
 
 % Open main qsub submission file to run all of the averaging below
 
-fidqsub = fopen('qsub_allaverages.sh');
+fidqsub = fopen('qsub_allaverages.sh','w');
 fprintf(fidqsub,'#!/bin/tcsh\n');
 
 
 
 %% Generate list files + .csh script
+
+grandtot = 0;
 
 for qq = 1:length(modellist)
     
@@ -135,6 +137,7 @@ for kk = 1:length(depths)
     fclose(fidT);
 
     totfile = totfile +sumR +sumZ +sumT;
+    grandtot = grandtot + totfile;
                 
     if sumR > 0                       
         outputR = sprintf('AVERAGED_OUTPUTS/%s.%04.0f.%02.0f.lpr',...
@@ -180,14 +183,14 @@ fclose(fidscr);
 if totfile == 0
     eval(['!\rm ' scriptfolder modellist{qq} '_average.csh'])
 else
-    fidtemp = fopen([qsubfolder 'qsub_' modellist{qq} '_average.sh']);
+    fidtemp = fopen([qsubfolder 'qsub_' modellist{qq} '_average.sh'],'w');
     fprintf(fidtemp,'#!/bin/tcsh\n');
     fprintf(fidtemp,'#PBS -N %s\n',['COMPILE_' modellist{qq}]);
     fprintf(fidtemp,'#PBS -l nodes=1:ppn=1\n');
     fprintf(fidtemp,'#PBS -q jfl\n');
     fprintf(fidtemp,'#PBS -V\n');
     fprintf(fidtemp,'cd $PBS_O_WORKDIR\n\n');
-    fprintf(fidtemp,'csh %s%s\n',scriptfolder,[scriptfolder modellist{qq} '_average.csh']);
+    fprintf(fidtemp,'csh %s\n',[scriptfolder modellist{qq} '_average.csh']);
     fclose(fidtemp);
     
     fprintf(fidqsub,'qsub %s\n',[qsubfolder 'qsub_' modellist{qq} '_average.sh']);
@@ -196,3 +199,4 @@ end
 end
 
 fclose(fidqsub);
+

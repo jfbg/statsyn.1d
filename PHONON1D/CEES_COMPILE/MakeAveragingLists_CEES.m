@@ -1,7 +1,7 @@
 clear all
 clc
 
-%{    
+%%{    
 % UNCOMMENT TO RETRIEVE OUTPUT FILE LIST FROM CEES SERVER
 !getout
 %}
