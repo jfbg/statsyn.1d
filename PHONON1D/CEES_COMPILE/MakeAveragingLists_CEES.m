@@ -14,21 +14,22 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-'VPREM_001'
-'VPREM_002'
-'VPREM_003'
-'VPREM_012'
-'VPREM_nC_001'
-'VPREM_nVL_001'
-'VPREM_nVL_002'
-'VPREM_nVL_004'
-'VPREM_nVL_005'
-'VPREM_nVL_007'
-'VPREM_nVL_010'
-'VPREM_nVL_011'
-'VPREM_nVL_012'
-'VPREM_nVL_liquid_001' 
-'TESTMODEL'
+...'VPREM_001'
+...'VPREM_002'
+...'VPREM_003'
+'VPREM_008'
+...'VPREM_012'
+...'VPREM_nC_001'
+...'VPREM_nVL_001'
+...'VPREM_nVL_002'
+...'VPREM_nVL_004'
+...'VPREM_nVL_005'
+...'VPREM_nVL_007'
+...'VPREM_nVL_010'
+...'VPREM_nVL_011'
+...'VPREM_nVL_012'
+...'VPREM_nVL_liquid_001' 
+...'TESTMODEL'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
