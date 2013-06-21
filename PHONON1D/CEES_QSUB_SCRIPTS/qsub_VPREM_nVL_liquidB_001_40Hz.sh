@@ -5,4 +5,4 @@
 #PBS -V
 cd $PBS_O_WORKDIR
 
-csh SCRIPTS_CEES/VPREM_nVL_liquidB_001_40Hz
+csh SCRIPTS_CEES/VPREM_nVL_liquidB_001_40Hz.csh
