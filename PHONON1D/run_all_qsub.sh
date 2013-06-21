@@ -1,7 +1,43 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_VPREM_nVL_013_07Hz.sh
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_001B_07Hz.csh.sh
 sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_VPREM_nVL_013_40Hz.sh
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_001B_40Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_008B_07Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_008B_40Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_021_07Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_021_40Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_022_07Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_022_40Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_023_07Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_023_40Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_030_07Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_030_40Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_031_07Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_031_40Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_nC_001B_07Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_nC_001B_40Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_nVL_001B_07Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_nVL_001B_40Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_nVL_liquidB_001_07Hz.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_nVL_liquidB_001_40Hz.csh.sh
 sleep 4
