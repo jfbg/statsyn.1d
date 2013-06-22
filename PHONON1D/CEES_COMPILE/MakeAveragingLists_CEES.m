@@ -17,7 +17,7 @@ modellist = {...
 ...'VPREM_001'
 ...'VPREM_002'
 ...'VPREM_003'
-'VPREM_008'
+'VPREM_nC_001B'
 ...'VPREM_012'
 ...'VPREM_nC_001'
 ...'VPREM_nVL_001'

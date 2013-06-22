@@ -1,2 +1,2 @@
 #!/bin/tcsh
-qsub ./QSUB_SCRIPTS/qsub_VPREM_008_average.sh
+qsub ./QSUB_SCRIPTS/qsub_VPREM_nC_001B_average.sh
