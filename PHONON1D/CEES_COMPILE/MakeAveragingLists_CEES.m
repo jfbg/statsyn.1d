@@ -23,7 +23,7 @@ modellist = {...
 'VPREM_031'
 'VPREM_nC_001B'
 'VPREM_nVL_001B'
-'VPREM_nVL_liquidB_001'
+'VPREM_nVL_liquid_001B'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
