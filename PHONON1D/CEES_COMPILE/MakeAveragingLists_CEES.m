@@ -181,7 +181,7 @@ else
     fidtemp = fopen([qsubfolder 'qsub_' modellist{qq} '_average.sh'],'w');
     fprintf(fidtemp,'#!/bin/tcsh\n');
     fprintf(fidtemp,'#PBS -N %s\n',['COMPILE_' modellist{qq}]);
-    fprintf(fidtemp,'#PBS -l nodes=1:ppn=1, mem=12gb\n');
+    fprintf(fidtemp,'#PBS -lmem=12gb,nodes=1:ppn=1\n');
     fprintf(fidtemp,'#PBS -q jfl\n');
     fprintf(fidtemp,'#PBS -V\n');
     fprintf(fidtemp,'cd $PBS_O_WORKDIR\n\n');

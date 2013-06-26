@@ -1,6 +1,6 @@
 #!/bin/tcsh
 #PBS -N COMPILE_VPREM_nVL_001B
-#PBS -l nodes=1:ppn=1, mem=12gb
+#PBS -lmem=12gb,nodes=1:ppn=1
 #PBS -q jfl
 #PBS -V
 cd $PBS_O_WORKDIR
