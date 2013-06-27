@@ -5,6 +5,9 @@ modellist = {...
     'VPREMOON_Qp_novlvl_10km';
     'VPREMOON_Qp_novlvl_liquid_10km';
     'VPREMOON_Qp_ori_10km'
+    'VPREMOON_Qp_ori2_10km'
+    'VPREMOON_Q4500_ori2_10km'
+    'VPREMOON_Q4500_ori_10km'
     };
 
 
@@ -29,9 +32,9 @@ for ii=1:length(modellist)
     hold on
        
 
-    plot(model(:,4),model(:,1),'b-')
-    plot(model(:,5),model(:,1),'r-')
-    plot(model(:,3),model(:,1),'k-')
+    plot(model(:,3),model(:,1),'b-')
+    plot(model(:,4),model(:,1),'r-')
+    plot(model(:,5),model(:,1),'k-')
 
     
     title(sprintf('Velocity Model\n%s',modellist{ii}),'Interpreter','none')
