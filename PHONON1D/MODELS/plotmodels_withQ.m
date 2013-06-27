@@ -8,6 +8,7 @@ modellist = {...
     'VPREMOON_Qp_ori2_10km'
     'VPREMOON_Q4500_ori2_10km'
     'VPREMOON_Q4500_ori_10km'
+    'VPREMOON_Qp_ori2_liquid_10km'
     };
 
 
