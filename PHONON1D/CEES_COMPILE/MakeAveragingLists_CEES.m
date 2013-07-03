@@ -14,16 +14,16 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-'VPREM_001B'
-'VPREM_008B'
-'VPREM_021'
-'VPREM_022'
-'VPREM_023'
-'VPREM_030'
-'VPREM_031'
-'VPREM_nC_001B'
-'VPREM_nVL_001B'
-'VPREM_nVL_liquid_001B'
+'VPREM_002'
+'VPREM_012B'
+...'VPREM_041'
+'VPREM_042'
+'VPREM_043'
+'VPREM_051'
+'VPREM_052'
+'VPREM_061'
+'VPREM_001C'
+'VPREM_liquid_001'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
@@ -39,7 +39,7 @@ qsubfolder = './QSUB_SCRIPTS/';
 
 fidqsub = fopen('qsub_allaverages.sh','w');
 fprintf(fidqsub,'#!/bin/tcsh\n');
-
+fidall = fopen('tool_allaverages.sh','w');
 
 
 %% Generate list files + .csh script
@@ -189,9 +189,10 @@ else
     fclose(fidtemp);
     
     fprintf(fidqsub,'qsub %s\n',[qsubfolder 'qsub_' modellist{qq} '_average.sh']);
+    fprintf(fidall,'csh %s\n',[scriptfolder modellist{qq} '_average.csh']);
 end
 
 end
 
 fclose(fidqsub);
-
+fclose(fidall);

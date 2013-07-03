@@ -1,0 +1,9 @@
+csh ./AVERAGING_SCRIPTS/VPREM_002_average.csh
+csh ./AVERAGING_SCRIPTS/VPREM_012B_average.csh
+csh ./AVERAGING_SCRIPTS/VPREM_042_average.csh
+csh ./AVERAGING_SCRIPTS/VPREM_043_average.csh
+csh ./AVERAGING_SCRIPTS/VPREM_051_average.csh
+csh ./AVERAGING_SCRIPTS/VPREM_052_average.csh
+csh ./AVERAGING_SCRIPTS/VPREM_061_average.csh
+csh ./AVERAGING_SCRIPTS/VPREM_001C_average.csh
+csh ./AVERAGING_SCRIPTS/VPREM_liquid_001_average.csh
