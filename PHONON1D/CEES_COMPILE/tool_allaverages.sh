@@ -1,1 +1,1 @@
-csh ./AVERAGING_SCRIPTS/VPREM_nVL_liquid_001C_average.csh
+csh ./AVERAGING_SCRIPTS/VPREM_041_average.csh

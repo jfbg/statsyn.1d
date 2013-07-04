@@ -16,7 +16,7 @@ fclose(fid);
 modellist = {...
 ...'VPREM_002'
 ...'VPREM_012B'
-...'VPREM_041'
+'VPREM_041'
 ...'VPREM_042'
 ...'VPREM_043'
 ...'VPREM_051'
@@ -24,7 +24,7 @@ modellist = {...
 ...'VPREM_061'
 ...'VPREM_001C'
 ...'VPREM_liquid_001'
-'VPREM_nVL_liquid_001C'
+...'VPREM_nVL_liquid_001C'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
