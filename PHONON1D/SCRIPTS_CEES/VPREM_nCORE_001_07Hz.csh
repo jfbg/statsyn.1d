@@ -10,7 +10,7 @@ set d_range    = "0 180 91"
 set n_phonon   = "8500000"
 
 # Source attenuation and type
-set dQdfstyle  = 2
+set dQdfstyle  = 1
 set sourcetype = 2    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "1 10 10"  # Energy partioning at source
@@ -31,8 +31,8 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "VPREM_002"
-set model_name = "VPREMOON_Qp_ori_10km"
+set file_out   = "VPREM_nCORE_001"
+set model_name = "VPREMOON_Qp_ori2_noCORE_10km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 3     ## Number of depths to use

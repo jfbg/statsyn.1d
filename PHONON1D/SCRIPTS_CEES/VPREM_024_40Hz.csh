@@ -5,12 +5,12 @@
 #
 
 @ t_start      = 0
-@ t_max        = 5400			# 90 minutes
+@ t_max        = 4500			# 90 minutes
 set d_range    = "0 180 91"
-set n_phonon   = "8500000"
+set n_phonon   = "10000000"
 
 # Source attenuation and type
-set dQdfstyle  = 2
+set dQdfstyle  = 1
 set sourcetype = 2    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "1 10 10"  # Energy partioning at source
@@ -23,22 +23,22 @@ set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
                    # This is actually not activated in the code yet.
 
 # SCATTERING
-set mx_scat_dp = 10   # Depth of scattering layer
-set bg_scat    = 0.001    # Global scattering probability (keep low....!)
+set mx_scat_dp = 1   # Depth of scattering layer
+set bg_scat    = 0.0    # Global scattering probability (keep low....!)
 set prob_scat  = 0.5    # Scattering Layer scattering probability
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "VPREM_002"
+set file_out   = "VPREM_024"
 set model_name = "VPREMOON_Qp_ori_10km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 3     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
 @ n_kern  = 16    ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 3     ## Number of iterations
+@ n_iter  = 4     ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -59,7 +59,7 @@ set log_dir    = "./LOG"
 while ($l < $n_freq)
 @ l = $l + 1
 
-if ($l == 2) then
+if ($l == 1) then
  set dt = "0.025"
  set period = "40"
 else

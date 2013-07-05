@@ -10,7 +10,7 @@ set d_range    = "0 180 91"
 set n_phonon   = "8500000"
 
 # Source attenuation and type
-set dQdfstyle  = 1
+set dQdfstyle  = 2
 set sourcetype = 2    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "1 10 10"  # Energy partioning at source
@@ -23,9 +23,9 @@ set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
                    # This is actually not activated in the code yet.
 
 # SCATTERING
-set mx_scat_dp = 5   # Depth of scattering layer
-set bg_scat    = 0.5    # Global scattering probability (keep low....!)
-set prob_scat  = 0.001    # Scattering Layer scattering probability
+set mx_scat_dp = 10   # Depth of scattering layer
+set bg_scat    = 0.001    # Global scattering probability (keep low....!)
+set prob_scat  = 0.5    # Scattering Layer scattering probability
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
