@@ -16,7 +16,8 @@ fclose(fid);
 modellist = {...
 ...'VPREM_002'
 ...'VPREM_012B'
-'VPREM_041'
+'VPREM_024'
+'VPREM_nCORE_001'
 ...'VPREM_042'
 ...'VPREM_043'
 ...'VPREM_051'

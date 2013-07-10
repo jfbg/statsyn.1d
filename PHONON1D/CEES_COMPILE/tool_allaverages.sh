@@ -1,1 +1,2 @@
-csh ./AVERAGING_SCRIPTS/VPREM_041_average.csh
+csh ./AVERAGING_SCRIPTS/VPREM_024_average.csh
+csh ./AVERAGING_SCRIPTS/VPREM_nCORE_001_average.csh
