@@ -134,7 +134,8 @@ PROGRAM STATSYN_GLOBALSCAT
       WRITE(6,*) 'QDEP:',qdep
       
       WRITE(6,'(A)') 'ENTER SOURCE TYPE:'
-      WRITE(6,'(A)') '(1: delta function) (2: sine) '
+      WRITE(6,'(A)') '(1: delta function) (2: sine)'
+      WRITE(6,'(A)') '(3: sine with flat energy from 0.2 t0 10Hz) (9: Custom)'
       READ (5,    *)  SourceTYPE
       WRITE(6,*) 'Source TYPE:',SourceTYPE 
       
@@ -415,6 +416,13 @@ PROGRAM STATSYN_GLOBALSCAT
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
         END DO
         WRITE(6,'(a)') ' SOURCE IS SINE WAVE'
+      ELSEIF (SourceTYPE.eq.3) THEN      !FLAT ENERGY FROM 0.1 to 10Hz  
+        DO I = 1, nts                           !SOURCE-TIME FUNCTION
+         t0 = (dti*float(I-1)-P0)*0.5
+         mt(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
+               *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
+        END DO
+        WRITE(6,'(a)') ' SOURCE IS SINE WAVE (FLAT POWER FROM 0.1 to 10 Hz)'
       ELSEIF (SourceTYPE.eq.9) THEN      !CUSTOM SOURCE
          WRITE(6,'(a)') ' CUSTOM SOURCE'
          CALL READIN_SOURCE(nts,mt,SourceFILE)
@@ -471,13 +479,13 @@ PROGRAM STATSYN_GLOBALSCAT
       
       WRITE(6,*) ns0,'x datt    - DONE'
       
-!      OPEN(23,FILE='source.out')              !OUTPUT SOURCE
-!      WRITE(23,*) nts,ns0                     !
-!      WRITE(23,FMT=888) 999.99,(datt*float(J-1),J=1,ns0)
-!      DO I = 1, nts
-!        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,3,I)*1.,J=1,ns0)
-!      END DO
-!      CLOSE(23)
+      OPEN(23,FILE='source40.out')              !OUTPUT SOURCE
+      WRITE(23,*) nts,ns0                     !
+      WRITE(23,FMT=888) 999.99,(datt*float(J-1),J=1,ns0)
+      DO I = 1, nts
+        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,1,I)*1.,J=1,ns0)
+      END DO
+      CLOSE(23)
 ! 
 !      OPEN(24,file='mts.out',status='unknown')
 !        DO I = 1,ns0
