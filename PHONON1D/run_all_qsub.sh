@@ -1,15 +1,11 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_VPREM_071_07Hz.sh
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_081_07Hz.sh
 sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_VPREM_071_40Hz.sh
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_081_40Hz.sh
 sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_VPREM_072_07Hz.sh
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_082_07Hz.sh
 sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_VPREM_072_40Hz.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_VPREM_073_07Hz.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_VPREM_073_40Hz.sh
+qsub CEES_QSUB_SCRIPTS/qsub_VPREM_082_40Hz.sh
 sleep 4
