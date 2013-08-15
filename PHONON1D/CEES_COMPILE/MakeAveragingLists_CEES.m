@@ -37,7 +37,7 @@ modellist = {...
 depths = [.01 20 100 500 750 1000]; % All potential depths
 freqs = [7 40 5];                     % All potential frequencies
 kerns = 16;                 
-iters = 4;
+iters = 7;
 
 outputfolder = '../OUTPUT/';
 scriptfolder = './AVERAGING_SCRIPTS/';
@@ -70,7 +70,8 @@ for kk = 1:length(depths)
     elseif freqs(hh) == 40, dt = 0.025;
     elseif freqs(hh) == 1, dt = 1.00;       % was used during Benchmarking
     elseif freqs(hh) == 5, dt = 0.20; 
-    else error('Input new frequency');
+    else
+        error('Input new frequency');
     end
     
     %Check for any file for freq/depth combination
