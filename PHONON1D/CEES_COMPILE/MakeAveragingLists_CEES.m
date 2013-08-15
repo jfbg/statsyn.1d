@@ -22,7 +22,7 @@ modellist = {...
 ...'VPREM_043'
 ...'VPREM_051'
 ...'VPREM_052'
-'VPREM_062'
+% 'VPREauM_062'
 ...'VPREM_nCORE_012'
 ...'VPREM_S3_001C'
 % 'VPREM_S3_061'
@@ -30,10 +30,12 @@ modellist = {...
 ...'VPREM_001C'
 ...'VPREM_liquid_001'
 ...'VPREM_nVL_liquid_001C'
+'BM_EARTHPREM_SPIKE_100km_dt02_CEES'
+'BM_EARTHPREM_SINE_100km_dt02_CEES'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
-freqs = [7 40];                     % All potential frequencies
+freqs = [7 40 5];                     % All potential frequencies
 kerns = 16;                 
 iters = 4;
 
@@ -64,10 +66,12 @@ for kk = 1:length(depths)
         
     avesrc = 'average_output';
 
-    if freqs(hh) == 7, dt = 0.15; end
-    if freqs(hh) == 40, dt = 0.025; end
-    if freqs(hh) == 1, dt = 1.00; end       % was used during Benchmarking
-    
+    if freqs(hh) == 7, dt = 0.15; 
+    elseif freqs(hh) == 40, dt = 0.025;
+    elseif freqs(hh) == 1, dt = 1.00;       % was used during Benchmarking
+    elseif freqs(hh) == 5, dt = 0.20; 
+    else error('Input new frequency');
+    end
     
     %Check for any file for freq/depth combination
     
