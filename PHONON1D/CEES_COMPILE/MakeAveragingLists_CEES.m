@@ -30,12 +30,12 @@ modellist = {...
 ...'VPREM_001C'
 ...'VPREM_liquid_001'
 ...'VPREM_nVL_liquid_001C'
-'BM_EARTHPREM_SPIKE_100km_dt02_CEES'
-'BM_EARTHPREM_SINE_100km_dt02_CEES'
+'BM_EARTHPREM_SPIKE_100km_dt05_CEES'
+'BM_EARTHPREM_SINE_100km_dt05_CEES'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
-freqs = [7 40 5];                     % All potential frequencies
+freqs = [7 40 5 20];                     % All potential frequencies
 kerns = 16;                 
 iters = 7;
 
@@ -70,6 +70,7 @@ for kk = 1:length(depths)
     elseif freqs(hh) == 40, dt = 0.025;
     elseif freqs(hh) == 1, dt = 1.00;       % was used during Benchmarking
     elseif freqs(hh) == 5, dt = 0.20; 
+    elseif freqs(hh) == 20, dt = 0.05; 
     else
         error('Input new frequency');
     end
