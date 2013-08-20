@@ -30,8 +30,13 @@ modellist = {...
 ...'VPREM_001C'
 ...'VPREM_liquid_001'
 ...'VPREM_nVL_liquid_001C'
-'BM_EARTHPREM_SPIKE_100km_dt05_CEES'
-'BM_EARTHPREM_SINE_100km_dt05_CEES'
+% 'BM_EARTHPREM_SPIKE_100km_dt05_CEES'
+% 'BM_EARTHPREM_SINE_100km_dt05_CEES'
+'VPREM_071'
+'VPREM_072'
+'VPREM_073'
+'VPREM_081'
+'VPREM_082'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
