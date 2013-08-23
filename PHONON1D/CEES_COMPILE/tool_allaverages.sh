@@ -1,5 +1,3 @@
-csh ./AVERAGING_SCRIPTS/VPREM_071_average.csh
-csh ./AVERAGING_SCRIPTS/VPREM_072_average.csh
-csh ./AVERAGING_SCRIPTS/VPREM_073_average.csh
-csh ./AVERAGING_SCRIPTS/VPREM_081_average.csh
-csh ./AVERAGING_SCRIPTS/VPREM_082_average.csh
+csh ./AVERAGING_SCRIPTS/SMOON_001b_average.csh
+csh ./AVERAGING_SCRIPTS/SMOON_002b_average.csh
+csh ./AVERAGING_SCRIPTS/SMOON_003c_average.csh

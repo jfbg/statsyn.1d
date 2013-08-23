@@ -14,29 +14,9 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-...'VPREM_002'
-...'VPREM_012B'
-...'VPREM_024'
-...'VPREM_nCORE_001'
-...'VPREM_042'
-...'VPREM_043'
-...'VPREM_051'
-...'VPREM_052'
-% 'VPREauM_062'
-...'VPREM_nCORE_012'
-...'VPREM_S3_001C'
-% 'VPREM_S3_061'
-% 'VPREM_S3_062'
-...'VPREM_001C'
-...'VPREM_liquid_001'
-...'VPREM_nVL_liquid_001C'
-% 'BM_EARTHPREM_SPIKE_100km_dt05_CEES'
-% 'BM_EARTHPREM_SINE_100km_dt05_CEES'
-'VPREM_071'
-'VPREM_072'
-'VPREM_073'
-'VPREM_081'
-'VPREM_082'
+'SMOON_001b'
+'SMOON_002b'
+'SMOON_003c'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
