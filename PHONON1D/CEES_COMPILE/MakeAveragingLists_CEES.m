@@ -17,8 +17,8 @@ modellist = {...
 % 'SMOON_002a'
 % 'SMOON_002b'
 % 'SMOON_003a'
-'SMOON_003b'
-'SMOON_004a'
+'SMOON_004b'
+'SMOON_004c'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
