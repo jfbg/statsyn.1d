@@ -14,7 +14,11 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-'SMOON_001'
+% 'SMOON_002a'
+% 'SMOON_002b'
+% 'SMOON_003a'
+'SMOON_003b'
+'SMOON_004a'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
@@ -30,7 +34,7 @@ qsubfolder = './QSUB_SCRIPTS/';
 
 fidqsub = fopen('qsub_allaverages.sh','w');
 fprintf(fidqsub,'#!/bin/tcsh\n');
-fidall = fopen('tool2_allaverages.sh','w');
+fidall = fopen('tool_allaverages.sh','w');
 
 
 %% Generate list files + .csh script
