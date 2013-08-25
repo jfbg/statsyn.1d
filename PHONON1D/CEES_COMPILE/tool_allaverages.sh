@@ -1,1 +1,2 @@
 csh ./AVERAGING_SCRIPTS/SMOON_004b_average.csh
+csh ./AVERAGING_SCRIPTS/SMOON_004c_average.csh
