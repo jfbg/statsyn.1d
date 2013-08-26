@@ -16,9 +16,9 @@ fclose(fid);
 modellist = {...
 % 'SMOON_002a'
 % 'SMOON_002b'
-'SMOON_005a'
-'SMOON_006a'
-'SMOON_007a'
+% 'SMOON_005a'
+% 'SMOON_006a'
+'SMOON_008a'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
