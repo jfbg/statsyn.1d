@@ -18,7 +18,8 @@ modellist = {...
 % 'SMOON_002b'
 % 'SMOON_005a'
 % 'SMOON_006a'
-'SMOON_009a'
+'SMOON_010a'
+'BM_EARTHPREM_SPIKE_100km_dt05_CEES_B'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
