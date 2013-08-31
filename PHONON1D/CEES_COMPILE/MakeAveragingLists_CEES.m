@@ -16,8 +16,8 @@ fclose(fid);
 modellist = {...
 % 'SMOON_002a'
 % 'SMOON_002b'
-'SMOON_013a'
-'SMOON_011a'
+'SMOON_012a'
+% 'SMOON_011a'
 % 'SMOON_010b'
 };
 
