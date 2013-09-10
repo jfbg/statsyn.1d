@@ -260,7 +260,7 @@ PROGRAM STATSYN_TRACK_INTEL
       
       d2r = pi/180.
       
-      nttrack = 5                !Set number of time intervals to track
+      nttrack = 25                !Set number of time intervals to track
       nttrack_dt = (t2-t1)/nttrack
       dt_track = 0.
       
