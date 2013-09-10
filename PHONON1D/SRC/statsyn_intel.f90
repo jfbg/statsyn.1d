@@ -744,8 +744,6 @@ PROGRAM STATSYN_GLOBALSCAT
        !WRITE(6,*) '       Prescat :',tt3-tt2,I
 !       WRITE(76,*) tt3-tt2
 
-            iz_track = iz -1  !Layer in which the phonon travels  (used for tracking)
-
             IF ((scat_prob > 0.).AND.(iz > 1)) THEN
     
             !Get iz_scat (layer in which phonon is scattered, if scattered)
