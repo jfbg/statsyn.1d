@@ -694,7 +694,7 @@ PROGRAM STATSYN_TRACK_INTEL
 
           IF (itt > nttrack) itt = nttrack
 
-          trackcount(ixt,iztrack,itt) = trackcount(ixt,iztrack,itt) + attndt_track
+          trackcount(ixt,iztrack,itt) = trackcount(ixt,iztrack,itt) + attn*dt_track
 !          trackcount(ixt,iztrack,itt) = trackcount(ixt,iztrack,itt) + attn/minattn*dt_track
 
         END IF
