@@ -14,7 +14,8 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-'VSMOON_008a'
+'VSMOON_009a'
+'VSMOON_010a'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
