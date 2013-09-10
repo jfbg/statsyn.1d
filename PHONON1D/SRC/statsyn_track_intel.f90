@@ -1,4 +1,4 @@
-PROGRAM STATSYN_GLOBALSCAT
+PROGRAM STATSYN_TRACK_INTEL
 !
 !
 ! Scattering is isotropic
@@ -598,7 +598,9 @@ PROGRAM STATSYN_GLOBALSCAT
         n_iter_last = -999
         ix_last = -999
         it_last = -999
+        iztrack = iz - 1 
         t_last = t
+        dt_track = t-t_last
         t_last_count = 0
         ! ============ <<
              
@@ -659,45 +661,44 @@ PROGRAM STATSYN_GLOBALSCAT
       
         ! ============ >>
         ! Track phonon's position
-!			  IF (I < 10000) THEN
-!          IF (dt_track > 0) THEN
-!
-!          !Find index for distance
-!          x_index = abs(x)
-!          DO WHILE (x_index >= circum)
-!            x_index = x_index - circum
-!          END DO
-!          IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
-!          ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE
-!
-!          itt = nint((t-t1)	/REAL(nttrack_dt)+.5)     !TIME
-!
-!          IF (Watt.eq.0) THEN                         !ATTENUATION
-!            ims = 2
-!            frac = 0.
-!          ELSE
-!            ims = int(s/datt)+1
-!            IF (ims > ns0-1) ims = ns0-1
-!            IF (ims <=   1) ims =   2
-!            s1 = float(ims-1)*datt
-!            s2 = float(ims  )*datt
-!            frac = (s-s1)/(s2-s1)
-!          END IF
-!
-!          attn = 0.
-!          DO JJ = 1,nts
-!            attn = attn + ((1.-frac)*mts(ims-1,1,JJ) &
-!                            + (frac)*mts(ims,1,JJ) )**2 !Power
-!          END DO
-!
-!          iztrack = iz -1
-!
-!          IF (itt > nttrack) itt = nttrack
-!
-!          trackcount(ix,iz-1,itt) = trackcount(ix,iz-1,itt) + attn/minattn*dt_track
-!
-!        END IF
-!        END IF
+			  IF (I < 10000) THEN
+          IF (dt_track > 0) THEN
+
+          !Find index for distance
+          x_index = abs(x)
+          DO WHILE (x_index >= circum)
+            x_index = x_index - circum
+          END DO
+          IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
+          ixt = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE
+
+          itt = nint((t-t1)	/REAL(nttrack_dt)+.5)     !TIME
+
+          IF (Watt.eq.0) THEN                         !ATTENUATION
+            ims = 2
+            frac = 0.
+          ELSE
+            ims = int(s/datt)+1
+            IF (ims > ns0-1) ims = ns0-1
+            IF (ims <=   1) ims =   2
+            s1 = float(ims-1)*datt
+            s2 = float(ims  )*datt
+            frac = (s-s1)/(s2-s1)
+          END IF
+
+          attn = 0.
+          DO JJ = 1,nts
+            attn = attn + ((1.-frac)*mts(ims-1,1,JJ) &
+                            + (frac)*mts(ims,1,JJ) )**2 !Power
+          END DO
+
+          IF (itt > nttrack) itt = nttrack
+
+          trackcount(ixt,iztrack,itt) = trackcount(ixt,iztrack,itt) + attndt_track
+!          trackcount(ixt,iztrack,itt) = trackcount(ixt,iztrack,itt) + attn/minattn*dt_track
+
+        END IF
+        END IF
 
         ! Track phonon's position
         ! ============ <<
@@ -744,7 +745,7 @@ PROGRAM STATSYN_GLOBALSCAT
        !WRITE(6,*) '       Prescat :',tt3-tt2,I
 !       WRITE(76,*) tt3-tt2
 
-            iz_track = iz -1  !Layer in which the phonon travels  (used for tracking)
+            iztrack = iz -1  !Layer in which the phonon travels  (used for tracking)
 
             IF ((scat_prob > 0.).AND.(iz > 1)) THEN
     
@@ -1120,7 +1121,38 @@ PROGRAM STATSYN_GLOBALSCAT
       
 !      ======================================================
 !      ----- Output Energy Tracking -----
-      ! ADD OUTPUT ENERGY TRACKING HERE FROM EARLIER VERSION 
+			
+			!! NORMALIZE trackcount for cell size ==========================
+			DO kk = 1,nlay-1																						   !
+																																		 !
+						normfactor = dxi*pi/360*((r_s(kk))**2-(r_s(kk+1))**2)    !
+																																		 !
+																																		 !
+					IF (normfactor == 0) cycle																 !													 																													 !	
+					trackcount(1:nx,kk,1:nttrack) =	 &												 !
+							trackcount(1:nx,kk,1:nttrack) / normfactor						 !
+			END DO																												 !	
+			!! =============================================================
+			
+			
+  		OPEN(17,FILE=tfile,STATUS='UNKNOWN')
+
+			DO kk = 1,nx
+					DO mm = 1,nttrack
+  						DO ll = 1,nlay
+							
+						IF (ll > 1) THEN
+							IF (z_s(ll) - z_s(ll-1) == 0) cycle
+						END IF
+						
+						WRITE(17,FMT=879) (x1+REAL(kk-1)*dxi),z_s(ll),mm*nttrack_dt,trackcount(kk,ll,mm)
+!						WRITE(17,FMT=878) (x1+REAL(kk-1)*dxi),z_s(ll),(trackcount(kk,ll))
+						
+					END DO
+				END DO
+			END DO
+					
+			CLOSE(17)
 !      ^^^^^ Output Energy Tracking ^^^^^
 
 
@@ -1135,7 +1167,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 
       STOP
-      END PROGRAM STATSYN_GLOBALSCAT
+      END PROGRAM STATSYN_TRACK_INTEL
 !     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 !     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 !     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

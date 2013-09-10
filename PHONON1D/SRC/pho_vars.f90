@@ -16,7 +16,7 @@ MODULE PHO_VARS      ! Make variables global
         REAL(8)       ::  normfactor            !Normalization factor for cell size
         REAL(8)       ::  dt_track
         REAL(8)           d2r,re,rm,circum
-        INTEGER           dotrack
+        INTEGER           dotrack,ixt,itt
         
         INTEGER       EorM                  !1=EARTH, 2=MOON
         
@@ -29,7 +29,7 @@ MODULE PHO_VARS      ! Make variables global
         REAL(8)       z_s(nlay0),r_s(nlay0),vs(nlay0,2),rhs(nlay0)
         REAL(8)       dx1,dt1
         INTEGER       irtr1
-        INTEGER     :: iz,iz1,itt,iz2
+        INTEGER     :: iz,iz1,iz2
         REAL(8)     :: maxcount
         INTEGER     :: IT,JT,I,J,ic,jj,k,kk,ll,mm
         REAL(8)       p,ang1
