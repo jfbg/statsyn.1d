@@ -1,1 +1,1 @@
-csh ./AVERAGING_SCRIPTS/VSMOON_010b_average.csh
+csh ./AVERAGING_SCRIPTS/VSMOON_011a_average.csh
