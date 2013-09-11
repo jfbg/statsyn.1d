@@ -27,6 +27,13 @@
       
       I = I-1 ! Number of layers in input model.
       
+      ! Depth of last layer is radius
+  		erad = z_st(I)
+  		deg2km = erad*d2r
+      circum = 2*pi*erad
+      
+      WRITE(6,*) 'PLANET RADIUS = ',erad
+      
       CLOSE (1)
       
       WRITE(6,*) '   VELOCITY MODELS CHECKS:'
@@ -191,10 +198,7 @@
       
       rhs = rh  !Will transform rhs in flattening subroutine
 
-  		! Depth of last layer is radius
-  		erad = z_s(nlay)
-  		deg2km = erad*d2r
-      circum = 2*pi*erad
+
       
   		WRITE(6,*) '     ** Planet''s radius=',erad
   		     	
