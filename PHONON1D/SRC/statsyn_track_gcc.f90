@@ -63,6 +63,7 @@ PROGRAM STATSYN_TRACK_INTEL
         INTEGER (kind=8) ::  surCYC1,exTIME,exNLAY
         INTEGER          ::  logperc
         INTEGER (kind=8) ::  scat_time
+        REAL(8)   tracktime
 
          
         REAL(8)   Cc2, Ccwil, Ccwir, Cc1
@@ -636,11 +637,18 @@ PROGRAM STATSYN_TRACK_INTEL
         ! Set scatterer scale-length
         scat_time = 0
         ! ============ <<       
+        
+               !DEBUG
+       tracktime = 0.
 
        ! ====================== >>
        ! Start single ray tracing while loop
        ! ====================== >>   
        DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
+       
+       
+       
+
        
 !       CALL etime(elapsed,tt2)
        CALL cpu_time(tt2)
@@ -661,8 +669,7 @@ PROGRAM STATSYN_TRACK_INTEL
       
         ! ============ >>
         ! Track phonon's position
-			  IF (I < 10000) THEN
-          IF (dt_track > 0) THEN
+			  IF ((I < 10000).AND.(dt_track > 0)) THEN
 
           !Find index for distance
           x_index = abs(x)
@@ -696,9 +703,11 @@ PROGRAM STATSYN_TRACK_INTEL
 
           trackcount(ixt,iztrack,itt) = trackcount(ixt,iztrack,itt) + attn*dt_track
 !          trackcount(ixt,iztrack,itt) = trackcount(ixt,iztrack,itt) + attn/minattn*dt_track
+         tracktime = tracktime + dt_track
+!         WRITE(6,*) tracktime,dt_track,itt
 
         END IF
-        END IF
+
 
         ! Track phonon's position
         ! ============ <<
@@ -1141,9 +1150,9 @@ PROGRAM STATSYN_TRACK_INTEL
 					DO mm = 1,nttrack
   						DO ll = 1,nlay
 							
-!						IF (ll > 1) THEN
-!							IF (z_s(ll) - z_s(ll-1) == 0) cycle
-!						END IF
+						IF (ll > 1) THEN
+							IF (z_s(ll) - z_s(ll-1) == 0) cycle
+						END IF
 						
 						  WRITE(17,FMT=879) (x1+REAL(kk-1)*dxi),z_s(ll),mm*nttrack_dt,trackcount(kk,ll,mm)/100
 						
