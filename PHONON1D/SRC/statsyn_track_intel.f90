@@ -1123,7 +1123,6 @@ PROGRAM STATSYN_TRACK_INTEL
 !      ----- Output Energy Tracking -----
 			
 			!! NORMALIZE trackcount for cell size ==========================
-		! NO NEED TO DO THIS BECAUSE I ALREADY NORMALIZE WITH TIME !!
 !			DO kk = 1,nlay-1																						   !
 !																																		 !
 !						normfactor = dxi*pi/360*((r_s(kk))**2-(r_s(kk+1))**2)    !

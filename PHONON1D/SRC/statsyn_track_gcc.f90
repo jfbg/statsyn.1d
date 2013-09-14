@@ -283,7 +283,7 @@ PROGRAM STATSYN_TRACK_INTEL
 !        --> One layer is directly at base of scattering layer (need this for scattering to work)
 !        --> Thin 100m layer at core to deal with singularity caused by flattening
 
-      corelayer = 0.1        ! Thickness of thin layer near core to deal with singularity
+      corelayer = .1        ! Thickness of thin layer near core to deal with singularity
   
  
       WRITE(6,*) 'Running Checks:'  
@@ -584,12 +584,14 @@ PROGRAM STATSYN_TRACK_INTEL
         
         !Set initial depth index (iz)
          iz = iz1    !iz1 is layer in which the source is.
+         iz_p = iz   !vel(iz_p) used to calculate the ray parameter
         
         !Set up/down direction
         r0 = rand()
         IF ((r0 < 0.5).OR.(iz == 1)) THEN       !IF QUAKE STARTS AT SURF GO DOWN
          ud = 1  
          iz = iz + 1 !Need this to make sure that source always stars at the same depth.
+         
         ELSE
          ud = -1
         END IF
@@ -607,29 +609,31 @@ PROGRAM STATSYN_TRACK_INTEL
              
         ! ============ >>
         ! sample take-off angle or ray parameters
-        angst = pi/2.                         
+        !DEBUG pi/2.
+        angst = pi/2.                        
         r0 = rand()
-        maxp = sin(angst)/vf(iz,iwave)
+        maxp = sin(angst)/vf(iz1,iwave)
 
   
         IF (samplingtype.eq.2) THEN               ! Sample slownesses
           p = maxp*r0
-          ang1 = asin(p*vf(iz,iwave))
+          ang1 = asin(p*vf(iz1,iwave))
         ELSEIF (samplingtype.eq.3) THEN            ! Sample from p range (same as CRFL)
           IF (ip.eq.3) THEN
              p = Cp_SH(Cindex_SH)
-             ang1 = asin(p*vf(iz,iwave))
+             ang1 = asin(p*vf(iz1,iwave))
              Cindex_SH = Cindex_SH + 1
              IF (Cindex_SH > Cnp_SH) Cindex_SH   = Cindex_SH - Cnp_SH
           ELSE        
              p = Cp(Cindex)
-             ang1 = asin(p*vf(iz,iwave))
+             ang1 = asin(p*vf(iz1,iwave))
              Cindex = Cindex + 1
              IF (Cindex > Cnp) Cindex   = Cindex - Cnp
           ENDIF
         ELSE    !IF (samplingtype.eq.1) THEN      ! Sample Angles
-          ang1 = angst*r0                        !Randomly select angle
-          p    = abs(sin(ang1))/vf(iz,iwave)
+					ang1 = angst*r0                       !Randomly select angle
+          p    = abs(sin(ang1))/vf(iz1,iwave)
+!          WRITE(76,*) ang1,p,vf(iz1,iwave),ip,r_P,r_SH,r_SV  !DEBUG
         END IF
         ! ============ <<
         
@@ -664,7 +668,7 @@ PROGRAM STATSYN_TRACK_INTEL
        z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
 
        !DEBUG
-!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1,irtr1
+!       IF (I.le.5) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1,irtr1
       
       
         ! ============ >>
@@ -778,7 +782,7 @@ PROGRAM STATSYN_TRACK_INTEL
                    END IF
 
                  
-                 imth = 2  !Interpolation method in Layer trace (2 is linear)
+                 imth = 3  !Interpolation method in Layer trace (2 is linear)
                  CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
                  ds_SL = (dh**2+dx1**2)**0.5
                                 
@@ -832,7 +836,7 @@ PROGRAM STATSYN_TRACK_INTEL
 
 
                      !DEBUG
-!                     WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2,irtr1
+!                     IF (I.le.5) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2,irtr1
                                             
       
                     END DO
@@ -1047,7 +1051,7 @@ PROGRAM STATSYN_TRACK_INTEL
               
        IF (mod(float(I),float(ntr)/20.) == 0) THEN !STATUS REPORT
         WRITE(6,FMT = 854) nint(float(I)/float(ntr)*100),kernelnum
-        WRITE(79,FMT = 854) nint(float(I)/float(ntr)*100),kernelnum
+!        WRITE(79,FMT = 854) nint(float(I)/float(ntr)*100),kernelnum
        END IF
 
 854   FORMAT (10x,i3,' % COMPLETE  -- kernel ',i2)
@@ -2553,7 +2557,7 @@ SUBROUTINE RAYTRACE
              END IF
         
           h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
-          imth = 2                              !INTERPOLATION METHOD
+          imth = 3                              !INTERPOLATION METHOD
 
           CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
           dtstr1 = dt1/Q(iz-1,iwave)                    !t* = TIME/QUALITY FACTOR
@@ -2623,7 +2627,7 @@ SUBROUTINE RAYTRACE_SCAT
             ubot = 0.
           END IF
          
-          imth = 2                              !INTERPOLATION METHOD
+          imth = 3                              !INTERPOLATION METHOD
 
           CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
           

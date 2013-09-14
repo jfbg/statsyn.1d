@@ -606,27 +606,27 @@ PROGRAM STATSYN_GLOBALSCAT
         ! sample take-off angle or ray parameters
         angst = pi/2.                         
         r0 = rand()
-        maxp = sin(angst)/vf(iz,iwave)
+        maxp = sin(angst)/vf(iz1,iwave)
 
   
         IF (samplingtype.eq.2) THEN               ! Sample slownesses
           p = maxp*r0
-          ang1 = asin(p*vf(iz,iwave))
+          ang1 = asin(p*vf(iz1,iwave))
         ELSEIF (samplingtype.eq.3) THEN            ! Sample from p range (same as CRFL)
           IF (ip.eq.3) THEN
              p = Cp_SH(Cindex_SH)
-             ang1 = asin(p*vf(iz,iwave))
+             ang1 = asin(p*vf(iz1,iwave))
              Cindex_SH = Cindex_SH + 1
              IF (Cindex_SH > Cnp_SH) Cindex_SH   = Cindex_SH - Cnp_SH
           ELSE        
              p = Cp(Cindex)
-             ang1 = asin(p*vf(iz,iwave))
+             ang1 = asin(p*vf(iz1,iwave))
              Cindex = Cindex + 1
              IF (Cindex > Cnp) Cindex   = Cindex - Cnp
           ENDIF
         ELSE    !IF (samplingtype.eq.1) THEN      ! Sample Angles
           ang1 = angst*r0                        !Randomly select angle
-          p    = abs(sin(ang1))/vf(iz,iwave)
+          p    = abs(sin(ang1))/vf(iz1,iwave)
         END IF
         ! ============ <<
         
