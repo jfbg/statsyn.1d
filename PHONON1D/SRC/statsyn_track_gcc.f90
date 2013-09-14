@@ -584,7 +584,6 @@ PROGRAM STATSYN_TRACK_INTEL
         
         !Set initial depth index (iz)
          iz = iz1    !iz1 is layer in which the source is.
-         iz_p = iz   !vel(iz_p) used to calculate the ray parameter
         
         !Set up/down direction
         r0 = rand()
