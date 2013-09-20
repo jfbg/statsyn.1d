@@ -4,7 +4,7 @@ MODULE PHO_VARS      ! Make variables global
         
         
         
-        INTEGER, PARAMETER :: nlay0=1000
+        INTEGER, PARAMETER :: nlay0=2000  !if change this, also change in REF_TRAN_PROB
                 
         ! ENERGY TRACKING
         CHARACTER*100 :: tfile
@@ -16,7 +16,8 @@ MODULE PHO_VARS      ! Make variables global
         REAL(8)       ::  normfactor            !Normalization factor for cell size
         REAL(8)       ::  dt_track
         REAL(8)           d2r,re,rm,circum
-        INTEGER           dotrack,ixt,itt
+        INTEGER           dotrack,ixt,itt,ixt_last
+        INTEGER           xind(10),G,xind2
         
         INTEGER       EorM                  !1=EARTH, 2=MOON
         
@@ -24,12 +25,12 @@ MODULE PHO_VARS      ! Make variables global
         INTEGER       check_scat, check_core, check_scat2, check_source
         
         REAL(8)       t,x,xo,a,x_index
-        REAL(8)       z(nlay0),vf(nlay0,2),rh(nlay0)
+        REAL(8)       z(nlay0),vf(nlay0,2),rh(nlay0),vqdep
         REAL(8)       z_st(nlay0),r_st(nlay0),vst(nlay0,2),rht(nlay0)
         REAL(8)       z_s(nlay0),r_s(nlay0),vs(nlay0,2),rhs(nlay0)
         REAL(8)       dx1,dt1
         INTEGER       irtr1
-        INTEGER     :: iz,iz1,iz2
+        INTEGER     :: iz,iz1,iz2,iz_p
         REAL(8)     :: maxcount
         INTEGER     :: IT,JT,I,J,ic,jj,k,kk,ll,mm
         REAL(8)       p,ang1
@@ -39,7 +40,7 @@ MODULE PHO_VARS      ! Make variables global
         INTEGER       n180,idelt1,idelt2
         REAL(8)     :: angst                 !! Starting angle for trace
         REAL(8)     :: deg2km
-        REAL(8)       corelayer
+        REAL(8)       corelayer,corelayer_flat
         
         CHARACTER*100 IFile,ofile,ofile2,logfile
         
@@ -60,7 +61,7 @@ MODULE PHO_VARS      ! Make variables global
         REAL(8)          ds_SL                  !Distance between phonon and next velocity layer
         REAL(8)          dh,dh2                    !Vertical Distance between phonon and next vel layer.
         INTEGER        izfac                  !0 if traveling above iz, 1 if below
-        REAL(8)          z_act                  !Depth when in between two vel layers
+        REAL(8)          z_act,z_last                  !Depth when in between two vel layers
         REAL(8)          Q0                    !Background Qi for frequency dependent Qi
         REAL(8)          dQdf                  !Q gradient with f
         INTEGER       iz_scat,iz_from                !Vel layer in which phonon is while it's scattered
@@ -95,7 +96,7 @@ MODULE PHO_VARS      ! Make variables global
         REAL(8)        :: dxi
         REAL(8)        :: h     !! Layer thickness
         INTEGER     :: idum
-        INTEGER     :: imth  !! Interpolation method (1 or 2)
+        INTEGER     :: imth  !! Interpolation method (1 or 2 or 3)
         INTEGER     :: iwave !! (P(2) or S(2))
         INTEGER     :: ix,nx ,ixtemp,ixdeg   !! Index & number of distances
         INTEGER     :: nfil  !! Number of filter values for hilbert transform
@@ -117,7 +118,7 @@ MODULE PHO_VARS      ! Make variables global
         REAL(8)           c_mult(3)
         CHARACTER*3    cmp(3)
         REAL(8)           p1,p2(2)              !Ray parameters
-        REAL(8)           qdep
+        REAL(8)           qdep,nqdeq
         INTEGER        cons_EorA
         
         !INTERFACE
@@ -133,7 +134,7 @@ MODULE PHO_VARS      ! Make variables global
         
         ! SYSTEM + DEBUG
         INTEGER        status                !I/O ERROR (0=no READ error)
-        INTEGER        n_iter_last,it_last,ix_last
+        INTEGER        n_iter_last,it_last,ix_last,z_last_count, z_last_count_num
         INTEGER     :: nseed
         INTEGER     :: seed2
         INTEGER (kind=8)     :: nclock,nclock1

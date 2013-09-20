@@ -4,7 +4,8 @@
       
       IMPLICIT NONE
       
-      REAL(8) qdepdiff
+      REAL(8) qdepdiff,dsamp
+      INTEGER lcount,nl
       
       !MODEL CHECKS
 			check_scat = 1
@@ -19,11 +20,18 @@
        IF (z_st(I) == scat_depth) THEN
           check_scat = 0		!Velocity layer depth is same as scattering layer.   
        END IF
+       IF (r_st(I) == corelayer) THEN
+          check_core = 0		!Velocity layer depth is same as corelayer.   
+       END IF
 !       IF (z_st(I) == qdep) THEN
 !          check_source = 0		!Velocity layer depth is same as source depth.   
 !       END IF
        IF (status /= 0) EXIT
       END DO
+      
+      check_core = 0  !New core layer density large enough that do not need to add layer
+      if (scat_prob <= 0.) check_scat = 0
+      
       
       I = I-1 ! Number of layers in input model.
       
@@ -31,12 +39,12 @@
   		erad = z_st(I)
   		deg2km = erad*d2r
       circum = 2*pi*erad
-      
-      WRITE(6,*) 'PLANET RADIUS = ',erad
-      
+    
+     
       CLOSE (1)
       
       WRITE(6,*) '   VELOCITY MODELS CHECKS:'
+      WRITE(6,*) 'For model:', ifile
       WRITE(6,*) '     ** Total pre-checks layers: ',I
       
       iz1 = 1
@@ -46,8 +54,6 @@
 			WRITE(6,*) '     ** Scattering layer at or below initial layer:', iz1
 			
 			
-    
-      IF (z_st(I) - z_st(I-1) < corelayer) check_core = 0 !Last layer is small enough to ignore.
 
       nlay = I + check_scat + check_core ! NUMBER OF LAYERS
       																	 ! Layers are added if checks failed.
@@ -133,9 +139,10 @@
 			END DO
 			WRITE(6,*) '     ** Source is in or on initial layer:', iz2
 			WRITE(6,*) '        * Distance between source and layer is (km):',qdep-z_s(iz2)			
-			IF (qdep - z_s(iz2) < 2)  check_source = 0
+			IF (qdep - z_s(iz2) == 0)  check_source = 0
+			IF (qdep <= 0.02) check_source = 0 !impact
 			
-			qdepdiff = qdep !-.1
+			qdepdiff = qdep - 1.
 			
 			! Adding a layer where the source is located
 			IF (check_source == 1) THEN
@@ -182,6 +189,75 @@
 				END DO
 			END IF
 			
+			
+			! Subsampling the layers around the source
+			
+			iz2 = 1
+			DO WHILE (qdep >= z_s(iz2+1))      !FIND WHICH LAYER THE SCAT LAYER IS ON
+			 iz2 = iz2 +1														 
+			END DO
+			IF (qdep <= 0.02) iz2 = 1
+		
+			dsamp = .5
+			
+			z_st = z_s
+			r_st = r_s
+			vst = vs
+			rht = rh
+			Qt = Q(:,1)
+			
+		
+			lcount = 1
+			DO K = 1,nlay 
+					IF (z_st(K) < qdep - 10) THEN
+					 z_s(lcount) = z_st(K)
+					 r_s(lcount) = r_st(K)
+					 vs(lcount,1) = vst(K,1)
+					 vs(lcount,2) = vst(K,2)
+					 rh(lcount) = rht(K)
+					 Q(lcount,1) = Qt(K)
+					 lcount = lcount + 1
+					END IF
+					
+					IF ((z_st(K) >= qdep -10 ).AND.(z_st(K) <= qdep + 10)) THEN
+					    nl = int( (z_st(K+1)-z_st(K))/dsamp)
+							z_s(lcount) = z_st(K)
+							r_s(lcount) = r_st(K)
+							vs(lcount,1) = vst(K,1)
+							vs(lcount,2) = vst(K,2)
+							rh(lcount) = rht(K)
+							Q(lcount,1) = Qt(K)
+							
+							lcount = lcount +1
+					    
+					    
+							DO J = 1, nl-1                 !INTERPOLATE AT EACH STEP
+							 z_s(lcount) = z_st(K) + float(J)*(z_st(K+1)-z_st(K))/float(nl)
+							 r_s(lcount) = r_st(K) + float(J)*(r_st(K+1)-r_st(K))/float(nl)
+							 vs(lcount,1) = vst(K,1) + float(J)*(vst(K+1,1)-vst(K,1))/float(nl)
+							 vs(lcount,2) = vst(K,2) + float(J)*(vst(K+1,2)-vst(K,2))/float(nl)
+							 rh(lcount) = rht(K) + float(J)*(rht(K+1)-rht(K))/float(nl)
+							 Q(lcount,1) = Qt(K) + float(J)*(Qt(K+1)-Qt(K))/float(nl)	    
+					    
+               lcount = lcount+1
+               END DO
+					END IF
+					
+					IF (z_st(K) > qdep +10) THEN
+							z_s(lcount) = z_st(K)
+							r_s(lcount) = r_st(K)
+							vs(lcount,1) = vst(K,1)
+							vs(lcount,2) = vst(K,2)
+							rh(lcount) = rht(K)
+							Q(lcount,1) = Qt(K)
+							lcount = lcount +1
+					END IF
+					
+				END DO
+	
+			nlay = lcount - 1
+			
+			
 			! Calculate Qs (4/9)*Qp
 			DO I = 1,nlay
 			 Q(I,2) = (4./9.)*Q(I,1)
@@ -204,8 +280,6 @@
   		     	
   		WRITE(6,*) '     ** Number of layers after model checks:',nlay
   		
-  		! Depth of last layer is radius
-  		erad = z_s(nlay)
 
       RETURN
 

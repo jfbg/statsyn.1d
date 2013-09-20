@@ -1,4 +1,4 @@
-PROGRAM STATSYN_GLOBALSCAT
+PROGRAM STATSYN_INTEL
 !
 !
 ! Scattering is isotropic
@@ -63,6 +63,7 @@ PROGRAM STATSYN_GLOBALSCAT
         INTEGER (kind=8) ::  surCYC1,exTIME,exNLAY
         INTEGER          ::  logperc
         INTEGER (kind=8) ::  scat_time
+        REAL(8)   tracktime
 
          
         REAL(8)   Cc2, Ccwil, Ccwir, Cc1
@@ -260,14 +261,14 @@ PROGRAM STATSYN_GLOBALSCAT
       
       d2r = pi/180.
       
-      nttrack = 5                !Set number of time intervals to track
+      nttrack = 25                !Set number of time intervals to track
       nttrack_dt = (t2-t1)/nttrack
-      dt_track = 0.
       
       n180 = nint(180/dxi)      !Number of intervals in 180deg
       
       dreceiver = 0.05  !radius around receiver in which the phonons will be recorded (deg)
       tstuck = 0
+      z_last_count_num = 0
      
       !Initialize random seed for sequence of random numbers used to multiply to clock-based seeds.    
       CALL INIT_RANDOM_SEED()
@@ -282,7 +283,7 @@ PROGRAM STATSYN_GLOBALSCAT
 !        --> One layer is directly at base of scattering layer (need this for scattering to work)
 !        --> Thin 100m layer at core to deal with singularity caused by flattening
 
-      corelayer = 0.1        ! Thickness of thin layer near core to deal with singularity
+      corelayer = .1        ! Thickness of thin layer near core to deal with singularity
   
  
       WRITE(6,*) 'Running Checks:'  
@@ -349,20 +350,20 @@ PROGRAM STATSYN_GLOBALSCAT
     
 !     ======================================================
 !      ----- INITIALIZE TRACKING PARAMETERS -----    
-      
-      WRITE(6,*) '!!!!!!!!!!!!!!!!!!!!!'  !DEBUG
-      WRITE(6,*) ' ',nx,nlay,nttrack      !DEBUG
-
-      !Allocate memory for tracking number of phonons in each area
-     ALLOCATE(trackcount(nx,nlay,nttrack))              
-      
-      DO kk = 1,nx
-        DO ll = 1,nlay
-          DO mm = 1,nttrack
-            trackcount(kk,ll,mm) = 0.
-          END DO
-        END DO
-      END DO  
+!      
+!      WRITE(6,*) '!!!!!!!!!!!!!!!!!!!!!'  !DEBUG
+!      WRITE(6,*) ' ',nx-1,nlay,nttrack      !DEBUG
+!
+!      !Allocate memory for tracking number of phonons in each area
+!     ALLOCATE(trackcount(nx,nlay,nttrack))              
+!      
+!      DO kk = 1,nx-1
+!        DO ll = 1,nlay
+!          DO mm = 1,nttrack
+!            trackcount(kk,ll,mm) = 0.
+!          END DO
+!        END DO
+!      END DO  
 !      ^^^^^ INITIALIZE TRACKING PARAMETERS ^^^^^
 
 
@@ -578,19 +579,20 @@ PROGRAM STATSYN_GLOBALSCAT
         ncaust = 1                             !# OF CAUSTICS STARS AT 0. (which is index 1)
         
         
-        !DEBUG
-!        tmax = 0.
         
         !Set initial depth index (iz)
          iz = iz1    !iz1 is layer in which the source is.
         
         !Set up/down direction
         r0 = rand()
+        
         IF ((r0 < 0.5).OR.(iz == 1)) THEN       !IF QUAKE STARTS AT SURF GO DOWN
          ud = 1  
          iz = iz + 1 !Need this to make sure that source always stars at the same depth.
+         iz_p = iz1
         ELSE
          ud = -1
+         iz_p = iz1 - 1
         END IF
       
         NITR = 0
@@ -598,35 +600,40 @@ PROGRAM STATSYN_GLOBALSCAT
         n_iter_last = -999
         ix_last = -999
         it_last = -999
+        iztrack = iz - 1 
         t_last = t
+        dt_track = t-t_last
+        ixt_last = 1
         t_last_count = 0
+        z_last = -99.
+        z_last_count = 0
         ! ============ <<
              
         ! ============ >>
         ! sample take-off angle or ray parameters
-        angst = pi/2.                         
+        angst = pi/2.                        
         r0 = rand()
         maxp = sin(angst)/vf(iz1,iwave)
 
   
         IF (samplingtype.eq.2) THEN               ! Sample slownesses
           p = maxp*r0
-          ang1 = asin(p*vf(iz1,iwave))
+          ang1 = asin(p*vf(iz_p,iwave))
         ELSEIF (samplingtype.eq.3) THEN            ! Sample from p range (same as CRFL)
           IF (ip.eq.3) THEN
              p = Cp_SH(Cindex_SH)
-             ang1 = asin(p*vf(iz1,iwave))
+             ang1 = asin(p*vf(iz_p,iwave))
              Cindex_SH = Cindex_SH + 1
              IF (Cindex_SH > Cnp_SH) Cindex_SH   = Cindex_SH - Cnp_SH
           ELSE        
              p = Cp(Cindex)
-             ang1 = asin(p*vf(iz1,iwave))
+             ang1 = asin(p*vf(iz_p,iwave))
              Cindex = Cindex + 1
              IF (Cindex > Cnp) Cindex   = Cindex - Cnp
           ENDIF
         ELSE    !IF (samplingtype.eq.1) THEN      ! Sample Angles
-          ang1 = angst*r0                        !Randomly select angle
-          p    = abs(sin(ang1))/vf(iz1,iwave)
+          ang1 = angst*r0         !Randomly select angle
+          p    = abs(sin(ang1))/vf(iz_p,iwave)
         END IF
         ! ============ <<
         
@@ -634,13 +641,16 @@ PROGRAM STATSYN_GLOBALSCAT
         ! Set scatterer scale-length
         scat_time = 0
         ! ============ <<       
+        
+               !DEBUG
+       tracktime = 0.
 
        ! ====================== >>
        ! Start single ray tracing while loop
        ! ====================== >>   
        DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
        
-!       CALL etime(elapsed,tt2)
+       
        CALL cpu_time(tt2)
        !WRITE(6,*) '       Params:',tt2-tt1,I
       
@@ -652,23 +662,25 @@ PROGRAM STATSYN_GLOBALSCAT
        izfac = 0
        IF (ud == 1) izfac = -1 
        z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
-
+       z_last = z_act
+       
        !DEBUG
-!       WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1,irtr1
+!       IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1,irtr1
       
       
         ! ============ >>
         ! Track phonon's position
-!			  IF (I < 10000) THEN
-!          IF (dt_track > 0) THEN
+!			  IF ((I < 10000).AND.(dt_track > 0.).AND.(z_last_count.lt.2)) THEN
 !
-!          !Find index for distance
+!          !Find index for distance for current x
 !          x_index = abs(x)
 !          DO WHILE (x_index >= circum)
 !            x_index = x_index - circum
 !          END DO
-!          IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
-!          ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE
+!          IF (x_index > circum/2.) x_index = x_index - 2.*(x_index-circum/2.)
+!          ixt = nint((x_index/deg2km-x1)/dxi +.5)       !EVENT TO SURFACE HIT DISTANCE
+!
+!    
 !
 !          itt = nint((t-t1)	/REAL(nttrack_dt)+.5)     !TIME
 !
@@ -690,14 +702,36 @@ PROGRAM STATSYN_GLOBALSCAT
 !                            + (frac)*mts(ims,1,JJ) )**2 !Power
 !          END DO
 !
-!          iztrack = iz -1
-!
 !          IF (itt > nttrack) itt = nttrack
 !
-!          trackcount(ix,iz-1,itt) = trackcount(ix,iz-1,itt) + attn/minattn*dt_track
+!          xind(1:10) = 0
+!
+!					xind2 = abs(ixt-ixt_last)
+!					IF (xind2 > 1) THEN
+!					    IF (ixt_last < ixt) THEN
+!					       DO G = 1,xind2
+!					         xind(G) = ixt_last + G
+!					         trackcount(xind(G),iztrack,itt) = trackcount(xind(G),iztrack,itt) + attn
+!					       END DO
+!					    END IF
+!					    IF (ixt_last > ixt) THEN
+!					       DO G = 1,xind2
+!					         xind(G) = ixt_last - G
+!					         trackcount(xind(G),iztrack,itt) = trackcount(xind(G),iztrack,itt) + attn
+!					       END DO
+!					    END IF
+!					ELSE
+!					  trackcount(ixt,iztrack,itt) = trackcount(ixt,iztrack,itt) + attn
+!					END IF
+!					
+!
+!         tracktime = tracktime + dt_track
+!
+!
+!         ixt_last = ixt
 !
 !        END IF
-!        END IF
+
 
         ! Track phonon's position
         ! ============ <<
@@ -726,6 +760,7 @@ PROGRAM STATSYN_GLOBALSCAT
                 
                 IF (vf(iz_scat,2) == 0.) scat_prob = 0. !No scattering in liquid layers
             
+                IF (z_s(iz_scat) > 1200.) scat_prob = 0. !No scattering at depths larger then 1200
             
             !Check if scatter at interface
             r0 = rand()
@@ -739,7 +774,6 @@ PROGRAM STATSYN_GLOBALSCAT
 
             IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
             
-!       CALL etime(elapsed,tt3)
        CALL cpu_time(tt3)
        !WRITE(6,*) '       Prescat :',tt3-tt2,I
 !       WRITE(76,*) tt3-tt2
@@ -766,7 +800,7 @@ PROGRAM STATSYN_GLOBALSCAT
                    END IF
 
                  
-                 imth = 2  !Interpolation method in Layer trace (2 is linear)
+                 imth = 3  !Interpolation method in Layer trace (2 is linear)
                  CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
                  ds_SL = (dh**2+dx1**2)**0.5
                                 
@@ -820,7 +854,7 @@ PROGRAM STATSYN_GLOBALSCAT
 
 
                      !DEBUG
-!                     WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2,irtr1
+!                     IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2,irtr1
                                             
       
                     END DO
@@ -842,7 +876,6 @@ PROGRAM STATSYN_GLOBALSCAT
                    CALL INTERFACE_NORMAL
                    
                    
-!       CALL etime(elapsed,tt4)
        CALL cpu_time(tt4)
        !WRITE(6,*) '       Allscat:',tt4-tt3,I
                    
@@ -857,7 +890,6 @@ PROGRAM STATSYN_GLOBALSCAT
                      ! RAY TRACING IN LAYER  
                      ! ============ <<
                      
-!       CALL etime(elapsed,tt5)
        CALL cpu_time(tt5) 
        !WRITE(6,*) '   NoscatInscat:',tt5-tt3,I
                      
@@ -876,7 +908,6 @@ PROGRAM STATSYN_GLOBALSCAT
           ! RAY TRACING IN LAYER  
           ! ============ <<
           
-!       CALL etime(elapsed,tt6)
        CALL cpu_time(tt6)
        !WRITE(6,*) '       Noscat  :',tt6-tt3,I
           
@@ -884,15 +915,12 @@ PROGRAM STATSYN_GLOBALSCAT
         ! SCATTERING LAYER
         ! ============ <<
         
-!       CALL etime(elapsed,tt7)
        CALL cpu_time(tt7)
        !WRITE(6,*) '       ScatLoop:',tt7-tt3,I        
         
         ! ============ >>
         ! RECORD IF PHONON IS AT SURFACE
-        IF (iz == 1) THEN
-!        IF ((iz == 1).AND.(t > 0.)) THEN        !IF RAY HITS SUFACE THEN RECORD, EXCEPT
-                                                ! IF IT'S A DEPARTING PHONON FROM THE SURFACE (IMPACT)
+         IF (iz == 1) THEN
 
           ud = 1                                !RAY NOW MUST TRAVEL down
           
@@ -994,6 +1022,9 @@ PROGRAM STATSYN_GLOBALSCAT
 
         ! RECORD IF PHONON IS AT SURFACE
         ! ============ <<
+        
+        !RECORD LAYER IN WHICH THE PHONON TRAVELLED FOR TRACKING
+        iztrack = iz -1  !Layer in which the phonon travelled
 
         !GO TO NEXT LAYER
         iz = iz + ud  
@@ -1004,10 +1035,7 @@ PROGRAM STATSYN_GLOBALSCAT
        IF (t_last == t) THEN
          dt_track = 0.
          t_last_count = t_last_count + 1
-         IF (t_last_count > 99) THEN
-!           WRITE(77,*) t_last_count,I,NITR         
-!           WRITE(6,FMT = 333) iz,t,x,ud,nint(x_sign),ip,p
-!           WRITE(6,*) '        ',z_act,iz,ang1/pi*180            
+         IF (t_last_count > 99) THEN       
            t = 9999.
            tstuck = tstuck + 1
          END IF
@@ -1017,46 +1045,42 @@ PROGRAM STATSYN_GLOBALSCAT
          t_last = t
        END IF
        
-333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f10.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f8.5)
-       
-       !DEBUG
-!       WRITE(6,*)I,NITR,t,tmax
-!       IF (t.lt.tmax) WRITE(6,*) I,tmax,t
-!       tmax = t
-       
+      
+       ! Check if phonon is stuck on layer (happens for near horizontal ones)
+       ! Calculate actual phonon depth
+       izfac = 0
+       IF (ud == 1) izfac = -1 
+       z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
+       IF (z_act == z_last) THEN
+           z_last_count = z_last_count + 1
+       ELSE
+           z_last_count = 0
+       END IF
+       IF (z_last_count > 10) THEN
+         t = 999999.
+         z_last_count_num = z_last_count_num + 1
+       END IF 
+      
        END DO    !CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
        ! ====================== <<
        ! Close single ray tracing while loop
        ! ====================== <<  
 
-!       CALL etime(elapsed,tt8)
        CALL cpu_time(tt8)
        !WRITE(6,*) '        Surface:',tt8-tt7,I               
               
        IF (mod(float(I),float(ntr)/20.) == 0) THEN !STATUS REPORT
         WRITE(6,FMT = 854) nint(float(I)/float(ntr)*100),kernelnum
-        WRITE(79,FMT = 854) nint(float(I)/float(ntr)*100),kernelnum
        END IF
-
+       
+333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f10.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f8.5)
 854   FORMAT (10x,i3,' % COMPLETE  -- kernel ',i2)
       
-!        maxcount = 0.
-!        DO kk = 1,nx
-!          DO ll = 1,nlay
-!            IF (trackcount(kk,ll) > maxcount) THEN
-!              maxcount = trackcount(kk,ll)
-!            END IF
-!          END DO
-!        END DO
-
-!        trackcount = trackcount / 100.
 
 
-!       CALL etime(elapsed,tt9)
        CALL cpu_time(tt9)
        !WRITE(6,*) '           Rest:',tt9-tt8,I        
        
-!       CALL etime(elapsed,ttime4)      
        CALL cpu_time(ttime4)
       !WRITE(6,*) '---->',I,ttime4-ttime3,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
       
@@ -1067,14 +1091,14 @@ PROGRAM STATSYN_GLOBALSCAT
 !     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !      ======================================================
 
-!      CALL etime(elapsed,totaltime)
       CALL cpu_time(totaltime)
       WRITE(6,FMT = 871) totaltime-ttimestart,I-1,(totaltime-ttimestart)/(I-1)
 871   FORMAT ('Total time = ',f9.2,'s for ',i8,' phonons (',f8.5,'s/p)')  
       WRITE(6,*) 'Total Surface records = ', surfcount
       WRITE(6,*) 'Too far from receiver = ', surCYC1      
       WRITE(6,*) 'Scattered:',  conv_count(1:6)
-      WRITE(6,*) 'Dead stuck:', tstuck    
+      WRITE(6,*) 'Caught on layer:',  z_last_count_num
+      WRITE(6,*) 'Dead stuck:', tstuck  
 
 
     
@@ -1118,7 +1142,37 @@ PROGRAM STATSYN_GLOBALSCAT
       
 !      ======================================================
 !      ----- Output Energy Tracking -----
-      ! ADD OUTPUT ENERGY TRACKING HERE FROM EARLIER VERSION 
+			
+			!! NORMALIZE trackcount for cell size ==========================
+!			DO kk = 1,nlay-1																						   !
+!																																		 !
+!						normfactor = dxi*pi/360*((r_s(kk))**2-(r_s(kk+1))**2)
+!
+!																																		 !
+!					IF (normfactor == 0) cycle																 !													 																													 !	
+!					trackcount(1:nx,kk,1:nttrack) =	 &												 !
+!							trackcount(1:nx,kk,1:nttrack) / normfactor						 !
+!			END DO																												 !	
+			!! =============================================================
+			
+!			
+!  		OPEN(17,FILE=tfile,STATUS='UNKNOWN')
+!
+!			DO kk = 1,nx-1
+!					DO mm = 1,nttrack
+!  						DO ll = 1,nlay
+!							
+!						IF (ll > 1) THEN
+!							IF (z_s(ll) - z_s(ll-1) == 0) cycle
+!						END IF
+!						
+!						  WRITE(17,FMT=879) (x1+REAL(kk-1)*dxi),z_s(ll),mm*nttrack_dt,trackcount(kk,ll,mm)/100
+!						
+!					END DO
+!				END DO
+!			END DO
+!					
+!			CLOSE(17)
 !      ^^^^^ Output Energy Tracking ^^^^^
 
 
@@ -1127,13 +1181,13 @@ PROGRAM STATSYN_GLOBALSCAT
 !      ======================================================
 !      ----- Formats -----
 878   FORMAT(2(f10.2,1X),f15.5) 
-879   FORMAT(2(f10.2,1X),i6,1x,f15.5)      
+879   FORMAT(2(f10.2,1X),i6,1x,f20.5)      
 888   FORMAT(F10.2,1X,2001(F10.6,1X))
 !      ^^^^^ Formats ^^^^^
 
 
       STOP
-      END PROGRAM STATSYN_GLOBALSCAT
+      END PROGRAM STATSYN_INTEL
 !     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 !     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 !     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1373,7 +1427,7 @@ SUBROUTINE SURFACE_PSV_BEN
 ! Calculate P-SV reflection coefficients at free surface based on BEN-MENAHEM (p.480)
 
       USE pho_vars
-      USE IFPORT
+      !USE IFPORT
       IMPLICIT NONE
       
       COMPLEX(8)    velP,velS,angP,angS,D1
@@ -1528,7 +1582,7 @@ END SUBROUTINE RTCOEF_SH
 SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
                          rrp,rrs,rtp,rts,ip,ud,amp,cons_EorA)
                          
-      USE IFPORT
+      !USE IFPORT
                          
       IMPLICIT     NONE
       REAL(8)      vp1,vs1,den1,vp2,vs2,den2     !VELOCITY & DENSITY
@@ -1660,7 +1714,7 @@ END SUBROUTINE RTCOEF_PSV
 SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
 
 ! Going from Mantle to Core, solid to liquid
-      USE IFPORT
+      !USE IFPORT
 
       IMPLICIT NONE
 
@@ -1783,7 +1837,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
 
 ! Going from Core to Mantle, liquid to solid
 
-      USE IFPORT
+      !USE IFPORT
 
       IMPLICIT NONE
 
@@ -2511,7 +2565,7 @@ SUBROUTINE RAYTRACE
              END IF
         
           h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
-          imth = 2                              !INTERPOLATION METHOD
+          imth = 3                              !INTERPOLATION METHOD
 
           CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
           dtstr1 = dt1/Q(iz-1,iwave)                    !t* = TIME/QUALITY FACTOR
@@ -2581,7 +2635,7 @@ SUBROUTINE RAYTRACE_SCAT
             ubot = 0.
           END IF
          
-          imth = 2                              !INTERPOLATION METHOD
+          imth = 3                              !INTERPOLATION METHOD
 
           CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
           
@@ -2608,7 +2662,7 @@ SUBROUTINE GET_DS_SCAT
       !The output dscat has been
       
       USE pho_vars      
-      USE IFPORT
+      !USE IFPORT
       
       IMPLICIT NONE
       REAL(8)     rt,z_ft,fac,bg_sl,z_nf
@@ -2685,7 +2739,7 @@ END SUBROUTINE GET_DS_SL
 
 SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh,cons_EorA)
 !      USE pho_vars
-      USE IFPORT
+      !USE IFPORT
       IMPLICIT NONE
       
       INTEGER, PARAMETER :: nlay0=1000
