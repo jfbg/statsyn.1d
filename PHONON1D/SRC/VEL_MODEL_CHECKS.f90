@@ -31,7 +31,6 @@
       
       check_core = 0  !New core layer density large enough that do not need to add layer
                       !But need to redefine corelayer, at end of program
-      corelayer = 
       if (scat_prob <= 0.) check_scat = 0
       
       
