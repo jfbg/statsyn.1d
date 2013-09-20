@@ -2740,7 +2740,7 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       USE IFPORT
       IMPLICIT NONE
       
-      INTEGER, PARAMETER :: nlay0=1000
+      INTEGER, PARAMETER :: nlay0=2000
 
       REAL(8) :: rt(10)
       REAL(8) :: art(10),ref_tran_sum
