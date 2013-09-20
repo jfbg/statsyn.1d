@@ -1,5 +1,43 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_TRACK_VSMOON_001.sh
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_012a.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_001.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_001b.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_002a.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_002b.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_003a.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_003b.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_003c.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_004a.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_004b.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_004c.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_005a.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_006a.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_007a.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_008a.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_009a.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_010a.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_010b.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_011a.csh.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_013a.csh.sh
 sleep 4
