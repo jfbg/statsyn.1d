@@ -30,6 +30,8 @@
       END DO
       
       check_core = 0  !New core layer density large enough that do not need to add layer
+                      !But need to redefine corelayer, at end of program
+      corelayer = 
       if (scat_prob <= 0.) check_scat = 0
       
       
@@ -273,11 +275,12 @@
       END IF
       
       rhs = rh  !Will transform rhs in flattening subroutine
+      corelayer = erad - z_s(nlay-1)
 
 
       
   		WRITE(6,*) '     ** Planet''s radius=',erad
-  		     	
+  		WRITE(6,*) '     ** Corelayer value=',corelayer  		     	
   		WRITE(6,*) '     ** Number of layers after model checks:',nlay
   		
 

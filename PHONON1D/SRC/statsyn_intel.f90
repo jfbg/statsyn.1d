@@ -613,7 +613,7 @@ PROGRAM STATSYN_INTEL
         ! sample take-off angle or ray parameters
         angst = pi/2.                        
         r0 = rand()
-        maxp = sin(angst)/vf(iz1,iwave)
+        maxp = sin(angst)/vf(iz_p,iwave)
 
   
         IF (samplingtype.eq.2) THEN               ! Sample slownesses
@@ -753,10 +753,8 @@ PROGRAM STATSYN_INTEL
                 IF ((z_act <= scat_depth).AND.(SL_prob > 0.)) scat_prob = SL_prob    
                    !Scattering layer probability
                 
-                !IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
-                   !Background probability IF leaving scat layer from at base
                 
-                IF (iz >= nlay-2) scat_prob = 0. !no scattering near center of Moon
+!                IF (iz >= nlay-2) scat_prob = 0. !no scattering near center of Moon
                 
                 IF (vf(iz_scat,2) == 0.) scat_prob = 0. !No scattering in liquid layers
             
@@ -2413,7 +2411,7 @@ SUBROUTINE INTERFACE_NORMAL
       
       ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE 
           ud = -1   ! GOING UP NOW
-          dt1 = (2*corelayer)/vf(iz,iwave)
+          dt1 = (2*corelayer)/vf(nlay,iwave)
           x = x + 180*deg2km
           t = t + dt1
           totald = totald + 2*corelayer
