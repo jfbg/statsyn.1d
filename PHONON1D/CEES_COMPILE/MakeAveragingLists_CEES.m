@@ -15,7 +15,7 @@ fclose(fid);
 
 modellist = {...
 'CSMOON_001b'
-'CSMOON_003b'
+% 'CSMOON_003b'
 };
 
 depths = [.01 20 100 500 750 1000]; % All potential depths
