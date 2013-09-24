@@ -17,7 +17,7 @@ MODULE PHO_VARS      ! Make variables global
         REAL(8)       ::  dt_track
         REAL(8)           d2r,re,rm,circum
         INTEGER           dotrack,ixt,itt,ixt_last
-        INTEGER           xind(10),G,xind2
+        INTEGER           xtracind(100),G,xtracind2
         
         INTEGER       EorM                  !1=EARTH, 2=MOON
         

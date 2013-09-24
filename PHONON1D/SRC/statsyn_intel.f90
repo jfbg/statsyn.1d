@@ -62,8 +62,7 @@ PROGRAM STATSYN_INTEL
         INTEGER (kind=8) ::  surfcount
         INTEGER (kind=8) ::  surCYC1,exTIME,exNLAY
         INTEGER          ::  logperc
-        INTEGER (kind=8) ::  scat_time
-        REAL(8)   tracktime
+        REAL(8)              z1init
 
          
         REAL(8)   Cc2, Ccwil, Ccwir, Cc1
@@ -259,6 +258,9 @@ PROGRAM STATSYN_INTEL
       re = 6370.
       rm = 1737.
       
+      ! SET TRACKING (1) OR NO TRACKING (0)
+      dotrack = 0
+      
       d2r = pi/180.
       
       nttrack = 25                !Set number of time intervals to track
@@ -269,6 +271,8 @@ PROGRAM STATSYN_INTEL
       dreceiver = 0.05  !radius around receiver in which the phonons will be recorded (deg)
       tstuck = 0
       z_last_count_num = 0
+      
+      imth = 2   !Interpolation method for LAYERTRACE
      
       !Initialize random seed for sequence of random numbers used to multiply to clock-based seeds.    
       CALL INIT_RANDOM_SEED()
@@ -305,6 +309,10 @@ PROGRAM STATSYN_INTEL
        CALL FLATTEN(z_s(i),vs(i,1),rhs(i),z(i),vf(i,1),rh(i),erad,pfac)!FLATTEN P-WAVE VELOCITIES
        CALL FLATTEN(z_s(i),vs(i,2),rhs(i),z(i),vf(i,2),rh(i),erad,pfac)!FLATTEN S-WAVE VELOCITIES
       END DO
+      
+      
+      !DEBUG
+      z1init = z(1)
 
 
 
@@ -351,19 +359,25 @@ PROGRAM STATSYN_INTEL
 !     ======================================================
 !      ----- INITIALIZE TRACKING PARAMETERS -----    
 !      
-!      WRITE(6,*) '!!!!!!!!!!!!!!!!!!!!!'  !DEBUG
-!      WRITE(6,*) ' ',nx-1,nlay,nttrack      !DEBUG
-!
-!      !Allocate memory for tracking number of phonons in each area
-!     ALLOCATE(trackcount(nx,nlay,nttrack))              
-!      
-!      DO kk = 1,nx-1
-!        DO ll = 1,nlay
-!          DO mm = 1,nttrack
-!            trackcount(kk,ll,mm) = 0.
-!          END DO
-!        END DO
-!      END DO  
+      IF (dotrack.eq.1) THEN
+
+      WRITE(6,*) '!!!!!!!!!!!!!!!!!!!!!'  !DEBUG
+      WRITE(6,*) ' ',nx-1,nlay,nttrack      !DEBUG
+
+      !Allocate memory for tracking number of phonons in each area
+     ALLOCATE(trackcount(nx,nlay,nttrack))              
+      
+      DO kk = 1,nx-1
+        DO ll = 1,nlay
+          DO mm = 1,nttrack
+            trackcount(kk,ll,mm) = 0.
+          END DO
+        END DO
+      END DO  
+      
+      ELSE
+        WRITE(6,*) 'NO TRACKING!'
+      END IF
 !      ^^^^^ INITIALIZE TRACKING PARAMETERS ^^^^^
 
 
@@ -512,17 +526,14 @@ PROGRAM STATSYN_INTEL
 
       !Debug
       surfcount = 0.
-!      CALL etime(elapsed,ttimestart)
       CALL cpu_time(ttimestart)
       
-      
+  
       
       DO I = 1, ntr   !FOR EACH TRACE -- DOLOOP_001
       
     
-      
-!      CALL etime(elapsed,tt1)
-      CALL cpu_time(tt1)
+!      CALL cpu_time(tt1)
       
       
     ! ============ >>
@@ -577,7 +588,7 @@ PROGRAM STATSYN_INTEL
         x_sign = 1.                            !DISTANCE DIRECTION
         az   = 0.
         ncaust = 1                             !# OF CAUSTICS STARS AT 0. (which is index 1)
-        
+        z_act = 0.
         
         
         !Set initial depth index (iz)
@@ -588,7 +599,7 @@ PROGRAM STATSYN_INTEL
         
         IF ((r0 < 0.5).OR.(iz == 1)) THEN       !IF QUAKE STARTS AT SURF GO DOWN
          ud = 1  
-         iz = iz + 1 !Need this to make sure that source always stars at the same depth.
+         iz = iz + 1 !Need this to make sure that source always starts at the same depth.
          iz_p = iz1
         ELSE
          ud = -1
@@ -635,24 +646,17 @@ PROGRAM STATSYN_INTEL
           ang1 = angst*r0         !Randomly select angle
           p    = abs(sin(ang1))/vf(iz_p,iwave)
         END IF
+        
         ! ============ <<
-        
-        ! ============ >>
-        ! Set scatterer scale-length
-        scat_time = 0
-        ! ============ <<       
-        
-               !DEBUG
-       tracktime = 0.
 
+!       CALL cpu_time(tt2)
+!       WRITE(6,*) '       Params:',tt2-tt1,I,t,z_act     
+        
        ! ====================== >>
        ! Start single ray tracing while loop
        ! ====================== >>   
        DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
        
-       
-       CALL cpu_time(tt2)
-       !WRITE(6,*) '       Params:',tt2-tt1,I
       
        NITR = NITR + 1
        scat_FLAG = 0
@@ -670,68 +674,67 @@ PROGRAM STATSYN_INTEL
       
         ! ============ >>
         ! Track phonon's position
-!			  IF ((I < 10000).AND.(dt_track > 0.).AND.(z_last_count.lt.2)) THEN
-!
-!          !Find index for distance for current x
-!          x_index = abs(x)
-!          DO WHILE (x_index >= circum)
-!            x_index = x_index - circum
-!          END DO
-!          IF (x_index > circum/2.) x_index = x_index - 2.*(x_index-circum/2.)
-!          ixt = nint((x_index/deg2km-x1)/dxi +.5)       !EVENT TO SURFACE HIT DISTANCE
-!
-!    
-!
-!          itt = nint((t-t1)	/REAL(nttrack_dt)+.5)     !TIME
-!
-!          IF (Watt.eq.0) THEN                         !ATTENUATION
-!            ims = 2
-!            frac = 0.
-!          ELSE
-!            ims = int(s/datt)+1
-!            IF (ims > ns0-1) ims = ns0-1
-!            IF (ims <=   1) ims =   2
-!            s1 = float(ims-1)*datt
-!            s2 = float(ims  )*datt
-!            frac = (s-s1)/(s2-s1)
-!          END IF
-!
-!          attn = 0.
-!          DO JJ = 1,nts
-!            attn = attn + ((1.-frac)*mts(ims-1,1,JJ) &
-!                            + (frac)*mts(ims,1,JJ) )**2 !Power
-!          END DO
-!
-!          IF (itt > nttrack) itt = nttrack
-!
-!          xind(1:10) = 0
-!
-!					xind2 = abs(ixt-ixt_last)
-!					IF (xind2 > 1) THEN
-!					    IF (ixt_last < ixt) THEN
-!					       DO G = 1,xind2
-!					         xind(G) = ixt_last + G
-!					         trackcount(xind(G),iztrack,itt) = trackcount(xind(G),iztrack,itt) + attn
-!					       END DO
-!					    END IF
-!					    IF (ixt_last > ixt) THEN
-!					       DO G = 1,xind2
-!					         xind(G) = ixt_last - G
-!					         trackcount(xind(G),iztrack,itt) = trackcount(xind(G),iztrack,itt) + attn
-!					       END DO
-!					    END IF
-!					ELSE
-!					  trackcount(ixt,iztrack,itt) = trackcount(ixt,iztrack,itt) + attn
-!					END IF
-!					
-!
-!         tracktime = tracktime + dt_track
-!
-!
-!         ixt_last = ixt
-!
-!        END IF
+        IF (dotrack.eq.1) THEN
+			  IF ((I < 10000).AND.(dt_track > 0.).AND.(z_last_count.lt.2)) THEN
 
+          !Find index for distance for current x
+          x_index = abs(x)
+          DO WHILE (x_index >= circum)
+            x_index = x_index - circum
+          END DO
+          IF (x_index > circum/2.) x_index = x_index - 2.*(x_index-circum/2.)
+          ixt = nint((x_index/deg2km-x1)/dxi +.5)       !EVENT TO SURFACE HIT DISTANCE
+
+      
+          itt = nint((t-t1)	/REAL(nttrack_dt)+.5)     !TIME
+
+          IF (Watt.eq.0) THEN                         !ATTENUATION
+            ims = 2
+            frac = 0.
+          ELSE
+            ims = int(s/datt)+1
+            IF (ims > ns0-1) ims = ns0-1
+            IF (ims <=   1) ims =   2
+            s1 = float(ims-1)*datt
+            s2 = float(ims  )*datt
+            frac = (s-s1)/(s2-s1)
+          END IF
+
+          attn = 0.
+          DO JJ = 1,nts
+            attn = attn + ((1.-frac)*mts(ims-1,1,JJ) &
+                            + (frac)*mts(ims,1,JJ) )**2 !Power
+          END DO
+
+          IF (itt > nttrack) itt = nttrack
+
+          xtracind(1:100) = 0
+
+					xtracind2 = abs(ixt-ixt_last)
+					IF (xtracind2.gt.100) xtracind2 = 100
+					
+					IF (xtracind2 > 1) THEN
+					    IF (ixt_last < ixt) THEN
+					       DO G = 1,xtracind2
+					         xtracind(G) = ixt_last + G
+					         trackcount(xtracind(G),iztrack,itt) = trackcount(xtracind(G),iztrack,itt) + attn
+					       END DO
+					    END IF
+					    IF (ixt_last > ixt) THEN
+					       DO G = 1,xtracind2
+					         xtracind(G) = ixt_last - G
+					         trackcount(xtracind(G),iztrack,itt) = trackcount(xtracind(G),iztrack,itt) + attn
+					       END DO
+					    END IF
+					ELSE
+					  trackcount(ixt,iztrack,itt) = trackcount(ixt,iztrack,itt) + attn
+					END IF
+					
+
+         ixt_last = ixt
+         
+        END IF
+        END IF
 
         ! Track phonon's position
         ! ============ <<
@@ -772,9 +775,9 @@ PROGRAM STATSYN_INTEL
 
             IF ((z_act == scat_depth).AND.(ud == 1)) scat_prob = BG_prob
             
-       CALL cpu_time(tt3)
-       !WRITE(6,*) '       Prescat :',tt3-tt2,I
-!       WRITE(76,*) tt3-tt2
+!       CALL cpu_time(tt3)
+!       WRITE(6,*) '       Prescat :',tt3-tt2,I
+
 
             IF ((scat_prob > 0.).AND.(iz > 1)) THEN
     
@@ -798,7 +801,6 @@ PROGRAM STATSYN_INTEL
                    END IF
 
                  
-                 imth = 3  !Interpolation method in Layer trace (2 is linear)
                  CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
                  ds_SL = (dh**2+dx1**2)**0.5
                                 
@@ -826,7 +828,7 @@ PROGRAM STATSYN_INTEL
                               CALL RAYTRACE_SCAT
                               
       !                        IF (irtr1 /= 0)  z_act = z_act + dh*ud !Calculate new depth FLAT
-                              z_act = z_act + dh*ud !Calculate new depth FLAT
+                              IF (irtr1 == 1) z_act = z_act + dh*ud !Calculate new depth FLAT
                               
                               !Is phonon scattered at scatterer or does it go through?
                               r0 = rand()
@@ -840,12 +842,10 @@ PROGRAM STATSYN_INTEL
                               !New ds_scat
                               CALL GET_DS_SCAT
                               
-!                              WRITE(77,*) ds_scat
-                              
                               
                         ELSE
                         
-                              ds_scat = 999999
+                              ds_scat = 999999.
                               
                         END IF                        
                       
@@ -863,7 +863,6 @@ PROGRAM STATSYN_INTEL
 !                   dh = ds_SL*abs(cos(asin(p*vf(iz_scat,iwave))))   !FLAT
                    IF (ud == 1) dh = abs(z(iz_scat+1) - z_act)
                    IF (ud == -1) dh = abs(z_act - z(iz_scat))
-                   !WRITE(77,*) dh,z_act,z(iz_scat),z(iz_scat+1),ud,z_act + dh*ud
                    CALL RAYTRACE_SCAT
                    
                    
@@ -874,8 +873,8 @@ PROGRAM STATSYN_INTEL
                    CALL INTERFACE_NORMAL
                    
                    
-       CALL cpu_time(tt4)
-       !WRITE(6,*) '       Allscat:',tt4-tt3,I
+!       CALL cpu_time(tt4)
+!       WRITE(6,*) '       Allscat:',tt4-tt3,I
                    
          
 
@@ -888,8 +887,8 @@ PROGRAM STATSYN_INTEL
                      ! RAY TRACING IN LAYER  
                      ! ============ <<
                      
-       CALL cpu_time(tt5) 
-       !WRITE(6,*) '   NoscatInscat:',tt5-tt3,I
+!       CALL cpu_time(tt5) 
+!       WRITE(6,*) '   NoscatInscat:',tt5-tt3,I
                      
                END IF
                
@@ -906,15 +905,15 @@ PROGRAM STATSYN_INTEL
           ! RAY TRACING IN LAYER  
           ! ============ <<
           
-       CALL cpu_time(tt6)
-       !WRITE(6,*) '       Noscat  :',tt6-tt3,I
+!       CALL cpu_time(tt6)
+!       WRITE(6,*) '       Noscat  :',tt6-tt3,I
           
         END IF !SCATTERING LAYER IF              
         ! SCATTERING LAYER
         ! ============ <<
         
-       CALL cpu_time(tt7)
-       !WRITE(6,*) '       ScatLoop:',tt7-tt3,I        
+!       CALL cpu_time(tt7)
+!       WRITE(6,*) '       ScatLoop:',tt7-tt3,I        
         
         ! ============ >>
         ! RECORD IF PHONON IS AT SURFACE
@@ -942,9 +941,7 @@ PROGRAM STATSYN_INTEL
                     ! right on the receiver. Max time is when ang1 is 90.          
                     dtsurf = (xo-x_index/deg2km)*deg2km*p 
 
-!            !DEBUG
-!            IF ((xo.eq.10).AND.(t.lt.500)) WRITE(6,*) p,t+dtsurf
-          
+         
                     IT = nint((t +dtsurf      -t1)/dti) + 1 
                     
                     IF (Watt.eq.0) THEN  
@@ -1029,12 +1026,12 @@ PROGRAM STATSYN_INTEL
         
 
         
-       !Check if time increased since last loop  -- Some phonon gets stuck and I'm not sure why yet...
+       !Check if time increased since last loop  
        IF (t_last == t) THEN
          dt_track = 0.
          t_last_count = t_last_count + 1
          IF (t_last_count > 99) THEN       
-           t = 9999.
+           t = 888888.
            tstuck = tstuck + 1
          END IF
        ELSE
@@ -1049,23 +1046,30 @@ PROGRAM STATSYN_INTEL
        izfac = 0
        IF (ud == 1) izfac = -1 
        z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
+       
        IF (z_act == z_last) THEN
            z_last_count = z_last_count + 1
        ELSE
            z_last_count = 0
        END IF
-       IF (z_last_count > 10) THEN
+       IF (z_last_count > 100) THEN
          t = 999999.
          z_last_count_num = z_last_count_num + 1
        END IF 
-      
+       
+
        END DO    !CLOSE SINGLE RAY TRACING LOOP - DOLOOP_002
+       
+!       if ((z_act < 1e-100).AND.(z_act > 0.)) return
        ! ====================== <<
        ! Close single ray tracing while loop
        ! ====================== <<  
 
-       CALL cpu_time(tt8)
-       !WRITE(6,*) '        Surface:',tt8-tt7,I               
+!       CALL cpu_time(tt8)
+!       WRITE(6,*) '        Surface:',tt8-tt7,I  
+       
+!       CALL cpu_time(tt8)
+!       WRITE(6,*) I,p,tt8-tt2             
               
        IF (mod(float(I),float(ntr)/20.) == 0) THEN !STATUS REPORT
         WRITE(6,FMT = 854) nint(float(I)/float(ntr)*100),kernelnum
@@ -1076,10 +1080,10 @@ PROGRAM STATSYN_INTEL
       
 
 
-       CALL cpu_time(tt9)
-       !WRITE(6,*) '           Rest:',tt9-tt8,I        
+!       CALL cpu_time(tt9)
+!       WRITE(6,*) '           ==> Rest:',tt9-tt2,I,NITR,t,z_act,iz,ud,irtr1  
        
-       CALL cpu_time(ttime4)
+!       CALL cpu_time(ttime4)
       !WRITE(6,*) '---->',I,ttime4-ttime3,'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
       
 
@@ -1097,8 +1101,8 @@ PROGRAM STATSYN_INTEL
       WRITE(6,*) 'Scattered:',  conv_count(1:6)
       WRITE(6,*) 'Caught on layer:',  z_last_count_num
       WRITE(6,*) 'Dead stuck:', tstuck  
-
-
+      
+      
     
 !      ======================================================
 !      ----- Output Synthetics -----  
@@ -1141,36 +1145,27 @@ PROGRAM STATSYN_INTEL
 !      ======================================================
 !      ----- Output Energy Tracking -----
 			
-			!! NORMALIZE trackcount for cell size ==========================
-!			DO kk = 1,nlay-1																						   !
-!																																		 !
-!						normfactor = dxi*pi/360*((r_s(kk))**2-(r_s(kk+1))**2)
-!
-!																																		 !
-!					IF (normfactor == 0) cycle																 !													 																													 !	
-!					trackcount(1:nx,kk,1:nttrack) =	 &												 !
-!							trackcount(1:nx,kk,1:nttrack) / normfactor						 !
-!			END DO																												 !	
-			!! =============================================================
 			
-!			
-!  		OPEN(17,FILE=tfile,STATUS='UNKNOWN')
-!
-!			DO kk = 1,nx-1
-!					DO mm = 1,nttrack
-!  						DO ll = 1,nlay
-!							
-!						IF (ll > 1) THEN
-!							IF (z_s(ll) - z_s(ll-1) == 0) cycle
-!						END IF
-!						
-!						  WRITE(17,FMT=879) (x1+REAL(kk-1)*dxi),z_s(ll),mm*nttrack_dt,trackcount(kk,ll,mm)/100
-!						
-!					END DO
-!				END DO
-!			END DO
-!					
-!			CLOSE(17)
+			IF (dotrack.eq.1) THEN
+  		OPEN(17,FILE=tfile,STATUS='UNKNOWN')
+
+			DO kk = 1,nx-1
+					DO mm = 1,nttrack
+  						DO ll = 1,nlay
+							
+						IF (ll > 1) THEN
+							IF (z_s(ll) - z_s(ll-1) == 0) cycle
+						END IF
+						
+						  WRITE(17,FMT=879) (x1+REAL(kk-1)*dxi),z_s(ll),mm*nttrack_dt,trackcount(kk,ll,mm)/100
+						
+					END DO
+				END DO
+			END DO
+					
+			CLOSE(17)
+			WRITE(6,*) 'Tracking outputs done'
+			END IF
 !      ^^^^^ Output Energy Tracking ^^^^^
 
 
@@ -1493,8 +1488,7 @@ SUBROUTINE SURFACE_PSV_BEN
     
       iwave = ip
       
-      !DE
-      
+   
 END SUBROUTINE SURFACE_PSV_BEN     
 
 SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp,cons_EorA)
@@ -1766,9 +1760,6 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
         nrS = rS/tot
         ntP = tP/tot
         
-!        !DEBUG
-!        WRITE(6,*) '===========>>>>',I,realp,nrP,nrS,ntP
-
 
         r0 = rand()
         
@@ -1917,6 +1908,7 @@ SUBROUTINE FLATTEN(z_s,vs,rhs,z_f,vf_f,rh_f,erad,pfac)
       r=erad-z_s
       
       z_f=-erad*dlog(r/erad)
+      z_f = abs(z_f)
       
       vf_f=vs*(erad/r)
       rh_f = ((erad/r)**(pfac-2))*rhs
@@ -2563,7 +2555,6 @@ SUBROUTINE RAYTRACE
              END IF
         
           h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
-          imth = 3                              !INTERPOLATION METHOD
 
           CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
           dtstr1 = dt1/Q(iz-1,iwave)                    !t* = TIME/QUALITY FACTOR
@@ -2633,8 +2624,6 @@ SUBROUTINE RAYTRACE_SCAT
             ubot = 0.
           END IF
          
-          imth = 3                              !INTERPOLATION METHOD
-
           CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
           
           dtstr1 = dt1/Q(iz_scat,iwave)                    !t* = TIME/QUALITY FACTOR
@@ -2647,6 +2636,13 @@ SUBROUTINE RAYTRACE_SCAT
          t = t + dt1                    !TRAVEL TIME
          x = x + dx1*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
+        END IF
+        
+        !FIX NEXT IF FOR DIFFRACTED WAVES: 
+        IF (irtr1 == 2) THEN             !RAY TURNS IN LAYER FOLLOW 1 LEN
+!        WRITE(6,*) 'HAHKJLASKLJHASKLHJGASFBJABGASFBKYASBGKLAJSGBLKASGFBLKUASHF ======<<<<<<'
+        ud = -ud
+        ncaust = ncaust + 1                   !# OF CAUSTICS
         END IF
       
       RETURN  
@@ -2693,7 +2689,6 @@ SUBROUTINE GET_DS_SCAT
          fac = z_act/z_nf         
       END IF
       
-!        write(79,*) ds_scat
 
         ds_scat = fac*ds_scat_nf  !Flatten ds_scat_nf (approximation based on mid depth)
         

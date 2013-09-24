@@ -646,7 +646,8 @@ PROGRAM STATSYN_TRACK_INTEL
 !          IF (I.eq.4) ang1 = angst-8.95/360.*2.*pi
 !          IF (I.eq.5) ang1 = angst-8.5/360.*2.*pi
 !          IF (I.eq.1) ang1 = angst-9./360.*2.*pi
-          p    = abs(sin(ang1))/vf(iz_p,iwave)
+!          p    = abs(sin(ang1))/vf(iz_p,iwave)
+          p    = abs(sin(ang1))/vf(iz1,iwave)
 !          p = maxp
         END IF
         ! ============ <<
@@ -1086,12 +1087,14 @@ PROGRAM STATSYN_TRACK_INTEL
        izfac = 0
        IF (ud == 1) izfac = -1 
        z_act = z(iz+izfac)    !Depth of phonon before ray tracing  FLAT
+       
        IF (z_act == z_last) THEN
            z_last_count = z_last_count + 1
        ELSE
            z_last_count = 0
        END IF
-       IF (z_last_count > 10) THEN
+       IF (z_last_count > 100) THEN
+       WRITE(6,*) 't = ',t,z_act
          t = 999999.
          z_last_count_num = z_last_count_num + 1
        END IF 
@@ -2791,7 +2794,7 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       !USE IFPORT
       IMPLICIT NONE
       
-      INTEGER, PARAMETER :: nlay0=1000
+      INTEGER, PARAMETER :: nlay0=2000
 
       REAL(8) :: rt(10)
       REAL(8) :: art(10),ref_tran_sum

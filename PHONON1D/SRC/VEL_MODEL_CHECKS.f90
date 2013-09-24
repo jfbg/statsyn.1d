@@ -19,20 +19,20 @@
        READ(1,*,IOSTAT=status) z_st(I),r_st(I),vst(I,1),vst(I,2),rht(I),Qt(I)
        IF (z_st(I) == scat_depth) THEN
           check_scat = 0		!Velocity layer depth is same as scattering layer.   
+          WRITE(6,*) '     ** Already a layer at the base of the scattering layer'
        END IF
-       IF (r_st(I) == corelayer) THEN
-          check_core = 0		!Velocity layer depth is same as corelayer.   
-       END IF
-!       IF (z_st(I) == qdep) THEN
-!          check_source = 0		!Velocity layer depth is same as source depth.   
+!       IF (r_st(I) == corelayer) THEN
+!          check_core = 0		!Velocity layer depth is same as corelayer.   
 !       END IF
+       IF (z_st(I) == qdep) THEN
+          check_source = 0		!Velocity layer depth is same as source depth.   
+       END IF
        IF (status /= 0) EXIT
       END DO
       
       check_core = 0  !New core layer density large enough that do not need to add layer
                       !But need to redefine corelayer, at end of program
-      if (scat_prob <= 0.) check_scat = 0
-      
+      if (SL_prob <= 0.) check_scat = 0
       
       I = I-1 ! Number of layers in input model.
       
@@ -45,7 +45,7 @@
       CLOSE (1)
       
       WRITE(6,*) '   VELOCITY MODELS CHECKS:'
-      WRITE(6,*) 'For model:', ifile
+      WRITE(6,*) '     For model:', ifile
       WRITE(6,*) '     ** Total pre-checks layers: ',I
       
       iz1 = 1
@@ -143,8 +143,8 @@
 			IF (qdep - z_s(iz2) == 0)  check_source = 0
 			IF (qdep <= 0.02) check_source = 0 !impact
 			
-			qdepdiff = qdep - 1.
-			
+			qdepdiff = qdep 
+						
 			! Adding a layer where the source is located
 			IF (check_source == 1) THEN
 				z_st = z_s
@@ -169,7 +169,7 @@
 					END IF
 					
 					IF (K == iz2 +1) THEN
-					 WRITE(6,*) '     ** Adding velocity layer at source depth'
+					 WRITE(6,*) '     ** Adding velocity layer at source depth:', qdep
 							z_s(K) = qdepdiff
 							r_s(K) = erad-qdepdiff
 							vs(K,1) = (vst(K,1)-vst(K-1,1))/(z_st(K) - z_st(K-1)) * (qdepdiff - z_st(K-1)) + vst(K-1,1)
