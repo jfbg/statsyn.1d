@@ -6,9 +6,9 @@
 folder = 'AVERAGED_OUTPUTS/';
 
 list = {...
-'CSMOON_001b.0100.40.lpr'
-'CSMOON_001b.0100.40.lpt'
-'CSMOON_001b.0100.40.lpz'
+'CSMOON_012a.0000.40.lpr'
+'CSMOON_012a.0000.40.lpt'
+'CSMOON_012a.0000.40.lpz'
 };
 
 
