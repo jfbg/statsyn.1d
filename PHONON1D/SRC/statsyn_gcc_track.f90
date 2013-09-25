@@ -669,7 +669,7 @@ PROGRAM STATSYN_INTEL
        z_last = z_act
        
        !DEBUG
-       IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1,irtr1
+!       IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1,irtr1
       
       
         ! ============ >>
@@ -852,7 +852,7 @@ PROGRAM STATSYN_INTEL
 
 
                      !DEBUG
-                     IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2,irtr1
+!                     IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2,irtr1
                                             
       
                     END DO
