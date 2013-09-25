@@ -48,7 +48,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 cd SRC
-make statsyn_gcc.x
+make statsyn_gcc_earth.x
 cd ..
 
 
@@ -112,7 +112,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsyn_gcc << EOF"                         >  $file_csh
+echo "./bin/statsyn_gcc_earth << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
 echo "$t_start $t_max $dt \!LIMIT THE TIME WINDOW (SECONDS) " >> $file_csh
