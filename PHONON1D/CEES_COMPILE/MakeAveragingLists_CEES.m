@@ -14,8 +14,8 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-'CSMOON_002b'
-% 'CSMOON_003b'
+'CSMOON_001b'
+'CSMOON_003c'
 };
 
 % depths = .01;
