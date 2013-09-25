@@ -60,8 +60,8 @@ while ($l < $n_freq)
 @ l = $l + 1
 
 if ($l == 1) then
- set dt = "0.025"
- set period = "40"
+ set dt = "1.000"
+ set period = "01"
 else
  set dt = "0.150"
  set period = "07"
