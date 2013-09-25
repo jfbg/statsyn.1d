@@ -966,7 +966,7 @@ PROGRAM STATSYN_INTEL
                     ! Calculate angle of incidence. 
                     ang1 = asin(p*vf(1,iwave))
 !          
-!                    IF ( (IT > 1-nts).and.(IT <= nt0+nts) ) THEN
+                    IF ( (IT > 1-nts).and.(IT <= nt0+nts) ) THEN
 !                      IF ( (ip == 1) ) THEN 
 !                        c_mult(1) = cos(ang1)           * ud     !! Vertical Amp from P wave
 !                        c_mult(2) = sin(ang1) * sin(az) * x_sign !! Tangential Amp from P wave
