@@ -1,43 +1,5 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_012a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_001.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_001b.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_002a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_002b.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_003a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_003b.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_003c.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_004a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_004b.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_004c.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_005a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_006a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_007a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_008a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_009a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_010a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_010b.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_011a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_013a.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTHPREM_SPIKE_100km_dt05_CEES_C.sh
 sleep 4
