@@ -15,7 +15,7 @@ fclose(fid);
 
 modellist = {...
 'CSMOON_001b'
-'CSMOON_003c'
+% 'CSMOON_003c'
 };
 
 % depths = .01;
