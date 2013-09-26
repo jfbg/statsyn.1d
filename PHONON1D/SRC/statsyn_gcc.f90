@@ -520,9 +520,9 @@ PROGRAM STATSYN_INTEL
 !     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       !Debug vv
-      OPEN(77,FILE='Debug_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
-      OPEN(78,FILE='Track_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
-      OPEN(76,FILE='Track_p.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+!      OPEN(77,FILE='Debug_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+!      OPEN(78,FILE='Track_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+!      OPEN(76,FILE='Track_p.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
 
       !Debug
       surfcount = 0.
@@ -669,7 +669,7 @@ PROGRAM STATSYN_INTEL
        z_last = z_act
        
        !DEBUG
-       IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1,irtr1
+!       IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1,irtr1
       
       
         ! ============ >>
@@ -852,7 +852,7 @@ PROGRAM STATSYN_INTEL
 
 
                      !DEBUG
-                     IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2,irtr1
+!                     IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2,irtr1
                                             
       
                     END DO
@@ -1134,10 +1134,10 @@ PROGRAM STATSYN_INTEL
 !      ^^^^^ Output Synthetics ^^^^^
       
       
-       CLOSE(77)
-       CLOSE(78)
+!       CLOSE(77)
+!       CLOSE(78)
        CLOSE(79)
-       CLOSE(76)
+!       CLOSE(76)
       !Debug ^^
       
       
