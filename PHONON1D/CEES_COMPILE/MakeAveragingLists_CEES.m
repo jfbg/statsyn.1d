@@ -14,15 +14,15 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-'CSMOON_010a'
-'CSMOON_010b'
+'BM_EARTHPREM_SPIKE_100km_dt05_CEES_C'
+% 'CSMOON_010b'
 };
 
 % depths = .01;
 depths = [.01 20 100 500 750 1000]; % All potential depths
 freqs = [7 40 5 20];                     % All potential frequencies
 kerns = 16;                 
-iters = 7;
+iters = 9;
 
 outputfolder = '../OUTPUT/';
 scriptfolder = './AVERAGING_SCRIPTS/';
