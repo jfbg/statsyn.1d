@@ -15,7 +15,7 @@ fclose(fid);
 
 modellist = {...
 'BM_EARTHPREM_SPIKE_100km_dt05_CEES_C'
-% 'CSMOON_010b'
+% 'CSMOON_013a'
 };
 
 % depths = .01;
