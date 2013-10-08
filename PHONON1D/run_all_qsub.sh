@@ -1,7 +1,7 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_012b.sh
+qsub CEES_QSUB_SCRIPTS/qsub_CVPREM_001_40Hz.sh
 sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_012c.sh
+qsub CEES_QSUB_SCRIPTS/qsub_CVPREM_001_07Hz.sh
 sleep 4
