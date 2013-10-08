@@ -1,5 +1,7 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTHPREM_SPIKE_100km_dt05_CEES_C.sh
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_012b.sh
+sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_012c.sh
 sleep 4
