@@ -1,7 +1,7 @@
 close all
 
 modellist = {...
-    'VPREMOON_Qp_ori2_core200'};
+    'CVPREM_001'};
 %     'VPREMOON_Qp_novlvl';
 %     'VPREMOON_Qp_novlvl_liquid';
 %     'VPREMOON_Qp_nocrust'

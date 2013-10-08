@@ -11,16 +11,17 @@ modellist = {...
 ...    'VPREMOON_Qp_ori2_liquid_10km'
 ...    'VPREMOON_Qp_ori2_noCORE_10km'
 ...    'VPREMOON_Q7500_ori2_10km'
-'SIMPLEMOON_Q2000_10km'
-'SIMPLEMOON_Q6500_10km'
-'SIMPLEMOON_basic_10km'
-'SIMPLEMOON_crust_10km'
-'SIMPLEMOON_lcore300_10km'
-'SIMPLEMOON_lcore600_10km'
-'SIMPLEMOON_score300_10km'
-'SIMPLEMOON_score600_10km'
-'SIMPLEMOON_vlvl_10km'
-    };
+% 'SIMPLEMOON_Q2000_10km'
+% 'SIMPLEMOON_Q6500_10km'
+% 'SIMPLEMOON_basic_10km'
+% 'SIMPLEMOON_crust_10km'
+% 'SIMPLEMOON_lcore300_10km'
+% 'SIMPLEMOON_lcore600_10km'
+% 'SIMPLEMOON_score300_10km'
+% 'SIMPLEMOON_score600_10km'
+% 'SIMPLEMOON_vlvl_10km'
+'CVPREM_001'
+};
 
 
 % Model columns:

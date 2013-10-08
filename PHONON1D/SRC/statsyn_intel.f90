@@ -1263,6 +1263,12 @@ SUBROUTINE ATTENUATE(sin,sout,ndat,dt,tstar,dQdfSTYLE)
              rdQdf(I) = 1.      !Q constant at all frequencies
         ELSE IF (dQdfSTYLE == 2) THEN
              rdQdf(I) = 1. + ((df*float(I-1)-1)*.3)
+        ELSE IF (dQdfSTYLE == 3) THEN
+             IF ((df*float(I-1)).LE.2) THEN
+             rdQdf(I) = 1.
+             ELSE
+             rdQdf(I) = 1. + ((df*float(I-1)-2)*.3)
+             END IF
         ELSE
              rdQdf(I) = 1.  ! If not properly specified do == 1
         END IF
