@@ -18,10 +18,11 @@ modellist = {...
 'CVPREM_001'
 'CVPREM_001b'
 'CVPREM_002'
+'CVPREM_003'
 };
 
 % depths = .01;
-depths = [.01 20 100 500 750 1000]; % All potential depths
+depths = [.01 20 50 100 150 800 500 750 1000]; % All potential depths
 freqs = [7 40 5 20];                     % All potential frequencies
 kerns = 16;                 
 iters = 9;
