@@ -49,7 +49,7 @@ PROGRAM STATSYN_INTEL
         COMPLEX       ms(nst0)               !SOURCE
         REAL          dt4,r_P,r_SV,r_SH     !r_* is energy ratio at source (1:10:10)
         INTEGER       SourceTYPE,samplingtype,sI
-        REAL(8)       maxp 
+        REAL(8)       maxp,maxs,mins
         CHARACTER*100 SourceFILE
         
         ! FLATTENING
@@ -85,6 +85,8 @@ PROGRAM STATSYN_INTEL
       surCYC1 = 0
       exTIME = 0
       exNLAY = 0
+      maxs = 0.
+      mins = 500.
 
       WRITE(*,*) 'ISOTROPIC Scattering'
       WRITE(*,*) 'Last Edited on $Date$'
@@ -954,6 +956,21 @@ PROGRAM STATSYN_INTEL
                       s1 = float(ims-1)*datt
                       s2 = float(ims  )*datt
                       frac = (s-s1)/(s2-s1)
+                    END IF
+                    
+                    !DEBUG
+                    if (s > maxs) THEN
+                    maxs = s
+!                    WRITE(*,*) mins,maxs
+                    END IF
+                    
+                    if (s < mins) THEN
+                    mins = s
+!                    WRITE(*,*) mins,maxs
+                    END IF
+                    
+                    IF (t < 500) THEN
+                    WRITE(6,*) IT,ims,ns0,s,datt
                     END IF
 
                       icaust = ncaust
