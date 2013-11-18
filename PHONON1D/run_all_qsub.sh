@@ -1,5 +1,5 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_CSMOON_001_noscat_OnlyPS_noatt.sh
+qsub CEES_QSUB_SCRIPTS/qsub_generate80spikes.sh
 sleep 4
