@@ -1,1 +1,1 @@
-csh ./AVERAGING_SCRIPTS/generatespikes_average.csh
+csh ./AVERAGING_SCRIPTS/CSMOON_001_noscat_OnlyPS_average.csh
