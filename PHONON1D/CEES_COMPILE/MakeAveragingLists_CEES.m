@@ -23,7 +23,7 @@ modellist = {...
 % 'CSMOON_010a_noscat'
 % 'CSMOON_010b_noscat'
 % 'CSMOON_011a_noscat'
-'CSMOON_001_noscat_OnlyPS'
+'generatespikes'
 };
 
 % depths = .01;
