@@ -4,7 +4,7 @@
       
       IMPLICIT NONE
       
-      REAL(8) qdepdiff,dsamp
+      REAL(8) qdepdiff,dsamp,sourcenext
       INTEGER lcount,nl
       
       !MODEL CHECKS
@@ -198,8 +198,13 @@
 			 iz2 = iz2 +1														 
 			END DO
 			IF (qdep <= 0.02) iz2 = 1
+			
 		
-			dsamp = .5
+			sourcenext = z_s(iz2+1)-z_s(iz2)
+			if (sourcenext < 10.) sourcenext = 10
+		  sourcenext = 1737
+		  
+			dsamp = 3.
 			
 			z_st = z_s
 			r_st = r_s
@@ -210,7 +215,7 @@
 		
 			lcount = 1
 			DO K = 1,nlay 
-					IF (z_st(K) < qdep - 10) THEN
+					IF (z_st(K) < qdep - sourcenext) THEN
 					 z_s(lcount) = z_st(K)
 					 r_s(lcount) = r_st(K)
 					 vs(lcount,1) = vst(K,1)
@@ -220,7 +225,7 @@
 					 lcount = lcount + 1
 					END IF
 					
-					IF ((z_st(K) >= qdep -10 ).AND.(z_st(K) <= qdep + 10)) THEN
+					IF ((z_st(K) >= qdep -sourcenext ).AND.(z_st(K) <= qdep + sourcenext)) THEN
 					    nl = int( (z_st(K+1)-z_st(K))/dsamp)
 							z_s(lcount) = z_st(K)
 							r_s(lcount) = r_st(K)
@@ -244,7 +249,7 @@
                END DO
 					END IF
 					
-					IF (z_st(K) > qdep +10) THEN
+					IF (z_st(K) > qdep +sourcenext) THEN
 							z_s(lcount) = z_st(K)
 							r_s(lcount) = r_st(K)
 							vs(lcount,1) = vst(K,1)
@@ -258,6 +263,81 @@
 	
 			nlay = lcount - 1
 			
+! ========= ANOTHER SUBSAMPLING =======
+
+			iz2 = 1
+			DO WHILE (qdep >= z_s(iz2+1))      !FIND WHICH LAYER THE SCAT LAYER IS ON
+			 iz2 = iz2 +1														 
+			END DO
+			IF (qdep <= 0.02) iz2 = 1
+			
+		
+			sourcenext = z_s(iz2+1)-z_s(iz2)
+			if (sourcenext < 10.) sourcenext = 10
+		  sourcenext = 10
+		  
+			dsamp = .1
+			
+			z_st = z_s
+			r_st = r_s
+			vst = vs
+			rht = rh
+			Qt = Q(:,1)
+			
+		
+			lcount = 1
+			DO K = 1,nlay 
+					IF (z_st(K) < qdep - sourcenext) THEN
+					 z_s(lcount) = z_st(K)
+					 r_s(lcount) = r_st(K)
+					 vs(lcount,1) = vst(K,1)
+					 vs(lcount,2) = vst(K,2)
+					 rh(lcount) = rht(K)
+					 Q(lcount,1) = Qt(K)
+					 lcount = lcount + 1
+					END IF
+					
+					IF ((z_st(K) >= qdep -sourcenext ).AND.(z_st(K) <= qdep + sourcenext)) THEN
+					    nl = int( (z_st(K+1)-z_st(K))/dsamp)
+							z_s(lcount) = z_st(K)
+							r_s(lcount) = r_st(K)
+							vs(lcount,1) = vst(K,1)
+							vs(lcount,2) = vst(K,2)
+							rh(lcount) = rht(K)
+							Q(lcount,1) = Qt(K)
+							
+							lcount = lcount +1
+					    
+					    
+							DO J = 1, nl-1                 !INTERPOLATE AT EACH STEP
+							 z_s(lcount) = z_st(K) + float(J)*(z_st(K+1)-z_st(K))/float(nl)
+							 r_s(lcount) = r_st(K) + float(J)*(r_st(K+1)-r_st(K))/float(nl)
+							 vs(lcount,1) = vst(K,1) + float(J)*(vst(K+1,1)-vst(K,1))/float(nl)
+							 vs(lcount,2) = vst(K,2) + float(J)*(vst(K+1,2)-vst(K,2))/float(nl)
+							 rh(lcount) = rht(K) + float(J)*(rht(K+1)-rht(K))/float(nl)
+							 Q(lcount,1) = Qt(K) + float(J)*(Qt(K+1)-Qt(K))/float(nl)	    
+					    
+               lcount = lcount+1
+               END DO
+					END IF
+					
+					IF (z_st(K) > qdep +sourcenext) THEN
+							z_s(lcount) = z_st(K)
+							r_s(lcount) = r_st(K)
+							vs(lcount,1) = vst(K,1)
+							vs(lcount,2) = vst(K,2)
+							rh(lcount) = rht(K)
+							Q(lcount,1) = Qt(K)
+							lcount = lcount +1
+					END IF
+					
+				END DO
+	
+			nlay = lcount - 1
+
+! ========= ANOTHER SUBSAMPLING =======
+
+		
 			
 			! Calculate Qs (4/9)*Qp
 			DO I = 1,nlay

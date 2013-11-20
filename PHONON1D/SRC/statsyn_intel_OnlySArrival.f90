@@ -1003,6 +1003,11 @@ PROGRAM STATSYN_INTEL
                       ix_last = ix
                       it_last = it
                       
+                      !DEBUG
+                      c_mult(1) = 1.
+                      c_mult(2) = 1.
+                      c_mult(3) = 1.
+                      
                       
               
                       DO ic = 1, 3

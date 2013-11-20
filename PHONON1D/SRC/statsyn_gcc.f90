@@ -958,20 +958,20 @@ PROGRAM STATSYN_INTEL
                       frac = (s-s1)/(s2-s1)
                     END IF
                     
-                    !DEBUG
-                    if (s > maxs) THEN
-                    maxs = s
-!                    WRITE(*,*) mins,maxs
-                    END IF
-                    
-                    if (s < mins) THEN
-                    mins = s
-!                    WRITE(*,*) mins,maxs
-                    END IF
-                    
-                    IF (t < 500) THEN
-                    WRITE(6,*) IT,ims,ns0,s,datt
-                    END IF
+!                    !DEBUG
+!                    if (s > maxs) THEN
+!                    maxs = s
+!!                    WRITE(*,*) mins,maxs
+!                    END IF
+!                   
+!                    if (s < mins) THEN
+!                    mins = s
+!!                    WRITE(*,*) mins,maxs
+!                    END IF
+!                    
+!                    IF (t < 500) THEN
+!                    WRITE(6,*) IT,ims,ns0,s,datt
+!                    END IF
 
                       icaust = ncaust
                       DO WHILE (icaust >= 4)

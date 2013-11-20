@@ -31,7 +31,7 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "CSMOON_001_noscat_OnlyPS_noatt"
+set file_out   = "CSMOON_001_noscat_OnlyPS_noatt_B"
 set model_name = "CSIMPLEMOON_basic"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
