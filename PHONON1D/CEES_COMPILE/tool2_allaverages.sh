@@ -1,1 +1,1 @@
-csh ./AVERAGING_SCRIPTS/CSMOON_001_noscat_OnlyPS_noatt_average.csh
+csh ./AVERAGING_SCRIPTS/CSMOON_001_noscat_OnlyPS_noatt_B_average.csh
