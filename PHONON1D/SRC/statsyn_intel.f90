@@ -469,8 +469,8 @@ PROGRAM STATSYN_INTEL
 !     ======================================================
 !      ----- Attenuation + Attenuated source -----
       WRITE(6,'(a)',ADVANCE='no') 'CALCULATING ATTENUATED SOURCES LIBRARY'        !CALCULATING SOURCE
-      datt = .02    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
-                ! This is datt, not max att. max att will be datt*(ns0-1) = 40.
+      datt = .0075    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
+                ! This is datt, not max att. max att will be datt*(ns0-1) = 15.
      DO I = 1, ns0                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
        CALL ATTENUATE(mt,mtsc,nts1,dt4,dtst1,dQdfSTYLE) !
@@ -1074,11 +1074,12 @@ PROGRAM STATSYN_INTEL
 !       WRITE(6,*) I,p,tt8-tt2             
               
        IF (mod(float(I),float(ntr)/20.) == 0) THEN !STATUS REPORT
-        WRITE(6,FMT = 854) nint(float(I)/float(ntr)*100),kernelnum
+       CALL cpu_time(kerneltime)
+        WRITE(6,FMT = 854) nint(float(I)/float(ntr)*100),kernelnum,kerneltime-ttimestart
        END IF
        
 333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f10.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f8.5)
-854   FORMAT (10x,i3,' % COMPLETE  -- kernel ',i2)
+854   FORMAT (10x,i3,' % COMPLETE  -- kernel ',i2,'  Time: ',f9.2)
       
 
 
