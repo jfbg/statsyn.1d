@@ -4,7 +4,7 @@ MODULE PHO_VARS      ! Make variables global
         
         
         
-        INTEGER, PARAMETER :: nlay0=2000  !if change this, also change in REF_TRAN_PROB
+        INTEGER, PARAMETER :: nlay0=4000  !if change this, also change in REF_TRAN_PROB
                 
         ! ENERGY TRACKING
         CHARACTER*100 :: tfile
@@ -46,7 +46,7 @@ MODULE PHO_VARS      ! Make variables global
         
         ! Measure elapsed time
         REAL        elapsed(2)
-        REAL        totaltime,ttime1,ttime2,ttime3,ttime4,ttimestart
+        REAL        totaltime,ttime1,ttime2,ttime3,ttime4,ttimestart,kerneltime
         REAL        tt1,tt2,tt3,tt4,tt5,tt6,tt7,tt8,tt9
 
         
@@ -123,10 +123,10 @@ MODULE PHO_VARS      ! Make variables global
         
         !INTERFACE
         INTEGER     INCI,init_ud
-        REAL(4)     c,rhof,a1,b1,rhos
-        REAL(4)     TdPP, TdSP, RdPP, TuPP, TuPS, RuPP
-        REAL(4)     RuSP, RuPS, RuSS
-        REAL(4)     SumCOEFF
+        REAL(8)     c,rhof,a1,b1,rhos
+        REAL(8)     TdPP, TdSP, RdPP, TuPP, TuPS, RuPP
+        REAL(8)     RuSP, RuPS, RuSS
+        REAL(8)     SumCOEFF
 
 !       !IF SprCrtcl > 1, then drop energy
 !					INTEGER       SprCrtcl, SprCrtcl_count

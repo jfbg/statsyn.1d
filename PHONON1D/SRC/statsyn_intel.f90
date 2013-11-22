@@ -272,7 +272,7 @@ PROGRAM STATSYN_INTEL
       tstuck = 0
       z_last_count_num = 0
       
-      imth = 2   !Interpolation method for LAYERTRACE
+      imth = 3   !Interpolation method for LAYERTRACE
      
       !Initialize random seed for sequence of random numbers used to multiply to clock-based seeds.    
       CALL INIT_RANDOM_SEED()
@@ -2574,12 +2574,20 @@ SUBROUTINE RAYTRACE
         
         IF (irtr1 == 0) THEN      
          ud = -ud
-        ELSE IF (irtr1 >= 1) THEN
+        ELSE IF (irtr1 == 1) THEN 
+         dtstr1 = dt1/Q(iz-1,iwave)
          totald = totald + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
          !JFL --> Should this be z(iz) (FLAT z), because dx1 was calculated in the flat model
          ! totald isn't used anywhere though.
          t = t + dt1                    !TRAVEL TIME
          x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
+         s = s + dtstr1                 !CUMULATIVE t*
+        
+        ELSE IF (irtr1 == 2) THEN  
+         dtstr1 = dt1*2/Q(iz-1,iwave)
+         totald = totald + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
+         t = t + dt1*2                    !TRAVEL TIME
+         x = x + dx1*2*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
          
         END IF
@@ -2636,12 +2644,21 @@ SUBROUTINE RAYTRACE_SCAT
         
         IF (irtr1 == 0) THEN
          ud = -ud
-        ELSE IF (irtr1 >= 1) THEN
+        ELSE IF (irtr1 == 1) THEN
+         dtstr1 = dt1/Q(iz_scat,iwave)
          totald = totald + ds_scat !DISTANCE TRAVELED IN LAYER
          
          t = t + dt1                    !TRAVEL TIME
          x = x + dx1*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
+        ELSE IF (irtr1 == 2) THEN
+         dtstr1 = dt1*2/Q(iz_scat,iwave)
+         totald = totald + ds_scat !DISTANCE TRAVELED IN LAYER
+         
+         t = t + dt1*2                    !TRAVEL TIME
+         x = x + dx1*2*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
+         s = s + dtstr1                 !CUMULATIVE t*
+
         END IF
         
         !FIX NEXT IF FOR DIFFRACTED WAVES: 
@@ -2741,7 +2758,7 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       USE IFPORT
       IMPLICIT NONE
       
-      INTEGER, PARAMETER :: nlay0=2000
+      INTEGER, PARAMETER :: nlay0=4000
 
       REAL(8) :: rt(10)
       REAL(8) :: art(10),ref_tran_sum
