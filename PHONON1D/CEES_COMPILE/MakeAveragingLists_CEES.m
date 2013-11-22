@@ -32,7 +32,7 @@ modellist = {...
 depths = [0.01];
 freqs = [7 40 5 20];                     % All potential frequencies
 kerns = 16;                 
-iters = 9;
+iters = 1;
 
 outputfolder = '../OUTPUT/';
 scriptfolder = './AVERAGING_SCRIPTS/';
