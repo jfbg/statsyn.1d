@@ -2653,7 +2653,7 @@ SUBROUTINE RAYTRACE_SCAT
          s = s + dtstr1                 !CUMULATIVE t*
         ELSE IF (irtr1 == 2) THEN
          dtstr1 = dt1*2/Q(iz_scat,iwave)
-         totald = totald + ds_scat !DISTANCE TRAVELED IN LAYER
+         totald = totald + dx1*2 !DISTANCE TRAVELED IN LAYER
          
          t = t + dt1*2                    !TRAVEL TIME
          x = x + dx1*2*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
