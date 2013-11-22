@@ -341,10 +341,12 @@ PROGRAM STATSYN_INTEL
 
       OPEN(15,FILE='model_flat.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL
       DO I = 1,nlay
-        WRITE(15,*) z_s(I),z(I),vf(I,1),vf(I,2),rhs(I),rh(I),Q(I,1),Q(I,2)
+        WRITE(15,FMT=4444) z_s(I),z(I),vf(I,1),vf(I,2),rhs(I),rh(I),Q(I,1),Q(I,2)
       END DO
       
       CLOSE(15)
+      
+4444  FORMAT (8(f10.4,2x))
       
 
 !      ----- Convert depths to flat depth -----
