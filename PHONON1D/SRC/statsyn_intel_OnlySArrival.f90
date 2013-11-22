@@ -18,8 +18,8 @@ PROGRAM STATSYN_INTEL
 !
 ! 
 !
-! $Revision: 645 $
-! $Date: 2013-11-13 13:52:36 -0800 (Wed, 13 Nov 2013) $
+! $Revision: 661 $
+! $Date: 2013-11-22 15:07:07 -0800 (Fri, 22 Nov 2013) $
 ! $Author: jguertin $
 !
 !
@@ -49,7 +49,7 @@ PROGRAM STATSYN_INTEL
         COMPLEX       ms(nst0)               !SOURCE
         REAL          dt4,r_P,r_SV,r_SH     !r_* is energy ratio at source (1:10:10)
         INTEGER       SourceTYPE,samplingtype,sI
-        REAL(8)       maxp,maxs,mins
+        REAL(8)       maxp 
         CHARACTER*100 SourceFILE
         
         ! FLATTENING
@@ -85,13 +85,11 @@ PROGRAM STATSYN_INTEL
       surCYC1 = 0
       exTIME = 0
       exNLAY = 0
-      maxs = 0.
-      mins = 500.
 
       WRITE(*,*) 'ISOTROPIC Scattering'
-      WRITE(*,*) 'Last Edited on $Date: 2013-11-13 13:52:36 -0800 (Wed, 13 Nov 2013) $'
+      WRITE(*,*) 'Last Edited on $Date: 2013-11-22 15:07:07 -0800 (Fri, 22 Nov 2013) $'
       WRITE(*,*) 'Last Edited by $Author: jguertin $'
-      WRITE(*,*) '$Revision: 645 $'
+      WRITE(*,*) '$Revision: 661 $'
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
@@ -274,7 +272,7 @@ PROGRAM STATSYN_INTEL
       tstuck = 0
       z_last_count_num = 0
       
-      imth = 2   !Interpolation method for LAYERTRACE
+      imth = 3   !Interpolation method for LAYERTRACE
      
       !Initialize random seed for sequence of random numbers used to multiply to clock-based seeds.    
       CALL INIT_RANDOM_SEED()
@@ -343,10 +341,12 @@ PROGRAM STATSYN_INTEL
 
       OPEN(15,FILE='model_flat.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL
       DO I = 1,nlay
-        WRITE(15,*) z_s(I),z(I),vf(I,1),vf(I,2),rhs(I),rh(I),Q(I,1),Q(I,2)
+        WRITE(15,FMT=4444) z_s(I),z(I),vf(I,1),vf(I,2),rhs(I),rh(I),Q(I,1),Q(I,2)
       END DO
       
       CLOSE(15)
+      
+4444  FORMAT (8(f10.4,2x))
       
 
 !      ----- Convert depths to flat depth -----
@@ -469,7 +469,7 @@ PROGRAM STATSYN_INTEL
 !     ======================================================
 !      ----- Attenuation + Attenuated source -----
       WRITE(6,'(a)',ADVANCE='no') 'CALCULATING ATTENUATED SOURCES LIBRARY'        !CALCULATING SOURCE
-      datt = .005    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
+      datt = .02    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
                 ! This is datt, not max att. max att will be datt*(ns0-1) = 40.
      DO I = 1, ns0                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
@@ -957,21 +957,6 @@ PROGRAM STATSYN_INTEL
                       s2 = float(ims  )*datt
                       frac = (s-s1)/(s2-s1)
                     END IF
-                    
-                    !DEBUG
-!                    if (s > maxs) THEN
-!                    maxs = s
-!!                    WRITE(*,*) mins,maxs
-!                    END IF
-                    
-!                    if (s < mins) THEN
-!                    mins = s
-!!                    WRITE(*,*) mins,maxs
-!                    END IF
-                    
-!                    IF (t < 500) THEN
-!                    WRITE(6,*) IT,ims,ns0,s,datt
-!                    END IF
 
                       icaust = ncaust
                       DO WHILE (icaust >= 4)
@@ -1003,11 +988,6 @@ PROGRAM STATSYN_INTEL
                       ix_last = ix
                       it_last = it
                       
-                      !DEBUG
-                      c_mult(1) = 1.
-                      c_mult(2) = 1.
-                      c_mult(3) = 1.
-                      
                       
               
                       DO ic = 1, 3
@@ -1032,11 +1012,12 @@ PROGRAM STATSYN_INTEL
                 surCYC1 = surCYC1 +1
           END IF
 
+					!DEBUG
+					t = 9999999.   !So that it stops after one surface hit
+
+
           !IF P or SV wave, check for P-SV reflection
           IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
-              
-          !DEBUG
-          t = 999999.  !Stop tracking once S- or P-wave reach the surface once (ONLY main arrival will be recorded).    
                   
         END IF
 
@@ -2599,12 +2580,20 @@ SUBROUTINE RAYTRACE
         
         IF (irtr1 == 0) THEN      
          ud = -ud
-        ELSE IF (irtr1 >= 1) THEN
+        ELSE IF (irtr1 == 1) THEN 
+         dtstr1 = dt1/Q(iz-1,iwave)
          totald = totald + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
          !JFL --> Should this be z(iz) (FLAT z), because dx1 was calculated in the flat model
          ! totald isn't used anywhere though.
          t = t + dt1                    !TRAVEL TIME
          x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
+         s = s + dtstr1                 !CUMULATIVE t*
+        
+        ELSE IF (irtr1 == 2) THEN  
+         dtstr1 = dt1*2/Q(iz-1,iwave)
+         totald = totald + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
+         t = t + dt1*2                    !TRAVEL TIME
+         x = x + dx1*2*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
          
         END IF
@@ -2661,12 +2650,21 @@ SUBROUTINE RAYTRACE_SCAT
         
         IF (irtr1 == 0) THEN
          ud = -ud
-        ELSE IF (irtr1 >= 1) THEN
+        ELSE IF (irtr1 == 1) THEN
+         dtstr1 = dt1/Q(iz_scat,iwave)
          totald = totald + ds_scat !DISTANCE TRAVELED IN LAYER
          
          t = t + dt1                    !TRAVEL TIME
          x = x + dx1*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
+        ELSE IF (irtr1 == 2) THEN
+         dtstr1 = dt1*2/Q(iz_scat,iwave)
+         totald = totald + dx1*2 !DISTANCE TRAVELED IN LAYER
+         
+         t = t + dt1*2                    !TRAVEL TIME
+         x = x + dx1*2*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
+         s = s + dtstr1                 !CUMULATIVE t*
+
         END IF
         
         !FIX NEXT IF FOR DIFFRACTED WAVES: 
@@ -2766,7 +2764,7 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       USE IFPORT
       IMPLICIT NONE
       
-      INTEGER, PARAMETER :: nlay0=2000
+      INTEGER, PARAMETER :: nlay0=4000
 
       REAL(8) :: rt(10)
       REAL(8) :: art(10),ref_tran_sum
