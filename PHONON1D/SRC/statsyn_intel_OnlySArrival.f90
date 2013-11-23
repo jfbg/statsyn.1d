@@ -469,7 +469,7 @@ PROGRAM STATSYN_INTEL
 !     ======================================================
 !      ----- Attenuation + Attenuated source -----
       WRITE(6,'(a)',ADVANCE='no') 'CALCULATING ATTENUATED SOURCES LIBRARY'        !CALCULATING SOURCE
-      datt = .02    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
+      datt = .0075    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
                 ! This is datt, not max att. max att will be datt*(ns0-1) = 40.
      DO I = 1, ns0                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
