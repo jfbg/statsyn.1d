@@ -14,30 +14,25 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-...'VPREM_002'
-...'VPREM_012B'
-...'VPREM_024'
-...'VPREM_nCORE_001'
-...'VPREM_042'
-...'VPREM_043'
-...'VPREM_051'
-...'VPREM_052'
-% 'VPREauM_062'
-...'VPREM_nCORE_012'
-...'VPREM_S3_001C'
-% 'VPREM_S3_061'
-% 'VPREM_S3_062'
-...'VPREM_001C'
-...'VPREM_liquid_001'
-...'VPREM_nVL_liquid_001C'
-'BM_EARTHPREM_SPIKE_100km_dt02_CEES'
-'BM_EARTHPREM_SINE_100km_dt02_CEES'
+% 'BM_EARTHPREM_SPIKE_100km_dt05_CEES_C'
+% 'CSMOON_001_noscat'
+% 'CSMOON_005a_noscat'
+% 'CSMOON_006a_noscat'
+% 'CSMOON_007a_noscat'
+% 'CSMOON_008a_noscat'
+% 'CSMOON_010a_noscat'
+% 'CSMOON_010b_noscat'
+% 'CSMOON_011a_noscat'
+% 'CSMOON_001_noscat_OnlyPS_B'
+'CSMOON_001_noscat_OnlyPS_noatt_B'
 };
 
-depths = [.01 20 100 500 750 1000]; % All potential depths
-freqs = [7 40 5];                     % All potential frequencies
+% depths = .01;
+% depths = [.01 20 50 100 150 800 500 750 1000]; % All potential depths
+depths = [0.01];
+freqs = [7 40 5 20];                     % All potential frequencies
 kerns = 16;                 
-iters = 4;
+iters = 1;
 
 outputfolder = '../OUTPUT/';
 scriptfolder = './AVERAGING_SCRIPTS/';
@@ -70,6 +65,7 @@ for kk = 1:length(depths)
     elseif freqs(hh) == 40, dt = 0.025;
     elseif freqs(hh) == 1, dt = 1.00;       % was used during Benchmarking
     elseif freqs(hh) == 5, dt = 0.20; 
+    elseif freqs(hh) == 20, dt = 0.05; 
     else
         error('Input new frequency');
     end
