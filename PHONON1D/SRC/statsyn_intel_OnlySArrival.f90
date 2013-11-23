@@ -819,7 +819,7 @@ PROGRAM STATSYN_INTEL
                     DO WHILE ((ds_scat < ds_SL).AND.(irtr1 == 1))
                     
                         !Calculate what would dh be if phonon only travelled ds_scat km
-                        dh = ds_scat*abs(dcos(asin(p*vf(iz_scat,iwave))))   !FLAT
+                        dh = ds_scat*abs(cos(asin(p*vf(iz_scat,iwave))))   !FLAT
 
                         !Calculate vertical to next layer
                         IF (ud == 1) dh2 = abs(z(iz_scat+1) - z_act)
@@ -970,17 +970,17 @@ PROGRAM STATSYN_INTEL
           
                     IF ( (IT > 1-nts).and.(IT <= nt0+nts) ) THEN
                       IF ( (ip == 1) ) THEN 
-                        c_mult(1) = dcos(ang1)           * ud     !! Vertical Amp from P wave
-                        c_mult(2) = dsin(ang1) * dsin(az) * x_sign !! Tangential Amp from P wave
-                        c_mult(3) = dsin(ang1) * dcos(az) * x_sign !! Radial Amp for P wave
+                        c_mult(1) = cos(ang1)           * ud     !! Vertical Amp from P wave
+                        c_mult(2) = sin(ang1) * sin(az) * x_sign !! Tangential Amp from P wave
+                        c_mult(3) = sin(ang1) * cos(az) * x_sign !! Radial Amp for P wave
                       ELSE IF (ip == 2) THEN
-                        c_mult(1) = dsin(ang1)           * ud     !! Vertical amp for SV
-                        c_mult(2) = dcos(ang1)*dsin(az)   * x_sign !! Tangential amp for SV
-                        c_mult(3) = dcos(ang1)*dcos(az)   * x_sign !! Radial amp for SV
+                        c_mult(1) = sin(ang1)           * ud     !! Vertical amp for SV
+                        c_mult(2) = cos(ang1)*sin(az)   * x_sign !! Tangential amp for SV
+                        c_mult(3) = cos(ang1)*cos(az)   * x_sign !! Radial amp for SV
                       ELSE IF (ip == 3) THEN
                         c_mult(1) = 0.                   !! Vertical Amp for SH
-                        c_mult(2) = dcos(az)             * x_sign !! Tangential Amp for SH
-                        c_mult(3) = dsin(az)             * x_sign !! Radial Amp for SH
+                        c_mult(2) = cos(az)             * x_sign !! Tangential Amp for SH
+                        c_mult(3) = sin(az)             * x_sign !! Radial Amp for SH
                       END IF
                       
                       
@@ -999,7 +999,7 @@ PROGRAM STATSYN_INTEL
                           JT = IT + JJ - 1
                           IF ( (JT > 0).AND.(JT <= nt0).AND.(a /= 0.) ) THEN
                             wf(ix,JT,ic) = wf(ix,JT,ic) + a * c_mult(ic) &
-                                * (dcos(ang1))**-1 &   !Geometrical spreading correction factor
+                                / (cos(ang1))    &   !Geometrical spreading correction factor
                                 * (   (1.-frac)*mts(ims-1,icaust,JJ) &
                                     + (   frac)*mts(ims  ,icaust,JJ) )!ATTENUATION                                    
                           END IF
@@ -2591,14 +2591,14 @@ SUBROUTINE RAYTRACE
          !JFL --> Should this be z(iz) (FLAT z), because dx1 was calculated in the flat model
          ! totald isn't used anywhere though.
          t = t + dt1                    !TRAVEL TIME
-         x = x + dx1*x_sign*dcos(az)     !EPICENTRAL DISTANCE TRAVELED-km
+         x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
         
         ELSE IF (irtr1 == 2) THEN  
          dtstr1 = dt1*2/Q(iz-1,iwave)
          totald = totald + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
          t = t + dt1*2                    !TRAVEL TIME
-         x = x + dx1*2*x_sign*dcos(az)     !EPICENTRAL DISTANCE TRAVELED-km
+         x = x + dx1*2*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
          
         END IF
@@ -2660,14 +2660,14 @@ SUBROUTINE RAYTRACE_SCAT
          totald = totald + ds_scat !DISTANCE TRAVELED IN LAYER
          
          t = t + dt1                    !TRAVEL TIME
-         x = x + dx1*x_sign*abs(dcos(az))     !EPICENTRAL DISTANCE TRAVELED-km
+         x = x + dx1*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
         ELSE IF (irtr1 == 2) THEN
          dtstr1 = dt1*2/Q(iz_scat,iwave)
          totald = totald + dx1*2 !DISTANCE TRAVELED IN LAYER
          
          t = t + dt1*2                    !TRAVEL TIME
-         x = x + dx1*2*x_sign*abs(dcos(az))     !EPICENTRAL DISTANCE TRAVELED-km
+         x = x + dx1*2*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
 
         END IF
