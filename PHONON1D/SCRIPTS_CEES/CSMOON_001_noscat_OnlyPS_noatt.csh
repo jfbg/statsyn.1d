@@ -7,7 +7,7 @@
 @ t_start      = 0
 @ t_max        = 1000
 set d_range    = "0 180 91"
-set n_phonon   = "5000000"
+set n_phonon   = "10000000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
@@ -31,14 +31,14 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "CSMOON_001_noscat_OnlyPS_noatt_B"
+set file_out   = "CSMOON_001_noscat_OnlyPS_noatt_C"
 set model_name = "CSIMPLEMOON_basic"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
-@ n_depth = 1     ## Number of depths to use
+@ n_depth = 3     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
 @ n_kern  = 16    ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 1     ## Number of iterations
+@ n_iter  = 2     ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
