@@ -93,7 +93,7 @@ PROGRAM STATSYN_INTEL
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
-      WRITE(*,*) '* ONLY FIRST ARRIVALS!!!'
+      WRITE(*,*) '* ONLY FIRST ARRIVALS!!!  WITH GEO CORRECTION'
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Using vflat for coefficients'
       WRITE(*,*) '*'
