@@ -999,6 +999,7 @@ PROGRAM STATSYN_INTEL
                           JT = IT + JJ - 1
                           IF ( (JT > 0).AND.(JT <= nt0).AND.(a /= 0.) ) THEN
                             wf(ix,JT,ic) = wf(ix,JT,ic) + a * c_mult(ic) &
+                                * (cos(ang1))**-1 &   !Geometrical spreading correction factor
                                 * (   (1.-frac)*mts(ims-1,icaust,JJ) &
                                     + (   frac)*mts(ims  ,icaust,JJ) )!ATTENUATION                                    
                           END IF
