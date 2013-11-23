@@ -983,6 +983,10 @@ PROGRAM STATSYN_INTEL
                         c_mult(3) = sin(az)             * x_sign !! Radial Amp for SH
                       END IF
                       
+                      
+                      c_mult(1) = 1.
+                      c_mult(2) = 1.
+                      c_mult(3) = 1.
         
                       n_iter_last = nitr
                       ix_last = ix

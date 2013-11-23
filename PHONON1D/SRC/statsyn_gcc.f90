@@ -29,7 +29,7 @@ PROGRAM STATSYN_INTEL
         
         ! All declarations in pho_vars except debugging and some source variables
         USE pho_vars
-        !USE IFPORT
+        USE IFPORT
         
         IMPLICIT NONE
         
@@ -49,7 +49,7 @@ PROGRAM STATSYN_INTEL
         COMPLEX       ms(nst0)               !SOURCE
         REAL          dt4,r_P,r_SV,r_SH     !r_* is energy ratio at source (1:10:10)
         INTEGER       SourceTYPE,samplingtype,sI
-        REAL(8)       maxp,maxs,mins
+        REAL(8)       maxp 
         CHARACTER*100 SourceFILE
         
         ! FLATTENING
@@ -85,8 +85,6 @@ PROGRAM STATSYN_INTEL
       surCYC1 = 0
       exTIME = 0
       exNLAY = 0
-      maxs = 0.
-      mins = 500.
 
       WRITE(*,*) 'ISOTROPIC Scattering'
       WRITE(*,*) 'Last Edited on $Date$'
@@ -274,7 +272,7 @@ PROGRAM STATSYN_INTEL
       tstuck = 0
       z_last_count_num = 0
       
-      imth = 2   !Interpolation method for LAYERTRACE
+      imth = 3   !Interpolation method for LAYERTRACE
      
       !Initialize random seed for sequence of random numbers used to multiply to clock-based seeds.    
       CALL INIT_RANDOM_SEED()
@@ -343,10 +341,12 @@ PROGRAM STATSYN_INTEL
 
       OPEN(15,FILE='model_flat.txt',STATUS='UNKNOWN')    !OPEN SEISMIC VELOCITY MODEL
       DO I = 1,nlay
-        WRITE(15,*) z_s(I),z(I),vf(I,1),vf(I,2),rhs(I),rh(I),Q(I,1),Q(I,2)
+        WRITE(15,FMT=4444) z_s(I),z(I),vf(I,1),vf(I,2),rhs(I),rh(I),Q(I,1),Q(I,2)
       END DO
       
       CLOSE(15)
+      
+4444  FORMAT (8(f10.4,2x))
       
 
 !      ----- Convert depths to flat depth -----
@@ -469,8 +469,8 @@ PROGRAM STATSYN_INTEL
 !     ======================================================
 !      ----- Attenuation + Attenuated source -----
       WRITE(6,'(a)',ADVANCE='no') 'CALCULATING ATTENUATED SOURCES LIBRARY'        !CALCULATING SOURCE
-      datt = .02    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
-                ! This is datt, not max att. max att will be datt*(ns0-1) = 40.
+      datt = .0075    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
+                ! This is datt, not max att. max att will be datt*(ns0-1) = 15.
      DO I = 1, ns0                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
        CALL ATTENUATE(mt,mtsc,nts1,dt4,dtst1,dQdfSTYLE) !
@@ -957,21 +957,6 @@ PROGRAM STATSYN_INTEL
                       s2 = float(ims  )*datt
                       frac = (s-s1)/(s2-s1)
                     END IF
-                    
-!                    !DEBUG
-!                    if (s > maxs) THEN
-!                    maxs = s
-!!                    WRITE(*,*) mins,maxs
-!                    END IF
-!                   
-!                    if (s < mins) THEN
-!                    mins = s
-!!                    WRITE(*,*) mins,maxs
-!                    END IF
-!                    
-!                    IF (t < 500) THEN
-!                    WRITE(6,*) IT,ims,ns0,s,datt
-!                    END IF
 
                       icaust = ncaust
                       DO WHILE (icaust >= 4)
@@ -1089,11 +1074,12 @@ PROGRAM STATSYN_INTEL
 !       WRITE(6,*) I,p,tt8-tt2             
               
        IF (mod(float(I),float(ntr)/20.) == 0) THEN !STATUS REPORT
-        WRITE(6,FMT = 854) nint(float(I)/float(ntr)*100),kernelnum
+       CALL cpu_time(kerneltime)
+        WRITE(6,FMT = 854) nint(float(I)/float(ntr)*100),kernelnum,kerneltime-ttimestart
        END IF
        
 333   FORMAT ('Phonon''s stuck: iz= ',i4,', t= ',f8.2,', x= ',f10.2,', ud=',i2,', x_sign= ',i2', ip= ',i1,' p=',f8.5)
-854   FORMAT (10x,i3,' % COMPLETE  -- kernel ',i2)
+854   FORMAT (10x,i3,' % COMPLETE  -- kernel ',i2,'  Time: ',f9.2)
       
 
 
@@ -1443,7 +1429,7 @@ SUBROUTINE SURFACE_PSV_BEN
 ! Calculate P-SV reflection coefficients at free surface based on BEN-MENAHEM (p.480)
 
       USE pho_vars
-      !USE IFPORT
+      USE IFPORT
       IMPLICIT NONE
       
       COMPLEX(8)    velP,velS,angP,angS,D1
@@ -1597,7 +1583,7 @@ END SUBROUTINE RTCOEF_SH
 SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
                          rrp,rrs,rtp,rts,ip,ud,amp,cons_EorA)
                          
-      !USE IFPORT
+      USE IFPORT
                          
       IMPLICIT     NONE
       REAL(8)      vp1,vs1,den1,vp2,vs2,den2     !VELOCITY & DENSITY
@@ -1729,7 +1715,7 @@ END SUBROUTINE RTCOEF_PSV
 SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
 
 ! Going from Mantle to Core, solid to liquid
-      !USE IFPORT
+      USE IFPORT
 
       IMPLICIT NONE
 
@@ -1849,7 +1835,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
 
 ! Going from Core to Mantle, liquid to solid
 
-      !USE IFPORT
+      USE IFPORT
 
       IMPLICIT NONE
 
@@ -2591,12 +2577,20 @@ SUBROUTINE RAYTRACE
         
         IF (irtr1 == 0) THEN      
          ud = -ud
-        ELSE IF (irtr1 >= 1) THEN
+        ELSE IF (irtr1 == 1) THEN 
+         dtstr1 = dt1/Q(iz-1,iwave)
          totald = totald + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
          !JFL --> Should this be z(iz) (FLAT z), because dx1 was calculated in the flat model
          ! totald isn't used anywhere though.
          t = t + dt1                    !TRAVEL TIME
          x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
+         s = s + dtstr1                 !CUMULATIVE t*
+        
+        ELSE IF (irtr1 == 2) THEN  
+         dtstr1 = dt1*2/Q(iz-1,iwave)
+         totald = totald + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
+         t = t + dt1*2                    !TRAVEL TIME
+         x = x + dx1*2*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
          
         END IF
@@ -2653,12 +2647,21 @@ SUBROUTINE RAYTRACE_SCAT
         
         IF (irtr1 == 0) THEN
          ud = -ud
-        ELSE IF (irtr1 >= 1) THEN
+        ELSE IF (irtr1 == 1) THEN
+         dtstr1 = dt1/Q(iz_scat,iwave)
          totald = totald + ds_scat !DISTANCE TRAVELED IN LAYER
          
          t = t + dt1                    !TRAVEL TIME
          x = x + dx1*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
+        ELSE IF (irtr1 == 2) THEN
+         dtstr1 = dt1*2/Q(iz_scat,iwave)
+         totald = totald + dx1*2 !DISTANCE TRAVELED IN LAYER
+         
+         t = t + dt1*2                    !TRAVEL TIME
+         x = x + dx1*2*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
+         s = s + dtstr1                 !CUMULATIVE t*
+
         END IF
         
         !FIX NEXT IF FOR DIFFRACTED WAVES: 
@@ -2679,7 +2682,7 @@ SUBROUTINE GET_DS_SCAT
       !The output dscat has been
       
       USE pho_vars      
-      !USE IFPORT
+      USE IFPORT
       
       IMPLICIT NONE
       REAL(8)     rt,z_ft,fac,bg_sl,z_nf
@@ -2755,10 +2758,10 @@ END SUBROUTINE GET_DS_SL
 
 SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh,cons_EorA)
 
-      !USE IFPORT
+      USE IFPORT
       IMPLICIT NONE
       
-      INTEGER, PARAMETER :: nlay0=2000
+      INTEGER, PARAMETER :: nlay0=4000
 
       REAL(8) :: rt(10)
       REAL(8) :: art(10),ref_tran_sum
