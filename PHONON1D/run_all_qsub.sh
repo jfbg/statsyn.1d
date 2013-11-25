@@ -1,13 +1,11 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_BSMOON_001b.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BVPREM_001_07Hz.sh
 sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_BSMOON_002b.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BVPREM_001_40Hz.sh
 sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_BSMOON_003b.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BVPREM_002_07Hz.sh
 sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_BSMOON_004c.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_BSMOON_013a.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BVPREM_002_40Hz.sh
 sleep 4

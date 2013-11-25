@@ -23,7 +23,11 @@ modellist = {...
 % 'CSMOON_010a_noscat'
 % 'CSMOON_010b_noscat'
 % 'CSMOON_011a_noscat'
-'BSMOON_001'
+% 'BSMOON_001'
+'BVPREM_001_07Hz.csh'
+'BVPREM_001_40Hz.csh'
+'BVPREM_002_07Hz.csh'
+'BVPREM_002_40Hz.csh'
 % 'BSMOON_002a'
 % 'CSMOON_001_noscat_OnlyPS_noatt_B'
 };
