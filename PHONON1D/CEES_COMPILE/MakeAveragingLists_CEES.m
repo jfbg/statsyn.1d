@@ -33,7 +33,7 @@ depths = [.01 20 50 100 150 800 500 750 1000]; % All potential depths
 % depths = [0.01];
 freqs = [7 40 5 20];                     % All potential frequencies
 kerns = 16;                 
-iters = 1;
+iters = 5;
 
 outputfolder = '../OUTPUT/';
 scriptfolder = './AVERAGING_SCRIPTS/';
