@@ -1027,7 +1027,7 @@ PROGRAM STATSYN_INTEL
                           JT = IT + JJ - 1
                           IF ( (JT > 0).AND.(JT <= nt0).AND.(a /= 0.) ) THEN
                             wf(ix,JT,ic) = wf(ix,JT,ic) + a * c_mult(ic) &
-                                / (cos(ang1))    &   !Geometric spreading correction factor
+                                * (cos(ang1))**(-1)    &   !Geometric spreading correction factor
                                 * (   (1.-frac)*mts(ims-1,icaust,JJ) &
                                     + (   frac)*mts(ims  ,icaust,JJ) )!ATTENUATION                                    
                           END IF
@@ -2642,7 +2642,7 @@ SUBROUTINE RAYTRACE
         
         ELSE IF (irtr1 == 2) THEN  
          dtstr1 = dt1*2/Q(iz-1,iwave)
-         totald = totald + ((z_s(iz)-z_s(iz-1))**2+dx1**2)**0.5 !DISTANCE TRAVELED IN LAYER
+         totald = totald + dxi*2 !((z_s(iz)-z_s(iz-1))**2+(dx1)**2)**0.5 !DISTANCE TRAVELED IN LAYER
          t = t + dt1*2                    !TRAVEL TIME
          x = x + dx1*2*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
