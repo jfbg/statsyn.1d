@@ -58,7 +58,7 @@ PROGRAM STATSYN_INTEL
         
         ! DEBUGGING
         CHARACTER*100    :: debugfile,logEND
-        REAL(8)             dhsmall
+        REAL(8)             dhsmall,imsmax
         INTEGER (kind=8) ::  surfcount
         INTEGER (kind=8) ::  surCYC1,exTIME,exNLAY
         INTEGER          ::  logperc
@@ -95,10 +95,10 @@ PROGRAM STATSYN_INTEL
       WRITE(*,*) '************************************'
       WRITE(*,*) '*'
       WRITE(*,*) '*    Circular radiation pattern'
-      WRITE(*,*) '*    Using vflat for coefficients'
       WRITE(*,*) '*'
-      WRITE(*,*) '*    USE FOR BENCHMARKING - DISCRETE p VALUES'
-      WRITE(*,*) '*          IF SAMPLINGTYPE.eq.3'
+      WRITE(*,*) '*    MAKE SURE TO CHECK FOR:'
+      WRITE(*,*) '*      -> Decreasing layer thickness near core'
+      WRITE(*,*) '*      -> datt is set accordingly for max tstar'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
@@ -278,7 +278,7 @@ PROGRAM STATSYN_INTEL
       CALL INIT_RANDOM_SEED()
       CALL RANDOM_NUMBER(r2s)
       
-      OPEN(79,FILE=logfile,STATUS='UNKNOWN')    !OPEN LOG FILE
+!      OPEN(79,FILE=logfile,STATUS='UNKNOWN')    !OPEN LOG FILE
 
 !      ^^^^^ INITIALIZE PARAMETERS ^^^^^
  
@@ -421,7 +421,7 @@ PROGRAM STATSYN_INTEL
       pi = atan(1.)*4.                        !
       P0 = dti*4.                             !DOMINANT PERIOD
       nts = nint(P0*4./dti)+1                 !# OF POINTS IN SOURCE SERIES
-      IF (nts < 31) nts = 31
+      IF (nts < 500) nts = 500
       nts1 = 1000
       DO I = 1, nts1
        mt(I) = 0.
@@ -455,13 +455,10 @@ PROGRAM STATSYN_INTEL
         WRITE(6,'(a)') ' SOURCE IS DELTA FUNCTION'
       END IF
       
+      WRITE(6,*) 'WILL TRACK PHONON UNTIL: maxtime - sourcetime=',t2-(nts*dti)
+      
 3335  FORMAT(500(F10.6,1X))
 
-      !Calculate maximum source power (i.e. no attenuation) to normalize attn
-      minattn = 0.
-      DO JJ = 1,nts1
-        minattn = minattn + mt(JJ)**2
-      END DO
 
 !     ^^^^^ Generate Source Function ^^^^^               
 
@@ -469,19 +466,22 @@ PROGRAM STATSYN_INTEL
 !     ======================================================
 !      ----- Attenuation + Attenuated source -----
       WRITE(6,'(a)',ADVANCE='no') 'CALCULATING ATTENUATED SOURCES LIBRARY'        !CALCULATING SOURCE
-      datt = .0075    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
+      
+!        REAL(8)          mts(datt,caustic,source)        !ATTENUATED SOURCE  (     
+      
+      datt = .005    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
                 ! This is datt, not max att. max att will be datt*(ns0-1) = 15.
      DO I = 1, ns0                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
-       CALL ATTENUATE(mt,mtsc,nts1,dt4,dtst1,dQdfSTYLE) !
+       CALL ATTENUATE(mt,mtsc,b,nts1,dt4,dtst1,dQdfSTYLE) !
        pow1 = 0.
        DO J = 1, nts1                         !
         mts4(I,1,J) =  mtsc(J)                 !
         mts4(I,3,J) = -mtsc(J)                 !
         pow1 = pow1 + mtsc(J)**2
        END DO                                 !
-       nfil = 5
-       CALL TILBERT(mtsc,dt4,nts1,nfil,b,e)   !HILBER TRANSFORM (pi/2PHASESHFT)
+!       nfil = 5
+!       CALL TILBERT(mtsc,dt4,nts1,nfil,b,e)   !HILBER TRANSFORM (pi/2PHASESHFT)
        pow2 = 0.                              !ZERO POWER OF SERIES
        DO K = 1, nts1                         !COPY HILBERT SERIES TO CORRECT
         mts4(I,2,K) = -b(K)                    !
@@ -496,25 +496,48 @@ PROGRAM STATSYN_INTEL
       
       mts = REAL(mts4,8)
       
-      WRITE(6,*) ns0,'x datt    - DONE'
+      WRITE(6,*) ns0,'x datt    - DONE',(ns0-1)*datt
       
-!      OPEN(23,FILE='source.out')              !OUTPUT SOURCE
-!      WRITE(23,*) nts,ns0                     !
+      !Calculate maximum source power (i.e. no attenuation) to normalize attn
+      minattn = 0.
+      DO JJ = 1,nts1
+        minattn = minattn + mt(JJ)**2
+      END DO
+      
+!      OPEN(23,FILE='source1.out')              !OUTPUT SOURCE
+!!      WRITE(23,*) nts,ns0                     !
+!      WRITE(23,FMT=888) 999.99,(datt*float(J-1),J=1,ns0)
+!      DO I = 1, nts
+!        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,1,I)*1.,J=1,ns0)
+!      END DO
+!      CLOSE(23)
+!      
+!      OPEN(23,FILE='source2.out')              !OUTPUT SOURCE
+!!      WRITE(23,*) nts,ns0                     !
+!      WRITE(23,FMT=888) 999.99,(datt*float(J-1),J=1,ns0)
+!      DO I = 1, nts
+!        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,2,I)*1.,J=1,ns0)
+!      END DO
+!      CLOSE(23)
+!      
+!      OPEN(23,FILE='source3.out')              !OUTPUT SOURCE
+!!      WRITE(23,*) nts,ns0                     !
 !      WRITE(23,FMT=888) 999.99,(datt*float(J-1),J=1,ns0)
 !      DO I = 1, nts
 !        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,3,I)*1.,J=1,ns0)
 !      END DO
 !      CLOSE(23)
-! 
-!      OPEN(24,file='mts.out',status='unknown')
-!        DO I = 1,ns0
-!          DO mm = 1,4
-!            DO K = 1,nts1
-!              WRITE(24,*) mts(I,mm,K)
-!        END DO
-!          END DO
-!    END DO
-!      CLOSE(24)
+!      
+!      OPEN(23,FILE='source4.out')              !OUTPUT SOURCE
+!!      WRITE(23,*) nts,ns0                     !
+!      WRITE(23,FMT=888) 999.99,(datt*float(J-1),J=1,ns0)
+!      DO I = 1, nts
+!        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,4,I)*1.,J=1,ns0)
+!      END DO
+!      CLOSE(23)
+
+      
+
 !!      ^^^^^ Attenuation ^^^^^    
 !     ======================================================
 !     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -657,7 +680,8 @@ PROGRAM STATSYN_INTEL
        ! ====================== >>
        ! Start single ray tracing while loop
        ! ====================== >>   
-       DO WHILE ((t < t2).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
+
+       DO WHILE ((t < (t2-dti*nts)).AND.(NITR < 200*nlay)) !TRACE UNTIL TIME PASSES TIME WINDOW - DOLOOP_002
        
       
        NITR = NITR + 1
@@ -957,6 +981,14 @@ PROGRAM STATSYN_INTEL
                       s2 = float(ims  )*datt
                       frac = (s-s1)/(s2-s1)
                     END IF
+                    
+                    
+                    ! UNCOMMENT TO SEE WHAT IS MAX ims*datt reached.
+                    ! If imsmax > datt*ntso, adjust datt so that imsmax can be reached.
+!                    if (ims > imsmax) THEN
+!                    imsmax = ims
+!                    WRITE(6,*) imsmax*datt
+!                    END IF
 
                       icaust = ncaust
                       DO WHILE (icaust >= 4)
@@ -995,6 +1027,7 @@ PROGRAM STATSYN_INTEL
                           JT = IT + JJ - 1
                           IF ( (JT > 0).AND.(JT <= nt0).AND.(a /= 0.) ) THEN
                             wf(ix,JT,ic) = wf(ix,JT,ic) + a * c_mult(ic) &
+                                / (cos(ang1))    &   !Geometric spreading correction factor
                                 * (   (1.-frac)*mts(ims-1,icaust,JJ) &
                                     + (   frac)*mts(ims  ,icaust,JJ) )!ATTENUATION                                    
                           END IF
@@ -1139,7 +1172,7 @@ PROGRAM STATSYN_INTEL
       
 !       CLOSE(77)
 !       CLOSE(78)
-       CLOSE(79)
+!       CLOSE(79)
 !       CLOSE(76)
       !Debug ^^
       
@@ -1217,7 +1250,7 @@ SUBROUTINE INIT_RANDOM_SEED()
 END SUBROUTINE INIT_RANDOM_SEED
       
       
-SUBROUTINE ATTENUATE(sin,sout,ndat,dt,tstar,dQdfSTYLE)
+SUBROUTINE ATTENUATE(sin,sout,southil,ndat,dt,tstar,dQdfSTYLE)
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
 !   |THIS SUBROUTINE ATTENUATES AN INPUT SIGNAL (sin) BY A VALUE (tstar) !   !
 !   |                                                                    !   !
@@ -1234,24 +1267,36 @@ SUBROUTINE ATTENUATE(sin,sout,ndat,dt,tstar,dQdfSTYLE)
       INTEGER        ndat,nfreq,npts              !# OF POINTS IN TIME & FREQ DOMAIN
       INTEGER        MAXPTS                  !MAX # OF POINTS & ITERATIONS
       PARAMETER(     MAXPTS = 16384)         !
-      REAL           xs(16384)               !SCRATCH SPACE
-      COMPLEX        xf(16384),yf(16384)     !SCRATCH SPACE
+      REAL           xs(MAXPTS)               !SCRATCH SPACE
+      COMPLEX        xf(MAXPTS),yf(MAXPTS)     !SCRATCH SPACE
       REAL           dt,df                   !TIME & FREQ SAMPLING INTERVAL
       REAL           pi                      !SET PI = 3.14....
       REAL           w,dw,dadw                    !FREQUENCY VARIABLES
       REAL           damp
-      REAL           rdQdf(16384)
-      INTEGER         dQdfSTYLE,I
+      REAL           rdQdf(MAXPTS)
+      INTEGER        dQdfSTYLE,I,shiftfactor,nfil
+      REAL           sinshift(MAXPTS),soutshift(MAXPTS),southil(*)
+      REAL           b(MAXPTS), e(MAXPTS)        !HILBERT TRANSFORM & ENVELOPE
+      
+      shiftfactor = 1000
+      sinshift(1:16384) = 0.
+      
+      DO I=1,ndat
+        sinshift(shiftfactor+I) = sin(I)
+      END DO
+
 
       
-      CALL NP2(ndat,npts)                    !FIND POWER OF TWO, npts >= ndat
+      CALL NP2(ndat+shiftfactor,npts)                    !FIND POWER OF TWO, npts >= ndat
       IF (npts > MAXPTS) THEN               !CHECK THAT ARRAY IS NOT TOO BIG
        WRITE(6,*) 'WARNING: SERIES TRUNCATED TO:',MAXPTS
        npts = MAXPTS
       END IF  
+      
 
-      CALL PADR(sin,ndat+1,npts)             !PAD SERIES WITH ZEROS
-      CALL COPYR(sin,xs,npts)                 !COPY INITIAL DENOMINATOR
+!      CALL PADR(sin,ndat+1,npts)             !PAD SERIES WITH ZEROS
+!      CALL COPYR(sin,xs,npts)                 !COPY INITIAL DENOMINATOR
+      CALL COPYR(sinshift,xs,npts)                 !COPY INITIAL DENOMINATOR
       
       CALL GET_SPEC(xs,npts,dt,xf,nfreq,df) !GET SPECTRUM OF x
       
@@ -1289,11 +1334,18 @@ SUBROUTINE ATTENUATE(sin,sout,ndat,dt,tstar,dQdfSTYLE)
       END DO
 
 
-      CALL GET_TS(yf,nfreq,df,0,sout,npts,dt) !GET TIME SERIES OF ATTENUATED SPEC
+      CALL GET_TS(yf,nfreq,df,0,soutshift,npts,dt) !GET TIME SERIES OF ATTENUATED SPEC
+      
+      nfil = 5
+      CALL TILBERT(soutshift,dt,npts,nfil,b,e)   !HILBER TRANSFORM (pi/2PHASESHFT)
+    
+    DO I=1,ndat
+     sout(I) = soutshift(shiftfactor+I)
+     southil(I) = b(shiftfactor+I)
+    END DO
     
       RETURN
 END SUBROUTINE ATTENUATE                      !END ATTENUATE
-      
 
 SUBROUTINE NP2(npts,np)
 !   | --- --------- --------- --------- --------- --------- --------- -- !   !
@@ -1349,7 +1401,9 @@ SUBROUTINE PADR(f1,n1,n2)
       END DO
       RETURN
 END SUBROUTINE padr                            !END PADR
-      
+
+
+
 ! SUBROUTINE SURFACE_PSV
 !
 !! Calculate P-SV reflection coefficients at free surface based on AKI&RICHARDS

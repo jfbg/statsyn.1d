@@ -6,9 +6,9 @@
 folder = 'AVERAGED_OUTPUTS/';
 
 list = {...
-% 'CSMOON_001_noscat_OnlyPS_B.0000.40.lpr'
-% 'CSMOON_001_noscat_OnlyPS_B.0000.40.lpt'
-% 'CSMOON_001_noscat_OnlyPS_B.0000.40.lpz'
+'CSMOON_001_noscat_OnlyPS_C.0000.40.lpr'
+'CSMOON_001_noscat_OnlyPS_C.0000.40.lpt'
+'CSMOON_001_noscat_OnlyPS_C.0000.40.lpz'
 % 'CSMOON_001_noscat_OnlyPS.0020.40.lpr'
 % 'CSMOON_001_noscat_OnlyPS.0020.40.lpt'
 % 'CSMOON_001_noscat_OnlyPS.0020.40.lpz'
