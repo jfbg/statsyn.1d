@@ -18,9 +18,9 @@ PROGRAM STATSYN_INTEL
 !
 ! 
 !
-! $Revision$
-! $Date$
-! $Author$
+! $Revision: 688 $
+! $Date: 2013-11-25 11:16:59 -0800 (Mon, 25 Nov 2013) $
+! $Author: jguertin $
 !
 !
 !
@@ -33,7 +33,7 @@ PROGRAM STATSYN_INTEL
         
         IMPLICIT NONE
         
-        INTEGER, PARAMETER :: nt0=190000, nx0=181,ns0=2001,nst0=4000
+        INTEGER, PARAMETER :: nt0=190000, nx0=361,ns0=2001,nst0=4000
         DOUBLE PRECISION      wf(nx0,nt0,3)        !STACKED DATA
         REAL(8)               w(nt0)
       
@@ -87,9 +87,9 @@ PROGRAM STATSYN_INTEL
       exNLAY = 0
 
       WRITE(*,*) 'ISOTROPIC Scattering'
-      WRITE(*,*) 'Last Edited on $Date$'
-      WRITE(*,*) 'Last Edited by $Author$'
-      WRITE(*,*) '$Revision$'
+      WRITE(*,*) 'Last Edited on $Date: 2013-11-25 11:16:59 -0800 (Mon, 25 Nov 2013) $'
+      WRITE(*,*) 'Last Edited by $Author: jguertin $'
+      WRITE(*,*) '$Revision: 688 $'
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
