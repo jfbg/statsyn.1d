@@ -23,7 +23,8 @@ modellist = {...
 % 'CSMOON_010a_noscat'
 % 'CSMOON_010b_noscat'
 % 'CSMOON_011a_noscat'
-'CSMOON_001_noscat_OnlyPS_C'
+'BSMOON_001'
+'BSMOON_002a'
 % 'CSMOON_001_noscat_OnlyPS_noatt_B'
 };
 

@@ -1,2 +1,3 @@
 #!/bin/tcsh
-qsub ./QSUB_SCRIPTS/qsub_CSMOON_001_noscat_OnlyPS_C_average.sh
+qsub ./QSUB_SCRIPTS/qsub_BSMOON_001_average.sh
+qsub ./QSUB_SCRIPTS/qsub_BSMOON_002a_average.sh
