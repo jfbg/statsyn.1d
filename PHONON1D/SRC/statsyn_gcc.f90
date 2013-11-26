@@ -95,6 +95,7 @@ PROGRAM STATSYN_INTEL
       WRITE(*,*) '************************************'
       WRITE(*,*) '*'
       WRITE(*,*) '*    Circular radiation pattern'
+      WRITE(*,*) '*    No correction for spreading'
       WRITE(*,*) '*'
       WRITE(*,*) '*    MAKE SURE TO CHECK FOR:'
       WRITE(*,*) '*      -> Decreasing layer thickness near core'
@@ -121,10 +122,12 @@ PROGRAM STATSYN_INTEL
 50    WRITE(6,'(A)') 'ENTER TIME WINDOW & SAMPLING INTERVAL (t1, t2, dt):'
       READ (5, *) t1,t2,dti                    !TIME WINDOW & # OF TIME STEPS
       nt = int((t2-t1)/dti) + 1
+      WRITE(6,*) t1,t2,dti
       
 60    WRITE(6,'(A)') 'ENTER DISTANCE RANGE (x1, x2, nx IN DEGREES):'
       READ (5,    *)  x1, x2, nx              !DISTANCE RANGE & # DISTANCE STEP
       dxi = (x2-x1)/float(nx-1)               !DISTANCE SAMPLING INTERVAL
+      WRITE(6,*) x1,x2,nx
 
       WRITE(6,'(A)') 'ENTER NUMBER OF RANDOM TRACES TO LAUNCH:'
       READ (5,    *)  ntr
@@ -1027,7 +1030,6 @@ PROGRAM STATSYN_INTEL
                           JT = IT + JJ - 1
                           IF ( (JT > 0).AND.(JT <= nt0).AND.(a /= 0.) ) THEN
                             wf(ix,JT,ic) = wf(ix,JT,ic) + a * c_mult(ic) &
-                                * (cos(ang1))**(-1)    &   !Geometric spreading correction factor
                                 * (   (1.-frac)*mts(ims-1,icaust,JJ) &
                                     + (   frac)*mts(ims  ,icaust,JJ) )!ATTENUATION                                    
                           END IF
