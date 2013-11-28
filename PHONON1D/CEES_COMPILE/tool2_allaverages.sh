@@ -1,6 +1,1 @@
-csh ./AVERAGING_SCRIPTS/BSMOON_006a_average.csh
-csh ./AVERAGING_SCRIPTS/BSMOON_007a_average.csh
-csh ./AVERAGING_SCRIPTS/BSMOON_008a_average.csh
-csh ./AVERAGING_SCRIPTS/BSMOON_009a_average.csh
-csh ./AVERAGING_SCRIPTS/BSMOON_010a_average.csh
-csh ./AVERAGING_SCRIPTS/BSMOON_010b_average.csh
+csh ./AVERAGING_SCRIPTS/BSMOON_004b_average.csh
