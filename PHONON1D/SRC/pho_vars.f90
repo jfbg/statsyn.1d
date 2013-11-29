@@ -22,7 +22,7 @@ MODULE PHO_VARS      ! Make variables global
         INTEGER       EorM                  !1=EARTH, 2=MOON
         
         ! VELOCITY MODEL CHECKS
-        INTEGER       check_scat, check_core, check_scat2, check_source
+        INTEGER       check_scat, check_core, check_scat2, check_source,check_receiver
         
         REAL(8)       t,x,xo,a,x_index
         REAL(8)       z(nlay0),vf(nlay0,2),rh(nlay0),vqdep
@@ -65,7 +65,7 @@ MODULE PHO_VARS      ! Make variables global
         REAL(8)          Q0                    !Background Qi for frequency dependent Qi
         REAL(8)          dQdf                  !Q gradient with f
         INTEGER       iz_scat,iz_from                !Vel layer in which phonon is while it's scattered
-        REAL(8)          scat_depth,scat_prob,BG_prob,SL_prob
+        REAL(8)          scat_depth,scat_prob,BG_prob,SL_prob,receiver_depth
         REAL(8)          scat_thet,scat_phi
         REAL(8)          z_mid                !Mid depth of travel between two scatterers.
         INTEGER       scat_FLAG
