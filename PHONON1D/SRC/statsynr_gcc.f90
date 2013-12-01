@@ -555,7 +555,7 @@ PROGRAM STATSYNR_INTEL
 
       !Debug vv
 !      OPEN(77,FILE='Debug_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
-!      OPEN(78,FILE='Track_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+      OPEN(78,FILE='Track_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
 !      OPEN(76,FILE='Track_p.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
 
       !Debug
@@ -648,6 +648,7 @@ PROGRAM STATSYNR_INTEL
         it_last = -999
         iztrack = iz - 1 
         t_last = t
+        t_last_record = t
         dt_track = t-t_last
         ixt_last = 1
         t_last_count = 0
@@ -957,6 +958,12 @@ PROGRAM STATSYNR_INTEL
 
           ud = 1                                !RAY NOW MUST TRAVEL down
           
+          
+!          WRITE(6,*) t,t_last_record
+          IF (t_last_record < t) THEN
+          
+          
+          
           xdiff = abs(x-xlast);
        
           !Find index for distance
@@ -975,26 +982,33 @@ PROGRAM STATSYNR_INTEL
 
 			!! FIND STATIONS THAT HAVE BEEN HIT BY TRAVELLING RAY
 			
+
 			hitstation(1:nx) = 0   !Reset station list
 			countstations = 0      !Reset counter
-			
-			 IF (x_signT == 1) THEN
-        xmin = x_index - x_signT*xdiff;
-        xmax = x_index;
-       ELSE
-        xmax = x_index - x_signT*xdiff;
-        xmin = x_index;
-       END IF
-       
-       DO J = -nx,nx*2,1
+			xmin = 0.
+			xmax = 0.
 
-        IF (((x1+dxi*(J-1))/360*circum >= xmin).AND.&
-                 &((x1+dxi*(J-1))/360*circum <= xmax)) THEN
-            countstations = countstations +1
-            hitstation(countstations) = J
-        END IF
-       END DO
-			
+		IF (xdiff > 0.) THEN			
+			 IF (x_signT == 1) THEN
+               xmin = x_index - x_signT*xdiff;
+               xmax = x_index;
+             ELSE
+               xmax = x_index - x_signT*xdiff;
+               xmin = x_index;
+             END IF
+       
+			   DO J = -10,nx+10,1
+
+				IF (((x1+dxi*(J-1))/360*circum >= xmin).AND.&
+						 &((x1+dxi*(J-1))/360*circum <= xmax)) THEN
+					countstations = countstations +1
+					hitstation(countstations) = J
+				END IF
+			   END DO
+		END IF	
+		
+		IF (countstations > 0) understation = 1
+		IF (countstations == 0) understation = 0
 
        !! FIND IF IT HIT A SURFACE STATION  
           ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
@@ -1003,7 +1017,8 @@ PROGRAM STATSYNR_INTEL
           
           
           IF ( abs(xo-x_index/deg2km) <= dreceiver) THEN
-          ! phonon is closer THEN 0.05 (dreceiver) deg to a recorder, RECORD AT SURFACE
+          ! phonon is closer THEN  dreceiver deg to a recorder, RECORD AT SURFACE
+          ! Check if station is already in the list.
             addstation = 1  
             DO J = 1,countstations
             IF (ix == hitstation(J)) addstation = 0
@@ -1037,15 +1052,15 @@ PROGRAM STATSYNR_INTEL
                     !Correction for attenuation
 		                stemp = s-dtsurf/Q(1,iwave)
 
-										IF (hitstation(J) < 1) THEN
-												ix = 1 + abs(hitstation(J)-1)
-												x_signT2 = -x_signT
-										END IF
-		
-										IF (hitstation(J) > nx) THEN
-												ix = nx - abs(hitstation(JJ)-nx)
-												x_signT2 = -x_signT
-										END IF
+					IF (hitstation(J) < 1) THEN
+							ix = 1 + abs(hitstation(J)-1)
+							x_signT2 = -x_signT  !Correct for sign if mirrored unto transmission plane
+					ELSEIF (hitstation(J) > nx) THEN
+							ix = nx - abs(hitstation(J)-nx)
+							x_signT2 = -x_signT
+					ELSE
+					        ix = hitstation(J)
+					END IF
 
          
                     IT = nint((t +dtsurf      -t1)/dti) + 1 
@@ -1053,13 +1068,13 @@ PROGRAM STATSYNR_INTEL
                     IF (Watt.eq.0) THEN  
                       ims = 2
                       frac = 0.
-                    ELSE
+                    ELSE  !Find Appropriate attenuation (include correction for time difference)
                       ims = int(stemp/datt)+1
                       IF (ims > ns0-1) ims = ns0-1
                       IF (ims <=   1) ims =   2
                       s1 = float(ims-1)*datt
                       s2 = float(ims  )*datt
-                      frac = (s-s1)/(s2-s1)
+                      frac = (stemp-s1)/(s2-s1)
                     END IF
                     
                     
@@ -1113,21 +1128,28 @@ PROGRAM STATSYNR_INTEL
                         END DO
                       END DO
                     !Debug
-                    surfcount = surfcount + countstations
+                    
                       
                     END IF
                     
           END DO
+          surfcount = surfcount + countstations
+          
+          !DEBUG
+!          WRITE(78,*) x,xlast,x_index,xmin,xmax,t,t_last,countstations,understation,hitstation(1:5)
           
           ELSE!CYCLE 1
           ! If the REAL phonon distance (x) is more than 0.05 (dreceiver) deg from the seismogram at xo,
-          ! do not record this surface hit (cycle).
+          ! and did not pas any receiver at depths (< 1km). Do not record this surface hit (cycle).
                 surCYC1 = surCYC1 +1
           END IF
+          
+          t_last_record = t
 
           !IF P or SV wave, check for P-SV reflection
           IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
-                  
+        
+        END IF          
         END IF
 
         ! RECORD IF PHONON IS AT SURFACE
@@ -1251,7 +1273,7 @@ PROGRAM STATSYNR_INTEL
       
       
 !       CLOSE(77)
-!       CLOSE(78)
+       CLOSE(78)
 !       CLOSE(79)
 !       CLOSE(76)
       !Debug ^^
@@ -2678,9 +2700,11 @@ END SUBROUTINE INTERFACE_NORMAL
       
       
 SUBROUTINE RAYTRACE
-      
+
       USE pho_vars
 !      INTEGER   init_ud
+
+	  xlast = x			!RECORD CURRENT DISTANCE BEFORE TRAVELING
       
 !      init_ud = ud
   
@@ -2698,6 +2722,7 @@ SUBROUTINE RAYTRACE
              END IF
         
           h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
+
 
           CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
           dtstr1 = dt1/Q(iz-1,iwave)                    !t* = TIME/QUALITY FACTOR
@@ -2717,14 +2742,13 @@ SUBROUTINE RAYTRACE
          !JFL --> Should this be z(iz) (FLAT z), because dx1 was calculated in the flat model
          ! totald isn't used anywhere though.
          t = t + dt1                    !TRAVEL TIME
-         xlast = x											!RECORD CURRENT DISTANCE BEFORE TRAVELING
+         
          x = x + dx1*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
         
         ELSE IF (irtr1 == 2) THEN  
          dtstr1 = dt1*2/Q(iz-1,iwave)
          totald = totald + dxi*2 !((z_s(iz)-z_s(iz-1))**2+(dx1)**2)**0.5 !DISTANCE TRAVELED IN LAYER
-         xlast = x											!RECORD CURRENT DISTANCE BEFORE TRAVELING
          t = t + dt1*2                    !TRAVEL TIME
          x = x + dx1*2*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
@@ -2746,6 +2770,8 @@ SUBROUTINE RAYTRACE_SCAT
       USE pho_vars
       IMPLICIT NONE
       REAL(8)   ztop,zbot,vtop,vbot,z_pos,vgrad
+
+      xlast = x			!RECORD CURRENT DISTANCE BEFORE TRAVELING
 
       
       !First need to interp velocities at z_act and at z_act+dh
@@ -2776,7 +2802,8 @@ SUBROUTINE RAYTRACE_SCAT
           ELSE
             ubot = 0.
           END IF
-         
+          
+
           CALL LAYERTRACE(p,dh,utop,ubot,imth,dx1,dt1,irtr1)
           
           dtstr1 = dt1/Q(iz_scat,iwave)                    !t* = TIME/QUALITY FACTOR
@@ -2788,7 +2815,6 @@ SUBROUTINE RAYTRACE_SCAT
          totald = totald + ds_scat !DISTANCE TRAVELED IN LAYER
          
          t = t + dt1                    !TRAVEL TIME
-         xlast = x											!RECORD CURRENT DISTANCE BEFORE TRAVELING
          x = x + dx1*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
         ELSE IF (irtr1 == 2) THEN
@@ -2796,7 +2822,6 @@ SUBROUTINE RAYTRACE_SCAT
          totald = totald + dx1*2 !DISTANCE TRAVELED IN LAYER
          
          t = t + dt1*2                    !TRAVEL TIME
-         xlast = x											!RECORD CURRENT DISTANCE BEFORE TRAVELING
          x = x + dx1*2*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
 

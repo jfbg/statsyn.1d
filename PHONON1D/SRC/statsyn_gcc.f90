@@ -271,7 +271,7 @@ PROGRAM STATSYN_INTEL
       
       n180 = nint(180/dxi)      !Number of intervals in 180deg
       
-      dreceiver = 0.05  !radius around receiver in which the phonons will be recorded (deg)
+      dreceiver = 1.64927397578244241E-002  !radius around receiver in which the phonons will be recorded (deg)
       tstuck = 0
       z_last_count_num = 0
       
@@ -641,6 +641,7 @@ PROGRAM STATSYN_INTEL
         it_last = -999
         iztrack = iz - 1 
         t_last = t
+        t_last_record = t
         dt_track = t-t_last
         ixt_last = 1
         t_last_count = 0
@@ -950,6 +951,9 @@ PROGRAM STATSYN_INTEL
 
           ud = 1                                !RAY NOW MUST TRAVEL down
           
+!          WRITE(6,*) t,t_last_record
+          IF (t_last_record < t) THEN
+          
           !Find index for distance
           x_index = abs(x)
           DO WHILE (x_index >= circum)
@@ -1047,9 +1051,12 @@ PROGRAM STATSYN_INTEL
                 surCYC1 = surCYC1 +1
           END IF
 
+          t_last_record = t
+
           !IF P or SV wave, check for P-SV reflection
           IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
-                  
+        
+        END IF          
         END IF
 
         ! RECORD IF PHONON IS AT SURFACE
