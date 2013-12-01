@@ -555,7 +555,7 @@ PROGRAM STATSYNR_INTEL
 
       !Debug vv
 !      OPEN(77,FILE='Debug_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
-      OPEN(78,FILE='Track_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+!      OPEN(78,FILE='Track_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
 !      OPEN(76,FILE='Track_p.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
 
       !Debug
@@ -1273,7 +1273,7 @@ PROGRAM STATSYNR_INTEL
       
       
 !       CLOSE(77)
-       CLOSE(78)
+!       CLOSE(78)
 !       CLOSE(79)
 !       CLOSE(76)
       !Debug ^^
