@@ -322,7 +322,7 @@
 ! ========= ANOTHER SUBSAMPLING =======
 
 			iz2 = 1
-			DO WHILE (qdep >= z_s(iz2+1))      !FIND WHICH LAYER THE SCAT LAYER IS ON
+			DO WHILE (qdep >= z_s(iz2+1))      !FIND WHICH LAYER THE SOURCE IS ON
 			 iz2 = iz2 +1														 
 			END DO
 			IF (qdep <= 0.02) iz2 = 1
@@ -332,7 +332,7 @@
 			if (sourcenext < 10.) sourcenext = 10
 		  sourcenext = 10
 		  
-			dsamp = .25
+			dsamp = 1.
 			
 			z_st = z_s
 			r_st = r_s
