@@ -21,10 +21,19 @@ MODULE PHO_VARS      ! Make variables global
         
         INTEGER       EorM                  !1=EARTH, 2=MOON
         
+        
+        !EXTRA VARIABLES FOR DEEP RECEIVERS
+        
+        INTEGER           hitstation(1000),addstation
+        INTEGER           x_signT,x_signT2,countstations
+        REAL(8)           xdiff,stemp,xlast
+
+        
+            
         ! VELOCITY MODEL CHECKS
         INTEGER       check_scat, check_core, check_scat2, check_source,check_receiver
         
-        REAL(8)       t,x,xo,a,x_index
+        REAL(8)       t,x,xo,a,x_index,x_last
         REAL(8)       z(nlay0),vf(nlay0,2),rh(nlay0),vqdep
         REAL(8)       z_st(nlay0),r_st(nlay0),vst(nlay0,2),rht(nlay0)
         REAL(8)       z_s(nlay0),r_s(nlay0),vs(nlay0,2),rhs(nlay0)
@@ -52,7 +61,7 @@ MODULE PHO_VARS      ! Make variables global
         
         ! SURFACE HIT
         REAL(8)          dtsurf   !Time difference for phonon hitting some distance away from receiver 
-        REAL(8)          dreceiver !radius around receiver in which the phonons will be recorded (deg)
+        REAL(8)          dreceiver,dreceiver_km !radius around receiver in which the phonons will be recorded (deg)
         
         ! SCATTERING
         REAL(8)          dsmin, dsmax, npow    !power law factor for scatterer length-scales
@@ -114,6 +123,7 @@ MODULE PHO_VARS      ! Make variables global
         INTEGER        :: t_last_count,tstuck
         REAL(8)        :: ubot, utop !! Bottom & Top slowness
         REAL(8)        :: x1, x2     !! Distance bounds
+        REAL(8)        :: xmin, xmax     !! Distance bounds when hit surface
         
         REAL(8)           c_mult(3)
         CHARACTER*3    cmp(3)

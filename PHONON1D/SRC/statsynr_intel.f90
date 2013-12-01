@@ -30,7 +30,7 @@ PROGRAM STATSYNR_INTEL
         
         ! All declarations in pho_vars except debugging and some source variables
         USE pho_vars
-        USE IFPORT
+        !USE IFPORT
         
         IMPLICIT NONE
         
@@ -272,7 +272,9 @@ PROGRAM STATSYNR_INTEL
       
       n180 = nint(180/dxi)      !Number of intervals in 180deg
       
-      dreceiver = 0.05  !radius around receiver in which the phonons will be recorded (deg)
+      dreceiver_km = 0.5  !radius around receiver in which the phonons will be recorded (km)
+      receiver_depth = dreceiver_km*2
+      
       tstuck = 0
       z_last_count_num = 0
       
@@ -301,6 +303,9 @@ PROGRAM STATSYNR_INTEL
       
       WRITE(6,*) 'End of Checks'
       WRITE(6,*) ''    
+      
+      dreceiver = dreceiver_km / circum * 360 ! dreceiver in degrees.
+      WRITE(6,*) 'Receiver width and depth (deg & km)',dreceiver,dreceiver_km
 !      ^^^^^ CHECKS  ^^^^^        
       
 
@@ -610,6 +615,7 @@ PROGRAM STATSYNR_INTEL
         ! Initialize parameters
         t = 0.                                 !SET START TIME = ZERO
         x = 0.                                 !START LOCATION = ZERO
+        xlast = 0.
         s = 0.                                 !SET START ATTENUATION = ZERO
         a = 1.                                 !START AMPLITUDE = 1.
         ! a    = cos(ang1*2.-pi/4.)              !SOURCE AMPLITUDE
@@ -951,25 +957,95 @@ PROGRAM STATSYNR_INTEL
 
           ud = 1                                !RAY NOW MUST TRAVEL down
           
+          xdiff = abs(x-xlast);
+       
           !Find index for distance
           x_index = abs(x)
           DO WHILE (x_index >= circum)
             x_index = x_index - circum
           END DO
-          
-          IF (x_index >= circum/2) x_index = x_index - 2*(x_index-circum/2)
+         
+          IF (x_index >= circum/2) THEN  !Reflect back on other half place
+            x_index = x_index - 2*(x_index-circum/2)
+            x_signT = -x_sign !shift recorded direction
+          ELSE
+            x_signT = x_sign
+          END IF
+
+
+			!! FIND STATIONS THAT HAVE BEEN HIT BY TRAVELLING RAY
+			
+			hitstation(1:nx) = 0   !Reset station list
+			countstations = 0      !Reset counter
+			
+			 IF (x_signT == 1) THEN
+        xmin = x_index - x_signT*xdiff;
+        xmax = x_index;
+       ELSE
+        xmax = x_index - x_signT*xdiff;
+        xmin = x_index;
+       END IF
+       
+       DO J = -nx,nx*2,1
+
+        IF (((x1+dxi*(J-1))/360*circum >= xmin).AND.&
+                 &((x1+dxi*(J-1))/360*circum <= xmax)) THEN
+            countstations = countstations +1
+            hitstation(countstations) = J
+        END IF
+       END DO
+			
+
+       !! FIND IF IT HIT A SURFACE STATION  
           ix = nint((x_index/deg2km-x1)/dxi) + 1      !EVENT TO SURFACE HIT DISTANCE 
 
           xo = x1 + float(ix-1)*dxi          !Distance_index in degrees
           
+          
           IF ( abs(xo-x_index/deg2km) <= dreceiver) THEN
-
-
-            ! phonon is closer THEN 0.05 (dreceiver) deg to a recorder, RECORD AT SURFACE    
+          ! phonon is closer THEN 0.05 (dreceiver) deg to a recorder, RECORD AT SURFACE
+            addstation = 1  
+            DO J = 1,countstations
+            IF (ix == hitstation(J)) addstation = 0
+            END DO
+    
+          IF (addstation == 1) THEN
+            countstations = countstations + 1
+            hitstation(countstations) = ix
+          END IF
+          END IF
+          
+          IF (countstations > 0) THEN
+          
+!          IF (countstations > 1) THEN
+          !DEBUG
+!          WRITE(6,*)  ''
+!          WRITE(6,*)  'HITS vvvvvvvvvvvvvvvvvvv',I
+!          WRITE(6,*)  xlast,x,x_index,xmin,xmax
+!          WRITE(6,*)  countstations,hitstation(1:countstations)
+!          WRITE(6,*)  asin(p*vf(1,iwave)),asin(p*vf(1,iwave))/2/pi*360
+!          WRITE(6,*)  '==============='          
+!          END IF
+          
+          DO J = 1,countstations
+                
+                    x_signT2 = x_signT;
 
                     !Time correction if phonon doesn't hit the surface
-                    ! right on the receiver. Max time is when ang1 is 90.          
-                    dtsurf = (xo-x_index/deg2km)*deg2km*p 
+                    ! right on the receiver.                              
+                    dtsurf = (abs((x1+dxi*(hitstation(J)-1))/360*circum - x_index))*p
+                    !Correction for attenuation
+		                stemp = s-dtsurf/Q(1,iwave)
+
+										IF (hitstation(J) < 1) THEN
+												ix = 1 + abs(hitstation(J)-1)
+												x_signT2 = -x_signT
+										END IF
+		
+										IF (hitstation(J) > nx) THEN
+												ix = nx - abs(hitstation(JJ)-nx)
+												x_signT2 = -x_signT
+										END IF
 
          
                     IT = nint((t +dtsurf      -t1)/dti) + 1 
@@ -978,7 +1054,7 @@ PROGRAM STATSYNR_INTEL
                       ims = 2
                       frac = 0.
                     ELSE
-                      ims = int(s/datt)+1
+                      ims = int(stemp/datt)+1
                       IF (ims > ns0-1) ims = ns0-1
                       IF (ims <=   1) ims =   2
                       s1 = float(ims-1)*datt
@@ -1006,17 +1082,17 @@ PROGRAM STATSYNR_INTEL
           
                     IF ( (IT > 1-nts).and.(IT <= nt0+nts) ) THEN
                       IF ( (ip == 1) ) THEN 
-                        c_mult(1) = cos(ang1)           * ud     !! Vertical Amp from P wave
-                        c_mult(2) = sin(ang1) * sin(az) * x_sign !! Tangential Amp from P wave
-                        c_mult(3) = sin(ang1) * cos(az) * x_sign !! Radial Amp for P wave
+                        c_mult(1) = cos(ang1)           * ud       !! Vertical Amp from P wave
+                        c_mult(2) = sin(ang1) * sin(az) * x_signT2 !! Tangential Amp from P wave
+                        c_mult(3) = sin(ang1) * cos(az) * x_signT2 !! Radial Amp for P wave
                       ELSE IF (ip == 2) THEN
-                        c_mult(1) = sin(ang1)           * ud     !! Vertical amp for SV
-                        c_mult(2) = cos(ang1)*sin(az)   * x_sign !! Tangential amp for SV
-                        c_mult(3) = cos(ang1)*cos(az)   * x_sign !! Radial amp for SV
+                        c_mult(1) = sin(ang1)           * ud       !! Vertical amp for SV
+                        c_mult(2) = cos(ang1)*sin(az)   * x_signT2 !! Tangential amp for SV
+                        c_mult(3) = cos(ang1)*cos(az)   * x_signT2 !! Radial amp for SV
                       ELSE IF (ip == 3) THEN
-                        c_mult(1) = 0.                   !! Vertical Amp for SH
-                        c_mult(2) = cos(az)             * x_sign !! Tangential Amp for SH
-                        c_mult(3) = sin(az)             * x_sign !! Radial Amp for SH
+                        c_mult(1) = 0.                             !! Vertical Amp for SH
+                        c_mult(2) = cos(az)             * x_signT2 !! Tangential Amp for SH
+                        c_mult(3) = sin(az)             * x_signT2 !! Radial Amp for SH
                       END IF
                       
         
@@ -1037,10 +1113,11 @@ PROGRAM STATSYNR_INTEL
                         END DO
                       END DO
                     !Debug
-                    surfcount = surfcount +1
+                    surfcount = surfcount + countstations
                       
                     END IF
                     
+          END DO
           
           ELSE!CYCLE 1
           ! If the REAL phonon distance (x) is more than 0.05 (dreceiver) deg from the seismogram at xo,
@@ -1486,7 +1563,7 @@ SUBROUTINE SURFACE_PSV_BEN
 ! Calculate P-SV reflection coefficients at free surface based on BEN-MENAHEM (p.480)
 
       USE pho_vars
-      USE IFPORT
+      !USE IFPORT
       IMPLICIT NONE
       
       COMPLEX(8)    velP,velS,angP,angS,D1
@@ -1640,7 +1717,7 @@ END SUBROUTINE RTCOEF_SH
 SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
                          rrp,rrs,rtp,rts,ip,ud,amp,cons_EorA)
                          
-      USE IFPORT
+      !USE IFPORT
                          
       IMPLICIT     NONE
       REAL(8)      vp1,vs1,den1,vp2,vs2,den2     !VELOCITY & DENSITY
@@ -1772,7 +1849,7 @@ END SUBROUTINE RTCOEF_PSV
 SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
 
 ! Going from Mantle to Core, solid to liquid
-      USE IFPORT
+      !USE IFPORT
 
       IMPLICIT NONE
 
@@ -1892,7 +1969,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
 
 ! Going from Core to Mantle, liquid to solid
 
-      USE IFPORT
+      !USE IFPORT
 
       IMPLICIT NONE
 
@@ -2640,14 +2717,16 @@ SUBROUTINE RAYTRACE
          !JFL --> Should this be z(iz) (FLAT z), because dx1 was calculated in the flat model
          ! totald isn't used anywhere though.
          t = t + dt1                    !TRAVEL TIME
-         x = x + dx1*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
+         xlast = x											!RECORD CURRENT DISTANCE BEFORE TRAVELING
+         x = x + dx1*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
         
         ELSE IF (irtr1 == 2) THEN  
          dtstr1 = dt1*2/Q(iz-1,iwave)
          totald = totald + dxi*2 !((z_s(iz)-z_s(iz-1))**2+(dx1)**2)**0.5 !DISTANCE TRAVELED IN LAYER
+         xlast = x											!RECORD CURRENT DISTANCE BEFORE TRAVELING
          t = t + dt1*2                    !TRAVEL TIME
-         x = x + dx1*2*x_sign*cos(az)     !EPICENTRAL DISTANCE TRAVELED-km
+         x = x + dx1*2*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
          
         END IF
@@ -2709,6 +2788,7 @@ SUBROUTINE RAYTRACE_SCAT
          totald = totald + ds_scat !DISTANCE TRAVELED IN LAYER
          
          t = t + dt1                    !TRAVEL TIME
+         xlast = x											!RECORD CURRENT DISTANCE BEFORE TRAVELING
          x = x + dx1*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
         ELSE IF (irtr1 == 2) THEN
@@ -2716,6 +2796,7 @@ SUBROUTINE RAYTRACE_SCAT
          totald = totald + dx1*2 !DISTANCE TRAVELED IN LAYER
          
          t = t + dt1*2                    !TRAVEL TIME
+         xlast = x											!RECORD CURRENT DISTANCE BEFORE TRAVELING
          x = x + dx1*2*x_sign*abs(cos(az))     !EPICENTRAL DISTANCE TRAVELED-km
          s = s + dtstr1                 !CUMULATIVE t*
 
@@ -2723,7 +2804,6 @@ SUBROUTINE RAYTRACE_SCAT
         
         !FIX NEXT IF FOR DIFFRACTED WAVES: 
         IF (irtr1 == 2) THEN             !RAY TURNS IN LAYER FOLLOW 1 LEN
-!        WRITE(6,*) 'HAHKJLASKLJHASKLHJGASFBJABGASFBKYASBGKLAJSGBLKASGFBLKUASHF ======<<<<<<'
         ud = -ud
         ncaust = ncaust + 1                   !# OF CAUSTICS
         END IF
@@ -2739,7 +2819,7 @@ SUBROUTINE GET_DS_SCAT
       !The output dscat has been
       
       USE pho_vars      
-      USE IFPORT
+      !USE IFPORT
       
       IMPLICIT NONE
       REAL(8)     rt,z_ft,fac,bg_sl,z_nf
@@ -2815,7 +2895,7 @@ END SUBROUTINE GET_DS_SL
 
 SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh,cons_EorA)
 
-      USE IFPORT
+      !USE IFPORT
       IMPLICIT NONE
       
       INTEGER, PARAMETER :: nlay0=4000

@@ -9,17 +9,24 @@
       
       !MODEL CHECKS
 			check_scat = 1
+			check_receiver = 1
 			check_scat2 = 0
 			check_core = 1
 			check_source = 1
       
       OPEN(1,FILE=ifile,STATUS='OLD')    !OPEN SEISMIC VELOCITY MODEL
       
+      WRITE(6,*) 'RECEIVER DEPTH ===========>',receiver_depth
+      
       DO I = 1, nlay0                     !READ IN VELOCITY MODEL
        READ(1,*,IOSTAT=status) z_st(I),r_st(I),vst(I,1),vst(I,2),rht(I),Qt(I)
        IF (z_st(I) == scat_depth) THEN
           check_scat = 0		!Velocity layer depth is same as scattering layer.   
           WRITE(6,*) '     ** Already a layer at the base of the scattering layer'
+       END IF
+       IF (z_st(I) == receiver_depth) THEN
+          check_receiver = 0		!There is a layer at the receiver depth   
+          WRITE(6,*) '     ** Already a layer at the base of the receiver layer'
        END IF
 !       IF (r_st(I) == corelayer) THEN
 !          check_core = 0		!Velocity layer depth is same as corelayer.   
@@ -50,14 +57,14 @@
       
       iz1 = 1
 			DO WHILE (scat_depth >= z_st(iz1+1))      !FIND WHICH LAYER THE SCAT LAYER IS ABOVE
-			 iz1 = iz1 +1														 !NEW VEL LAYER WILL BE AT (iz1 + 1)
+			 iz1 = iz1 +1														  !NEW VEL LAYER WILL BE AT (iz1 + 1)
 			END DO
 			WRITE(6,*) '     ** Scattering layer at or below initial layer:', iz1
 			
 			
 
       nlay = I + check_scat + check_core ! NUMBER OF LAYERS
-      																	 ! Layers are added if checks failed.
+									     																	  ! Layers are added if checks failed.
       
 			IF (nlay > I) THEN																	 
 			! BUILD MODEL 
@@ -135,7 +142,7 @@
 			
 			
 			iz2 = 1
-			DO WHILE (qdep >= z_s(iz2+1))      !FIND WHICH LAYER THE SCAT LAYER IS ABOVE
+			DO WHILE (qdep >= z_s(iz2+1))      !FIND WHICH LAYER THE SOURCE IS ABOVE
 			 iz2 = iz2 +1														 !NEW VEL LAYER WILL BE AT (iz1 + 1)
 			END DO
 			WRITE(6,*) '     ** Source is in or on initial layer:', iz2
@@ -191,7 +198,56 @@
 			END IF
 			
 			
-			! Subsampling the layers around the source
+			! Adding a layer under the receivers
+			IF (check_receiver == 1) THEN
+				z_st = z_s
+				r_st = r_s
+				vst = vs
+				rht = rh
+				DO I = 1,nlay
+				  Qt(I) = Q(I,1)
+				END DO
+				
+				nlay = nlay+1
+				
+				iz2 = 1; !Add new layer under the surface layer.
+				
+				
+				DO K = 1,nlay !one new layer for the source
+					IF (K <= iz2) THEN
+					 z_s(K) = z_st(K)
+					 r_s(K) = r_st(K)
+					 vs(K,1) = vst(K,1)
+					 vs(K,2) = vst(K,2)
+					 rh(K) = rht(K)
+					 Q(K,1) = Qt(K)
+					END IF
+					
+					IF (K == iz2 +1) THEN
+					 WRITE(6,*) '     ** Adding velocity layer at the receiver depth:', receiver_depth
+							z_s(K) = receiver_depth
+							r_s(K) = erad-receiver_depth
+							vs(K,1) = (vst(K,1)-vst(K-1,1))/(z_st(K) - z_st(K-1)) * (receiver_depth - z_st(K-1)) + vst(K-1,1)
+							vs(K,2) = (vst(K,2)-vst(K-1,2))/(z_st(K) - z_st(K-1)) * (receiver_depth - z_st(K-1)) + vst(K-1,2)
+							rh(K) = (rht(K)-rht(K-1))/(z_st(K) - z_st(K-1)) * (receiver_depth - z_st(K)) + rht(K)
+							Q(K,1) = (Qt(K)-Qt(K-1))/(z_st(K) - z_st(K-1)) * (receiver_depth - z_st(K)) + Qt(K)
+					END IF
+					
+					IF (K > iz2 + 1) THEN
+							z_s(K) = z_st(K-1)
+							r_s(K) = r_st(K-1)
+							vs(K,1) = vst(K-1,1)
+							vs(K,2) = vst(K-1,2)
+							rh(K) = rht(K-1)
+							Q(K,1) = Qt(K-1)
+					END IF
+					
+				END DO
+			END IF
+			
+			
+
+			!================ Subsampling the layers around the source
 			
 			iz2 = 1
 			DO WHILE (qdep >= z_s(iz2+1))      !FIND WHICH LAYER THE SCAT LAYER IS ON
