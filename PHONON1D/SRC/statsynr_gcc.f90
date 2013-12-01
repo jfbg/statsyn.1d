@@ -305,7 +305,7 @@ PROGRAM STATSYNR_INTEL
       WRITE(6,*) ''    
       
       dreceiver = dreceiver_km / circum * 360 ! dreceiver in degrees.
-      WRITE(6,*) 'Receiver width and depth (deg & km)',dreceiver,dreceiver_km
+      WRITE(6,*) 'Receiver width and depth/2 (deg & km)',dreceiver,dreceiver_km
 !      ^^^^^ CHECKS  ^^^^^        
       
 
