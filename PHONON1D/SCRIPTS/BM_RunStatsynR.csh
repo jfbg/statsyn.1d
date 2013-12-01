@@ -36,9 +36,9 @@ set model_name = "CSIMPLEMOON_basic"
 #set model_name = "SIMPLEMOON_basic_10km"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
-@ n_depth = 1     ## Number of depths to use
+@ n_depth = 3     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 1    ## Number of kernels to use per iteration (simultaneous run)
+@ n_kern  = 16    ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 1     ## Number of iterations
 
 # Output folder
@@ -78,7 +78,7 @@ while ($i < $n_depth)
 if ($i == 1) then
  set q_depth = 20
 else if ($i == 2) then
- set q_depth = 20
+ set q_depth = 0.01
 else
  set q_depth = 1000
 endif
