@@ -263,7 +263,7 @@
 			if (sourcenext < 10.) sourcenext = 10
 		  sourcenext = 1737
 		  
-			dsamp = 20.   !Set maximum thickness of each layer. If layer is thicker, it will be broken down.
+			dsamp = 10.   !Set maximum thickness of each layer. If layer is thicker, it will be broken down.
 			
 			z_st = z_s
 			r_st = r_s
