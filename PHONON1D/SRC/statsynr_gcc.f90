@@ -34,7 +34,7 @@ PROGRAM STATSYNR_INTEL
         
         IMPLICIT NONE
         
-        INTEGER, PARAMETER :: nt0=190000, nx0=181,ns0=2001,nst0=4000
+        INTEGER, PARAMETER :: nt0=190000, nx0=361,ns0=2001,nst0=4000
         DOUBLE PRECISION      wf(nx0,nt0,3)        !STACKED DATA
         REAL(8)               w(nt0)
       
@@ -96,7 +96,7 @@ PROGRAM STATSYNR_INTEL
       WRITE(*,*) '************************************'
       WRITE(*,*) '*'
       WRITE(*,*) '*    Circular radiation pattern'
-      WRITE(*,*) '*    No correction for spreading'
+      WRITE(*,*) '*    Receivers are 1km wide x 1 km deep'
       WRITE(*,*) '*'
       WRITE(*,*) '*    MAKE SURE TO CHECK FOR:'
       WRITE(*,*) '*      -> Decreasing layer thickness near core'

@@ -96,7 +96,7 @@ PROGRAM STATSYNR_INTEL
       WRITE(*,*) '************************************'
       WRITE(*,*) '*'
       WRITE(*,*) '*    Circular radiation pattern'
-      WRITE(*,*) '*    No correction for spreading'
+      WRITE(*,*) '*    Receivers are 1km wide x 1 km deep'
       WRITE(*,*) '*'
       WRITE(*,*) '*    MAKE SURE TO CHECK FOR:'
       WRITE(*,*) '*      -> Decreasing layer thickness near core'
