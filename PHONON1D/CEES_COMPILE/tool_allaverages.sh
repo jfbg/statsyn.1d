@@ -1,6 +1,3 @@
 csh ./AVERAGING_SCRIPTS/RSMOON_001_average.csh
-csh ./AVERAGING_SCRIPTS/RSMOON_002a_average.csh
-csh ./AVERAGING_SCRIPTS/RSMOON_004a_average.csh
 csh ./AVERAGING_SCRIPTS/RSMOON_008a_average.csh
 csh ./AVERAGING_SCRIPTS/RSMOON_010b_average.csh
-csh ./AVERAGING_SCRIPTS/RSMOON_011a_average.csh
