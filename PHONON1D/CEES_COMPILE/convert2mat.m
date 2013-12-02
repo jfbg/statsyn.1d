@@ -6,7 +6,9 @@
 folder = 'AVERAGED_OUTPUTS/';
 
 list = {...
-'BM_EARTHPREM_SPIKE_100km_dt05_CEES_D.0100.20.lpr'
+'BM_TEST.0100.20.lpr'
+'BM_TEST.0100.20.lpz'
+'BM_TEST.0100.20.lpt'
 % 'BSMOON_001.0000.40.lpt'
 % 'BSMOON_001.0000.40.lpz'
 % 'BSMOON_002a.0000.40.lpr'
