@@ -13,6 +13,9 @@
 			check_scat2 = 0
 			check_core = 1
 			check_source = 1
+			
+      dreceiver_km = 0.5  !radius around receiver in which the phonons will be recorded (km)
+      receiver_depth = dreceiver_km*2
       
       OPEN(1,FILE=ifile,STATUS='OLD')    !OPEN SEISMIC VELOCITY MODEL
       

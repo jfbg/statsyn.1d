@@ -271,7 +271,8 @@ PROGRAM STATSYN_INTEL
       
       n180 = nint(180/dxi)      !Number of intervals in 180deg
       
-      dreceiver = 1.64927397578244241E-002  !radius around receiver in which the phonons will be recorded (deg)
+!      dreceiver = 1.64927397578244241E-002  !radius around receiver in which the phonons will be recorded (deg)
+      dreceiver = 0.05  !radius around receiver in which the phonons will be recorded (deg)      
       tstuck = 0
       z_last_count_num = 0
       

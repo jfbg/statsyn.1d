@@ -13,7 +13,7 @@ set n_phonon   = "5000000"
 set dQdfstyle  = 1
 set sourcetype = 3    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
-set rPrSVrSH   = "1 .5 .5"  # Energy partioning at source
+set rPrSVrSH   = "1 10 10"  # Energy partioning at source
 set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
 
 # Code Parameters

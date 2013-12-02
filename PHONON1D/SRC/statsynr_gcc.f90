@@ -272,8 +272,7 @@ PROGRAM STATSYNR_INTEL
       
       n180 = nint(180/dxi)      !Number of intervals in 180deg
       
-      dreceiver_km = 0.5  !radius around receiver in which the phonons will be recorded (km)
-      receiver_depth = dreceiver_km*2
+
       
       tstuck = 0
       z_last_count_num = 0
