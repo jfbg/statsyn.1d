@@ -14,25 +14,39 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-% 'BM_EARTHPREM_SPIKE_100km_dt05_CEES_C'
-% 'CSMOON_001_noscat'
-% 'CSMOON_005a_noscat'
-% 'CSMOON_006a_noscat'
-% 'CSMOON_007a_noscat'
-% 'CSMOON_008a_noscat'
-% 'CSMOON_010a_noscat'
-% 'CSMOON_010b_noscat'
-% 'CSMOON_011a_noscat'
-% 'CSMOON_001_noscat_OnlyPS_B'
-'CSMOON_001_noscat_OnlyPS_noatt_B'
+'RSMOON_001'
+'RSMOON_001_0000km'
+'RSMOON_002a'
+'RSMOON_002a_0000km'
+'RSMOON_004a'
+'RSMOON_004a_0000km'
+'RSMOON_008a'
+'RSMOON_008a_0000km'
+'RSMOON_010b'
+'RSMOON_010b_0000km'
+'RSMOON_011a'
+'RSMOON_011a_0000km'
+'RSMOON_012a'
+'RSMOON_012a_0000km'
+'RSMOON_012c'
+'RSMOON_012c_0000km'
+'RVPREM_001_07Hz'
+'RVPREM_001_07Hz_0000km'
+'RVPREM_001_40Hz'
+'RVPREM_001_40Hz_0000km'
+'RVPREM_002_07Hz'
+'RVPREM_002_07Hz_0000km'
+'RVPREM_002_40Hz'
+'RVPREM_002_40Hz_0000km'
 };
 
 % depths = .01;
-% depths = [.01 20 50 100 150 800 500 750 1000]; % All potential depths
-depths = [0.01];
+% depths = [.01 20 30 50 100 150 800 500 750 1000]; % All potential depths
+depths = [15 30 60]; % All potential depths
+% depths = [0.01];
 freqs = [7 40 5 20];                     % All potential frequencies
 kerns = 16;                 
-iters = 1;
+iters = 5;
 
 outputfolder = '../OUTPUT/';
 scriptfolder = './AVERAGING_SCRIPTS/';

@@ -14,22 +14,23 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-% 'BM_EARTHPREM_SPIKE_100km_dt05_CEES_C'
-% 'CSMOON_001_noscat'
-% 'CSMOON_005a_noscat'
-% 'CSMOON_006a_noscat'
-% 'CSMOON_007a_noscat'
-% 'CSMOON_008a_noscat'
-% 'CSMOON_010a_noscat'
-% 'CSMOON_010b_noscat'
-% 'CSMOON_011a_noscat'
-'BM_TEST'
-% 'BSMOON_002a'
-% 'CSMOON_001_noscat_OnlyPS_noatt_B'
+'RSMOON_001'
+'RSMOON_002a'
+'RSMOON_004a'
+'RSMOON_008a'
+'RSMOON_010b'
+'RSMOON_011a'
+'RSMOON_012a'
+'RSMOON_012c'
+'RVPREM_001'
+'RVPREM_001'
+'RVPREM_002'
+'RVPREM_002'
 };
 
 % depths = .01;
-depths = [.01 20 50 100 150 800 500 750 1000]; % All potential depths
+% depths = [.01 20 30 50 100 150 800 500 750 1000]; % All potential depths
+depths = [15 30 60 .01 1000]; % All potential depths
 % depths = [0.01];
 freqs = [7 40 5 20];                     % All potential frequencies
 kerns = 16;                 
