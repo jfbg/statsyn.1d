@@ -14,27 +14,16 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-'RSMOON_001'
-'RSMOON_002a'
-'RSMOON_004a'
-'RSMOON_008a'
-'RSMOON_010b'
-'RSMOON_011a'
-'RSMOON_012a'
-'RSMOON_012c'
-'RVPREM_001'
-'RVPREM_001'
-'RVPREM_002'
-'RVPREM_002'
+'BM_TEST'
 };
 
 % depths = .01;
 % depths = [.01 20 30 50 100 150 800 500 750 1000]; % All potential depths
-depths = [15 30 60 .01 1000]; % All potential depths
+depths = [100]; % All potential depths
 % depths = [0.01];
-freqs = [7 40 5 20];                     % All potential frequencies
+freqs = [20];                     % All potential frequencies
 kerns = 16;                 
-iters = 5;
+iters = 7;
 
 outputfolder = '../OUTPUT/';
 scriptfolder = './AVERAGING_SCRIPTS/';
@@ -44,7 +33,7 @@ qsubfolder = './QSUB_SCRIPTS/';
 
 fidqsub = fopen('qsub_allaverages.sh','w');
 fprintf(fidqsub,'#!/bin/tcsh\n');
-fidall = fopen('tool_allaverages.sh','w');
+fidall = fopen('tool3_allaverages.sh','w');
 
 
 %% Generate list files + .csh script
