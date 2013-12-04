@@ -1,2 +1,2 @@
 #!/bin/tcsh
-qsub ./QSUB_SCRIPTS/qsub_RVPREM_001_average.sh
+qsub ./QSUB_SCRIPTS/qsub_RSMOON_012a_average.sh
