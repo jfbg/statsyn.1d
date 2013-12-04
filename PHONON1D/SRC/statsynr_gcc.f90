@@ -354,7 +354,7 @@ PROGRAM STATSYNR_INTEL
       
       CLOSE(15)
       
-4444  FORMAT (8(f10.4,2x))
+4444  FORMAT (8(f12.4,2x))
       
 
 !      ----- Convert depths to flat depth -----
@@ -554,7 +554,7 @@ PROGRAM STATSYNR_INTEL
 
       !Debug vv
 !      OPEN(77,FILE='Debug_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
-!      OPEN(78,FILE='Track_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
+      OPEN(78,FILE='Track_x.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
 !      OPEN(76,FILE='Track_p.txt',STATUS='UNKNOWN')    !OPEN OUTPUT FILE
 
       !Debug
@@ -678,7 +678,11 @@ PROGRAM STATSYNR_INTEL
              IF (Cindex > Cnp) Cindex   = Cindex - Cnp
           ENDIF
         ELSE    !IF (samplingtype.eq.1) THEN      ! Sample Angles
-          ang1 = angst*r0         !Randomly select angle
+!          ang1 = angst*r0         !Randomly select angle
+          !DEBUG
+          ang1 = 75+14.5/50*I         !Randomly select angle
+          WRITE(6,*) '!!!!!!!!!!!!!!!!!!',ang1
+          ang1 = ang1/180*pi
           p    = abs(sin(ang1))/vf(iz_p,iwave)
         END IF
         
@@ -705,7 +709,7 @@ PROGRAM STATSYNR_INTEL
        z_last = z_act
        
        !DEBUG
-!       IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1,irtr1
+       IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1,irtr1
       
       
         ! ============ >>
@@ -871,14 +875,14 @@ PROGRAM STATSYNR_INTEL
                               IF (r0 < scat_prob) THEN
                               
                               !DEBUG
-                              WRITE(6,*) ''
-                              WRITE(6,*) ip,p,az,x_sign,ud,asin(p*vf(1,iwave))/pi*180
+!                              WRITE(6,*) ''
+!                              WRITE(6,*) ip,p,az,x_sign,ud,asin(p*vf(1,iwave))/pi*180
                               
                                  CALL REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh,cons_EorA)   !Scatter
                                  
                               !DEBUG
-                              WRITE(6,*) ip,p,az,x_sign,ud,asin(p*vf(1,iwave))/pi*180
-	                          WRITE(6,*) ''
+!                              WRITE(6,*) ip,p,az,x_sign,ud,asin(p*vf(1,iwave))/pi*180
+!	                          WRITE(6,*) ''
                               END IF                            
                               
                               ! Calculate new ds_SL based on new ud and p (if it got scattered)
@@ -897,7 +901,7 @@ PROGRAM STATSYNR_INTEL
 
 
                      !DEBUG
-!                     IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2,irtr1
+                     IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,2,irtr1
                                             
       
                     END DO
@@ -963,6 +967,9 @@ PROGRAM STATSYNR_INTEL
         ! ============ >>
         ! RECORD IF PHONON IS AT SURFACE
          IF (iz == 1) THEN
+         
+         !DEBUG
+         t = 9999999.
 
           ud = 1                                !RAY NOW MUST TRAVEL down
           
@@ -1281,7 +1288,7 @@ PROGRAM STATSYNR_INTEL
       
       
 !       CLOSE(77)
-!       CLOSE(78)
+       CLOSE(78)
 !       CLOSE(79)
 !       CLOSE(76)
       !Debug ^^

@@ -13,7 +13,7 @@ set n_phonon   = "5000000"
 set dQdfstyle  = 1
 set sourcetype = 9    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
-set rPrSVrSH   = "1 0 0"  # Energy partioning at source
+set rPrSVrSH   = "1 1 1"  # Energy partioning at source
 set samtype    = 3   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
 
 # Code Parameters
@@ -31,13 +31,13 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "BM_EARTHPREM_SPIKE_100km_EXP_noATT_RS"
-set model_name = "EARTH_MODEL"
+set file_out   = "BM_MOON2LAYERS_bpSPIKE_700km_noATT_ENERGY_RS"
+set model_name = "MOON2LAYERS"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 16    ## Number of kernels to use per iteration (simultaneous run)
+@ n_kern  = 16   ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 4     ## Number of iterations
 
 # Output folder
@@ -48,7 +48,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 #cd SRC
-#make statsyn_gcc_earth.x
+#make statsyn_gcc_moon.x
 #cd ..
 
 
@@ -75,7 +75,7 @@ endif
 while ($i < $n_depth)
 @ i = $i + 1
 if ($i == 1) then
- set q_depth = 100
+ set q_depth = 700
 else if ($i == 2) then
  set q_depth = 20
 else
@@ -112,7 +112,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsyn_intel_BM_Earth << EOF"                         >  $file_csh
+echo "./bin/statsyn_intel_BM_Moon << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
 echo "$t_start $t_max $dt \!LIMIT THE TIME WINDOW (SECONDS) " >> $file_csh

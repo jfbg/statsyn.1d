@@ -1,19 +1,9 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_RSMOON_001_0000km_noscat.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTHPREM_SPIKE_100km_EXP_noATT_RS.sh
 sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_RSMOON_001_noscat.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTHPREM_SPIKE_100km_EXP_RS.sh
 sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_RSMOON_012a_0000km_noscat.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_RSMOON_012a_noscat.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_RVPREM_001_07Hz_0000km_noscat.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_RVPREM_001_07Hz_noscat.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_RVPREM_001_40Hz_0000km_noscat.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_RVPREM_001_40Hz_noscat.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BM_MOON2LAYERS_700km_AllPs_noATT_RS.sh
 sleep 4
