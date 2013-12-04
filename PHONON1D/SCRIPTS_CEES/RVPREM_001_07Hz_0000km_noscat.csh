@@ -23,9 +23,9 @@ set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
                    # This is actually not activated in the code yet.
 
 # SCATTERING
-set mx_scat_dp = 30   # Depth of scattering layer
+set mx_scat_dp = 0   # Depth of scattering layer
 set bg_scat    = 0.0   # Global scattering probability (keep low....!)
-set prob_scat  = 0.9    # Scattering Layer scattering probability
+set prob_scat  = 0.0    # Scattering Layer scattering probability
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
