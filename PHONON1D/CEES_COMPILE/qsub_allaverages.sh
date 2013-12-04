@@ -1,2 +1,2 @@
 #!/bin/tcsh
-qsub ./QSUB_SCRIPTS/qsub_BM_TEST_average.sh
+qsub ./QSUB_SCRIPTS/qsub_RSMOON_002a_average.sh
