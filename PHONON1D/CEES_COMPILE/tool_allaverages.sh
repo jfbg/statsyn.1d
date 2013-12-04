@@ -1,1 +1,3 @@
-csh ./AVERAGING_SCRIPTS/RSMOON_002a_average.csh
+csh ./AVERAGING_SCRIPTS/RVPREM_001_average.csh
+csh ./AVERAGING_SCRIPTS/RVPREM_002_average.csh
+csh ./AVERAGING_SCRIPTS/RSMOON_001_noscat_average.csh
