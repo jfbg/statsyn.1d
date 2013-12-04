@@ -869,7 +869,16 @@ PROGRAM STATSYNR_INTEL
                               !Is phonon scattered at scatterer or does it go through?
                               r0 = rand()
                               IF (r0 < scat_prob) THEN
+                              
+                              !DEBUG
+                              WRITE(6,*) ''
+                              WRITE(6,*) ip,p,az,x_sign,ud,asin(p*vf(1,iwave))/pi*180
+                              
                                  CALL REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh,cons_EorA)   !Scatter
+                                 
+                              !DEBUG
+                              WRITE(6,*) ip,p,az,x_sign,ud,asin(p*vf(1,iwave))/pi*180
+	                          WRITE(6,*) ''
                               END IF                            
                               
                               ! Calculate new ds_SL based on new ud and p (if it got scattered)
