@@ -1,1 +1,1 @@
-csh ./AVERAGING_SCRIPTS/BM_TEST_average.csh
+csh ./AVERAGING_SCRIPTS/PSMOON_001_average.csh
