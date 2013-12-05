@@ -119,7 +119,7 @@ MODULE PHO_VARS      ! Make variables global
         REAL(8)        :: pow2,pow1 !! Normalization factor for hilber transform
         REAL(8)        :: s,s1,s2     !! Attenuation & bounds on attenuation for distance
         REAL(8)        :: scr1,scr2,scr3,scr4 !! Flat earth approximation variables
-        REAL(8)        :: t0,t1,t2,dti,t_last,t_last_record  !! Time variables (bounds & interval)
+        REAL(8)        :: t0,t02,t1,t2,dti,t_last,t_last_record  !! Time variables (bounds & interval)
         INTEGER        :: t_last_count,tstuck
         REAL(8)        :: ubot, utop !! Bottom & Top slowness
         REAL(8)        :: x1, x2     !! Distance bounds
