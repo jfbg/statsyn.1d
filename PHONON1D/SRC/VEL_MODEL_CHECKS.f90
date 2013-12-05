@@ -336,7 +336,11 @@
 			if (sourcenext < 10.) sourcenext = 10
 !		  sourcenext = 10
 		  
-			dsamp = 1.
+		  IF (SL_prob == 0.) THEN
+   			dsamp = 0.25
+   		ELSE
+   		  dsamp = 20.
+   		END IF
 			
 			z_st = z_s
 			r_st = r_s
