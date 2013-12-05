@@ -1,42 +1,6 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_001.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_001_0000km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_002a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_002a_0000km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_004a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_004a_0000km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_008a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_008a_0000km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_010b.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_010b_0000km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_011a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_011a_0000km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_012a.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_012a_0000km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_012a_0030km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_012c.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_012c_0000km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_012c_0030km.sh
-sleep 4
 qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_001_07Hz.sh
 sleep 4
 qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_001_07Hz_0000km.sh
