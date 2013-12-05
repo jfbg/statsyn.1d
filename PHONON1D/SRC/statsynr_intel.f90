@@ -46,7 +46,7 @@ PROGRAM STATSYNR_INTEL
         REAL          b(nst0), e(nst0)        !HILBERT TRANSFORM & ENVELOPE
         REAL          mtsc(nst0),datt,dtst1  !SCRATCH SPACE
         INTEGER       ims
-        REAL          mt(nst0)               !SOURCE-TIME FUNCTION 
+        REAL          mt(nst0),mt2(ns0),mt1(ns0)               !SOURCE-TIME FUNCTION 
         COMPLEX       ms(nst0)               !SOURCE
         REAL          dt4,r_P,r_SV,r_SH     !r_* is energy ratio at source (1:10:10)
         INTEGER       SourceTYPE,samplingtype,sI
@@ -445,10 +445,18 @@ PROGRAM STATSYNR_INTEL
         WRITE(6,'(a)') ' SOURCE IS SINE WAVE'
       ELSEIF (SourceTYPE.eq.3) THEN      !FLAT ENERGY FROM 0.1 to 10Hz  
         DO I = 1, nts                           !SOURCE-TIME FUNCTION
-         t0 = (dti*float(I-1)-P0)*0.5
-         mt(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
+         t0 = (dti/4*8*float(I-1)-P0)
+         mt1(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
+               *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
+         t02 = (dti/4*12*float(I-1)-P0)
+         mt2(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
         END DO
+        
+        CALL CONVOLVE(mt1,mt2,mt,nts)
+        
+        
+        
         WRITE(6,'(a)') ' SOURCE IS SINE WAVE (FLAT POWER FROM 0.1 to 10 Hz)'
       ELSEIF (SourceTYPE.eq.9) THEN      !CUSTOM SOURCE
          WRITE(6,'(a)') ' CUSTOM SOURCE'
@@ -1047,9 +1055,9 @@ PROGRAM STATSYNR_INTEL
 
                     !Time correction if phonon doesn't hit the surface
                     ! right on the receiver.                              
-                    dtsurf = (abs((x1+dxi*(hitstation(J)-1))/360*circum - x_index))*p
+                    dtsurf = ((x1+dxi*(hitstation(J)-1))/360*circum - x_index)*p
                     !Correction for attenuation
-		                stemp = s-dtsurf/Q(1,iwave)
+		                stemp = s+dtsurf/Q(1,iwave)
 
 					IF (hitstation(J) < 1) THEN
 							ix = 1 + abs(hitstation(J)-1)
@@ -1085,11 +1093,10 @@ PROGRAM STATSYNR_INTEL
 !                    END IF
 
                       icaust = ncaust
-                      DO WHILE (icaust >= 4)
+                      DO WHILE (icaust >= 5)
                         icaust = icaust - 4
                       END DO
-                        icaust = icaust +1  !index if (ncaust + 1)
-
+                      
                  
                     ! Calculate angle of incidence. 
                     ang1 = asin(p*vf(1,iwave))
@@ -1126,7 +1133,7 @@ PROGRAM STATSYNR_INTEL
                           END IF
                         END DO
                       END DO
-                    !Debug
+
                     
                       
                     END IF
@@ -1144,9 +1151,11 @@ PROGRAM STATSYNR_INTEL
           END IF
           
           t_last_record = t
+          
 
           !IF P or SV wave, check for P-SV reflection
-          IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
+          !DEBUG
+!          IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
         
         END IF          
         END IF
@@ -3308,3 +3317,43 @@ SUBROUTINE CHECK_TOTALTIME(nt,nt0,dti,t1,t2)
 
       RETURN 
 END SUBROUTINE CHECK_TOTALTIME
+
+SUBROUTINE CONVOLVE(x, h, y, nts)
+        !x is the signal array
+        !h is the noise/impulse array
+        real y(1000)
+        real x(1000),h(1000)
+        integer :: kernelsize, datasize
+        integer :: i,j,k
+        
+        datasize = nts !size(x)
+        kernelsize = nts !size(h)
+        
+!        allocate(y(datasize))
+!        allocate(convolve(datasize))
+       
+        !last part
+        do i=kernelsize,datasize
+            y(i) = 0.0
+            j=i
+            do k=1,kernelsize
+                y(i) = y(i) + x(j)*h(k)
+                j = j-1
+            end do
+        end do
+        
+        !first part
+        do i=1,kernelsize
+            y(i) = 0.0
+            j=i
+            k=1
+            do while (j > 0)
+                y(i) = y(i) + x(j)*h(k)
+                j = j-1
+                k = k+1
+            end do
+        end do
+        
+!        convolve = y
+               
+END SUBROUTINE CONVOLVE
