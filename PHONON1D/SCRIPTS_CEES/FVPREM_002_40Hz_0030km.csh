@@ -74,7 +74,7 @@ endif
 @ i  =  0
 while ($i < $n_depth)
 @ i = $i + 1
-if ($i == 2 then
+if ($i == 2) then
  set q_depth = 0.01
 else if ($i == 1) then
  set q_depth = 50
