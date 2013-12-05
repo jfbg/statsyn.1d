@@ -87,7 +87,7 @@ PROGRAM STATSYNR_INTEL
       exTIME = 0
       exNLAY = 0
 
-      WRITE(*,*) 'ISOTROPIC Scattering'
+      WRITE(*,*) 'ISOTROPIC Scattering '
       WRITE(*,*) 'Last Edited on $Date$'
       WRITE(*,*) 'Last Edited by $Author$'
       WRITE(*,*) '$Revision$'
