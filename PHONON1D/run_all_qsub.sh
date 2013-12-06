@@ -1,27 +1,11 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_001_07Hz.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_001_07Hz_0000km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_001_07Hz_0030km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_001_40Hz.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_001_40Hz_0000km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_001_40Hz_0030km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_002_07Hz.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_002_07Hz_0000km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_002_07Hz_0030km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_002_40Hz.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_002_40Hz_0000km.sh
-sleep 4
-qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_002_40Hz_0030km.sh
-sleep 4
+qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTH_0100_SPIKE.sh
+sleep 1
+qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTHPREM_SPIKE_100km_EXP_noATT_RS.sh
+sleep 1
+qsub CEES_QSUB_SCRIPTS/qsub_BM_MOON2LAYERS_700km_AllPs_noATT_RS.sh
+sleep 1
+qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTH_0100_SPIKE_noATT.sh
+sleep 1

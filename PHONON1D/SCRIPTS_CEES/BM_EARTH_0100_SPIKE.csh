@@ -5,34 +5,34 @@
 #
 
 @ t_start      = 0
-@ t_max        = 8192			# 90 minutes
-set d_range    = "0 180 91"
+@ t_max        = 2750			# 90 minutes
+set d_range    = "0 180 361"
 set n_phonon   = "5000000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
-set sourcetype = 9    # delta (1), sine (2), custom (9)
+set sourcetype = 1    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "1 1 1"  # Energy partioning at source
-set samtype    = 3   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
+set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or CRFL_BM (3)
 
 # Code Parameters
 set cons_EorA = 2  # Conserve Amplitude (1) or Energy (2) at interfaces (Benchmark works with 2)
-set Watt      = 0  # With attenuation (1) or without (0)
+set Watt      = 1  # With attenuation (1) or without (0)
 set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
                    # This is actually not activated in the code yet.
 
 # SCATTERING
-set mx_scat_dp = 0   # Depth of scattering layer
-set bg_scat    = 0.0   # Global scattering probability (keep low....!)
+set mx_scat_dp = 0.0    # Depth of scattering layer
+set bg_scat    = 0.0    # Global scattering probability (keep low....!)
 set prob_scat  = 0.0    # Scattering Layer scattering probability
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "BM_MOON2LAYERS_bpSPIKE_700km_noATT_ENERGY_RS"
-set model_name = "MOON2LAYERS"
+set file_out   = "BM_EARTH_0100_SPIKE"
+set model_name = "EARTH_MODEL"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
@@ -48,7 +48,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 #cd SRC
-#make statsyn_gcc_moon.x
+#make statsyn_intel.x
 #cd ..
 
 
@@ -60,8 +60,8 @@ while ($l < $n_freq)
 @ l = $l + 1
 
 if ($l == 1) then
- set dt = "1.000"
- set period = "01"
+ set dt = "0.05"
+ set period = "20"
 else
  set dt = "0.150"
  set period = "07"
@@ -75,7 +75,7 @@ endif
 while ($i < $n_depth)
 @ i = $i + 1
 if ($i == 1) then
- set q_depth = 700
+ set q_depth = 100
 else if ($i == 2) then
  set q_depth = 20
 else
@@ -112,7 +112,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsynr_intel_BM_Moon << EOF"                         >  $file_csh
+echo "./bin/statsynr_intel << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
 echo "$t_start $t_max $dt \!LIMIT THE TIME WINDOW (SECONDS) " >> $file_csh
