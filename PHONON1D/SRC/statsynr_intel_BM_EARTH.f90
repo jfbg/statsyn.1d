@@ -19,9 +19,9 @@ PROGRAM STATSYNR_INTEL
 ! Receivers are 2D (1km long x 1km deep)
 !
 !
-! $Revision: 751 $
-! $Date: 2013-12-05 12:30:14 -0800 (Thu, 05 Dec 2013) $
-! $Author: jguertin $
+! $Revision$
+! $Date$
+! $Author$
 !
 !
 !
@@ -88,9 +88,9 @@ PROGRAM STATSYNR_INTEL
       exNLAY = 0
 
       WRITE(*,*) 'ISOTROPIC Scattering '
-      WRITE(*,*) 'Last Edited on $Date: 2013-12-05 12:30:14 -0800 (Thu, 05 Dec 2013) $'
-      WRITE(*,*) 'Last Edited by $Author: jguertin $'
-      WRITE(*,*) '$Revision: 751 $'
+      WRITE(*,*) 'Last Edited on $Date$'
+      WRITE(*,*) 'Last Edited by $Author$'
+      WRITE(*,*) '$Revision$'
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
