@@ -18,7 +18,7 @@ set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or CR
 
 # Code Parameters
 set cons_EorA = 2  # Conserve Amplitude (1) or Energy (2) at interfaces (Benchmark works with 2)
-set Watt      = 1  # With attenuation (1) or without (0)
+set Watt      = 0  # With attenuation (1) or without (0)
 set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
                    # This is actually not activated in the code yet.
 
