@@ -1,0 +1,8 @@
+#!/bin/tcsh
+#PBS -N COMPILE_BM_MOON2LAYERS_bpSPIKE_700km_noATT_ENERGY_RS
+#PBS -lmem=12gb,nodes=1:ppn=1
+#PBS -q jfl
+#PBS -V
+cd $PBS_O_WORKDIR
+
+csh ./AVERAGING_SCRIPTS/BM_MOON2LAYERS_bpSPIKE_700km_noATT_ENERGY_RS_average.csh
