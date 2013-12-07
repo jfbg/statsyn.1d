@@ -1,9 +1,11 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_BM_MOON2LAYERS_700km_AllPs_noATT_RS.sh
+qsub CEES_QSUB_SCRIPTS/qsub_PVPREM_001_40Hz_noscat.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTH_0100_SPIKE.sh
+qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_012a_noscat.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTHPREM_SPIKE_100km_EXP_noATT_RS.sh
+qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_011a_noscat.sh
+sleep 1
+qsub CEES_QSUB_SCRIPTS/qsub_PSMOON_001_noscat.sh
 sleep 1
