@@ -5,7 +5,7 @@
 #
 
 @ t_start      = 0
-@ t_max        = 2750			# 90 minutes
+@ t_max        = 3500			# 90 minutes
 set d_range    = "0 180 361"
 set n_phonon   = "5000000"
 
@@ -31,7 +31,7 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "BM_EARTH_0200_SPIKE"
+set file_out   = "BM_EARTH_0100_SPIKE"
 set model_name = "EARTH_MODEL"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
