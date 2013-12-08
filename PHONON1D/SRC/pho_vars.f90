@@ -33,7 +33,7 @@ MODULE PHO_VARS      ! Make variables global
         ! VELOCITY MODEL CHECKS
         INTEGER       check_scat, check_core, check_scat2, check_source,check_receiver
         
-        REAL(8)       t,x,xo,a,x_index,x_last
+        REAL(8)       t,x,xo,a,a_att,x_index,x_last
         REAL(8)       z(nlay0),vf(nlay0,2),rh(nlay0),vqdep
         REAL(8)       z_st(nlay0),r_st(nlay0),vst(nlay0,2),rht(nlay0)
         REAL(8)       z_s(nlay0),r_s(nlay0),vs(nlay0,2),rhs(nlay0)
