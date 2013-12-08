@@ -1,9 +1,5 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTH_0100_SPIKE_2.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTH_0100_SPIKE_3.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTH_0100_SPIKE_4.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTH_0100_SPIKE_Delta.sh
 sleep 1
