@@ -101,6 +101,7 @@ PROGRAM STATSYNR_INTEL
       WRITE(*,*) '*    MAKE SURE TO CHECK FOR:'
       WRITE(*,*) '*      -> Decreasing layer thickness near core'
       WRITE(*,*) '*      -> datt is set accordingly for max tstar'
+      WRITE(*,*) '*               MOON (~10) EARTH (~20)'
       WRITE(*,*) '*'
       WRITE(*,*) '************************************'
       WRITE(*,*) ''
@@ -276,6 +277,7 @@ PROGRAM STATSYNR_INTEL
       
       tstuck = 0
       z_last_count_num = 0
+      imsmax = 0.
       
       imth = 3   !Interpolation method for LAYERTRACE
      
@@ -485,7 +487,7 @@ PROGRAM STATSYNR_INTEL
       
 !        REAL(8)          mts(datt,caustic,source)        !ATTENUATED SOURCE  (     
       
-      datt = .005    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
+      datt = .01    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
                 ! This is datt, not max att. max att will be datt*(ns0-1) = 15.
      DO I = 1, ns0                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
@@ -631,6 +633,7 @@ PROGRAM STATSYNR_INTEL
         az   = 0.
         ncaust = 1                             !# OF CAUSTICS STARS AT 0. (which is index 1)
         z_act = 0.
+
         
         
         !Set initial depth index (iz)
@@ -1077,10 +1080,10 @@ PROGRAM STATSYNR_INTEL
                     
                     ! UNCOMMENT TO SEE WHAT IS MAX ims*datt reached.
                     ! If imsmax > datt*ntso, adjust datt so that imsmax can be reached.
-!                    if (ims > imsmax) THEN
-!                    imsmax = ims
-!                    WRITE(6,*) imsmax*datt
-!                    END IF
+                    IF (s > imsmax) THEN
+                    imsmax = s
+                    WRITE(6,*) imsmax,ims
+                    END IF
 
                       icaust = ncaust
                       DO WHILE (icaust >= 5)

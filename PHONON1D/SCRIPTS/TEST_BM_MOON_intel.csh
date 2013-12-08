@@ -5,7 +5,7 @@
 #
 
 @ t_start      = 0
-@ t_max        = 3500			# 90 minutes
+@ t_max        = 2750			# 90 minutes
 set d_range    = "0 180 361"
 set n_phonon   = "5000000"
 
@@ -37,8 +37,8 @@ set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 16    ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 5     ## Number of iterations
+@ n_kern  = 1    ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 1     ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -47,9 +47,9 @@ set log_dir    = "./LOG"
 
 
 # Compile statistical phonon code
-#cd SRC
-#make statsyn_intel.x
-#cd ..
+cd SRC
+make statsynr_gcc.x
+cd ..
 
 
 ##
@@ -75,7 +75,7 @@ endif
 while ($i < $n_depth)
 @ i = $i + 1
 if ($i == 1) then
- set q_depth = 200
+ set q_depth = 100
 else if ($i == 2) then
  set q_depth = 20
 else
@@ -101,7 +101,7 @@ while ($j < $n_kern)
 
 @ kernelnum = $j
 
-sleep 25
+sleep 1
 
 ## 
 # Start phonon synthetics
@@ -112,7 +112,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsynr_intel_BM_Earth << EOF"                         >  $file_csh
+echo "./bin/statsynr_intel_BM_Moon << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
 echo "$t_start $t_max $dt \!LIMIT THE TIME WINDOW (SECONDS) " >> $file_csh
