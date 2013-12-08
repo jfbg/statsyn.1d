@@ -1154,7 +1154,7 @@ PROGRAM STATSYNR_INTEL
 
           !IF P or SV wave, check for P-SV reflection
           !DEBUG
-!          IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
+          IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
         
         END IF          
         END IF

@@ -967,10 +967,9 @@ PROGRAM STATSYNR_INTEL
           
           
 !          WRITE(6,*) t,t_last_record
-          IF (t_last_record < t) THEN
+          IF (t_last_record < t) THEN  !Don't record twice if phonon hasn't moved.
           
-          
-          
+           
           xdiff = abs(x-xlast);
        
           !Find index for distance
@@ -1037,18 +1036,9 @@ PROGRAM STATSYNR_INTEL
           END IF
           END IF
           
-          IF (countstations > 0) THEN
+          IF (countstations > 0) THEN  !Add signal to time series
           
-!          IF (countstations > 1) THEN
-          !DEBUG
-!          WRITE(6,*)  ''
-!          WRITE(6,*)  'HITS vvvvvvvvvvvvvvvvvvv',I
-!          WRITE(6,*)  xlast,x,x_index,xmin,xmax
-!          WRITE(6,*)  countstations,hitstation(1:countstations)
-!          WRITE(6,*)  asin(p*vf(1,iwave)),asin(p*vf(1,iwave))/2/pi*360
-!          WRITE(6,*)  '==============='          
-!          END IF
-          
+       
           DO J = 1,countstations
                 
                     x_signT2 = x_signT;
@@ -1154,8 +1144,7 @@ PROGRAM STATSYNR_INTEL
           
 
           !IF P or SV wave, check for P-SV reflection
-          !DEBUG
-!          IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
+          IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
         
         END IF          
         END IF

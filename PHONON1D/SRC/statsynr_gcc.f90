@@ -1155,7 +1155,7 @@ PROGRAM STATSYNR_INTEL
 
           !IF P or SV wave, check for P-SV reflection
           !DEBUG
-!          IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
+          IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
         
         END IF          
         END IF
@@ -1657,7 +1657,9 @@ SUBROUTINE SURFACE_PSV_BEN
            IF (REAL(crS) < 0) a = -a
          END IF
        
-      END IF      
+      END IF   
+      
+      IF ((ip_init == 2).AND.(ip == 1)) WRITE(6,*) 'YAHOOOOOOOOOOOOO'
     
       iwave = ip
       
