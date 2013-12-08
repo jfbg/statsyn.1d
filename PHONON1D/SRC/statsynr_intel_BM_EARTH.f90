@@ -94,7 +94,7 @@ PROGRAM STATSYNR_INTEL
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
-      WRITE(*,*) '*'
+      WRITE(*,*) '*    BENCHMARK EARTH!!!'
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Receivers are 1km wide x 1 km deep'
       WRITE(*,*) '*'
@@ -966,10 +966,9 @@ PROGRAM STATSYNR_INTEL
           
           
 !          WRITE(6,*) t,t_last_record
-          IF (t_last_record < t) THEN
+          IF (t_last_record < t) THEN  !Don't record twice if phonon hasn't moved.
           
-          
-          
+           
           xdiff = abs(x-xlast);
        
           !Find index for distance
@@ -1036,18 +1035,9 @@ PROGRAM STATSYNR_INTEL
           END IF
           END IF
           
-          IF (countstations > 0) THEN
+          IF (countstations > 0) THEN  !Add signal to time series
           
-!          IF (countstations > 1) THEN
-          !DEBUG
-!          WRITE(6,*)  ''
-!          WRITE(6,*)  'HITS vvvvvvvvvvvvvvvvvvv',I
-!          WRITE(6,*)  xlast,x,x_index,xmin,xmax
-!          WRITE(6,*)  countstations,hitstation(1:countstations)
-!          WRITE(6,*)  asin(p*vf(1,iwave)),asin(p*vf(1,iwave))/2/pi*360
-!          WRITE(6,*)  '==============='          
-!          END IF
-          
+       
           DO J = 1,countstations
                 
                     x_signT2 = x_signT;
@@ -1153,7 +1143,6 @@ PROGRAM STATSYNR_INTEL
           
 
           !IF P or SV wave, check for P-SV reflection
-          !DEBUG
           IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
         
         END IF          
@@ -1299,7 +1288,7 @@ PROGRAM STATSYNR_INTEL
   						DO ll = 1,nlay
 							
 						IF (ll > 1) THEN
-							IF (z_s(ll) - z_s(ll-1) == 0) cycle
+							IF (z_s(ll) - z_s(ll-1) == 0.) cycle
 						END IF
 						
 						  WRITE(17,FMT=879) (x1+REAL(kk-1)*dxi),z_s(ll),mm*nttrack_dt,trackcount(kk,ll,mm)/100
@@ -1882,7 +1871,7 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
 
       IMPLICIT NONE
 
-      REAL(8)      realp,ra,rb,rc,rrhos,rrhof
+      REAL(8)      realp,ra,rb,rc,rrhos,rrhof,pi
       COMPLEX(8)   p,a,b,c,rhos,rhof,tau
       COMPLEX(8)   angP,angS,angPc,D12
       COMPLEX(8)   crP,crS,ctP,c0
@@ -1899,9 +1888,29 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
       rhof = CMPLX(rrhof,0.)
       c0 = CMPLX(0.,0.)
       
-      angP = CMPLX(asin(realp*ra),0.)
-      angS = CMPLX(asin(realp*rb),0.)
-      angPc = CMPLX(asin(realp*rc),0.)
+      pi = atan(1.)*4.
+      
+      IF (realp*ra >= 1) THEN
+         angP = CMPLX(pi/2,0.)
+      ELSE
+         angP = CMPLX(asin(realp*ra),0.)
+      END IF
+      
+      IF (realp*rb >= 1) THEN
+         angS = CMPLX(pi/2,0.)
+      ELSE
+         angS = CMPLX(asin(realp*rb),0.)
+      END IF
+      
+      IF (realp*rc >= 1) THEN
+         angPc= CMPLX(pi/2,0.)
+      ELSE
+         angPc = CMPLX(asin(realp*rc),0.)
+      END IF
+      
+!      angP = CMPLX(asin(realp*ra),0.)
+!      angS = CMPLX(asin(realp*rb),0.)
+!      angPc = CMPLX(asin(realp*rc),0.)
       
  
       tau = rhof/rhos
@@ -1923,8 +1932,12 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
         tP = ((REAL(ctP)**2+IMAG(ctP)**2)**0.5)**cons_EorA
         
 
+        
+
         !Supercritical
         IF (rc*realp > 1) tP = 0.
+
+!        WRITE(6,*) 'S2L   =',rP,rS,tP
         
         !Get new ip
         tot = rP + rS + tP
@@ -2002,7 +2015,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
 
       IMPLICIT NONE
 
-      REAL(8)      realp,ra,rb,rc,rrhos,rrhof
+      REAL(8)      realp,ra,rb,rc,rrhos,rrhof,pi
       COMPLEX(8)   p,a,b,c,rhos,rhof,tau
       COMPLEX(8)   angP,angS,angPc,D12,c0
       COMPLEX(8)   crP,ctP,ctS
@@ -2017,15 +2030,31 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
       rhos = CMPLX(rrhos,0.)
       rhof = CMPLX(rrhof,0.)
       c0 = CMPLX(0.,0.)
+
+      pi = atan(1.)*4.
       
-      angP = CMPLX(asin(realp*ra),0.)
-      angS = CMPLX(asin(realp*rb),0.)
+      IF (realp*ra >= 1) THEN
+         angP = CMPLX(pi/2,0.)
+      ELSE
+         angP = CMPLX(asin(realp*ra),0.)
+      END IF
+      
+      IF (realp*rb >= 1) THEN
+         angS = CMPLX(pi/2,0.)
+      ELSE
+         angS = CMPLX(asin(realp*rb),0.)
+      END IF
+      
       angPc = CMPLX(asin(realp*rc),0.)
 
  
       tau = rhof/rhos
+!      D12 = ((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
+!                + tau*(c/a)*cos(angP)+(cos(2*angS))**2*cos(angPc))**(-1.)
+
       D12 = ((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
                 + tau*(c/a)*cos(angP)+(cos(2*angS))**2*cos(angPc))**(-1.)
+
 
       !INCIDENT-P
       
@@ -2044,6 +2073,8 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
         !Supercritical
         IF (ra*realp > 1) tP = 0.
         IF (rb*realp > 1) tS = 0.
+
+!        WRITE(6,*) '  L2S =',rP,tP,tS
         
         !Get new ip
         tot = rP + tP + tS
@@ -2492,6 +2523,8 @@ SUBROUTINE INTERFACE_NORMAL
          
          IF ((ud == 1).AND.(vf(iz,2) == 0.)) THEN 
            !FROM SOLID TO LIQUID  --- going down     
+           
+!           WRITE(6,*) 'SOLID TO LIQUID !!!!!',ip,iz,ud,ip
               
             ap = vf(iz-1,1)
             bs = vf(iz-1,2)
@@ -2499,6 +2532,9 @@ SUBROUTINE INTERFACE_NORMAL
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
+            
+!           WRITE(6,*) '                     ',ip,ud
+!           WRITE(6,*) ''
             
          ELSEIF ((ud == -1).AND.(vf(iz-1,2) == 0.)) THEN
            !FROM SOLID TO LIQUID  --- going up
@@ -2519,30 +2555,36 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz-1,1)
             rhosol = rh(iz)
             rhoflu = rh(iz-1)
+            
+			IF (p*cf >= 1) WRITE(6,*) 'DOWN =',p,cf,p*cf,iz,ud
+  
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)         
           
          ELSEIF ((ud == -1).AND.(vf(iz,2) == 0.)) THEN
            !FROM LIQUID TO SOLID  --- going up
-                    
+
+        
+        
             ap = vf(iz-1,1)
             bs = vf(iz-1,2)
             cf = vf(iz,1)
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
-            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)
 
+			IF (p*cf >= 1) WRITE(6,*) 'UP =',p,cf,p*cf,iz,ud,NITR
+
+            
+            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)
+            
          END IF
 
 
-      ELSEIF (((vf(iz,2) == 0).OR.(vf(iz-1,2) == 0)).AND.(ip.eq.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
+      ELSEIF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip.eq.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
         !Solid-Liquid Interface with SH waves
         ud = -ud 
       
       ELSE               !IF0
         !Solid-Solid Interface
-
-        !DEBUG
-!        WRITE(6,*) '    ==> iz <nlay-1',iz,nlay,nlay-1
 
               
           IF ((iz == 2).AND.(ud == -1)) THEN                              !IF1.1 
@@ -2878,7 +2920,7 @@ SUBROUTINE GET_DS_SCAT
       ! scale_length factor
       z_nf = erad - erad*dexp(z_act/(-1*erad)) ;
     
-      IF ((z_nf == 0).OR.(z_act == 0)) THEN
+      IF ((z_nf == 0.).OR.(z_act == 0.)) THEN
          fac = 1
       ELSE
          fac = z_act/z_nf         
@@ -2887,7 +2929,7 @@ SUBROUTINE GET_DS_SCAT
 
         ds_scat = fac*ds_scat_nf  !Flatten ds_scat_nf (approximation based on mid depth)
         
-        IF (ds_scat == 0) WRITE(*,*) 'ds_scat is 0!!'
+        IF (ds_scat == 0.) WRITE(*,*) 'ds_scat is 0!!'
     
   
       RETURN       
