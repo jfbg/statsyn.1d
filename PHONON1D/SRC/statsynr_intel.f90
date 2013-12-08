@@ -1289,7 +1289,7 @@ PROGRAM STATSYNR_INTEL
   						DO ll = 1,nlay
 							
 						IF (ll > 1) THEN
-							IF (z_s(ll) - z_s(ll-1) == 0) cycle
+							IF (z_s(ll) - z_s(ll-1) == 0.) cycle
 						END IF
 						
 						  WRITE(17,FMT=879) (x1+REAL(kk-1)*dxi),z_s(ll),mm*nttrack_dt,trackcount(kk,ll,mm)/100
@@ -2473,7 +2473,7 @@ SUBROUTINE INTERFACE_NORMAL
       
       IF ((h <= 0.).AND.(iz > 1).AND.(iz < nlay-1)) THEN
 
-      IF (((vf(iz,2) == 0).OR.(vf(iz-1,2) == 0)).AND.(ip.ne.3)) THEN  !IF0
+      IF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip.ne.3)) THEN  !IF0
          !SOLID-LIQUID INTERFACE with P and SV waves
          !Figure out if phonon is going from:
          !      solid to liquid (mantle to core) or from
@@ -2524,15 +2524,12 @@ SUBROUTINE INTERFACE_NORMAL
          END IF
 
 
-      ELSEIF (((vf(iz,2) == 0).OR.(vf(iz-1,2) == 0)).AND.(ip.eq.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
+      ELSEIF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip.eq.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
         !Solid-Liquid Interface with SH waves
         ud = -ud 
       
       ELSE               !IF0
         !Solid-Solid Interface
-
-        !DEBUG
-!        WRITE(6,*) '    ==> iz <nlay-1',iz,nlay,nlay-1
 
               
           IF ((iz == 2).AND.(ud == -1)) THEN                              !IF1.1 
@@ -2868,7 +2865,7 @@ SUBROUTINE GET_DS_SCAT
       ! scale_length factor
       z_nf = erad - erad*dexp(z_act/(-1*erad)) ;
     
-      IF ((z_nf == 0).OR.(z_act == 0)) THEN
+      IF ((z_nf == 0.).OR.(z_act == 0.)) THEN
          fac = 1
       ELSE
          fac = z_act/z_nf         
@@ -2877,7 +2874,7 @@ SUBROUTINE GET_DS_SCAT
 
         ds_scat = fac*ds_scat_nf  !Flatten ds_scat_nf (approximation based on mid depth)
         
-        IF (ds_scat == 0) WRITE(*,*) 'ds_scat is 0!!'
+        IF (ds_scat == 0.) WRITE(*,*) 'ds_scat is 0!!'
     
   
       RETURN       

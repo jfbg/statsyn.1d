@@ -2483,7 +2483,7 @@ SUBROUTINE INTERFACE_NORMAL
       
       IF ((h <= 0.).AND.(iz > 1).AND.(iz < nlay-1)) THEN
 
-      IF (((vf(iz,2) == 0).OR.(vf(iz-1,2) == 0)).AND.(ip.ne.3)) THEN  !IF0
+      IF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip.ne.3)) THEN  !IF0
          !SOLID-LIQUID INTERFACE with P and SV waves
          !Figure out if phonon is going from:
          !      solid to liquid (mantle to core) or from
