@@ -30,7 +30,7 @@ PROGRAM STATSYNR_INTEL
         
         ! All declarations in pho_vars except debugging and some source variables
         USE pho_vars
-        USE IFPORT
+        !USE IFPORT
         
         IMPLICIT NONE
         
@@ -1582,7 +1582,7 @@ SUBROUTINE SURFACE_PSV_BEN
 ! Calculate P-SV reflection coefficients at free surface based on BEN-MENAHEM (p.480)
 
       USE pho_vars
-      USE IFPORT
+      !USE IFPORT
       IMPLICIT NONE
       
       COMPLEX(8)    velP,velS,angP,angS,D1
@@ -1736,7 +1736,7 @@ END SUBROUTINE RTCOEF_SH
 SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
                          rrp,rrs,rtp,rts,ip,ud,amp,cons_EorA)
                          
-      USE IFPORT
+      !USE IFPORT
                          
       IMPLICIT     NONE
       REAL(8)      vp1,vs1,den1,vp2,vs2,den2     !VELOCITY & DENSITY
@@ -1868,11 +1868,11 @@ END SUBROUTINE RTCOEF_PSV
 SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
 
 ! Going from Mantle to Core, solid to liquid
-      USE IFPORT
+      !USE IFPORT
 
       IMPLICIT NONE
 
-      REAL(8)      realp,ra,rb,rc,rrhos,rrhof
+      REAL(8)      realp,ra,rb,rc,rrhos,rrhof,pi
       COMPLEX(8)   p,a,b,c,rhos,rhof,tau
       COMPLEX(8)   angP,angS,angPc,D12
       COMPLEX(8)   crP,crS,ctP,c0
@@ -1889,9 +1889,29 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
       rhof = CMPLX(rrhof,0.)
       c0 = CMPLX(0.,0.)
       
-      angP = CMPLX(asin(realp*ra),0.)
-      angS = CMPLX(asin(realp*rb),0.)
-      angPc = CMPLX(asin(realp*rc),0.)
+      pi = atan(1.)*4.
+      
+      IF (realp*ra >= 1) THEN
+         angP = CMPLX(pi/2,0.)
+      ELSE
+         angP = CMPLX(asin(realp*ra),0.)
+      END IF
+      
+      IF (realp*rb >= 1) THEN
+         angS = CMPLX(pi/2,0.)
+      ELSE
+         angS = CMPLX(asin(realp*rb),0.)
+      END IF
+      
+      IF (realp*rc >= 1) THEN
+         angPc= CMPLX(pi/2,0.)
+      ELSE
+         angPc = CMPLX(asin(realp*rc),0.)
+      END IF
+      
+!      angP = CMPLX(asin(realp*ra),0.)
+!      angS = CMPLX(asin(realp*rb),0.)
+!      angPc = CMPLX(asin(realp*rc),0.)
       
  
       tau = rhof/rhos
@@ -1913,8 +1933,12 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
         tP = ((REAL(ctP)**2+IMAG(ctP)**2)**0.5)**cons_EorA
         
 
+        
+
         !Supercritical
         IF (rc*realp > 1) tP = 0.
+
+!        WRITE(6,*) 'S2L   =',rP,rS,tP
         
         !Get new ip
         tot = rP + rS + tP
@@ -1988,11 +2012,11 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
 
 ! Going from Core to Mantle, liquid to solid
 
-      USE IFPORT
+      !USE IFPORT
 
       IMPLICIT NONE
 
-      REAL(8)      realp,ra,rb,rc,rrhos,rrhof
+      REAL(8)      realp,ra,rb,rc,rrhos,rrhof,pi
       COMPLEX(8)   p,a,b,c,rhos,rhof,tau
       COMPLEX(8)   angP,angS,angPc,D12,c0
       COMPLEX(8)   crP,ctP,ctS
@@ -2007,15 +2031,31 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
       rhos = CMPLX(rrhos,0.)
       rhof = CMPLX(rrhof,0.)
       c0 = CMPLX(0.,0.)
+
+      pi = atan(1.)*4.
       
-      angP = CMPLX(asin(realp*ra),0.)
-      angS = CMPLX(asin(realp*rb),0.)
+      IF (realp*ra >= 1) THEN
+         angP = CMPLX(pi/2,0.)
+      ELSE
+         angP = CMPLX(asin(realp*ra),0.)
+      END IF
+      
+      IF (realp*rb >= 1) THEN
+         angS = CMPLX(pi/2,0.)
+      ELSE
+         angS = CMPLX(asin(realp*rb),0.)
+      END IF
+      
       angPc = CMPLX(asin(realp*rc),0.)
 
  
       tau = rhof/rhos
+!      D12 = ((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
+!                + tau*(c/a)*cos(angP)+(cos(2*angS))**2*cos(angPc))**(-1.)
+
       D12 = ((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
                 + tau*(c/a)*cos(angP)+(cos(2*angS))**2*cos(angPc))**(-1.)
+
 
       !INCIDENT-P
       
@@ -2034,6 +2074,8 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
         !Supercritical
         IF (ra*realp > 1) tP = 0.
         IF (rb*realp > 1) tS = 0.
+
+!        WRITE(6,*) '  L2S =',rP,tP,tS
         
         !Get new ip
         tot = rP + tP + tS
@@ -2482,6 +2524,8 @@ SUBROUTINE INTERFACE_NORMAL
          
          IF ((ud == 1).AND.(vf(iz,2) == 0.)) THEN 
            !FROM SOLID TO LIQUID  --- going down     
+           
+!           WRITE(6,*) 'SOLID TO LIQUID !!!!!',ip,iz,ud,ip
               
             ap = vf(iz-1,1)
             bs = vf(iz-1,2)
@@ -2489,6 +2533,9 @@ SUBROUTINE INTERFACE_NORMAL
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
+            
+!           WRITE(6,*) '                     ',ip,ud
+!           WRITE(6,*) ''
             
          ELSEIF ((ud == -1).AND.(vf(iz-1,2) == 0.)) THEN
            !FROM SOLID TO LIQUID  --- going up
@@ -2509,18 +2556,27 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz-1,1)
             rhosol = rh(iz)
             rhoflu = rh(iz-1)
+            
+			IF (p*cf >= 1) WRITE(6,*) 'DOWN =',p,cf,p*cf,iz,ud
+  
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)         
           
          ELSEIF ((ud == -1).AND.(vf(iz,2) == 0.)) THEN
            !FROM LIQUID TO SOLID  --- going up
-                    
+
+        
+        
             ap = vf(iz-1,1)
             bs = vf(iz-1,2)
             cf = vf(iz,1)
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
-            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)
 
+			IF (p*cf >= 1) WRITE(6,*) 'UP =',p,cf,p*cf,iz,ud,NITR
+
+            
+            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)
+            
          END IF
 
 
@@ -2838,7 +2894,7 @@ SUBROUTINE GET_DS_SCAT
       !The output dscat has been
       
       USE pho_vars      
-      USE IFPORT
+      !USE IFPORT
       
       IMPLICIT NONE
       REAL(8)     rt,z_ft,fac,bg_sl,z_nf
@@ -2914,7 +2970,7 @@ END SUBROUTINE GET_DS_SL
 
 SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh,cons_EorA)
 
-      USE IFPORT
+      !USE IFPORT
       IMPLICIT NONE
       
       INTEGER, PARAMETER :: nlay0=4000

@@ -31,7 +31,7 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "BM_EARTH_0200_SPIKE"
+set file_out   = "BM_EARTH_0100_SPIKE_S2L"
 set model_name = "EARTH_MODEL"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
@@ -75,7 +75,7 @@ endif
 while ($i < $n_depth)
 @ i = $i + 1
 if ($i == 1) then
- set q_depth = 200
+ set q_depth = 100
 else if ($i == 2) then
  set q_depth = 20
 else
