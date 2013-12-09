@@ -1585,11 +1585,13 @@ SUBROUTINE SURFACE_PSV_BEN
       USE IFPORT
       IMPLICIT NONE
       
-      COMPLEX(8)    velP,velS,angP,angS,D1
+      COMPLEX       velP,velS,angP,angS,D1
       INTEGER       ip_init
-      COMPLEX(8)    crP,crS,cp,c0
+      COMPLEX       crP,crS,cp,c0,cone,ctwo
       REAL(8)       rP,rS,nrP,nrS
       real(8)       totc
+      COMPLEX       sinP,sinS,sin2P,sin2S,cos2S,sin4S
+      COMPLEX       cosP,cosS
       
 
       ip_init = ip
@@ -1597,18 +1599,33 @@ SUBROUTINE SURFACE_PSV_BEN
       velP = CMPLX(vs(1,1),0.)
       velS = CMPLX(vs(1,2),0.)
       cp = CMPLX(p,0.)
-      c0 = CMPLX(0.,0.)
-
-      angP = asin(CMPLX(p*vs(1,1),0.))
-      angS = asin(CMPLX(p*vs(1,2),0.))
+      cone = cmplx(1.,0.)
+      ctwo = cmplx(2.,0.)
+      c0   = cmplx(0.,0.)
       
-      D1 = ((velS/velP)**2.*sin(2.*angP)*sin(2.*angS)+(cos(2.*angS))**2.)**(-1.)
+      sinP = cp*velP
+      sinS = cp*velS
+      cosP = csqrt(cone-sinP**2)
+      cosS =  csqrt(cone-sinS**2)
+      
+      sin2P = ctwo*sinP*cosP
+      sin2S = ctwo*sinS*cosS
+      cos2S = cone-ctwo*sinS**2
+      sin4S = ctwo*sin2S*cos2S
+
+!      angP = asin(CMPLX(p*vs(1,1),0.))
+!      angS = asin(CMPLX(p*vs(1,2),0.))
+      
+!      D1 = ((velS/velP)**2.*sin(2.*angP)*sin(2.*angS)+(cos(2.*angS))**2.)**(-1.)
+      D1 = ((velS/velP)**2.*sin2P*sin2S+(cos2S)**2.)**(-1.)
       
       IF (ip.eq.1) THEN      ! P-incident
       
-       crP = D1*((velS/velP)**2*sin(2*angP)*sin(2*angS)-(cos(2*angS))**2)
-       crS = D1*(-2.*(velS/velP)*sin(2*angP)*cos(2*angS))
-       
+!       crP = D1*((velS/velP)**2*sin(2*angP)*sin(2*angS)-(cos(2*angS))**2)
+!       crS = D1*(-2.*(velS/velP)*sin(2*angP)*cos(2*angS))
+       crP = D1*((velS/velP)**2*sin2P*sin2S-(cos2S)**2)
+       crS = D1*(-ctwo*(velS/velP)*sin2P*cos2S)
+              
        rP = ((REAL(crP)**2 + IMAG(crP)**2)**0.5)**cons_EorA
        rS = ((REAL(crS)**2 + IMAG(crS)**2)**0.5)**cons_EorA
        
@@ -1626,8 +1643,8 @@ SUBROUTINE SURFACE_PSV_BEN
 
       ELSEIF (ip.eq.2) THEN   ! S-incident
       
-       crP = D1*((velS/velP)*sin(4*angS))
-       crS = D1*((velS/velP)**2*sin(2*angP)*sin(2*angS)-(cos(2*angS))**2)
+       crP = D1*((velS/velP)*sin4S)
+       crS = D1*((velS/velP)**2*sin2P*sin2S-(cos2S)**2)
 
        rP = ((REAL(crP)**2 + IMAG(crP)**2)**0.5)**cons_EorA
        rS = ((REAL(crS)**2 + IMAG(crS)**2)**0.5)**cons_EorA
@@ -1652,9 +1669,9 @@ SUBROUTINE SURFACE_PSV_BEN
       
       !CO2
 !      WRITE(6,*) 'SURFACE ',rP,rS
-      
+
+END SUBROUTINE SURFACE_PSV_BEN
    
-END SUBROUTINE SURFACE_PSV_BEN     
 
 SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp,cons_EorA)
 ! p.139 of Aki and Richards 2nd edition
