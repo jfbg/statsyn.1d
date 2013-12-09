@@ -1882,14 +1882,17 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
       IMPLICIT NONE
 
       REAL(8)      realp,ra,rb,rc,rrhos,rrhof,pi
-      COMPLEX(8)   p,a,b,c,rhos,rhof,tau
-      COMPLEX(8)   angP,angS,angPc,D12
-      COMPLEX(8)   crP,crS,ctP,c0
+      COMPLEX   p,a,b,c,rhos,rhof,tau
+      COMPLEX   angP,angS,angPc,D12
+      COMPLEX   crP,crS,ctP,c0
       REAL(8)      rP,rS,tP,tot,nrP,nrS,ntP,r0,amp
       INTEGER      ud,ip
       INTEGER      cons_EorA
       INTEGER      I
-      COMPLEX(8)     sin2P,sin2S,cosPc,cosP,cos2S,sin4S
+      COMPLEX     sin2P,sin2S,cosPc,cosP,cos2S,sin4S,sinPc
+      COMPLEX     sinP,sinS,cosS,cone,ctwo
+      
+    
       
       p = CMPLX(realp,0.)
       a = CMPLX(ra,0.)
@@ -1897,34 +1900,51 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
       c = CMPLX(rc,0.)
       rhos = CMPLX(rrhos,0.)
       rhof = CMPLX(rrhof,0.)
-      c0 = CMPLX(0.,0.)
-      
 
-	  angP = asin(CMPLX(realp*ra,0.))
-	  angS = asin(CMPLX(realp*rb,0.))
-	  angPc = asin(CMPLX(realp*rc,0.))
+      cone = cmplx(1,0)
+      ctwo = cmplx(2,0)
+      c0   = cmplx(0.,0.)
+      
+      sinP = p*a
+      sinS = p*b 
+      sinPc = p*c
+      
+      cosPc = csqrt(cone-sinPc**2)
+      cosP = csqrt(cone-sinP**2)
+      cosS =  csqrt(cone-sinS**2)
+      
+      sin2P = ctwo*sinP*cosP
+      sin2S = ctwo*sinS*cosS
+      cos2S = cone-ctwo*sinS**2
+      sin4S = ctwo*sin2S*cos2S
+      
  
       tau = rhof/rhos
-      D12 = ((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
-                + tau*(c/a)*cos(angP)+(cos(2*angS))**2*cos(angPc))**(-1.)
-
+!      D12 = ((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
+!                + tau*(c/a)*cos(angP)+(cos(2*angS))**2*cos(angPc))**(-1.)
+      D12 = ((b/a)**2*sin2P*sin2S*cosPc &
+                + tau*(c/a)*cosP+(cos2S)**2*cosPc)**(-1.)
 
       IF (ip == 1) THEN   !INCIDENT-P
       
         !Calculate coefficients
-        crP = D12*((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
-                + tau*(c/a)*cos(angP)-(cos(2*angS))**2*cos(angPc))
+        crP = D12*((b/a)**2*sin2P*sin2S*cosPc &
+                + tau*(c/a)*cosP-(cos2S)**2*cosPc)
         
-        crS = D12*(-2.*(b/a)*sin(2*angP)*cos(2*angS)*cos(angPc))
+        crS = D12*(-ctwo*(b/a)*sin2P*cos2S*cosPc)
         
-        ctP = D12*(2.*cos(angP)*cos(2*angS))
+        ctP = D12*(ctwo*cosP*cos2S)
 
         rP = ((REAL(crP)**2+IMAG(crP)**2)**0.5)**cons_EorA
         rS = ((REAL(crS)**2+IMAG(crS)**2)**0.5)**cons_EorA
         tP = ((REAL(ctP)**2+IMAG(ctP)**2)**0.5)**cons_EorA
         
         !Supercritical
-        IF (rc*realp > 1) tP = 0.
+
+        IF (rc*realp > 1) THEN 
+!            WRITE(6,*) 'YUP CCCC'
+            tP = 0.
+        END IF
         
         !Get new ip
         tot = rP + rS + tP
@@ -1951,12 +1971,12 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
         
       ELSE IF (ip == 2) THEN       !INCIDENT SV
       
-        crP = D12*((b/a)*sin(4*angS)*cos(angPc))
+        crP = D12*((b/a)*sin4S*cosPc)
         
-        crS = D12*((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
-                - tau*(c/a)*cos(angP) - (cos(2*angS))**2*cos(angPc))
+        crS = D12*((b/a)**2*sin2P*sin2S*cosPc &
+                - tau*(c/a)*cosP - (cos2S)**2*cosPc)
         
-        ctP = D12*(-2.*(b/a)*cos(angP)*sin(2*angS))
+        ctP = D12*(-ctwo*(b/a)*cosP*sin2S)
 
         rP = ((REAL(crP)**2+IMAG(crP)**2)**0.5)**cons_EorA
         rS = ((REAL(crS)**2+IMAG(crS)**2)**0.5)**cons_EorA
@@ -2005,41 +2025,61 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
       IMPLICIT NONE
 
       REAL(8)      realp,ra,rb,rc,rrhos,rrhof,pi
-      COMPLEX(8)   p,a,b,c,rhos,rhof,tau
-      COMPLEX(8)   angP,angS,angPc,D12,c0
-      COMPLEX(8)   crP,ctP,ctS
+      COMPLEX      p,a,b,c,rhos,rhof,tau
+      COMPLEX      angP,angS,angPc,D12,c0
+      COMPLEX      crP,ctP,ctS
       REAL(8)      rP,tS,tP,tot,nrP,ntS,ntP,r0,amp
       INTEGER      ud,ip
       INTEGER      cons_EorA
       
+      COMPLEX      sin2P,sin2S,cos2S
+      COMPLEX      sinS,sinP,sinPc,cosS,cosP,cosPc
+      COMPLEX      cone,ctwo,cfour
+            
       p = CMPLX(realp,0.)
       a = CMPLX(ra,0.)
       b = CMPLX(rb,0.)
       c = CMPLX(rc,0.)
       rhos = CMPLX(rrhos,0.)
       rhof = CMPLX(rrhof,0.)
-      c0 = CMPLX(0.,0.)
-
-      angS = asin(CMPLX(realp*rb,0.))
-      angP = asin(CMPLX(realp*ra,0.))      
-      angPc = asin(CMPLX(realp*rc,0.))
+      
+      cone = cmplx(1.,0.)
+      ctwo = cmplx(2.,0.)
+      cfour = cmplx(4.,0.)
+      c0   = cmplx(0.,0.)
+      
+      sinP = p*a
+      sinS = p*b 
+      sinPc = p*c
+      
+      cosPc = csqrt(cone-sinPc**2)
+      cosP = csqrt(cone-sinP**2)
+      cosS =  csqrt(cone-sinS**2)
+      
+      sin2P = ctwo*sinP*cosP
+      sin2S = ctwo*sinS*cosS
+      cos2S = cone-ctwo*sinS**2
 
  
       tau = rhof/rhos
 
-      D12 = ((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
-                + tau*(c/a)*cos(angP)+(cos(2*angS))**2*cos(angPc))**(-1.)
-
+!      D12 = ((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
+!                + tau*(c/a)*cos(angP)+(cos(2*angS))**2*cos(angPc))**(-1.)
+      D12 = ((b/a)**2*sin2P*sin2S*cosPc &
+                + tau*(c/a)*cosP+(cos2S)**2*cosPc)**(-1.)
 
       !INCIDENT-P
       
-        rP = D12*((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
-                - tau*(c/a)*cos(angP)-(cos(2*angS))**2*cos(angPc))
-        
-        tP = D12*(2*tau*(c/a)*cos(2*angS)*cos(angPc))
-        
-        tS = D12*(-4*tau*(c/a)*cos(angP)*sin(angS)*cos(angPc))
-
+!        rP = D12*((b/a)**2*sin(2*angP)*sin(2*angS)*cos(angPc) &
+!                - tau*(c/a)*cos(angP)-(cos(2*angS))**2*cos(angPc))
+        crP = D12*((b/a)**2*sin2P*sin2S*cosPc &
+                - tau*(c/a)*cosP-(cos2S)**2*cosPc)
+                        
+!        tP = D12*(2*tau*(c/a)*cos(2*angS)*cos(angPc))
+        ctP = D12*(ctwo*tau*(c/a)*cos2S*cosPc)
+                
+!        tS = D12*(-4*tau*(c/a)*cos(angP)*sin(angS)*cos(angPc))
+        ctS = D12*(-cfour*tau*(c/a)*cosP*sinS*cosPc)
                 
         rP = ((REAL(crP)**2+IMAG(crP)**2)**0.5)**cons_EorA
         tP = ((REAL(ctP)**2+IMAG(ctP)**2)**0.5)**cons_EorA
@@ -2071,7 +2111,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
         END IF
         
         !CO2
-!       WRITE(6,*) 'L2S rP,tS,tP ',nrP,ntS,ntP     
+!       WRITE(6,*) 'L2S rP,tS,tP ',nrP,ntS,ntP  
       
      RETURN
       
@@ -2499,32 +2539,27 @@ SUBROUTINE INTERFACE_NORMAL
          IF ((ud == 1).AND.(vf(iz,2) == 0.)) THEN 
            !FROM SOLID TO LIQUID  --- going down     
            
-!           WRITE(6,*) 'S2L DOWN =>',ip,iz,ud,ip
-              
+             
             ap = vf(iz-1,1)
             bs = vf(iz-1,2)
             cf = vf(iz,1)
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
+
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
             
-!           WRITE(6,*) '           ',ip,ud
-!           WRITE(6,*) ''
-            
+
          ELSEIF ((ud == -1).AND.(vf(iz-1,2) == 0.)) THEN
            !FROM SOLID TO LIQUID  --- going up
            
-!           WRITE(6,*) 'S2L UP   =>',ip,iz,ud,ip
            
             ap = vf(iz,1)
             bs = vf(iz,2)
             cf = vf(iz-1,1)
             rhosol = rh(iz)
             rhoflu = rh(iz-1)
-            CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
 
-!           WRITE(6,*) '           ',ip,ud
-!           WRITE(6,*) ''           
+            CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
            
          ELSEIF ((ud == 1).AND.(vf(iz-1,2) == 0.)) THEN  
            !FROM LIQUID TO SOLID  --- going down 
@@ -2535,31 +2570,18 @@ SUBROUTINE INTERFACE_NORMAL
             rhosol = rh(iz)
             rhoflu = rh(iz-1)
             
-!           WRITE(6,*) 'L2S DOWN =>',ip,iz,ud,ip
-  
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)         
- 
-!           WRITE(6,*) '           ',ip,ud
-!           WRITE(6,*) ''         
  
          ELSEIF ((ud == -1).AND.(vf(iz,2) == 0.)) THEN
            !FROM LIQUID TO SOLID  --- going up
 
-!            WRITE(6,*) 'L2S UP   =>',ip,iz,ud,ip       
-        
             ap = vf(iz-1,1)
             bs = vf(iz-1,2)
             cf = vf(iz,1)
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
 
-!			IF (p*cf >= 1) WRITE(6,*) 'UP =',p,cf,p*cf,iz,ud,NITR
-
-            
-            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)
-
-!           WRITE(6,*) '           ',ip,ud
-!           WRITE(6,*) ''
+            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)                      
             
          END IF
 

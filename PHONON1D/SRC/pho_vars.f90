@@ -151,5 +151,7 @@ MODULE PHO_VARS      ! Make variables global
         INTEGER           ntime(8)
         INTEGER     last_RT
         INTEGER              kernelnum
+        INTEGER     sameip,sameud
+        REAL(8)     samea
         
 END MODULE PHO_VARS
