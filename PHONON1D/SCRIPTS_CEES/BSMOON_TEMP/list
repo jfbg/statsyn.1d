@@ -1,0 +1,12 @@
+License checkout failed.
+License Manager Error -15
+MATLAB is unable to connect to the license server. 
+Check that the license manager has been started, and that the MATLAB client machine can communicate with the license server.
+
+Troubleshoot this issue by selecting the button below or visiting: 
+http://www.mathworks.com/support/lme/R2012b/15
+
+Diagnostic Information:
+Feature: MATLAB 
+License path: /Users/jfbg/.matlab/R2012b_licenses:/Applications/MATLAB_R2012b.app/licenses/license.dat:/Applications/MATLAB_R2012b.app/licenses/network.lic 
+Licensing error: -15,570. System Error: 36

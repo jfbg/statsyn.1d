@@ -1,0 +1,11 @@
+cp -r aa_Template_S3/ PS_0030km/PSMOON_001/
+cp -r aa_Template_S3/ PS_0030km/PSMOON_002a/
+cp -r aa_Template_S3/ PS_0030km/PSMOON_004a/
+cp -r aa_Template_S3/ PS_0030km/PSMOON_008a/
+cp -r aa_Template_S3/ PS_0030km/PSMOON_010b/
+cp -r aa_Template_S3/ PS_0030km/PSMOON_011a/
+cp -r aa_Template_S3/ PS_0030km/PSMOON_012a/
+cp -r aa_Template_S3/ PS_0030km/PSMOON_012c/
+cp -r aa_Template_S3/ PS_0030km/PVPREM_001/
+cp -r aa_Template_S3/ PS_0030km/PVPREM_002/
+

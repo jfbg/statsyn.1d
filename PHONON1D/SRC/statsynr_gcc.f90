@@ -1671,8 +1671,6 @@ SUBROUTINE SURFACE_PSV_BEN
       !CO2
 !      WRITE(6,*) 'SURFACE ',rP,rS
 
-      
-   
 END SUBROUTINE SURFACE_PSV_BEN
 
 SUBROUTINE RTCOEF_SH(p,b1,b2,rh1,rh2,ar,at,ud,amp,cons_EorA)
@@ -2564,9 +2562,12 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz,1)
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
+            
+            WRITE(6,*) 'SOLID  -> LIQUID',ip,ud,I,iz
 
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
-            
+            WRITE(6,*) '                ',ip,ud
+            WRITE(6,*) ''            
 
          ELSEIF ((ud == -1).AND.(vf(iz-1,2) == 0.)) THEN
            !FROM SOLID TO LIQUID  --- going up
@@ -2599,8 +2600,12 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz,1)
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
+            
+            WRITE(6,*) 'LIQ -> SOLID',ip,ud,I,iz
 
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)                      
+            WRITE(6,*) '            ',ip,ud
+            WRITE(6,*) ''            
             
          END IF
 

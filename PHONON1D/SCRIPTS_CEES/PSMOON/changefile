@@ -1,0 +1,4 @@
+for x in `ls *0030km*.csh`
+do
+perl -pi -w -e 's/ == 2/ == 1/g;' $x
+done
