@@ -1,4 +1,4 @@
-for x in `ls *0030km*.csh`
+for x in `ls *noscat*.csh`
 do
 perl -pi -w -e 's/ == 2/ == 1/g;' $x
 done
