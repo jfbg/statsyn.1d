@@ -429,7 +429,7 @@ PROGRAM STATSYNR_INTEL
       pi = atan(1.)*4.                        !
       P0 = dti*4.                             !DOMINANT PERIOD
       nts = nint(P0*4./dti)+1                 !# OF POINTS IN SOURCE SERIES
-      IF (nts < 500) nts = 500
+      IF (nts < 31) nts = 31
       nts1 = 1000
       DO I = 1, nts1
        mt(I) = 0.
@@ -1903,7 +1903,7 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
       COMPLEX   angP,angS,angPc,D12
       COMPLEX   crP,crS,ctP,c0
       REAL(8)      rP,rS,tP,tot,nrP,nrS,ntP,r0,amp
-      INTEGER      ud,ip
+      INTEGER      ud,ip,udinit
       INTEGER      cons_EorA
       INTEGER      I
       COMPLEX     sin2P,sin2S,cosPc,cosP,cos2S,sin4S,sinPc
@@ -1969,6 +1969,9 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
         nrS = rS/tot
         ntP = tP/tot
         
+        !DEBUG
+!        IF (ud == 1) WRITE(6,*) 'D',ip,nrP,nrS,ntP
+        
 
         r0 = rand()
         
@@ -2009,6 +2012,9 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
         nrS = rS/tot
         ntP = tP/tot
         
+        !DEBUG
+!        IF (ud == 1) WRITE(6,*) 'S',ip,nrP,nrS,ntP
+        udinit = ud
         r0 = rand()
         
         IF (r0 <= nrP) THEN    !REFLECTED P
@@ -2023,17 +2029,18 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
           ip = 1
           IF (REAL(ctP) < 0.) amp = -amp
         END IF
-                
+            
+!        IF (udinit == 1) WRITE(6,*) 'S',ip,ud   
       END IF
       
       !CO2
-!      WRITE(6,*) 'S2L rP,rS,tP ',nrP,nrS,ntP
+!      WRITE(6,*) I,'S2L rP,rS,tP ',nrP,nrS,ntP
       
       RETURN
       
 END SUBROUTINE RTFLUID_BEN_S2L
 
-SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
+SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
 
 ! Going from Core to Mantle, liquid to solid
 
@@ -2046,7 +2053,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
       COMPLEX      angP,angS,angPc,D12,c0
       COMPLEX      crP,ctP,ctS
       REAL(8)      rP,tS,tP,tot,nrP,ntS,ntP,r0,amp
-      INTEGER      ud,ip
+      INTEGER      ud,ip,I
       INTEGER      cons_EorA
       
       COMPLEX      sin2P,sin2S,cos2S
@@ -2128,7 +2135,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
         END IF
         
         !CO2
-!       WRITE(6,*) 'L2S rP,tS,tP ',nrP,ntS,ntP  
+!       WRITE(6,*) I,'L2S rP,tS,tP ',nrP,ntS,ntP  
       
      RETURN
       
@@ -2562,9 +2569,12 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz,1)
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
+            
+!            WRITE(6,*) 'SOLID  -> LIQUID',ip,ud,I,iz
 
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
-            
+!            WRITE(6,*) '                ',ip,ud
+!            WRITE(6,*) ''            
 
          ELSEIF ((ud == -1).AND.(vf(iz-1,2) == 0.)) THEN
            !FROM SOLID TO LIQUID  --- going up
@@ -2587,7 +2597,7 @@ SUBROUTINE INTERFACE_NORMAL
             rhosol = rh(iz)
             rhoflu = rh(iz-1)
             
-            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)         
+            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)         
  
          ELSEIF ((ud == -1).AND.(vf(iz,2) == 0.)) THEN
            !FROM LIQUID TO SOLID  --- going up
@@ -2597,8 +2607,12 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz,1)
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
+            
+!            WRITE(6,*) 'LIQ -> SOLID',ip,ud,I,iz
 
-            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)                      
+            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)                      
+!            WRITE(6,*) '            ',ip,ud
+!            WRITE(6,*) ''            
             
          END IF
 
