@@ -146,6 +146,7 @@ echo " " >> $file_csh
 #
 if ($j == $n_kern)  then
 csh $file_csh
+sleep 60
 endif
 if ($j < $n_kern) then
 csh $file_csh &
