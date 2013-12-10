@@ -429,7 +429,7 @@ PROGRAM STATSYNR_INTEL
       pi = atan(1.)*4.                        !
       P0 = dti*4.                             !DOMINANT PERIOD
       nts = nint(P0*4./dti)+1                 !# OF POINTS IN SOURCE SERIES
-      IF (nts < 31) nts = 31
+      IF (nts < 101) nts = 101
       nts1 = 1000
       DO I = 1, nts1
        mt(I) = 0.

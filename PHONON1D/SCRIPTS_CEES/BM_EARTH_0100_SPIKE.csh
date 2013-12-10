@@ -10,7 +10,7 @@ set d_range    = "0 180 361"
 set n_phonon   = "5000000"
 
 # Source attenuation and type
-set dQdfstyle  = 1
+set dQdfstyle  = 2
 set sourcetype = 1    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "1 1 1"  # Energy partioning at source
