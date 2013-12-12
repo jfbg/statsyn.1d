@@ -5,7 +5,7 @@
 #
 
 @ t_start      = 0
-@ t_max        = 2750			# 90 minutes
+@ t_max        = 3500			# 90 minutes
 set d_range    = "0 180 361"
 set n_phonon   = "5000000"
 
@@ -48,7 +48,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 #cd SRC
-#make statsyn_intel.x
+#make statsynr_intel.x
 #cd ..
 
 

@@ -10,7 +10,7 @@ set d_range    = "0 180 361"
 set n_phonon   = "5000000"
 
 # Source attenuation and type
-set dQdfstyle  = 2
+set dQdfstyle  = 1
 set sourcetype = 1    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "1 1 1"  # Energy partioning at source
@@ -48,7 +48,7 @@ set log_dir    = "./LOG"
 
 # Compile statistical phonon code
 #cd SRC
-#make statsyn_intel.x
+#make statsynr_intel.x
 #cd ..
 
 

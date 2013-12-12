@@ -429,7 +429,7 @@ PROGRAM STATSYNR_INTEL
       pi = atan(1.)*4.                        !
       P0 = dti*4.                             !DOMINANT PERIOD
       nts = nint(P0*4./dti)+1                 !# OF POINTS IN SOURCE SERIES
-      IF (nts < 101) nts = 101
+      IF (nts < 31) nts = 31
       nts1 = 1000
       DO I = 1, nts1
        mt(I) = 0.
@@ -2056,9 +2056,11 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
       INTEGER      ud,ip,I
       INTEGER      cons_EorA
       
+      
       COMPLEX      sin2P,sin2S,cos2S
       COMPLEX      sinS,sinP,sinPc,cosS,cosP,cosPc
       COMPLEX      cone,ctwo,cfour
+      
             
       p = CMPLX(realp,0.)
       a = CMPLX(ra,0.)
@@ -2540,10 +2542,13 @@ SUBROUTINE INTERFACE_NORMAL
       
       USE pho_vars
       IMPLICIT NONE
-      REAL(8)     ap,bs,cf,rhosol,rhoflu
-!      INTEGER     ip_init
+      REAL(8)     ap,bs,cf,rhosol,rhoflu,a_init
+      INTEGER     ip_init,ud_init
       
-!      ip_init = ip
+      
+      ip_init = ip
+      ud_init = ud
+      a_init = a
       
       
       last_RT = 0
@@ -2553,14 +2558,14 @@ SUBROUTINE INTERFACE_NORMAL
       
       IF ((h <= 0.).AND.(iz > 1).AND.(iz < nlay-1)) THEN
 
-      IF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip.ne.3)) THEN  !IF0
+      IF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip_init.ne.3)) THEN  !IF0
          !SOLID-LIQUID INTERFACE with P and SV waves
          !Figure out if phonon is going from:
          !      solid to liquid (mantle to core) or from
          !      liquid to solid (core to mantle)
          !      and check direction
          
-         IF ((ud == 1).AND.(vf(iz,2) == 0.)) THEN 
+         IF ((ud_init == 1).AND.(vf(iz,2) == 0.)) THEN 
            !FROM SOLID TO LIQUID  --- going down     
            
              
@@ -2576,7 +2581,9 @@ SUBROUTINE INTERFACE_NORMAL
 !            WRITE(6,*) '                ',ip,ud
 !            WRITE(6,*) ''            
 
-         ELSEIF ((ud == -1).AND.(vf(iz-1,2) == 0.)) THEN
+!			WRITE(6,*) 'S2L Down'
+
+         ELSEIF ((ud_init == -1).AND.(vf(iz-1,2) == 0.)) THEN
            !FROM SOLID TO LIQUID  --- going up
            
            
@@ -2587,8 +2594,10 @@ SUBROUTINE INTERFACE_NORMAL
             rhoflu = rh(iz-1)
 
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
+
+!			WRITE(6,*) 'S2L Up'
            
-         ELSEIF ((ud == 1).AND.(vf(iz-1,2) == 0.)) THEN  
+         ELSEIF ((ud_init == 1).AND.(vf(iz-1,2) == 0.)) THEN  
            !FROM LIQUID TO SOLID  --- going down 
 
             ap = vf(iz,1)
@@ -2599,7 +2608,9 @@ SUBROUTINE INTERFACE_NORMAL
             
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)         
  
-         ELSEIF ((ud == -1).AND.(vf(iz,2) == 0.)) THEN
+!			WRITE(6,*) 'L2S Down' 
+
+         ELSEIF ((ud_init == -1).AND.(vf(iz,2) == 0.)) THEN
            !FROM LIQUID TO SOLID  --- going up
 
             ap = vf(iz-1,1)
@@ -2613,11 +2624,13 @@ SUBROUTINE INTERFACE_NORMAL
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)                      
 !            WRITE(6,*) '            ',ip,ud
 !            WRITE(6,*) ''            
+!			WRITE(6,*) 'L2S Up'
             
          END IF
 
 
-      ELSEIF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip.eq.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
+      ELSEIF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip_init.eq.3).AND.&
+                        &(h <= 0.).AND.(iz > 1)) THEN  !IF0
         !Solid-Liquid Interface with SH waves
         ud = -ud 
       
@@ -2625,26 +2638,31 @@ SUBROUTINE INTERFACE_NORMAL
         !Solid-Solid Interface
 
               
-          IF ((iz == 2).AND.(ud == -1)) THEN                              !IF1.1 
+          IF ((iz == 2).AND.(ud_init == -1)) THEN                              !IF1.1 
           ! Skip INTERFACE_NORMAL BECAUSE PHONON IS AT SURFACE
           ELSE                                                             !IF1.1
               
 
-            IF (ip  ==  3) THEN                                              !IF2a
-              IF ( (ud == 1) ) THEN               !IF DOWNGOING SH WAVE      !IF3a
+            IF (ip_init  ==  3) THEN                                              !IF2a
+              IF ( (ud_init == 1) ) THEN               !IF DOWNGOING SH WAVE      !IF3a
                 CALL RTCOEF_SH(p,vf(iz-1,2),vf(iz,2),rh(iz-1),rh(iz),ar,at,ud,a,cons_EorA)
-              ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE        !IF3a
+!                 			WRITE(6,*) 'Solid2Solid SH DOWN'
+              ELSE IF ((ud_init == -1) ) THEN          !IF UPGOING SH WAVE        !IF3a
                 CALL RTCOEF_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1),ar,at,ud,a,cons_EorA)
-              END IF                                                         !IF3a
+!                 			WRITE(6,*) 'Solid2Solid SH UP'
+              END IF  
+                                                                            !IF3a
             ELSE                                                             !IF2a
-              IF ( (ud == 1) ) THEN               !IF DOWNGOING P-SV WAVE    !IF3b
+              IF ( (ud_init == 1) ) THEN               !IF DOWNGOING P-SV WAVE    !IF3b
                 CALL RTCOEF_PSV(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
                              vf(iz  ,1),vf(iz  ,2),rh(iz), &
                             arp,ars,atp,ats,ip,ud,a,cons_EorA)
-              ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE      !IF3b
+!                 			WRITE(6,*) 'Solid2Solid PSV DOWN'
+              ELSE IF ((ud_init == -1) ) THEN          !IF UPGOING P-SV WAVE      !IF3b
                 CALL RTCOEF_PSV(p,vf(iz  ,1),vf(iz  ,2),rh(iz  ), &
                              vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
                             arp,ars,atp,ats,ip,ud,a,cons_EorA)             
+!                 			WRITE(6,*) 'Solid2Solid PSV UP'
               END IF                                                        !IF3b
             END IF                                                          !IF2a
          
@@ -2652,6 +2670,9 @@ SUBROUTINE INTERFACE_NORMAL
           END IF  !IF1.1
           
       END IF    !IF0
+      !
+!      			WRITE(6,*)   'OUT'
+!			WRITE(6,*)   ''
       
       ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE 
           ud = -1   ! GOING UP NOW
@@ -2665,6 +2686,7 @@ SUBROUTINE INTERFACE_NORMAL
         IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
        
       END IF 
+      
 !      IF (t_last_count > 995) WRITE(6,*) I,NITR,ip,iz,REAL(dt1,4),irtr1,ud,h,z(iz),z(iz-1)!, &
        
       RETURN  
