@@ -551,7 +551,7 @@ PROGRAM STATSYNR_INTEL
 !        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,4,I)*1.,J=1,ns0)
 !      END DO
 !      CLOSE(23)
-
+!	  WRITE(6,*) 'SOURCE OUTPUT DONE'
       
 
 !!      ^^^^^ Attenuation ^^^^^    
@@ -612,7 +612,8 @@ PROGRAM STATSYNR_INTEL
             ip = 3 !SH
           END IF
         END IF
-         
+        
+        firstip = ip
         iwave = ip
         IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
         
@@ -661,6 +662,7 @@ PROGRAM STATSYNR_INTEL
         t_last_count = 0
         z_last = -99.
         z_last_count = 0
+        trackS2L = 0
         ! ============ <<
              
         ! ============ >>
@@ -689,7 +691,8 @@ PROGRAM STATSYNR_INTEL
           ang1 = angst*r0         !Randomly select angle
           p    = abs(sin(ang1))/vf(iz_p,iwave)
         END IF
-        
+
+               
         ! ============ <<
 
 !       CALL cpu_time(tt2)
@@ -714,6 +717,7 @@ PROGRAM STATSYNR_INTEL
        
        !DEBUG
 !       IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1,irtr1
+!        WRITE(6,*) I,NITR,z_act,x,t,p,ip,iz,ud
       
       
         ! ============ >>
@@ -1958,10 +1962,7 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
         
         !Supercritical
 
-        IF (rc*realp > 1) THEN 
-!            WRITE(6,*) 'YUP CCCC'
-            tP = 0.
-        END IF
+        IF (rc*realp >= 1) tP = 0.
         
         !Get new ip
         tot = rP + rS + tP
@@ -2032,6 +2033,7 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
             
 !        IF (udinit == 1) WRITE(6,*) 'S',ip,ud   
       END IF
+      
       
       !CO2
 !      WRITE(6,*) I,'S2L rP,rS,tP ',nrP,nrS,ntP
@@ -2201,6 +2203,7 @@ SUBROUTINE LAYERTRACE(p,h,utop,ubot,imth,dx,dt,irtr)
          dx=0.            !ray turned above layer
          dt=0.
          irtr=0
+!         WRITE(6,*) 'HAHAHAHA=>',utop,p,
          RETURN
       END IF
 !
@@ -2575,13 +2578,15 @@ SUBROUTINE INTERFACE_NORMAL
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
             
-!            WRITE(6,*) 'SOLID  -> LIQUID',ip,ud,I,iz
+!            WRITE(6,*) 'SOLID  -> LIQUID',ip,ud,I,iz,t,ip,ud
 
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
 !            WRITE(6,*) '                ',ip,ud
 !            WRITE(6,*) ''            
 
-!			WRITE(6,*) 'S2L Down'
+!			WRITE(6,*) 'S2L Down' ,I,NITR,iz,t,ip,ud,irtr_past
+!			DEBUG
+!			trackS2L = 1
 
          ELSEIF ((ud_init == -1).AND.(vf(iz-1,2) == 0.)) THEN
            !FROM SOLID TO LIQUID  --- going up
@@ -2595,7 +2600,7 @@ SUBROUTINE INTERFACE_NORMAL
 
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
 
-!			WRITE(6,*) 'S2L Up'
+!			WRITE(6,*) 'S2L Up',I,NITR,iz,t,ip,ud,irtr_past
            
          ELSEIF ((ud_init == 1).AND.(vf(iz-1,2) == 0.)) THEN  
            !FROM LIQUID TO SOLID  --- going down 
@@ -2608,7 +2613,7 @@ SUBROUTINE INTERFACE_NORMAL
             
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)         
  
-!			WRITE(6,*) 'L2S Down' 
+!			WRITE(6,*) 'L2S Down' ,I,NITR,iz,t,ip,ud,irtr_past
 
          ELSEIF ((ud_init == -1).AND.(vf(iz,2) == 0.)) THEN
            !FROM LIQUID TO SOLID  --- going up
@@ -2619,12 +2624,12 @@ SUBROUTINE INTERFACE_NORMAL
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
             
-!            WRITE(6,*) 'LIQ -> SOLID',ip,ud,I,iz
+!            WRITE(6,*) 'LIQ -> SOLID',ip,ud,I,iz,t,ip,ud
 
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)                      
 !            WRITE(6,*) '            ',ip,ud
 !            WRITE(6,*) ''            
-!			WRITE(6,*) 'L2S Up'
+!			WRITE(6,*) 'L2S Up' ,I,NITR,iz,t,ip,ud,irtr_past
             
          END IF
 
@@ -2646,10 +2651,10 @@ SUBROUTINE INTERFACE_NORMAL
             IF (ip_init  ==  3) THEN                                              !IF2a
               IF ( (ud_init == 1) ) THEN               !IF DOWNGOING SH WAVE      !IF3a
                 CALL RTCOEF_SH(p,vf(iz-1,2),vf(iz,2),rh(iz-1),rh(iz),ar,at,ud,a,cons_EorA)
-!                 			WRITE(6,*) 'Solid2Solid SH DOWN'
+!                 			WRITE(6,*) 'Solid2Solid SH DOWN' ,I,iz,t,ip,ud
               ELSE IF ((ud_init == -1) ) THEN          !IF UPGOING SH WAVE        !IF3a
                 CALL RTCOEF_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1),ar,at,ud,a,cons_EorA)
-!                 			WRITE(6,*) 'Solid2Solid SH UP'
+!                 			WRITE(6,*) 'Solid2Solid SH UP' ,I,iz,t,ip,ud
               END IF  
                                                                             !IF3a
             ELSE                                                             !IF2a
@@ -2657,12 +2662,12 @@ SUBROUTINE INTERFACE_NORMAL
                 CALL RTCOEF_PSV(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
                              vf(iz  ,1),vf(iz  ,2),rh(iz), &
                             arp,ars,atp,ats,ip,ud,a,cons_EorA)
-!                 			WRITE(6,*) 'Solid2Solid PSV DOWN'
+!                 			WRITE(6,*) 'Solid2Solid PSV DOWN' ,I,iz,t,ip,ud
               ELSE IF ((ud_init == -1) ) THEN          !IF UPGOING P-SV WAVE      !IF3b
                 CALL RTCOEF_PSV(p,vf(iz  ,1),vf(iz  ,2),rh(iz  ), &
                              vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
                             arp,ars,atp,ats,ip,ud,a,cons_EorA)             
-!                 			WRITE(6,*) 'Solid2Solid PSV UP'
+!                 			WRITE(6,*) 'Solid2Solid PSV UP' ,I,iz,t,ip,ud
               END IF                                                        !IF3b
             END IF                                                          !IF2a
          
@@ -2672,7 +2677,6 @@ SUBROUTINE INTERFACE_NORMAL
       END IF    !IF0
       !
 !      			WRITE(6,*)   'OUT'
-!			WRITE(6,*)   ''
       
       ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE 
           ud = -1   ! GOING UP NOW
@@ -2682,10 +2686,11 @@ SUBROUTINE INTERFACE_NORMAL
           totald = totald + 2*corelayer
           s = s + dt1/Q(nlay,iwave)
       
-        iwave = ip
-        IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
-       
+
       END IF 
+      
+      iwave = ip
+      IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
       
 !      IF (t_last_count > 995) WRITE(6,*) I,NITR,ip,iz,REAL(dt1,4),irtr1,ud,h,z(iz),z(iz-1)!, &
        
@@ -2829,12 +2834,25 @@ SUBROUTINE RAYTRACE
              ELSE
                ubot = 0.
              END IF
+             
+
         
           h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
+          
+!          if ((p > utop).AND.(h > 0.)) WRITE(6,*) I,p,utop,ubot,iz,ip,firstip,ud,t
 
+          
+          !DEBUGWRITE
+!          IF ((iz < 322).AND.(iz > 318)) THEN
+!             WRITE(6,*) I,nitr,ip,vf(iz,1),vf(iz,2),vf(iz-1,1),vf(iz-1,2)
+!           END IF  
 
+          irtr_past = irtr1
           CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
           dtstr1 = dt1/Q(iz-1,iwave)                    !t* = TIME/QUALITY FACTOR
+          
+
+
         
         ELSE
           irtr1  = -1
