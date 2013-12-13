@@ -14,8 +14,9 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
+'BM_EARTH_0100_SPIKE'
 'BM_EARTH_0100_SPIKE_B'
-% 'BM_EARTH_0100_SPIKE_noATT'
+'BM_EARTH_0100_SPIKE_noATT'
 % 'BM_EARTH_0030_SPIKE'
 % 'BM_EARTH_0200_SPIKE'
 % 'BM_EARTHPREM_SPIKE_100km_EXP_noATT_RS'
@@ -38,7 +39,7 @@ depths = [100 30 200 700]; % All potential depths
 % depths = [0.01];
 freqs = [40 20 1];                     % All potential frequencies
 kerns = 16;                 
-iters = 7;
+iters = 10;
 
 outputfolder = '../OUTPUT/';
 scriptfolder = './AVERAGING_SCRIPTS/';
