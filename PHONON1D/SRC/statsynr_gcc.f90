@@ -2841,7 +2841,7 @@ SUBROUTINE RAYTRACE
         
           h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
           
-          if ((p > utop).AND.(h > 0.)) WRITE(6,*) I,p,utop,ubot,iz,ip,iz_p,iz1
+!          if ((p > utop).AND.(h > 0.)) WRITE(6,*) I,p,utop,ubot,iz,ip,iz_p,iz1
 
           
           !DEBUGWRITE

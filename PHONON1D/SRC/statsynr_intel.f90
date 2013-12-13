@@ -671,6 +671,8 @@ PROGRAM STATSYNR_INTEL
         r0 = rand()
         maxp = sin(angst)/vf(iz_p,iwave)
 
+		!DEBUG
+		iz_p = iz1
   
         IF (samplingtype.eq.2) THEN               ! Sample slownesses
           p = maxp*r0
@@ -2839,7 +2841,7 @@ SUBROUTINE RAYTRACE
         
           h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
           
-!          if ((p > utop).AND.(h > 0.)) WRITE(6,*) I,p,utop,ubot,iz,ip,firstip,ud,t
+!          if ((p > utop).AND.(h > 0.)) WRITE(6,*) I,p,utop,ubot,iz,ip,iz_p,iz1
 
           
           !DEBUGWRITE
