@@ -1443,7 +1443,7 @@ SUBROUTINE ATTENUATE(sin,sout,southil,ndat,dt,tstar,dQdfSTYLE)
       CALL GET_TS(yf,nfreq,df,0,soutshift,npts,dt) !GET TIME SERIES OF ATTENUATED SPEC
       
       nfil = 5
-      CALL TILBERT(soutshift,dt,npts,nfil,b,e)   !HILBER TRANSFORM (pi/2PHASESHFT)
+      CALL TILBERT(soutshift,dt,npts,nfil,b,e)   !HILBERT TRANSFORM (pi/2PHASESHFT)
     
     DO I=1,ndat
      sout(I) = soutshift(shiftfactor+I)
