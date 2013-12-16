@@ -15,8 +15,8 @@ fclose(fid);
 
 modellist = {...
 'BM_EARTH_0100_SPIKE'
-'BM_EARTH_0100_SPIKE_B'
-'BM_EARTH_0100_SPIKE_noATT'
+% 'BM_EARTH_0100_SPIKE_B'
+% 'BM_EARTH_0100_SPIKE_noATT'
 % 'BM_EARTH_0030_SPIKE'
 % 'BM_EARTH_0200_SPIKE'
 % 'BM_EARTHPREM_SPIKE_100km_EXP_noATT_RS'
@@ -37,7 +37,7 @@ modellist = {...
 % depths = [.01 20 30 50 100 150 800 500 750 1000]; % All potential depths
 depths = [100 30 200 700]; % All potential depths
 % depths = [0.01];
-freqs = [40 20 1];                     % All potential frequencies
+freqs = [2];                     % All potential frequencies
 kerns = 16;                 
 iters = 10;
 
@@ -72,7 +72,8 @@ for kk = 1:length(depths)
     elseif freqs(hh) == 40, dt = 0.025;
     elseif freqs(hh) == 1, dt = 1.00;       % was used during Benchmarking
     elseif freqs(hh) == 5, dt = 0.20; 
-    elseif freqs(hh) == 20, dt = 0.05; 
+    elseif freqs(hh) == 20, dt = 0.05;
+    elseif freqs(hh) == 2, dt = 0.5;
     else
         error('Input new frequency');
     end
@@ -119,6 +120,17 @@ for kk = 1:length(depths)
 
             filenameT = sprintf('%s.0.01.%.0f.%.0f.%02.0f.lpt',...
                         modellist{qq},ii,jj,freqs(hh));
+            end
+            
+            if freqs(hh) == 2
+            filenameR = sprintf('%s.%.0f.%.0f.%.0f.%.0f.lpr',...
+                        modellist{qq},depths(kk),ii,jj,freqs(hh));
+
+            filenameZ = sprintf('%s.%.0f.%.0f.%.0f.%.0f.lpz',...
+                        modellist{qq},depths(kk),ii,jj,freqs(hh));
+
+            filenameT = sprintf('%s.%.0f.%.0f.%.0f.%.0f.lpt',...
+                        modellist{qq},depths(kk),ii,jj,freqs(hh));
             end
                         
               
