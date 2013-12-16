@@ -1443,7 +1443,7 @@ SUBROUTINE ATTENUATE(sin,sout,southil,ndat,dt,tstar,dQdfSTYLE)
       CALL GET_TS(yf,nfreq,df,0,soutshift,npts,dt) !GET TIME SERIES OF ATTENUATED SPEC
       
       nfil = 5
-      CALL TILBERT(soutshift,dt,npts,nfil,b,e)   !HILBER TRANSFORM (pi/2PHASESHFT)
+      CALL TILBERT(soutshift,dt,npts,nfil,b,e)   !HILBERT TRANSFORM (pi/2PHASESHFT)
     
     DO I=1,ndat
      sout(I) = soutshift(shiftfactor+I)
@@ -2586,7 +2586,7 @@ SUBROUTINE INTERFACE_NORMAL
 !            WRITE(6,*) '                ',ip,ud
 !            WRITE(6,*) ''            
 
-!			WRITE(6,*) 'S2L Down' ,I,NITR,iz,t,ip,ud,irtr_past
+			WRITE(6,*) 'S2L Down' ,I,NITR,iz,t,ip,ud,irtr_past
 !			DEBUG
 !			trackS2L = 1
 
@@ -2602,7 +2602,7 @@ SUBROUTINE INTERFACE_NORMAL
 
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
 
-!			WRITE(6,*) 'S2L Up',I,NITR,iz,t,ip,ud,irtr_past
+			WRITE(6,*) 'S2L Up',I,NITR,iz,t,ip,ud,irtr_past
            
          ELSEIF ((ud_init == 1).AND.(vf(iz-1,2) == 0.)) THEN  
            !FROM LIQUID TO SOLID  --- going down 
@@ -2615,7 +2615,7 @@ SUBROUTINE INTERFACE_NORMAL
             
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)         
  
-!			WRITE(6,*) 'L2S Down' ,I,NITR,iz,t,ip,ud,irtr_past
+			WRITE(6,*) 'L2S Down' ,I,NITR,iz,t,ip,ud,irtr_past
 
          ELSEIF ((ud_init == -1).AND.(vf(iz,2) == 0.)) THEN
            !FROM LIQUID TO SOLID  --- going up
@@ -2631,13 +2631,12 @@ SUBROUTINE INTERFACE_NORMAL
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)                      
 !            WRITE(6,*) '            ',ip,ud
 !            WRITE(6,*) ''            
-!			WRITE(6,*) 'L2S Up' ,I,NITR,iz,t,ip,ud,irtr_past
+			WRITE(6,*) 'L2S Up' ,I,NITR,iz,t,ip,ud,irtr_past
             
          END IF
 
 
-      ELSEIF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip_init.eq.3).AND.&
-                        &(h <= 0.).AND.(iz > 1)) THEN  !IF0
+      ELSEIF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip_init.eq.3)) THEN  !IF0
         !Solid-Liquid Interface with SH waves
         ud = -ud 
       
@@ -2677,8 +2676,13 @@ SUBROUTINE INTERFACE_NORMAL
           END IF  !IF1.1
           
       END IF    !IF0
-      !
-!      			WRITE(6,*)   'OUT'
+      
+      
+      iwave = ip
+      IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
+            
+!      WRITE(6,*)   'OUT'
+!      WRITE(6,*)   ''
       
       ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE 
           ud = -1   ! GOING UP NOW
@@ -2690,11 +2694,7 @@ SUBROUTINE INTERFACE_NORMAL
       
 
       END IF 
-      
-      iwave = ip
-      IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
-      
-!      IF (t_last_count > 995) WRITE(6,*) I,NITR,ip,iz,REAL(dt1,4),irtr1,ud,h,z(iz),z(iz-1)!, &
+   
        
       RETURN  
 END SUBROUTINE INTERFACE_NORMAL

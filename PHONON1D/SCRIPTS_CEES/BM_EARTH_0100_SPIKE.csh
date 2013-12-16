@@ -7,7 +7,7 @@
 @ t_start      = 0
 @ t_max        = 3500			# 90 minutes
 set d_range    = "0 180 361"
-set n_phonon   = "5000000"
+set n_phonon   = "2000000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
@@ -60,8 +60,8 @@ while ($l < $n_freq)
 @ l = $l + 1
 
 if ($l == 1) then
- set dt = "0.05"
- set period = "20"
+ set dt = "0.5"
+ set period = "2"
 else
  set dt = "0.150"
  set period = "07"
