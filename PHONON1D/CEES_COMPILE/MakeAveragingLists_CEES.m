@@ -14,7 +14,7 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-% 'BM_EARTH_0100_SPIKE'
+'BM_EARTH_0100_SPIKE'
 'BM_EARTH_0100_S3'
 % 'BM_EARTH_0100_SPIKE_B'
 % 'BM_EARTH_0100_SPIKE_noATT'
