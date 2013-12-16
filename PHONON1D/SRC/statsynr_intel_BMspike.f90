@@ -97,7 +97,7 @@ PROGRAM STATSYNR_INTEL
       WRITE(*,*) '*'
       WRITE(*,*) '*    USE FOR BENCHMARKING'
       WRITE(*,*) '*    TT_Times figures'
-      WRITE(*,*) '*    ALWAYS USE icaustic == 1'
+      WRITE(*,*) '*    Use attenuated spike a_att = 1*exp(-2*pi*s)'
       WRITE(*,*) '*'
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Receivers are 1km wide x 1 km deep'
@@ -2593,7 +2593,7 @@ SUBROUTINE INTERFACE_NORMAL
 !            WRITE(6,*) '                ',ip,ud
 !            WRITE(6,*) ''            
 
-			WRITE(6,*) 'S2L Down' ,I,NITR,iz,t,ip,ud,irtr_past
+!			WRITE(6,*) 'S2L Down' ,I,NITR,iz,t,ip,ud,irtr_past
 !			DEBUG
 !			trackS2L = 1
 
@@ -2609,7 +2609,7 @@ SUBROUTINE INTERFACE_NORMAL
 
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
 
-			WRITE(6,*) 'S2L Up',I,NITR,iz,t,ip,ud,irtr_past
+!			WRITE(6,*) 'S2L Up',I,NITR,iz,t,ip,ud,irtr_past
            
          ELSEIF ((ud_init == 1).AND.(vf(iz-1,2) == 0.)) THEN  
            !FROM LIQUID TO SOLID  --- going down 
@@ -2622,7 +2622,7 @@ SUBROUTINE INTERFACE_NORMAL
             
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)         
  
-			WRITE(6,*) 'L2S Down' ,I,NITR,iz,t,ip,ud,irtr_past
+!			WRITE(6,*) 'L2S Down' ,I,NITR,iz,t,ip,ud,irtr_past
 
          ELSEIF ((ud_init == -1).AND.(vf(iz,2) == 0.)) THEN
            !FROM LIQUID TO SOLID  --- going up
@@ -2638,7 +2638,7 @@ SUBROUTINE INTERFACE_NORMAL
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)                      
 !            WRITE(6,*) '            ',ip,ud
 !            WRITE(6,*) ''            
-			WRITE(6,*) 'L2S Up' ,I,NITR,iz,t,ip,ud,irtr_past
+!			WRITE(6,*) 'L2S Up' ,I,NITR,iz,t,ip,ud,irtr_past
             
          END IF
 
