@@ -1,13 +1,9 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTH_0100_SPIKE_02.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BM_onlySPIKE_02.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTH_0100_SPIKE_05.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BM_onlySPIKE_07.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTH_0100_SPIKE_07.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTH_0100_SPIKE_10.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_BM_EARTH_0100_SPIKE_20.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BM_onlySPIKE_20.sh
 sleep 1
