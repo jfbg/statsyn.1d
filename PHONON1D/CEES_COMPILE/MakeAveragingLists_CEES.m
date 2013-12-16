@@ -14,8 +14,8 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-'BM_EARTH_0100_SPIKE'
-'BM_EARTH_0100_S3'
+% 'BM_EARTH_0100_SPIKE'
+% 'BM_EARTH_0100_S3'
 % 'BM_EARTH_0100_SPIKE_B'
 % 'BM_EARTH_0100_SPIKE_noATT'
 % 'BM_EARTH_0030_SPIKE'
@@ -32,13 +32,14 @@ modellist = {...
 % 'PVPREM_001_40Hz_0030km_noscat'
 % 'PVPREM_001_40Hz_1000km_noscat'
 % 'PSMOON_011a_noscat'
+'BM_EARTH_0100_SPIKE'
 };
 
 % depths = .01;
 % depths = [.01 20 30 50 100 150 800 500 750 1000]; % All potential depths
 depths = [100 30 200 700]; % All potential depths
 % depths = [0.01];
-freqs = [2];                     % All potential frequencies
+freqs = [2 5 7 10 20];                     % All potential frequencies
 kerns = 16;                 
 iters = 10;
 
@@ -75,6 +76,7 @@ for kk = 1:length(depths)
     elseif freqs(hh) == 5, dt = 0.20; 
     elseif freqs(hh) == 20, dt = 0.05;
     elseif freqs(hh) == 2, dt = 0.5;
+    elseif freqs(hh) == 10, dt = 0.1;
     else
         error('Input new frequency');
     end
@@ -123,16 +125,16 @@ for kk = 1:length(depths)
                         modellist{qq},ii,jj,freqs(hh));
             end
             
-            if freqs(hh) == 2
-            filenameR = sprintf('%s.%.0f.%.0f.%.0f.%.0f.lpr',...
-                        modellist{qq},depths(kk),ii,jj,freqs(hh));
-
-            filenameZ = sprintf('%s.%.0f.%.0f.%.0f.%.0f.lpz',...
-                        modellist{qq},depths(kk),ii,jj,freqs(hh));
-
-            filenameT = sprintf('%s.%.0f.%.0f.%.0f.%.0f.lpt',...
-                        modellist{qq},depths(kk),ii,jj,freqs(hh));
-            end
+%             if freqs(hh) == 2
+%             filenameR = sprintf('%s.%.0f.%.0f.%.0f.%.0f.lpr',...
+%                         modellist{qq},depths(kk),ii,jj,freqs(hh));
+% 
+%             filenameZ = sprintf('%s.%.0f.%.0f.%.0f.%.0f.lpz',...
+%                         modellist{qq},depths(kk),ii,jj,freqs(hh));
+% 
+%             filenameT = sprintf('%s.%.0f.%.0f.%.0f.%.0f.lpt',...
+%                         modellist{qq},depths(kk),ii,jj,freqs(hh));
+%             end
                         
               
                         
