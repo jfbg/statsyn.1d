@@ -46,6 +46,7 @@
       
       I = I-1 ! Number of layers in input model.
       
+      
       ! Depth of last layer is radius
   		erad = z_st(I)
   		deg2km = erad*d2r

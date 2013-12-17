@@ -498,7 +498,10 @@ PROGRAM STATSYNR_INTEL
       
 !        REAL(8)          mts(datt,caustic,source)        !ATTENUATED SOURCE  (     
       
-      datt = .005    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
+      datt = .005
+      IF (erad.eq.1737) datt = .0025    
+      IF (erad.eq.6370) datt = .01
+      
                 ! This is datt, not max att. max att will be datt*(ns0-1) = 15.
      DO I = 1, ns0                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
@@ -1094,11 +1097,11 @@ PROGRAM STATSYNR_INTEL
                     END IF
                     
                     
-                    ! UNCOMMENT TO SEE WHAT IS MAX ims*datt reached.
+                    ! UNCOMMENT TO SEE WHAT IS MAX s and ims*datt reached.
                     ! If imsmax > datt*ntso, adjust datt so that imsmax can be reached.
-!                    if (ims > imsmax) THEN
-!                    imsmax = ims
-!                    WRITE(6,*) imsmax*datt
+!                    IF (s > imsmax) THEN
+!                      imsmax = s
+!                      WRITE(6,*) s,ims
 !                    END IF
 
                       icaust = ncaust
