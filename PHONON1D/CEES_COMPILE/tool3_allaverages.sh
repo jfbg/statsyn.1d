@@ -1,1 +1,1 @@
-csh ./AVERAGING_SCRIPTS/BM_onlySPIKE_average.csh
+csh ./AVERAGING_SCRIPTS/BM_EARTH_0100_SPIKE_average.csh

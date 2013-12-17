@@ -14,8 +14,8 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-% 'BM_EARTH_0100_SPIKE'
-% 'BM_EARTH_0100_S3'
+'BM_EARTH_0100_SPIKE'
+'BM_EARTH_0100_S3'
 % 'BM_EARTH_0100_SPIKE_B'
 % 'BM_EARTH_0100_SPIKE_noATT'
 % 'BM_EARTH_0030_SPIKE'
@@ -33,7 +33,7 @@ modellist = {...
 % 'PVPREM_001_40Hz_1000km_noscat'
 % 'PSMOON_011a_noscat'
 % 'BM_EARTH_0100_SPIKE'
-'BM_onlySPIKE'
+% 'BM_onlySPIKE'
 };
 
 % depths = .01;
