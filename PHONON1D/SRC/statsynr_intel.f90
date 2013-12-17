@@ -46,7 +46,7 @@ PROGRAM STATSYNR_INTEL
         REAL          b(nst0), e(nst0)        !HILBERT TRANSFORM & ENVELOPE
         REAL          mtsc(nst0),datt,dtst1  !SCRATCH SPACE
         INTEGER       ims
-        REAL          mt(nst0),mt2(ns0),mt1(ns0)               !SOURCE-TIME FUNCTION 
+        REAL          mt(nst0),mt2(ns0),mt1(ns0),maxmt               !SOURCE-TIME FUNCTION 
         COMPLEX       ms(nst0)               !SOURCE
         REAL          dt4,r_P,r_SV,r_SH     !r_* is energy ratio at source (1:10:10)
         INTEGER       SourceTYPE,samplingtype,sI
@@ -427,6 +427,7 @@ PROGRAM STATSYNR_INTEL
 !      WRITE(6,*) 'CALCULATING SOURCE:'        !CALCULATING SOURCE
       dt4 = REAL(dti,4)
       P0 = dti*4.                             !DOMINANT PERIOD
+      P02 = dti*12.                            !DOMINANT PERIOD FOR S3 SOURCE
       pi = atan(1.)*4.                        !
       nts = nint(P0*4./dti)+1                 !# OF POINTS IN SOURCE SERIES
       IF (nts < 31) nts = 31
@@ -450,13 +451,25 @@ PROGRAM STATSYNR_INTEL
          t0 = (dti*float(I-1)-P0)
          mt1(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
-         t02 = (dti/4*12*float(I-1)-P0)
-         mt2(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
-               *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
+         t02 = (dti*float(I-5))
+         mt2(I) = -4.*pi**2.*P02**(-2.)*(t0-P02/2.) &
+               *dexp(-2.*pi**2.*(t0/P02-0.5)**2.)
         END DO
         
         CALL CONVOLVE(mt1,mt2,mt,nts)  
-        WRITE(6,'(a)') ' SOURCE IS SINE WAVE (FLAT POWER FROM 0.1 to 10 Hz)'
+        
+        maxmt = 0.
+        DO I = 1,nts
+          IF (abs(mt(I)) > maxmt) maxmt = abs(mt(I))
+        END DO
+        
+        DO I = 1,nts
+          mt(I) = -mt(I) / maxmt
+!          WRITE(6,*) mt(I)
+        END DO
+        
+       
+        WRITE(6,'(a)') ' SOURCE IS SINE WAVE (FLATTER POWER FROM 0.1 to 10 Hz)'
         
       ELSEIF (SourceTYPE.eq.9) THEN      !CUSTOM SOURCE
          WRITE(6,'(a)') ' CUSTOM SOURCE'
