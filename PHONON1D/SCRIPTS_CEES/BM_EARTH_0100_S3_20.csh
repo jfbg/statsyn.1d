@@ -7,7 +7,7 @@
 @ t_start      = 0
 @ t_max        = 3500			# 90 minutes
 set d_range    = "0 180 361"
-set n_phonon   = "20000000"
+set n_phonon   = "2000000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
@@ -31,7 +31,7 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "BM_EARTH_0100_SPIKE"
+set file_out   = "BM_EARTH_0100_S3"
 set model_name = "EARTH_MODEL"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
@@ -60,8 +60,8 @@ while ($l < $n_freq)
 @ l = $l + 1
 
 if ($l == 1) then
- set dt = "0.1"
- set period = "10"
+ set dt = "0.05"
+ set period = "20"
 else
  set dt = "0.150"
  set period = "07"

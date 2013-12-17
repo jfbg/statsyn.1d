@@ -426,8 +426,8 @@ PROGRAM STATSYNR_INTEL
 !      ----- Generate Source Function -----               
 !      WRITE(6,*) 'CALCULATING SOURCE:'        !CALCULATING SOURCE
       dt4 = REAL(dti,4)
-      pi = atan(1.)*4.                        !
       P0 = dti*4.                             !DOMINANT PERIOD
+      pi = atan(1.)*4.                        !
       nts = nint(P0*4./dti)+1                 !# OF POINTS IN SOURCE SERIES
       IF (nts < 31) nts = 31
       nts1 = 1000
@@ -443,9 +443,11 @@ PROGRAM STATSYNR_INTEL
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
         END DO
         WRITE(6,'(a)') ' SOURCE IS SINE WAVE'
+      
       ELSEIF (SourceTYPE.eq.3) THEN      !FLAT ENERGY FROM 0.1 to 10Hz  
+        
         DO I = 1, nts                           !SOURCE-TIME FUNCTION
-         t0 = (dti/4*8*float(I-1)-P0)
+         t0 = (dti*float(I-1)-P0)
          mt1(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
          t02 = (dti/4*12*float(I-1)-P0)
@@ -453,11 +455,9 @@ PROGRAM STATSYNR_INTEL
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
         END DO
         
-        CALL CONVOLVE(mt1,mt2,mt,nts)
-        
-        
-        
+        CALL CONVOLVE(mt1,mt2,mt,nts)  
         WRITE(6,'(a)') ' SOURCE IS SINE WAVE (FLAT POWER FROM 0.1 to 10 Hz)'
+        
       ELSEIF (SourceTYPE.eq.9) THEN      !CUSTOM SOURCE
          WRITE(6,'(a)') ' CUSTOM SOURCE'
          CALL READIN_SOURCE(nts,mt,SourceFILE)

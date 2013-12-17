@@ -45,7 +45,7 @@ MODULE PHO_VARS      ! Make variables global
         REAL(8)       p,ang1
         REAL(8)       Q(nlay0,2),Qt(nlay0)              !QUALITY FACTOR 
         REAL(8)       dtstr1                !ATTENUATION PER LAYER
-        REAL(8)       pi,P0
+        REAL(8)       pi,P0,P02
         INTEGER       n180,idelt1,idelt2
         REAL(8)     :: angst                 !! Starting angle for trace
         REAL(8)     :: deg2km

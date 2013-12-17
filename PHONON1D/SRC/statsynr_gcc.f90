@@ -46,7 +46,7 @@ PROGRAM STATSYNR_INTEL
         REAL          b(nst0), e(nst0)        !HILBERT TRANSFORM & ENVELOPE
         REAL          mtsc(nst0),datt,dtst1  !SCRATCH SPACE
         INTEGER       ims
-        REAL          mt(nst0),mt2(ns0),mt1(ns0)               !SOURCE-TIME FUNCTION 
+        REAL          mt(nst0),mt2(ns0),mt1(ns0),maxmt               !SOURCE-TIME FUNCTION 
         COMPLEX       ms(nst0)               !SOURCE
         REAL          dt4,r_P,r_SV,r_SH     !r_* is energy ratio at source (1:10:10)
         INTEGER       SourceTYPE,samplingtype,sI
@@ -426,8 +426,9 @@ PROGRAM STATSYNR_INTEL
 !      ----- Generate Source Function -----               
 !      WRITE(6,*) 'CALCULATING SOURCE:'        !CALCULATING SOURCE
       dt4 = REAL(dti,4)
-      pi = atan(1.)*4.                        !
       P0 = dti*4.                             !DOMINANT PERIOD
+      P02 = dti*12.                            !DOMINANT PERIOD FOR S3 SOURCE
+      pi = atan(1.)*4.                        !
       nts = nint(P0*4./dti)+1                 !# OF POINTS IN SOURCE SERIES
       IF (nts < 31) nts = 31
       nts1 = 1000
@@ -443,21 +444,33 @@ PROGRAM STATSYNR_INTEL
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
         END DO
         WRITE(6,'(a)') ' SOURCE IS SINE WAVE'
+      
       ELSEIF (SourceTYPE.eq.3) THEN      !FLAT ENERGY FROM 0.1 to 10Hz  
+        
         DO I = 1, nts                           !SOURCE-TIME FUNCTION
-         t0 = (dti/4*8*float(I-1)-P0)
+         t0 = (dti*float(I-1)-P0)
          mt1(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
-         t02 = (dti/4*12*float(I-1)-P0)
-         mt2(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
-               *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
+         t02 = (dti*float(I-5))
+         mt2(I) = -4.*pi**2.*P02**(-2.)*(t0-P02/2.) &
+               *dexp(-2.*pi**2.*(t0/P02-0.5)**2.)
         END DO
         
-        CALL CONVOLVE(mt1,mt2,mt,nts)
+        CALL CONVOLVE(mt1,mt2,mt,nts)  
         
+        maxmt = 0.
+        DO I = 1,nts
+          IF (abs(mt(I)) > maxmt) maxmt = abs(mt(I))
+        END DO
         
+        DO I = 1,nts
+          mt(I) = -mt(I) / maxmt
+!          WRITE(6,*) mt(I)
+        END DO
         
-        WRITE(6,'(a)') ' SOURCE IS SINE WAVE (FLAT POWER FROM 0.1 to 10 Hz)'
+       
+        WRITE(6,'(a)') ' SOURCE IS SINE WAVE (FLATTER POWER FROM 0.1 to 10 Hz)'
+        
       ELSEIF (SourceTYPE.eq.9) THEN      !CUSTOM SOURCE
          WRITE(6,'(a)') ' CUSTOM SOURCE'
          CALL READIN_SOURCE(nts,mt,SourceFILE)
@@ -2586,7 +2599,7 @@ SUBROUTINE INTERFACE_NORMAL
 !            WRITE(6,*) '                ',ip,ud
 !            WRITE(6,*) ''            
 
-			WRITE(6,*) 'S2L Down' ,I,NITR,iz,t,ip,ud,irtr_past
+!			WRITE(6,*) 'S2L Down' ,I,NITR,iz,t,ip,ud,irtr_past
 !			DEBUG
 !			trackS2L = 1
 
@@ -2602,7 +2615,7 @@ SUBROUTINE INTERFACE_NORMAL
 
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
 
-			WRITE(6,*) 'S2L Up',I,NITR,iz,t,ip,ud,irtr_past
+!			WRITE(6,*) 'S2L Up',I,NITR,iz,t,ip,ud,irtr_past
            
          ELSEIF ((ud_init == 1).AND.(vf(iz-1,2) == 0.)) THEN  
            !FROM LIQUID TO SOLID  --- going down 
@@ -2615,7 +2628,7 @@ SUBROUTINE INTERFACE_NORMAL
             
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)         
  
-			WRITE(6,*) 'L2S Down' ,I,NITR,iz,t,ip,ud,irtr_past
+!			WRITE(6,*) 'L2S Down' ,I,NITR,iz,t,ip,ud,irtr_past
 
          ELSEIF ((ud_init == -1).AND.(vf(iz,2) == 0.)) THEN
            !FROM LIQUID TO SOLID  --- going up
@@ -2631,12 +2644,13 @@ SUBROUTINE INTERFACE_NORMAL
             CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)                      
 !            WRITE(6,*) '            ',ip,ud
 !            WRITE(6,*) ''            
-			WRITE(6,*) 'L2S Up' ,I,NITR,iz,t,ip,ud,irtr_past
+!			WRITE(6,*) 'L2S Up' ,I,NITR,iz,t,ip,ud,irtr_past
             
          END IF
 
 
-      ELSEIF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip_init.eq.3)) THEN  !IF0
+      ELSEIF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip_init.eq.3).AND.&
+                        &(h <= 0.).AND.(iz > 1)) THEN  !IF0
         !Solid-Liquid Interface with SH waves
         ud = -ud 
       
@@ -2676,13 +2690,8 @@ SUBROUTINE INTERFACE_NORMAL
           END IF  !IF1.1
           
       END IF    !IF0
-      
-      
-      iwave = ip
-      IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
-            
-!      WRITE(6,*)   'OUT'
-!      WRITE(6,*)   ''
+      !
+!      			WRITE(6,*)   'OUT'
       
       ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE 
           ud = -1   ! GOING UP NOW
@@ -2694,7 +2703,11 @@ SUBROUTINE INTERFACE_NORMAL
       
 
       END IF 
-   
+      
+      iwave = ip
+      IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
+      
+!      IF (t_last_count > 995) WRITE(6,*) I,NITR,ip,iz,REAL(dt1,4),irtr1,ud,h,z(iz),z(iz-1)!, &
        
       RETURN  
 END SUBROUTINE INTERFACE_NORMAL
