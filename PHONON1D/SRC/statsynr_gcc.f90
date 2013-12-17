@@ -430,7 +430,11 @@ PROGRAM STATSYNR_INTEL
       P02 = dti*12.                            !DOMINANT PERIOD FOR S3 SOURCE
       pi = atan(1.)*4.                        !
       nts = nint(P0*4./dti)+1                 !# OF POINTS IN SOURCE SERIES
-      IF (nts < 31) nts = 31
+      IF (SourceTYPE.eq.1) THEN
+            IF (nts < 31) nts = 31
+      ELSEIF (nts < 101) THEN
+            nts = 101
+      END IF
       nts1 = 1000
       DO I = 1, nts1
        mt(I) = 0.

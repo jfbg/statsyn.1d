@@ -1128,7 +1128,7 @@ PROGRAM STATSYNR_INTEL
               
                       DO ic = 1, 3
 !                        DO JJ = 1, nts
-                          JT = IT + JJ - 1
+!                          JT = IT + JJ - 1
 !                          IF ( (JT > 0).AND.(JT <= nt0).AND.(a /= 0.) ) THEN
                             wf(ix,IT,ic) = wf(ix,IT,ic) + a_att * c_mult(ic) 
 !                                * (   (1.-frac)*mts(ims-1,icaust,JJ) &
