@@ -32,7 +32,8 @@ modellist = {...
 % 'PVPREM_001_40Hz_0030km_noscat'
 % 'PVPREM_001_40Hz_1000km_noscat'
 % 'PSMOON_011a_noscat'
-'BM_EARTH_0100_SPIKE'
+% 'BM_EARTH_0100_SPIKE'
+'BM_onlySPIKE'
 };
 
 % depths = .01;
