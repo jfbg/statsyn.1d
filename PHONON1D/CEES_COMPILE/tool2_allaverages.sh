@@ -1,1 +1,1 @@
-csh ./AVERAGING_SCRIPTS/BM_EARTH_0100_S3_average.csh
+csh ./AVERAGING_SCRIPTS/PSPACE_013_average.csh
