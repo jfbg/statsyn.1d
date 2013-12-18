@@ -230,7 +230,7 @@ PROGRAM STATSYNR_INTEL
         Cindex = 1
 
 
-! SH
+! SH 
 
         Cc2_SH = 4.1
         Ccwil_SH = 5.0

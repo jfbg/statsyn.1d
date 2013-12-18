@@ -46,7 +46,7 @@ PROGRAM STATSYNR_INTEL
         REAL          b(nst0), e(nst0)        !HILBERT TRANSFORM & ENVELOPE
         REAL          mtsc(nst0),datt,dtst1  !SCRATCH SPACE
         INTEGER       ims
-        REAL          mt(nst0),mt2(ns0),mt1(ns0)               !SOURCE-TIME FUNCTION 
+        REAL          mt(nst0),mt2(ns0),mt1(ns0),maxmt               !SOURCE-TIME FUNCTION 
         COMPLEX       ms(nst0)               !SOURCE
         REAL          dt4,r_P,r_SV,r_SH     !r_* is energy ratio at source (1:10:10)
         INTEGER       SourceTYPE,samplingtype,sI
@@ -94,7 +94,7 @@ PROGRAM STATSYNR_INTEL
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
-      WRITE(*,*) '*   BENCHMARK EARTH'
+      WRITE(*,*) '*    BM_EARTH'
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Receivers are 1km wide x 1 km deep'
       WRITE(*,*) '*'
@@ -425,10 +425,15 @@ PROGRAM STATSYNR_INTEL
 !      ----- Generate Source Function -----               
 !      WRITE(6,*) 'CALCULATING SOURCE:'        !CALCULATING SOURCE
       dt4 = REAL(dti,4)
-      pi = atan(1.)*4.                        !
       P0 = dti*4.                             !DOMINANT PERIOD
+      P02 = dti*12.                            !DOMINANT PERIOD FOR S3 SOURCE
+      pi = atan(1.)*4.                        !
       nts = nint(P0*4./dti)+1                 !# OF POINTS IN SOURCE SERIES
-      IF (nts < 500) nts = 500
+      IF (SourceTYPE.eq.1) THEN
+            IF (nts < 31) nts = 31
+      ELSEIF (nts < 101) THEN
+            nts = 101
+      END IF
       nts1 = 1000
       DO I = 1, nts1
        mt(I) = 0.
@@ -442,21 +447,33 @@ PROGRAM STATSYNR_INTEL
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
         END DO
         WRITE(6,'(a)') ' SOURCE IS SINE WAVE'
+      
       ELSEIF (SourceTYPE.eq.3) THEN      !FLAT ENERGY FROM 0.1 to 10Hz  
+        
         DO I = 1, nts                           !SOURCE-TIME FUNCTION
-         t0 = (dti/4*8*float(I-1)-P0)
+         t0 = (dti*float(I-1)-P0)
          mt1(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
                *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
-         t02 = (dti/4*12*float(I-1)-P0)
-         mt2(I) = -4.*pi**2.*P0**(-2.)*(t0-P0/2.) &
-               *dexp(-2.*pi**2.*(t0/P0-0.5)**2.)
+         t02 = (dti*float(I-5))
+         mt2(I) = -4.*pi**2.*P02**(-2.)*(t0-P02/2.) &
+               *dexp(-2.*pi**2.*(t0/P02-0.5)**2.)
         END DO
         
-        CALL CONVOLVE(mt1,mt2,mt,nts)
+        CALL CONVOLVE(mt1,mt2,mt,nts)  
         
+        maxmt = 0.
+        DO I = 1,nts
+          IF (abs(mt(I)) > maxmt) maxmt = abs(mt(I))
+        END DO
         
+        DO I = 1,nts
+          mt(I) = -mt(I) / maxmt
+!          WRITE(6,*) mt(I)
+        END DO
         
-        WRITE(6,'(a)') ' SOURCE IS SINE WAVE (FLAT POWER FROM 0.1 to 10 Hz)'
+       
+        WRITE(6,'(a)') ' SOURCE IS SINE WAVE (FLATTER POWER FROM 0.1 to 10 Hz)'
+        
       ELSEIF (SourceTYPE.eq.9) THEN      !CUSTOM SOURCE
          WRITE(6,'(a)') ' CUSTOM SOURCE'
          CALL READIN_SOURCE(nts,mt,SourceFILE)
@@ -484,7 +501,10 @@ PROGRAM STATSYNR_INTEL
       
 !        REAL(8)          mts(datt,caustic,source)        !ATTENUATED SOURCE  (     
       
-      datt = .01    ! Arbitrary datt, but tstar shouldn't get.lt.2 in Moon.
+      datt = .005
+      IF (erad.eq.1737) datt = .0025    
+      IF (erad.eq.6370) datt = .01
+      
                 ! This is datt, not max att. max att will be datt*(ns0-1) = 15.
      DO I = 1, ns0                           !SOURCES * ATTENUATION
        dtst1 = float(I-1)*datt                !ATTENUATION
@@ -550,7 +570,7 @@ PROGRAM STATSYNR_INTEL
 !        WRITE(23,FMT=888) float(I-1)*dti,(mts(J,4,I)*1.,J=1,ns0)
 !      END DO
 !      CLOSE(23)
-
+!	  WRITE(6,*) 'SOURCE OUTPUT DONE'
       
 
 !!      ^^^^^ Attenuation ^^^^^    
@@ -611,7 +631,8 @@ PROGRAM STATSYNR_INTEL
             ip = 3 !SH
           END IF
         END IF
-         
+        
+        firstip = ip
         iwave = ip
         IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
         
@@ -660,6 +681,7 @@ PROGRAM STATSYNR_INTEL
         t_last_count = 0
         z_last = -99.
         z_last_count = 0
+        trackS2L = 0
         ! ============ <<
              
         ! ============ >>
@@ -668,6 +690,8 @@ PROGRAM STATSYNR_INTEL
         r0 = rand()
         maxp = sin(angst)/vf(iz_p,iwave)
 
+		!DEBUG
+		iz_p = iz1
   
         IF (samplingtype.eq.2) THEN               ! Sample slownesses
           p = maxp*r0
@@ -688,7 +712,8 @@ PROGRAM STATSYNR_INTEL
           ang1 = angst*r0         !Randomly select angle
           p    = abs(sin(ang1))/vf(iz_p,iwave)
         END IF
-        
+
+               
         ! ============ <<
 
 !       CALL cpu_time(tt2)
@@ -713,6 +738,7 @@ PROGRAM STATSYNR_INTEL
        
        !DEBUG
 !       IF (I.le.361) WRITE(78,*) I,NITR,z_act,x,t,az,p,ip,ds_scat,ds_SL,iz,ud,scat_prob,1,irtr1
+!        WRITE(6,*) I,NITR,z_act,x,t,p,ip,iz,ud
       
       
         ! ============ >>
@@ -1074,11 +1100,11 @@ PROGRAM STATSYNR_INTEL
                     END IF
                     
                     
-                    ! UNCOMMENT TO SEE WHAT IS MAX ims*datt reached.
+                    ! UNCOMMENT TO SEE WHAT IS MAX s and ims*datt reached.
                     ! If imsmax > datt*ntso, adjust datt so that imsmax can be reached.
-!                    if (ims > imsmax) THEN
-!                    imsmax = ims
-!                    WRITE(6,*) imsmax*datt
+!                    IF (s > imsmax) THEN
+!                      imsmax = s
+!                      WRITE(6,*) s,ims
 !                    END IF
 
                       icaust = ncaust
@@ -1144,6 +1170,7 @@ PROGRAM STATSYNR_INTEL
 
           !IF P or SV wave, check for P-SV reflection
           IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
+
         
         END IF          
         END IF
@@ -1435,7 +1462,7 @@ SUBROUTINE ATTENUATE(sin,sout,southil,ndat,dt,tstar,dQdfSTYLE)
       CALL GET_TS(yf,nfreq,df,0,soutshift,npts,dt) !GET TIME SERIES OF ATTENUATED SPEC
       
       nfil = 5
-      CALL TILBERT(soutshift,dt,npts,nfil,b,e)   !HILBER TRANSFORM (pi/2PHASESHFT)
+      CALL TILBERT(soutshift,dt,npts,nfil,b,e)   !HILBERT TRANSFORM (pi/2PHASESHFT)
     
     DO I=1,ndat
      sout(I) = soutshift(shiftfactor+I)
@@ -1901,7 +1928,7 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
       COMPLEX   angP,angS,angPc,D12
       COMPLEX   crP,crS,ctP,c0
       REAL(8)      rP,rS,tP,tot,nrP,nrS,ntP,r0,amp
-      INTEGER      ud,ip
+      INTEGER      ud,ip,udinit
       INTEGER      cons_EorA
       INTEGER      I
       COMPLEX     sin2P,sin2S,cosPc,cosP,cos2S,sin4S,sinPc
@@ -1956,16 +1983,16 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
         
         !Supercritical
 
-        IF (rc*realp > 1) THEN 
-!            WRITE(6,*) 'YUP CCCC'
-            tP = 0.
-        END IF
+        IF (rc*realp >= 1) tP = 0.
         
         !Get new ip
         tot = rP + rS + tP
         nrP = rP/tot
         nrS = rS/tot
         ntP = tP/tot
+        
+        !DEBUG
+!        IF (ud == 1) WRITE(6,*) 'D',ip,nrP,nrS,ntP
         
 
         r0 = rand()
@@ -2007,6 +2034,9 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
         nrS = rS/tot
         ntP = tP/tot
         
+        !DEBUG
+!        IF (ud == 1) WRITE(6,*) 'S',ip,nrP,nrS,ntP
+        udinit = ud
         r0 = rand()
         
         IF (r0 <= nrP) THEN    !REFLECTED P
@@ -2021,17 +2051,19 @@ SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
           ip = 1
           IF (REAL(ctP) < 0.) amp = -amp
         END IF
-                
+            
+!        IF (udinit == 1) WRITE(6,*) 'S',ip,ud   
       END IF
       
+      
       !CO2
-!      WRITE(6,*) 'S2L rP,rS,tP ',nrP,nrS,ntP
+!      WRITE(6,*) I,'S2L rP,rS,tP ',nrP,nrS,ntP
       
       RETURN
       
 END SUBROUTINE RTFLUID_BEN_S2L
 
-SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
+SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
 
 ! Going from Core to Mantle, liquid to solid
 
@@ -2044,12 +2076,14 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
       COMPLEX      angP,angS,angPc,D12,c0
       COMPLEX      crP,ctP,ctS
       REAL(8)      rP,tS,tP,tot,nrP,ntS,ntP,r0,amp
-      INTEGER      ud,ip
+      INTEGER      ud,ip,I
       INTEGER      cons_EorA
+      
       
       COMPLEX      sin2P,sin2S,cos2S
       COMPLEX      sinS,sinP,sinPc,cosS,cosP,cosPc
       COMPLEX      cone,ctwo,cfour
+      
             
       p = CMPLX(realp,0.)
       a = CMPLX(ra,0.)
@@ -2126,7 +2160,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA)
         END IF
         
         !CO2
-!       WRITE(6,*) 'L2S rP,tS,tP ',nrP,ntS,ntP  
+!       WRITE(6,*) I,'L2S rP,tS,tP ',nrP,ntS,ntP  
       
      RETURN
       
@@ -2190,6 +2224,7 @@ SUBROUTINE LAYERTRACE(p,h,utop,ubot,imth,dx,dt,irtr)
          dx=0.            !ray turned above layer
          dt=0.
          irtr=0
+!         WRITE(6,*) 'HAHAHAHA=>',utop,p,
          RETURN
       END IF
 !
@@ -2531,10 +2566,13 @@ SUBROUTINE INTERFACE_NORMAL
       
       USE pho_vars
       IMPLICIT NONE
-      REAL(8)     ap,bs,cf,rhosol,rhoflu
-!      INTEGER     ip_init
+      REAL(8)     ap,bs,cf,rhosol,rhoflu,a_init
+      INTEGER     ip_init,ud_init
       
-!      ip_init = ip
+      
+      ip_init = ip
+      ud_init = ud
+      a_init = a
       
       
       last_RT = 0
@@ -2544,14 +2582,14 @@ SUBROUTINE INTERFACE_NORMAL
       
       IF ((h <= 0.).AND.(iz > 1).AND.(iz < nlay-1)) THEN
 
-      IF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip.ne.3)) THEN  !IF0
+      IF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip_init.ne.3)) THEN  !IF0
          !SOLID-LIQUID INTERFACE with P and SV waves
          !Figure out if phonon is going from:
          !      solid to liquid (mantle to core) or from
          !      liquid to solid (core to mantle)
          !      and check direction
          
-         IF ((ud == 1).AND.(vf(iz,2) == 0.)) THEN 
+         IF ((ud_init == 1).AND.(vf(iz,2) == 0.)) THEN 
            !FROM SOLID TO LIQUID  --- going down     
            
              
@@ -2560,11 +2598,18 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz,1)
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
+            
+!            WRITE(6,*) 'SOLID  -> LIQUID',ip,ud,I,iz,t,ip,ud
 
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
-            
+!            WRITE(6,*) '                ',ip,ud
+!            WRITE(6,*) ''            
 
-         ELSEIF ((ud == -1).AND.(vf(iz-1,2) == 0.)) THEN
+!			WRITE(6,*) 'S2L Down' ,I,NITR,iz,t,ip,ud,irtr_past
+!			DEBUG
+!			trackS2L = 1
+
+         ELSEIF ((ud_init == -1).AND.(vf(iz-1,2) == 0.)) THEN
            !FROM SOLID TO LIQUID  --- going up
            
            
@@ -2575,8 +2620,10 @@ SUBROUTINE INTERFACE_NORMAL
             rhoflu = rh(iz-1)
 
             CALL RTFLUID_BEN_S2L(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)
+
+!			WRITE(6,*) 'S2L Up',I,NITR,iz,t,ip,ud,irtr_past
            
-         ELSEIF ((ud == 1).AND.(vf(iz-1,2) == 0.)) THEN  
+         ELSEIF ((ud_init == 1).AND.(vf(iz-1,2) == 0.)) THEN  
            !FROM LIQUID TO SOLID  --- going down 
 
             ap = vf(iz,1)
@@ -2585,9 +2632,11 @@ SUBROUTINE INTERFACE_NORMAL
             rhosol = rh(iz)
             rhoflu = rh(iz-1)
             
-            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)         
+            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)         
  
-         ELSEIF ((ud == -1).AND.(vf(iz,2) == 0.)) THEN
+!			WRITE(6,*) 'L2S Down' ,I,NITR,iz,t,ip,ud,irtr_past
+
+         ELSEIF ((ud_init == -1).AND.(vf(iz,2) == 0.)) THEN
            !FROM LIQUID TO SOLID  --- going up
 
             ap = vf(iz-1,1)
@@ -2595,13 +2644,19 @@ SUBROUTINE INTERFACE_NORMAL
             cf = vf(iz,1)
             rhosol = rh(iz-1)
             rhoflu = rh(iz)
+            
+!            WRITE(6,*) 'LIQ -> SOLID',ip,ud,I,iz,t,ip,ud
 
-            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA)                      
+            CALL RTFLUID_BEN_L2S(p,ip,ap,bs,cf,rhosol,rhoflu,a,ud,cons_EorA,I)                      
+!            WRITE(6,*) '            ',ip,ud
+!            WRITE(6,*) ''            
+!			WRITE(6,*) 'L2S Up' ,I,NITR,iz,t,ip,ud,irtr_past
             
          END IF
 
 
-      ELSEIF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip.eq.3).AND.(h <= 0.).AND.(iz > 1)) THEN  !IF0
+      ELSEIF (((vf(iz,2) == 0.).OR.(vf(iz-1,2) == 0.)).AND.(ip_init.eq.3).AND.&
+                        &(h <= 0.).AND.(iz > 1)) THEN  !IF0
         !Solid-Liquid Interface with SH waves
         ud = -ud 
       
@@ -2609,26 +2664,31 @@ SUBROUTINE INTERFACE_NORMAL
         !Solid-Solid Interface
 
               
-          IF ((iz == 2).AND.(ud == -1)) THEN                              !IF1.1 
+          IF ((iz == 2).AND.(ud_init == -1)) THEN                              !IF1.1 
           ! Skip INTERFACE_NORMAL BECAUSE PHONON IS AT SURFACE
           ELSE                                                             !IF1.1
               
 
-            IF (ip  ==  3) THEN                                              !IF2a
-              IF ( (ud == 1) ) THEN               !IF DOWNGOING SH WAVE      !IF3a
+            IF (ip_init  ==  3) THEN                                              !IF2a
+              IF ( (ud_init == 1) ) THEN               !IF DOWNGOING SH WAVE      !IF3a
                 CALL RTCOEF_SH(p,vf(iz-1,2),vf(iz,2),rh(iz-1),rh(iz),ar,at,ud,a,cons_EorA)
-              ELSE IF ((ud == -1) ) THEN          !IF UPGOING SH WAVE        !IF3a
+!                 			WRITE(6,*) 'Solid2Solid SH DOWN' ,I,iz,t,ip,ud
+              ELSE IF ((ud_init == -1) ) THEN          !IF UPGOING SH WAVE        !IF3a
                 CALL RTCOEF_SH(p,vf(iz,2),vf(iz-1,2),rh(iz),rh(iz-1),ar,at,ud,a,cons_EorA)
-              END IF                                                         !IF3a
+!                 			WRITE(6,*) 'Solid2Solid SH UP' ,I,iz,t,ip,ud
+              END IF  
+                                                                            !IF3a
             ELSE                                                             !IF2a
-              IF ( (ud == 1) ) THEN               !IF DOWNGOING P-SV WAVE    !IF3b
+              IF ( (ud_init == 1) ) THEN               !IF DOWNGOING P-SV WAVE    !IF3b
                 CALL RTCOEF_PSV(p,vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
                              vf(iz  ,1),vf(iz  ,2),rh(iz), &
                             arp,ars,atp,ats,ip,ud,a,cons_EorA)
-              ELSE IF ((ud == -1) ) THEN          !IF UPGOING P-SV WAVE      !IF3b
+!                 			WRITE(6,*) 'Solid2Solid PSV DOWN' ,I,iz,t,ip,ud
+              ELSE IF ((ud_init == -1) ) THEN          !IF UPGOING P-SV WAVE      !IF3b
                 CALL RTCOEF_PSV(p,vf(iz  ,1),vf(iz  ,2),rh(iz  ), &
                              vf(iz-1,1),vf(iz-1,2),rh(iz-1), &
                             arp,ars,atp,ats,ip,ud,a,cons_EorA)             
+!                 			WRITE(6,*) 'Solid2Solid PSV UP' ,I,iz,t,ip,ud
               END IF                                                        !IF3b
             END IF                                                          !IF2a
          
@@ -2636,6 +2696,8 @@ SUBROUTINE INTERFACE_NORMAL
           END IF  !IF1.1
           
       END IF    !IF0
+      !
+!      			WRITE(6,*)   'OUT'
       
       ELSE IF (iz == nlay-1) THEN               !ONCE HIT OTHER SIDE OF CORE 
           ud = -1   ! GOING UP NOW
@@ -2645,10 +2707,12 @@ SUBROUTINE INTERFACE_NORMAL
           totald = totald + 2*corelayer
           s = s + dt1/Q(nlay,iwave)
       
-        iwave = ip
-        IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
-       
+
       END IF 
+      
+      iwave = ip
+      IF (iwave == 3) iwave = 2                ! ASSUMING ISOTROPY SO v_SH == v_SV
+      
 !      IF (t_last_count > 995) WRITE(6,*) I,NITR,ip,iz,REAL(dt1,4),irtr1,ud,h,z(iz),z(iz-1)!, &
        
       RETURN  
@@ -2791,12 +2855,25 @@ SUBROUTINE RAYTRACE
              ELSE
                ubot = 0.
              END IF
+             
+
         
           h = z(iz)-z(iz-1)                  !THICKNESS OF LAYER
+          
+!          if ((p > utop).AND.(h > 0.)) WRITE(6,*) I,p,utop,ubot,iz,ip,iz_p,iz1
 
+          
+          !DEBUGWRITE
+!          IF ((iz < 322).AND.(iz > 318)) THEN
+!             WRITE(6,*) I,nitr,ip,vf(iz,1),vf(iz,2),vf(iz-1,1),vf(iz-1,2)
+!           END IF  
 
+          irtr_past = irtr1
           CALL LAYERTRACE(p,h,utop,ubot,imth,dx1,dt1,irtr1)
           dtstr1 = dt1/Q(iz-1,iwave)                    !t* = TIME/QUALITY FACTOR
+          
+
+
         
         ELSE
           irtr1  = -1
