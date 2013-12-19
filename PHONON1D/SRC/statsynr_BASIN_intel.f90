@@ -845,7 +845,7 @@ PROGRAM STATSYNR_INTEL
             IF ((scat_prob > 0.).AND.(iz > 1).AND.(r0 < scat_prob)) THEN   !CALL INTERFACE_SCATTER
                 ud_pre = ud  !save current ud before scattering it.
                 CALL CHECKSCATPROB
-                IF (scat_prob2.gt.0) THEN
+                IF (r0 < scat_prob2) THEN
                   CALL REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh,cons_EorA)  !Scatter  
                 END IF
                 !Fix iz if direction has changed
@@ -3535,19 +3535,50 @@ SUBROUTINE CHECKSCATPROB
       ELSEIF (basintype.eq.1) THEN
         ! BASIN001
         !4deg of scat free centered on 20, 40, 60, 80, 100, 120, 140, 160, 180
-        basrad = 2.
-				IF (   ((xd.ge.20-basrad).AND.(xd.le.20+basrad)).OR.&
-							&((xd.ge.40-basrad).AND.(xd.le.40+basrad)).OR.&
-							&((xd.ge.60-basrad).AND.(xd.le.60+basrad)).OR.&
-							&((xd.ge.80-basrad).AND.(xd.le.80+basrad)).OR.&
-							&((xd.ge.100-basrad).AND.(xd.le.100+basrad)).OR.&
-							&((xd.ge.120-basrad).AND.(xd.le.120+basrad)).OR.&
-							&((xd.ge.140-basrad).AND.(xd.le.140+basrad)).OR.&
-							&((xd.ge.160-basrad).AND.(xd.le.160+basrad))) THEN
+        ! no scat in basin
+							basrad = 2.
+							IF (   ((xd.ge.20-basrad).AND.(xd.le.20+basrad)).OR.&
+										&((xd.ge.40-basrad).AND.(xd.le.40+basrad)).OR.&
+										&((xd.ge.60-basrad).AND.(xd.le.60+basrad)).OR.&
+										&((xd.ge.80-basrad).AND.(xd.le.80+basrad)).OR.&
+										&((xd.ge.100-basrad).AND.(xd.le.100+basrad)).OR.&
+										&((xd.ge.120-basrad).AND.(xd.le.120+basrad)).OR.&
+										&((xd.ge.140-basrad).AND.(xd.le.140+basrad)).OR.&
+										&((xd.ge.160-basrad).AND.(xd.le.160+basrad))) THEN
 						
-							scat_prob2 = 0.
-				END IF
-				
+										scat_prob2 = 0.
+							END IF
+			 
+			 ELSEIF (basintype.eq.2) THEN
+							! BASIN002
+							! Two 20deg rad basins, see effect of near edge receivers, no scat in basin
+							basrad = 20.
+							IF (   ((xd.ge.60-basrad).AND.(xd.le.60+basrad)).OR.&
+										&((xd.ge.140-basrad).AND.(xd.le.140+basrad))) THEN
+						
+										scat_prob2 = 0.
+							END IF	
+							
+			 ELSEIF (basintype.eq.3) THEN
+        ! BASIN001
+        !4deg of scat free centered on 20, 40, 60, 80, 100, 120, 140, 160, 180
+        ! Scat only if z_scat < 2km
+							basrad = 2.
+							IF (   ((xd.ge.20-basrad).AND.(xd.le.20+basrad)).OR.&
+										&((xd.ge.40-basrad).AND.(xd.le.40+basrad)).OR.&
+										&((xd.ge.60-basrad).AND.(xd.le.60+basrad)).OR.&
+										&((xd.ge.80-basrad).AND.(xd.le.80+basrad)).OR.&
+										&((xd.ge.100-basrad).AND.(xd.le.100+basrad)).OR.&
+										&((xd.ge.120-basrad).AND.(xd.le.120+basrad)).OR.&
+										&((xd.ge.140-basrad).AND.(xd.le.140+basrad)).OR.&
+										&((xd.ge.160-basrad).AND.(xd.le.160+basrad))) THEN
+						
+										IF (z_act.le.5) THEN 
+										  scat_prob2 = 1.
+										ELSE
+										  scat_prob2 = 0.
+										END IF
+							END IF
 			ELSE
 			  !Reset to SL_prob value if out of basin
 			  scat_prob2 = scat_prob

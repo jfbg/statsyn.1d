@@ -5,16 +5,16 @@
 #
 
 @ t_start      = 0
-@ t_max        = 2750			# 90 minutes
-set d_range    = "0 180 361"
-set n_phonon   = "1000"
+@ t_max        = 4500			# 90 minutes
+set d_range    = "0 180 91"
+set n_phonon   = "20000000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
-set sourcetype = 2    # delta (1), sine (2), custom (9)
+set sourcetype = 3    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
-set rPrSVrSH   = "1 1 1"  # Energy partioning at source
-set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or CRFL_BM (3)
+set rPrSVrSH   = "1 10 10"  # Energy partioning at source
+set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
 
 # Code Parameters
 set cons_EorA = 2  # Conserve Amplitude (1) or Energy (2) at interfaces (Benchmark works with 2)
@@ -22,25 +22,25 @@ set Watt      = 1  # With attenuation (1) or without (0)
 set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
                    # This is actually not activated in the code yet.
 # Basin type
-set basintype = 3
+set basintype = 2
 
 # SCATTERING
-set mx_scat_dp = 10.0    # Depth of scattering layer
+set mx_scat_dp = 30.0    # Depth of scattering layer
 set bg_scat    = 0.0    # Global scattering probability (keep low....!)
 set prob_scat  = 1.0    # Scattering Layer scattering probability
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
-set velperturb = 0.6
+set velperturb = 0.75
 
-set file_out   = "BM_EARTH_0100_SPIKE"
-set model_name = "EARTH_MODEL"
+set file_out   = "PBASIN_002"
+set model_name = "CSIMPLEMOON_basic"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
-@ n_depth = 1     ## Number of depths to use
+@ n_depth = 2     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 1    ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 1     ## Number of iterations
+@ n_kern  = 16    ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 5     ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -49,9 +49,9 @@ set log_dir    = "./LOG"
 
 
 # Compile statistical phonon code
-cd SRC
-make statsynr_BASIN_gcc.x
-cd ..
+# cd SRC
+# make statsynr_BASIN_gcc.x
+# cd ..
 
 
 ##
@@ -62,11 +62,11 @@ while ($l < $n_freq)
 @ l = $l + 1
 
 if ($l == 1) then
- set dt = "0.2"
- set period = "05"
+set dt = "0.025"
+set period = "40"
 else
- set dt = "0.150"
- set period = "07"
+set dt = "0.150"
+set period = "07"
 endif
 
 
@@ -76,10 +76,10 @@ endif
 @ i  =  0
 while ($i < $n_depth)
 @ i = $i + 1
-if ($i == 1) then
- set q_depth = 100
+if ($i == 3) then
+ set q_depth = 0.01
 else if ($i == 2) then
- set q_depth = 20
+ set q_depth = 30
 else
  set q_depth = 1000
 endif
@@ -103,7 +103,7 @@ while ($j < $n_kern)
 
 @ kernelnum = $j
 
-sleep 1
+sleep 25
 
 ## 
 # Start phonon synthetics
@@ -114,7 +114,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsynr_BASIN_gcc << EOF"                         >  $file_csh
+echo "./bin/statsynr_BASIN_intel << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
 echo "$t_start $t_max $dt \!LIMIT THE TIME WINDOW (SECONDS) " >> $file_csh
@@ -149,6 +149,7 @@ echo " " >> $file_csh
 #
 if ($j == $n_kern)  then
 csh $file_csh
+sleep 300
 endif
 if ($j < $n_kern) then
 csh $file_csh &
