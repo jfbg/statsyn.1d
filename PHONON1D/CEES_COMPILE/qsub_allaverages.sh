@@ -1,2 +1,4 @@
 #!/bin/tcsh
-qsub ./QSUB_SCRIPTS/qsub_PSPACE_022_average.sh
+qsub ./QSUB_SCRIPTS/qsub_BM_MOON2LAYERS_bpSPIKE_700km_noATT_ENERGY_RS_average.sh
+qsub ./QSUB_SCRIPTS/qsub_BM_EARTHPREM_SPIKE_100km_EXP_RS_average.sh
+qsub ./QSUB_SCRIPTS/qsub_BM_EARTHPREM_SPIKE_100km_EXP_noATT_RS_average.sh

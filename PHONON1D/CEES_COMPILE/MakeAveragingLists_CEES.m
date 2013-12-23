@@ -14,33 +14,16 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-'BM_EARTH_0100_SPIKE'
-'BM_EARTH_0100_S3'
-% 'BM_EARTH_0100_SPIKE_B'
-% 'BM_EARTH_0100_SPIKE_noATT'
-% 'BM_EARTH_0030_SPIKE'
-% 'BM_EARTH_0200_SPIKE'
-% 'BM_EARTHPREM_SPIKE_100km_EXP_noATT_RS'
-% 'BM_MOON2LAYERS_700km_AllPs_noATT_RS'
-% 'PSMOON_001_0000km_noscat'
-% 'PSMOON_001_0030km_noscat'
-% 'PSMOON_001_1000km_noscat'
-% 'PSMOON_012a_0000km_noscat'
-% 'PSMOON_012a_0030km_noscat'
-% 'PSMOON_012a_1000km_noscat'
-% 'PVPREM_001_40Hz_0000km_noscat'
-% 'PVPREM_001_40Hz_0030km_noscat'
-% 'PVPREM_001_40Hz_1000km_noscat'
-% 'PSMOON_011a_noscat'
-% 'BM_EARTH_0100_SPIKE'
-% 'BM_onlySPIKE'
+'BM_MOON2LAYERS_bpSPIKE_700km_noATT_ENERGY_RS'
+'BM_EARTHPREM_SPIKE_100km_EXP_RS'
+'BM_EARTHPREM_SPIKE_100km_EXP_noATT_RS'
 };
 
 % depths = .01;
 % depths = [.01 20 30 50 100 150 800 500 750 1000]; % All potential depths
 depths = [100 30 200 700]; % All potential depths
 % depths = [0.01];
-freqs = [2 5 7 10 20];                     % All potential frequencies
+freqs = [2 5 7 10 20 1];                     % All potential frequencies
 kerns = 16;                 
 iters = 10;
 
