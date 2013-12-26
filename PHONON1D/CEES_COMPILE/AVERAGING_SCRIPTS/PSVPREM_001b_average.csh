@@ -1,0 +1,20 @@
+#!/bin/csh
+
+average_output << EOF
+./LISTS/PSVPREM_001b.0800.40.lpr.list
+./AVERAGED_OUTPUTS/PSVPREM_001b.0800.40.lpr
+0.0250
+EOF
+
+average_output << EOF
+./LISTS/PSVPREM_001b.0800.40.lpz.list
+./AVERAGED_OUTPUTS/PSVPREM_001b.0800.40.lpz
+0.0250
+EOF
+
+average_output << EOF
+./LISTS/PSVPREM_001b.0800.40.lpt.list
+./AVERAGED_OUTPUTS/PSVPREM_001b.0800.40.lpt
+0.0250
+EOF
+
