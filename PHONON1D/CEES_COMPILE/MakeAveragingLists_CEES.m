@@ -14,18 +14,21 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-'BM_MOON2LAYERS_bpSPIKE_700km_noATT_ENERGY_RS'
-'BM_EARTHPREM_SPIKE_100km_EXP_RS'
-'BM_EARTHPREM_SPIKE_100km_EXP_noATT_RS'
+    'PSPACE_B_011'
+    'PSPACE_B_012'
+    'PSPACE_B_032'
+% 'BM_MOON2LAYERS_bpSPIKE_700km_noATT_ENERGY_RS'
+% 'BM_EARTHPREM_SPIKE_100km_EXP_RS'
+% 'BM_EARTHPREM_SPIKE_100km_EXP_noATT_RS'
 };
 
 % depths = .01;
 % depths = [.01 20 30 50 100 150 800 500 750 1000]; % All potential depths
-depths = [100 30 200 700]; % All potential depths
+depths = [30]; % All potential depths
 % depths = [0.01];
-freqs = [2 5 7 10 20 1];                     % All potential frequencies
+freqs = [40];%2 5 7 10 20 1];                     % All potential frequencies
 kerns = 16;                 
-iters = 10;
+iters = 7;
 
 outputfolder = '../OUTPUT/';
 scriptfolder = './AVERAGING_SCRIPTS/';

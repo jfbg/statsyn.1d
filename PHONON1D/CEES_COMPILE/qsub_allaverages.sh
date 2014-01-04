@@ -1,6 +1,4 @@
 #!/bin/tcsh
-qsub ./QSUB_SCRIPTS/qsub_PSPACE_B_022_average.sh
-qsub ./QSUB_SCRIPTS/qsub_PSVPREM_001_average.sh
-qsub ./QSUB_SCRIPTS/qsub_PSVPREM_001b_average.sh
-qsub ./QSUB_SCRIPTS/qsub_PSVPREM_002_average.sh
-qsub ./QSUB_SCRIPTS/qsub_PSVPREM_003_average.sh
+qsub ./QSUB_SCRIPTS/qsub_PSPACE_B_011_average.sh
+qsub ./QSUB_SCRIPTS/qsub_PSPACE_B_012_average.sh
+qsub ./QSUB_SCRIPTS/qsub_PSPACE_B_032_average.sh
