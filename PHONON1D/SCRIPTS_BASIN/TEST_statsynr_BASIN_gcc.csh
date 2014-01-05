@@ -22,7 +22,7 @@ set Watt      = 1  # With attenuation (1) or without (0)
 set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
                    # This is actually not activated in the code yet.
 # Basin type
-set basintype = 3
+set basintype = 1
 
 # SCATTERING
 set mx_scat_dp = 10.0    # Depth of scattering layer
@@ -33,8 +33,8 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "BM_EARTH_0100_SPIKE"
-set model_name = "EARTH_MODEL"
+set file_out   = "PBASIN_test"
+set model_name = "CSIMPLEMOON_basic"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
@@ -77,7 +77,7 @@ endif
 while ($i < $n_depth)
 @ i = $i + 1
 if ($i == 1) then
- set q_depth = 100
+ set q_depth = 1000
 else if ($i == 2) then
  set q_depth = 20
 else
