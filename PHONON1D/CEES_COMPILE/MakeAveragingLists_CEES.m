@@ -14,17 +14,18 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-    'PSPACE_B_011'
-    'PSPACE_B_012'
-    'PSPACE_B_032'
-% 'BM_MOON2LAYERS_bpSPIKE_700km_noATT_ENERGY_RS'
-% 'BM_EARTHPREM_SPIKE_100km_EXP_RS'
-% 'BM_EARTHPREM_SPIKE_100km_EXP_noATT_RS'
+'CSIMPLEMOON_Q2000'
+'CSIMPLEMOON_Q6500'
+'CSIMPLEMOON_basic'
+'CSIMPLEMOON_crust'
+'CSIMPLEMOON_lcore300'
+'CSIMPLEMOON_score300'
+'CSIMPLEMOON_vlvl'
 };
 
 % depths = .01;
 % depths = [.01 20 30 50 100 150 800 500 750 1000]; % All potential depths
-depths = [30]; % All potential depths
+depths = [.01 1000 30]; % All potential depths
 % depths = [0.01];
 freqs = [40];%2 5 7 10 20 1];                     % All potential frequencies
 kerns = 16;                 
