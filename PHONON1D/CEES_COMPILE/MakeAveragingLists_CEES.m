@@ -15,13 +15,13 @@ fclose(fid);
 
 modellist = {...
     'PSPACE_B_001'
-'CSIMPLEMOON_Q2000'
-'CSIMPLEMOON_Q6500'
-'CSIMPLEMOON_basic'
-'CSIMPLEMOON_crust'
-'CSIMPLEMOON_lcore300'
-'CSIMPLEMOON_score300'
-'CSIMPLEMOON_vlvl'
+% 'CSIMPLEMOON_Q2000'
+% 'CSIMPLEMOON_Q6500'
+% 'CSIMPLEMOON_basic'
+% 'CSIMPLEMOON_crust'
+% 'CSIMPLEMOON_lcore300'
+% 'CSIMPLEMOON_score300'
+% 'CSIMPLEMOON_vlvl'
 };
 
 % depths = .01;
@@ -29,8 +29,8 @@ modellist = {...
 depths = [.01 1000 30]; % All potential depths
 % depths = [0.01];
 freqs = [40];%2 5 7 10 20 1];                     % All potential frequencies
-kerns = 16;                 
-iters = 7;
+kerns = 10;                 
+iters = 3;
 
 outputfolder = '../OUTPUT/';
 scriptfolder = './AVERAGING_SCRIPTS/';
