@@ -21,7 +21,6 @@ for ii = 1:size(run_names,1)
 
       if jj == 1
          d = load(run_list{jj}, '-ascii');
-         t = d(2:
       else
          dt = load(run_list{jj}, '-ascii');
          d = d + dt;
