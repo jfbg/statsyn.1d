@@ -1321,7 +1321,7 @@ PROGRAM STATSYNR_INTEL
 							IF (z_s(ll) - z_s(ll-1) == 0.) cycle
 						END IF
 						
-						  WRITE(17,FMT=879) (x1+REAL(kk-1)*dxi),z_s(ll),mm*nttrack_dt,trackcount(kk,ll,mm)/100
+						  WRITE(17,FMT=879) (x1+REAL(kk-1)*dxi),z_s(ll),mm*nttrack_dt,trackcount(kk,ll,mm)
 						
 					END DO
 				END DO
@@ -1338,7 +1338,7 @@ PROGRAM STATSYNR_INTEL
 !      ======================================================
 !      ----- Formats -----
 878   FORMAT(2(f10.2,1X),f15.5) 
-879   FORMAT(2(f10.2,1X),i6,1x,f20.5)      
+879   FORMAT(2(f10.2,1X),i6,1x,f30.10)      
 888   FORMAT(F10.2,1X,2001(F10.6,1X))
 !      ^^^^^ Formats ^^^^^
 
