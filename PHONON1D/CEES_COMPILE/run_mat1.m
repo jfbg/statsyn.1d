@@ -26,7 +26,7 @@ for ii = 1:size(run_names,1)
          d = d + dt;
       end
 
-   fprintf('%s  --  %03.0 / %03.0\n',run_names{ii},jj,size(run_list,1))
+   fprintf('%s  --  %03.0f / %03.0f\n',run_names{ii},jj,size(run_list,1))
    end
 
    t = ((0:(size(d)-2))*dt(ii))';
