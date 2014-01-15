@@ -1277,7 +1277,7 @@ PROGRAM STATSYNR_INTEL
   
         OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
          
-         WRITE(22,*) nt,nx
+!         WRITE(22,*) nt,nx
          WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
         
           DO I = 1, nt
@@ -1442,6 +1442,12 @@ SUBROUTINE ATTENUATE(sin,sout,southil,ndat,dt,tstar,dQdfSTYLE)
              rdQdf(I) = 1.
              ELSE
              rdQdf(I) = 1. + ((df*float(I-1)-2)*.3)
+             END IF
+        ELSE IF (dQdfSTYLE == 4) THEN
+             IF ((df*float(I-1)).LE.4) THEN
+             rdQdf(I) = 1.
+             ELSE
+             rdQdf(I) = 1. + ((df*float(I-1)-4)*.3)
              END IF
         ELSE
              rdQdf(I) = 1.  ! If not properly specified do == 1
