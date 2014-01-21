@@ -1,25 +1,15 @@
 close all
 
 modellist = {...
-...    'VPREMOON_Qp_nocrust_10km';
-...    'VPREMOON_Qp_novlvl_10km';
-...    'VPREMOON_Qp_novlvl_liquid_10km';
-...    'VPREMOON_Qp_ori_10km'
-...   'VPREMOON_Qp_ori2_10km'
-...    'VPREMOON_Q4500_ori2_10km'
-...    'VPREMOON_Q4500_ori_10km'
-...    'VPREMOON_Qp_ori2_liquid_10km'
-...    'VPREMOON_Qp_ori2_noCORE_10km'
-...    'VPREMOON_Q7500_ori2_10km'
-% 'SIMPLEMOON_Q2000_10km'
-% 'SIMPLEMOON_Q6500_10km'
-% 'SIMPLEMOON_basic_10km'
-% 'SIMPLEMOON_crust_10km'
-% 'SIMPLEMOON_lcore300_10km'
-% 'SIMPLEMOON_lcore600_10km'
-% 'SIMPLEMOON_score300_10km'
-% 'SIMPLEMOON_score600_10km'
-% 'SIMPLEMOON_vlvl_10km'
+'CSIMPLEMOON_Q2000'
+'CSIMPLEMOON_Q6500'
+'CSIMPLEMOON_basic'
+'CSIMPLEMOON_crust'
+'CSIMPLEMOON_lcore300'
+'CSIMPLEMOON_lcore600'
+'CSIMPLEMOON_score300'
+'CSIMPLEMOON_score600'
+'CSIMPLEMOON_vlvl'
 'CVPREM_001'
 };
 

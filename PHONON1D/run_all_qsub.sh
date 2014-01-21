@@ -1,43 +1,7 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_004_07Hz.sh
+qsub CEES_QSUB_SCRIPTS/qsub_PSPACE_B_015.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_004_40Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_011_07Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_011_40Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_012_07Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_012_40Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_013_07Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_013_40Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_031_07Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_031_40Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_032_07Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_032_40Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_033_07Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_033_40Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_041_07Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_041_40Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_042_07Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_042_40Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_043_07Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_043_40Hz.sh
+qsub CEES_QSUB_SCRIPTS/qsub_PSPACE_B_016.sh
 sleep 1
