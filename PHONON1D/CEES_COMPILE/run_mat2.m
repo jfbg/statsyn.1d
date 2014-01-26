@@ -9,7 +9,7 @@ fid = fopen('mat2_outputs.list','r');
 run_out = textscan(fid,'%s','delimiter','\n');
 run_out = run_out{1};
 
-dt = load('mat2_dt.list');
+dtemp = load('mat2_dt.list');
 
 for ii = 1:size(run_names,1)
 
@@ -29,7 +29,7 @@ for ii = 1:size(run_names,1)
    fprintf('%s  --  %03.0f / %03.0f\n',run_names{ii},jj,size(run_list,1))
    end
 
-   t = ((0:(size(d)-2))*dt(ii))';
+   t = ((0:(size(d)-2))*dtemp(ii))';
    dist = linspace(0,180,size(d,2)-1);
    d = d(2:end,2:end)/size(run_list,1);
 
