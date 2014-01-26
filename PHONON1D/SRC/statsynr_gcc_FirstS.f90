@@ -19,9 +19,9 @@ PROGRAM STATSYNR_INTEL
 ! Receivers are 2D (1km long x 1km deep)
 !
 !
-! $Revision: 845 $
-! $Date: 2013-12-18 14:02:08 -0800 (Wed, 18 Dec 2013) $
-! $Author: jguertin $
+! $Revision$
+! $Date$
+! $Author$
 !
 !
 !
@@ -88,13 +88,17 @@ PROGRAM STATSYNR_INTEL
       exNLAY = 0
 
       WRITE(*,*) 'ISOTROPIC Scattering '
-      WRITE(*,*) 'Last Edited on $Date: 2013-12-18 14:02:08 -0800 (Wed, 18 Dec 2013) $'
-      WRITE(*,*) 'Last Edited by $Author: jguertin $'
-      WRITE(*,*) '$Revision: 845 $'
+      WRITE(*,*) 'Last Edited on $Date$'
+      WRITE(*,*) 'Last Edited by $Author$'
+      WRITE(*,*) '$Revision$'
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
-      WRITE(*,*) '*    BM_MOON'
+      WRITE(*,*) '*'
+      WRITE(*,*) '*    STOPS AFTER REACHING THE SURFACE ONCE'
+      WRITE(*,*) '*    USED TO GET FIRST S-WAVE AMPLITUDES'      
+      WRITE(*,*) '*    SEARCH FirstS TO SEE CHANGE MADE TO CODE'
+      WRITE(*,*) '*'            
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Receivers are 1km wide x 1 km deep'
       WRITE(*,*) '*'
@@ -212,8 +216,7 @@ PROGRAM STATSYNR_INTEL
 !  FOR CRFL BENCHMARKING
 
         Cc2 = 7.3
-        Cc2 = 8.3
-        Ccwil = 10.0
+        Ccwil = 8.0
         Ccwir = 320
         Cc1 = 420
         Cnp = 3600
@@ -231,9 +234,10 @@ PROGRAM STATSYNR_INTEL
         Cindex = 1
 
 
-! SH
-        Cc2_SH = 5
-        Ccwil_SH = 5.5
+! SH 
+
+        Cc2_SH = 4.1
+        Ccwil_SH = 5.0
         Ccwir_SH = 320
         Cc1_SH = 420
         Cnp_SH = 3600
@@ -1170,6 +1174,8 @@ PROGRAM STATSYNR_INTEL
           
 
           !IF P or SV wave, check for P-SV reflection
+
+          !FirstS    Commented Surface conversion so that wave ip output 
           IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
 
         
@@ -1268,16 +1274,16 @@ PROGRAM STATSYNR_INTEL
     
 !      ======================================================
 !      ----- Output Synthetics -----  
-      wf(1,1,1) = 1.
-      wf(1,1,2) = 1.
-      wf(1,1,3) = 1.
+!      wf(1,1,1) = 1.
+!      wf(1,1,2) = 1.
+!      wf(1,1,3) = 1.
       
       DO ic = 1, 3
         ofile2 = trim(ofile)//'.'//cmp(ic)
   
         OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
          
-         WRITE(22,*) nt,nx
+!         WRITE(22,*) nt,nx
          WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
         
           DO I = 1, nt
@@ -1336,7 +1342,7 @@ PROGRAM STATSYNR_INTEL
 !      ======================================================
 !      ----- Formats -----
 878   FORMAT(2(f10.2,1X),f15.5) 
-879   FORMAT(2(f10.2,1X),i6,1x,f20.5)      
+879   FORMAT(2(f10.2,1X),i6,1x,f30.10)      
 888   FORMAT(F10.2,1X,2001(F10.6,1X))
 !      ^^^^^ Formats ^^^^^
 
@@ -1442,6 +1448,12 @@ SUBROUTINE ATTENUATE(sin,sout,southil,ndat,dt,tstar,dQdfSTYLE)
              rdQdf(I) = 1.
              ELSE
              rdQdf(I) = 1. + ((df*float(I-1)-2)*.3)
+             END IF
+        ELSE IF (dQdfSTYLE == 4) THEN
+             IF ((df*float(I-1)).LE.4) THEN
+             rdQdf(I) = 1.
+             ELSE
+             rdQdf(I) = 1. + ((df*float(I-1)-4)*.3)
              END IF
         ELSE
              rdQdf(I) = 1.  ! If not properly specified do == 1

@@ -30,7 +30,7 @@ PROGRAM STATSYNR_INTEL
         
         ! All declarations in pho_vars except debugging and some source variables
         USE pho_vars
-        USE IFPORT
+        !USE IFPORT
         
         IMPLICIT NONE
         
@@ -1277,7 +1277,7 @@ PROGRAM STATSYNR_INTEL
   
         OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
          
-         WRITE(22,*) nt,nx
+!         WRITE(22,*) nt,nx
          WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
         
           DO I = 1, nt
@@ -1336,7 +1336,7 @@ PROGRAM STATSYNR_INTEL
 !      ======================================================
 !      ----- Formats -----
 878   FORMAT(2(f10.2,1X),f15.5) 
-879   FORMAT(2(f10.2,1X),i6,1x,f30.10)     
+879   FORMAT(2(f10.2,1X),i6,1x,f30.10)      
 888   FORMAT(F10.2,1X,2001(F10.6,1X))
 !      ^^^^^ Formats ^^^^^
 
@@ -1442,6 +1442,12 @@ SUBROUTINE ATTENUATE(sin,sout,southil,ndat,dt,tstar,dQdfSTYLE)
              rdQdf(I) = 1.
              ELSE
              rdQdf(I) = 1. + ((df*float(I-1)-2)*.3)
+             END IF
+        ELSE IF (dQdfSTYLE == 4) THEN
+             IF ((df*float(I-1)).LE.4) THEN
+             rdQdf(I) = 1.
+             ELSE
+             rdQdf(I) = 1. + ((df*float(I-1)-4)*.3)
              END IF
         ELSE
              rdQdf(I) = 1.  ! If not properly specified do == 1
@@ -1609,7 +1615,7 @@ SUBROUTINE SURFACE_PSV_BEN
 ! Calculate P-SV reflection coefficients at free surface based on BEN-MENAHEM (p.480)
 
       USE pho_vars
-      USE IFPORT
+      !USE IFPORT
       IMPLICIT NONE
       
       COMPLEX       velP,velS,angP,angS,D1
@@ -1785,7 +1791,7 @@ END SUBROUTINE RTCOEF_SH
 SUBROUTINE RTCOEF_PSV(pin,vp1,vs1,den1,vp2,vs2,den2, &
                          rrp,rrs,rtp,rts,ip,ud,amp,cons_EorA)
                          
-      USE IFPORT
+      !USE IFPORT
                          
       IMPLICIT     NONE
       REAL(8)      vp1,vs1,den1,vp2,vs2,den2     !VELOCITY & DENSITY
@@ -1920,7 +1926,7 @@ END SUBROUTINE RTCOEF_PSV
 SUBROUTINE RTFLUID_BEN_S2L(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
 
 ! Going from Mantle to Core, solid to liquid
-      USE IFPORT
+      !USE IFPORT
 
       IMPLICIT NONE
 
@@ -2068,7 +2074,7 @@ SUBROUTINE RTFLUID_BEN_L2S(realp,ip,ra,rb,rc,rrhos,rrhof,amp,ud,cons_EorA,I)
 
 ! Going from Core to Mantle, liquid to solid
 
-      USE IFPORT
+      !USE IFPORT
 
       IMPLICIT NONE
 
@@ -2993,7 +2999,7 @@ SUBROUTINE GET_DS_SCAT
       !The output dscat has been
       
       USE pho_vars      
-      USE IFPORT
+      !USE IFPORT
       
       IMPLICIT NONE
       REAL(8)     rt,z_ft,fac,bg_sl,z_nf
@@ -3069,7 +3075,7 @@ END SUBROUTINE GET_DS_SL
 
 SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_count,rh,cons_EorA)
 
-      USE IFPORT
+      !USE IFPORT
       IMPLICIT NONE
       
       INTEGER, PARAMETER :: nlay0=4000
