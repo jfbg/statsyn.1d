@@ -68,11 +68,11 @@ PROGRAM STATSYNR_INTEL
          
         REAL(8)   Cc2, Ccwil, Ccwir, Cc1
         INTEGER   Cnp,Cnp1,CI,Cindex
-        REAL(8)  Cc2r, Cc1r, Cdp, Cp(3600)
+        REAL(8)  Cc2r, Cc1r, Cdp, Cp(4000)
 
         REAL(8)   Cc2_SH, Ccwil_SH, Ccwir_SH, Cc1_SH
         INTEGER   Cnp_SH,Cnp1_SH,CI_SH,Cindex_SH
-        REAL(8)  Cc2r_SH, Cc1r_SH, Cdp_SH, Cp_SH(3600)
+        REAL(8)  Cc2r_SH, Cc1r_SH, Cdp_SH, Cp_SH(4000)
 
         REAL(8)  tmax
         
@@ -211,9 +211,9 @@ PROGRAM STATSYNR_INTEL
 
 !  FOR CRFL BENCHMARKING
 
-        Cc2 = 7.3
-        Cc2 = 8.3
-        Ccwil = 10.0
+
+        Cc2 = 9
+        Ccwil = 12.0
         Ccwir = 320
         Cc1 = 420
         Cnp = 3600
@@ -233,7 +233,7 @@ PROGRAM STATSYNR_INTEL
 
 ! SH
         Cc2_SH = 5
-        Ccwil_SH = 5.5
+        Ccwil_SH = 8
         Ccwir_SH = 320
         Cc1_SH = 420
         Cnp_SH = 3600
