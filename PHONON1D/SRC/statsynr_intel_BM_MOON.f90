@@ -1277,7 +1277,7 @@ PROGRAM STATSYNR_INTEL
   
         OPEN(22,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
          
-         WRITE(22,*) nt,nx
+!         WRITE(22,*) nt,nx
          WRITE(22,FMT=888) 999.99,(x1+dxi*float(J-1),J=1,nx)
         
           DO I = 1, nt
