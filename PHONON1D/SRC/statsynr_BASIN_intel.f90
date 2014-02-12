@@ -95,7 +95,7 @@ PROGRAM STATSYNR_INTEL
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
       WRITE(*,*) '*'
-      WRITE(*,*) '*    BASIN VERSION !! '
+      WRITE(*,*) '*    BASIN VERSION !!  '
       WRITE(*,*) '*'
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Receivers are 1km wide x 1 km deep'
