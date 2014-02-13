@@ -3548,6 +3548,26 @@ SUBROUTINE CHECKSCATPROB
 						
 										scat_prob2 = 0.
 							END IF
+							
+			 ELSEIF (basintype.eq.11) THEN
+        ! BASIN011
+        !4deg of scat free centered on 20, 40, 60, 80, 100, 120, 140, 160, 180
+        ! no scat in basin
+        ! Source is in similar basin with no scattering if impact.
+        
+							basrad = 2.
+							IF (    ((xd.ge.0).AND.(xd.le.0+basrad)).OR.&
+							      &((xd.ge.20-basrad).AND.(xd.le.20+basrad)).OR.&
+										&((xd.ge.40-basrad).AND.(xd.le.40+basrad)).OR.&
+										&((xd.ge.60-basrad).AND.(xd.le.60+basrad)).OR.&
+										&((xd.ge.80-basrad).AND.(xd.le.80+basrad)).OR.&
+										&((xd.ge.100-basrad).AND.(xd.le.100+basrad)).OR.&
+										&((xd.ge.120-basrad).AND.(xd.le.120+basrad)).OR.&
+										&((xd.ge.140-basrad).AND.(xd.le.140+basrad)).OR.&
+										&((xd.ge.160-basrad).AND.(xd.le.160+basrad))) THEN
+						
+										scat_prob2 = 0.
+							END IF
 			 
 			 ELSEIF (basintype.eq.2) THEN
 							! BASIN002
@@ -3565,6 +3585,29 @@ SUBROUTINE CHECKSCATPROB
         ! Scat only if z_scat < 2km
 							basrad = 2.
 							IF (   ((xd.ge.20-basrad).AND.(xd.le.20+basrad)).OR.&
+										&((xd.ge.40-basrad).AND.(xd.le.40+basrad)).OR.&
+										&((xd.ge.60-basrad).AND.(xd.le.60+basrad)).OR.&
+										&((xd.ge.80-basrad).AND.(xd.le.80+basrad)).OR.&
+										&((xd.ge.100-basrad).AND.(xd.le.100+basrad)).OR.&
+										&((xd.ge.120-basrad).AND.(xd.le.120+basrad)).OR.&
+										&((xd.ge.140-basrad).AND.(xd.le.140+basrad)).OR.&
+										&((xd.ge.160-basrad).AND.(xd.le.160+basrad))) THEN
+						
+										IF (z_act.le.5) THEN 
+										  scat_prob2 = 1.
+										ELSE
+										  scat_prob2 = 0.
+										END IF
+							END IF
+							
+			ELSEIF (basintype.eq.13) THEN
+        ! BASIN013
+        !4deg of scat free centered on 20, 40, 60, 80, 100, 120, 140, 160, 180
+        ! Scat only if z_scat < 2km
+        
+							basrad = 2.
+							IF (   ((xd.ge.0).AND.(xd.le.0+basrad)).OR.&
+							      &((xd.ge.20-basrad).AND.(xd.le.20+basrad)).OR.&
 										&((xd.ge.40-basrad).AND.(xd.le.40+basrad)).OR.&
 										&((xd.ge.60-basrad).AND.(xd.le.60+basrad)).OR.&
 										&((xd.ge.80-basrad).AND.(xd.le.80+basrad)).OR.&
