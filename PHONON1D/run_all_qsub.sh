@@ -1,19 +1,7 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_001n_0000km.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BMF_EARTHPREM_SPIKE_100km_EXP_noATT.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_001n_0000km_5Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_003n_0000km.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_003n_0000km_5Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_004n_0000km.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_004n_0000km_5Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_006n_0000km.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_006n_0000km_5Hz.sh
+qsub CEES_QSUB_SCRIPTS/qsub_BMF_MOON2LAYERS_700km_noATT.sh
 sleep 1
