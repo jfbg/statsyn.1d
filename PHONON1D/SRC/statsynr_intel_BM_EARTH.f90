@@ -211,11 +211,11 @@ PROGRAM STATSYNR_INTEL
 
 !  FOR CRFL BENCHMARKING
 
-        Cc2 = 8.3
-        Ccwil = 10.0
+        Cc2 = 10.
+        Ccwil = 13.0
         Ccwir = 320
         Cc1 = 420
-        Cnp = 3600
+        Cnp = 2500
            
            
         Cc2r=1./Cc2
@@ -231,11 +231,11 @@ PROGRAM STATSYNR_INTEL
 
 
 ! SH
-        Cc2_SH = 5
-        Ccwil_SH = 5.5
+        Cc2_SH = 10.
+        Ccwil_SH = 13.
         Ccwir_SH = 320
         Cc1_SH = 420
-        Cnp_SH = 3600
+        Cnp_SH = 2500
            
            
         Cc2r_SH=1./Cc2_SH
