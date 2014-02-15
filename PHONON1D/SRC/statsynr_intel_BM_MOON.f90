@@ -233,7 +233,7 @@ PROGRAM STATSYNR_INTEL
 
 ! SH
         Cc2_SH = 5
-        Ccwil_SH = 8
+        Ccwil_SH = 8 
         Ccwir_SH = 320
         Cc1_SH = 420
         Cnp_SH = 3600
