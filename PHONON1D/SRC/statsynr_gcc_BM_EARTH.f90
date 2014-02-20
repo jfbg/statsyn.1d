@@ -68,11 +68,11 @@ PROGRAM STATSYNR_INTEL
          
         REAL(8)   Cc2, Ccwil, Ccwir, Cc1
         INTEGER   Cnp,Cnp1,CI,Cindex
-        REAL(8)  Cc2r, Cc1r, Cdp, Cp(4000)
+        REAL(8)  Cc2r, Cc1r, Cdp, Cp(3600)
 
         REAL(8)   Cc2_SH, Ccwil_SH, Ccwir_SH, Cc1_SH
         INTEGER   Cnp_SH,Cnp1_SH,CI_SH,Cindex_SH
-        REAL(8)  Cc2r_SH, Cc1r_SH, Cdp_SH, Cp_SH(4000)
+        REAL(8)  Cc2r_SH, Cc1r_SH, Cdp_SH, Cp_SH(3600)
 
         REAL(8)  tmax
         
@@ -94,7 +94,7 @@ PROGRAM STATSYNR_INTEL
       
       WRITE(*,*) ''
       WRITE(*,*) '************************************'
-      WRITE(*,*) '*    BM_MOON'
+      WRITE(*,*) '*    BM_EARTH'
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Receivers are 1km wide x 1 km deep'
       WRITE(*,*) '*'
@@ -211,12 +211,11 @@ PROGRAM STATSYNR_INTEL
 
 !  FOR CRFL BENCHMARKING
 
-
-        Cc2 = 9
-        Ccwil = 12.0
+        Cc2 = 10.
+        Ccwil = 13.0
         Ccwir = 320
         Cc1 = 420
-        Cnp = 3600
+        Cnp = 2500
            
            
         Cc2r=1./Cc2
@@ -232,11 +231,11 @@ PROGRAM STATSYNR_INTEL
 
 
 ! SH
-        Cc2_SH = 5
-        Ccwil_SH = 8 
+        Cc2_SH = 10.
+        Ccwil_SH = 13.
         Ccwir_SH = 320
         Cc1_SH = 420
-        Cnp_SH = 3600
+        Cnp_SH = 2500
            
            
         Cc2r_SH=1./Cc2_SH
