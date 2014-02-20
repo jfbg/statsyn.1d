@@ -19,7 +19,7 @@ PROGRAM STATSYNR_INTEL
 ! Receivers are 2D (1km long x 1km deep)
 !
 !
-! $Revision$
+! $Revision$ 
 ! $Date$
 ! $Author$
 !
