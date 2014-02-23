@@ -15,7 +15,8 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-'BMF_EARTH_0100_S3_F'
+'BMF_EARTHPREM_SPIKE_100km_EXP_noATT_AllPs'
+'BMF_MOON2LAYERS_700km_noATT_AllPs'
 };
 
 % depths = .01;
