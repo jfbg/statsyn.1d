@@ -23,7 +23,7 @@ modellist = {...
 % depths = [.01 20 30 50 100 150 800 500 750 1000]; % All potential depths
 depths = [0.01 30 50 1000 700 100]; % All potential depths
 % depths = [0.01];
-freqs = [7];%2 5 7 10 20 1];                     % All potential frequencies
+freqs = [7 1];%2 5 7 10 20 1];                     % All potential frequencies
 kerns = 16;                  
 iters = 15;
 
