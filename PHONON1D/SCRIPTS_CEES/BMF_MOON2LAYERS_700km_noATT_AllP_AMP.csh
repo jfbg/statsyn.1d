@@ -5,19 +5,19 @@
 #
 
 @ t_start      = 0
-@ t_max        = 8192			# 90 minutes
+@ t_max        = 3000			# 90 minutes
 set d_range    = "0 180 91"
-set n_phonon   = "12500000"
+set n_phonon   = "12502800"
 
 # Source attenuation and type
 set dQdfstyle  = 1
 set sourcetype = 9    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "0 0 1"  # Energy partioning at source
-set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
+set samtype    = 3   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
 
 # Code Parameters
-set cons_EorA = 2  # Conserve Amplitude (1) or Energy (2) at interfaces (Benchmark works with 2)
+set cons_EorA = 1  # Conserve Amplitude (1) or Energy (2) at interfaces (Benchmark works with 2)
 set Watt      = 0  # With attenuation (1) or without (0)
 set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
                    # This is actually not activated in the code yet.
@@ -31,14 +31,14 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.6
 
-set file_out   = "BMF_MOON2LAYERS_700km_noATT_AllPs_Thor"
+set file_out   = "BMF_MOON2LAYERS_700km_noATT_AllP_AMP"
 set model_name = "MOON2LAYERS"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
-@ n_kern  = 6    ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 8     ## Number of iterations
+@ n_kern  = 16    ## Number of kernels to use per iteration (simultaneous run)
+@ n_iter  = 7     ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -47,9 +47,9 @@ set log_dir    = "./LOG"
 
 
 # Compile statistical phonon code
-cd SRC
-make statsynr_gcc_BM_Moon.x
-cd ..
+#cd SRC
+#make statsyn_gcc_moon.x
+#cd ..
 
 
 ##
@@ -101,7 +101,7 @@ while ($j < $n_kern)
 
 @ kernelnum = $j
 
-sleep 4
+sleep 25
 
 ## 
 # Start phonon synthetics
@@ -112,7 +112,7 @@ set file_log = log.$file_out.$q_depth.$j.$k.$period
 set file_track = $file_out.$q_depth.$j.$k.$period.TRACK
 set file_csh   = SCRIPTS_RUN/$file_out.$q_depth.$j.$k.$period.csh
 
-echo "./bin/statsynr_gcc_BM_Moon << EOF"                         >  $file_csh
+echo "./bin/statsynr_intel_BM_Moon << EOF"                         >  $file_csh
 echo "./MODELS/$model_name"				                      >> $file_csh
 echo "$pfac"				                                  >> $file_csh
 echo "$t_start $t_max $dt \!LIMIT THE TIME WINDOW (SECONDS) " >> $file_csh
