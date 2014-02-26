@@ -14,7 +14,7 @@ set dQdfstyle  = 1
 set sourcetype = 9    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "0 0 1"  # Energy partioning at source
-set samtype    = 3   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
+set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
 
 # Code Parameters
 set cons_EorA = 1  # Conserve Amplitude (1) or Energy (2) at interfaces (Benchmark works with 2)
