@@ -1,0 +1,8 @@
+#!/bin/tcsh
+#PBS -N BMC_EARTHPREM_SPIKE_100km_EXP_noATT_AllPs
+#PBS -l nodes=1:ppn=16
+#PBS -q jfl
+#PBS -V
+cd $PBS_O_WORKDIR
+
+csh SCRIPTS_CEES/BMC_EARTHPREM_SPIKE_100km_EXP_noATT_AllPs.csh
