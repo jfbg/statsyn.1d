@@ -1451,7 +1451,10 @@ SUBROUTINE ATTENUATE(sin,sout,southil,ndat,dt,tstar,dQdfSTYLE)
              END IF
         ELSE IF (dQdfSTYLE == 5) THEN
         	! BASED ON FITTING THE QC VALUES FROM APSE DATA, USES A REFERENCE Qi(1Hz) of 6000
-             rdQdf(I) = 1. + ((df*float(I-1))**3.5558397)/6000
+             rdQdf(I) = 1. + ((df*float(I-1))**3.5558397)/6000   !FIT APSE QC
+	    ELSE IF (dQdfSTYLE == 6) THEN
+        	! BASED ON FITTING THE QC VALUES FROM APSE DATA, USES A REFERENCE Qi(1Hz) of 6000
+             rdQdf(I) = 1. + ((df*float(I-1))**4.1)/6000   !LARGER Qi at LARGE FREQUENCIES THAN 5
         ELSE
              rdQdf(I) = 1.  ! If not properly specified do == 1
         END IF
