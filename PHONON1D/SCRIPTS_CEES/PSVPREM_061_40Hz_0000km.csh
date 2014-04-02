@@ -5,7 +5,7 @@
 #
 
 @ t_start      = 0
-@ t_max        = 6000			# 90 minutes
+@ t_max        = 4500			# 90 minutes
 set d_range    = "0 180 91"
 set n_phonon   = "40000000"
 
@@ -31,7 +31,7 @@ set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
 set velperturb = 0.60
 
-set file_out   = "PSVPREM_059"
+set file_out   = "PSVPREM_061"
 set model_name = "CVPREM_001"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
