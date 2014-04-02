@@ -3580,7 +3580,7 @@ SUBROUTINE CHECKSCATPROB
 							END IF	
 							
 			 ELSEIF (basintype.eq.3) THEN
-        ! BASIN001
+        ! BASIN003
         !4deg of scat free centered on 20, 40, 60, 80, 100, 120, 140, 160, 180
         ! Scat only if z_scat < 2km
 							basrad = 2.
