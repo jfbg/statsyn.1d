@@ -1,19 +1,9 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_2301_0000km_5Hz.sh
+qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_062_40Hz_0000km.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_2301_1000km_5Hz.sh
+qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_062_40Hz_0050km.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_2302_0000km_5Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_2302_1000km_5Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_2601_0000km_5Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_2601_1000km_5Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_2602_0000km_5Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_2602_1000km_5Hz.sh
+qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_062_40Hz_1000km.sh
 sleep 1
