@@ -7,7 +7,7 @@
 @ t_start      = 0
 @ t_max        = 6000			# 90 minutes
 set d_range    = "0 180 361"
-set n_phonon   = "30000000"
+set n_phonon   = "20000000"
 
 # Source attenuation and type
 set dQdfstyle  = 1
@@ -25,7 +25,7 @@ set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
 set basintype = 2
 
 # SCATTERING
-set mx_scat_dp = 60.0    # Depth of scattering layer
+set mx_scat_dp = 30.0    # Depth of scattering layer
 set bg_scat    = 0.0    # Global scattering probability (keep low....!)
 set prob_scat  = 1.0    # Scattering Layer scattering probability
 set dsmin      = 0.05   # Min scaterrer length scale
