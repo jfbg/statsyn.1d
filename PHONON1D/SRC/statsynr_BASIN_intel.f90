@@ -3581,7 +3581,7 @@ SUBROUTINE CHECKSCATPROB
 							
 			 ELSEIF (basintype.eq.12) THEN
 							! BASIN002
-							! Two 20deg rad basins, see effect of near edge receivers, 5 km scat in basin
+							! Two 20deg rad basins, see effect of near edge receivers, 5 km scat  in basin
 							basrad = 20.
 							IF (   ((xd.ge.60-basrad).AND.(xd.le.60+basrad)).OR.&
 										&((xd.ge.140-basrad).AND.(xd.le.140+basrad))) THEN
@@ -3596,7 +3596,7 @@ SUBROUTINE CHECKSCATPROB
 			 ELSEIF (basintype.eq.3) THEN
         ! BASIN003
         !4deg of scat free centered on 20, 40, 60, 80, 100, 120, 140, 160, 180
-        ! Scat only if z_scat < 2km
+        ! Scat only if z_scat < 5km
 							basrad = 2.
 							IF (   ((xd.ge.20-basrad).AND.(xd.le.20+basrad)).OR.&
 										&((xd.ge.40-basrad).AND.(xd.le.40+basrad)).OR.&
@@ -3617,7 +3617,7 @@ SUBROUTINE CHECKSCATPROB
 			ELSEIF (basintype.eq.13) THEN
         ! BASIN013
         !4deg of scat free centered on 20, 40, 60, 80, 100, 120, 140, 160, 180
-        ! Scat only if z_scat < 2km
+        ! Scat only if z_scat < 5km
         
 							basrad = 2.
 							IF (   ((xd.ge.0).AND.(xd.le.0+basrad)).OR.&
