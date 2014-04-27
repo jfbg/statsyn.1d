@@ -5,7 +5,7 @@
 #
 
 @ t_start      = 0
-@ t_max        = 6000			# 90 minutes
+@ t_max        = 4000			# 90 minutes
 set d_range    = "0 180 361"
 set n_phonon   = "20000000"
 
