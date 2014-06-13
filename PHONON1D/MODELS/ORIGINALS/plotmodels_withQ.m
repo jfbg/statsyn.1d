@@ -1,7 +1,7 @@
 close all
 
 modellist = {...
-    'CVPREM_001'};
+    'CWEBER_001'};
 %     'VPREMOON_Qp_novlvl';
 %     'VPREMOON_Qp_novlvl_liquid';
 %     'VPREMOON_Qp_nocrust'
