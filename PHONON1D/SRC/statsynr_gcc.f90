@@ -709,6 +709,9 @@ PROGRAM STATSYNR_INTEL
              Cindex = Cindex + 1
              IF (Cindex > Cnp) Cindex   = Cindex - Cnp
           ENDIF
+        ELSEIF (samplingtype.eq.4) THEN            ! angle is cos(uniform distribution between 0 and 1)
+          ang1 = acos(r0)
+          p    = abs(sin(ang1))/vf(iz_p,iwave)
         ELSE    !IF (samplingtype.eq.1) THEN      ! Sample Angles
           ang1 = angst*r0         !Randomly select angle
           p    = abs(sin(ang1))/vf(iz_p,iwave)
@@ -1451,7 +1454,10 @@ SUBROUTINE ATTENUATE(sin,sout,southil,ndat,dt,tstar,dQdfSTYLE)
              END IF
         ELSE IF (dQdfSTYLE == 5) THEN
         	! BASED ON FITTING THE QC VALUES FROM APSE DATA, USES A REFERENCE Qi(1Hz) of 6000
-             rdQdf(I) = 1. + ((df*float(I-1))**3.5558397)/6000
+             rdQdf(I) = 1. + ((df*float(I-1))**3.5558397)/6000   !FIT APSE QC
+	    ELSE IF (dQdfSTYLE == 6) THEN
+        	! BASED ON FITTING THE QC VALUES FROM APSE DATA, USES A REFERENCE Qi(1Hz) of 6000
+             rdQdf(I) = 1. + ((df*float(I-1))**4.1)/6000   !LARGER Qi at LARGE FREQUENCIES THAN 5
         ELSE
              rdQdf(I) = 1.  ! If not properly specified do == 1
         END IF
