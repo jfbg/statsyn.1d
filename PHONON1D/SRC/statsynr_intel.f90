@@ -709,6 +709,9 @@ PROGRAM STATSYNR_INTEL
              Cindex = Cindex + 1
              IF (Cindex > Cnp) Cindex   = Cindex - Cnp
           ENDIF
+        ELSEIF (samplingtype.eq.4) THEN            ! angle is cos(uniform distribution between 0 and 1)
+          ang1 = acos(r0)
+          p    = abs(sin(ang1))/vf(iz_p,iwave)
         ELSE    !IF (samplingtype.eq.1) THEN      ! Sample Angles
           ang1 = angst*r0         !Randomly select angle
           p    = abs(sin(ang1))/vf(iz_p,iwave)
