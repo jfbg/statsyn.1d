@@ -105,6 +105,8 @@ PROGRAM STATSYNR_INTEL
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Receivers are 1km wide x 1 km deep'
       WRITE(*,*) '*'
+      WRITE(*,*) '*    OUTPUT MAXDEPTH AND TIMES FOR SOME STATIONS'
+      WRITE(*,*) '*'
       WRITE(*,*) '*    MAKE SURE TO CHECK FOR:'
       WRITE(*,*) '*      -> Decreasing layer thickness near core'
       WRITE(*,*) '*      -> datt is set accordingly for max tstar'
