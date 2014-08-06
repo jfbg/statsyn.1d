@@ -1190,24 +1190,24 @@ PROGRAM STATSYNR_INTEL
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! EDITS FOR TIME AND DEPTH TRACKING
       
-      IF (ix == 1) WRITE(7770,*) t+dtsurf-t1,maxdepth
-      IF (ix == 2) WRITE(7771,*) t+dtsurf-t1,maxdepth
-      IF (ix == 3) WRITE(7772,*) t+dtsurf-t1,maxdepth
-      IF (ix == 4) WRITE(7773,*) t+dtsurf-t1,maxdepth
-      IF (ix == 5) WRITE(7774,*) t+dtsurf-t1,maxdepth
-      IF (ix == 6) WRITE(7775,*) t+dtsurf-t1,maxdepth
-      IF (ix == 7) WRITE(7776,*) t+dtsurf-t1,maxdepth
-      IF (ix == 8) WRITE(7777,*) t+dtsurf-t1,maxdepth
-      IF (ix == 9) WRITE(7778,*) t+dtsurf-t1,maxdepth
-      IF (ix == 10) WRITE(7779,*) t+dtsurf-t1,maxdepth
-      IF (ix == 11) WRITE(7780,*) t+dtsurf-t1,maxdepth
-      IF (ix == 16) WRITE(7781,*) t+dtsurf-t1,maxdepth
-      IF (ix == 21) WRITE(7782,*) t+dtsurf-t1,maxdepth
-      IF (ix == 26) WRITE(7783,*) t+dtsurf-t1,maxdepth
-      IF (ix == 31) WRITE(7784,*) t+dtsurf-t1,maxdepth
-      IF (ix == 36) WRITE(7785,*) t+dtsurf-t1,maxdepth
-      IF (ix == 41) WRITE(7786,*) t+dtsurf-t1,maxdepth
-      IF (ix == 46) WRITE(7787,*) t+dtsurf-t1,maxdepth
+      IF (ix == 1) WRITE(7770,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 2) WRITE(7771,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 3) WRITE(7772,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 4) WRITE(7773,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 5) WRITE(7774,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 6) WRITE(7775,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 7) WRITE(7776,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 8) WRITE(7777,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 9) WRITE(7778,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 10) WRITE(7779,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 11) WRITE(7780,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 16) WRITE(7781,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 21) WRITE(7782,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 26) WRITE(7783,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 31) WRITE(7784,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 36) WRITE(7785,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 41) WRITE(7786,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
+      IF (ix == 46) WRITE(7787,*) I,t+dtsurf-t1,erad-erad*exp(maxdepth/(-1*erad))
 
                    
                       
