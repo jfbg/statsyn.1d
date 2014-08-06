@@ -1232,7 +1232,8 @@ PROGRAM STATSYNR_INTEL
           IF ((ip == 1).OR.(ip == 2))   CALL SURFACE_PSV_BEN
 
         
-        END IF          
+        END IF      
+        t = 888888888.    
         END IF
 
         ! RECORD IF PHONON IS AT SURFACE
