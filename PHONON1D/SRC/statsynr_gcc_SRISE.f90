@@ -715,6 +715,7 @@ PROGRAM STATSYNR_INTEL
         z_last = -99.
         z_last_count = 0
         trackS2L = 0
+        maxdepth = 0.
         ! ============ <<
              
         ! ============ >>
