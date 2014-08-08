@@ -1,9 +1,15 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_PSEARTH_SINE_SS0_40Hz_0020km.sh
+qsub CEES_QSUB_SCRIPTS/qsub_PSPACE_cosscat_001_0000km.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSEARTH_SINE_SS0_40Hz_0050km.sh
+qsub CEES_QSUB_SCRIPTS/qsub_PSPACE_cosscat_001_0050km.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSEARTH_SINE_SS0_40Hz_1000km.sh
+qsub CEES_QSUB_SCRIPTS/qsub_PSPACE_cosscat_001_1000km.sh
+sleep 1
+qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_cosscat_001_0000km.sh
+sleep 1
+qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_cosscat_001_0050km.sh
+sleep 1
+qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_cosscat_001_1000km.sh
 sleep 1
