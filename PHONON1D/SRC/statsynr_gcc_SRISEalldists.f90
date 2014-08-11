@@ -105,7 +105,8 @@ PROGRAM STATSYNR_INTEL
       WRITE(*,*) '*    Circular radiation pattern'
       WRITE(*,*) '*    Receivers are 1km wide x 1 km deep'
       WRITE(*,*) '*'
-      WRITE(*,*) '*    OUTPUT MAXDEPTH AND TIMES FOR SOME STATIONS'
+      WRITE(*,*) '*    OUTPUT MAXDEPTH AND TIMES FOR ALL Distances'
+      WRITE(*,*) '*    Only for the first surface hit'
       WRITE(*,*) '*'
       WRITE(*,*) '*    MAKE SURE TO CHECK FOR:'
       WRITE(*,*) '*      -> Decreasing layer thickness near core'
@@ -1025,7 +1026,7 @@ PROGRAM STATSYNR_INTEL
           END IF
         
         
-        WRITE(7770,*) I,t,x_index/deg2km,erad-erad*exp(maxdepth/(-1*erad)
+        WRITE(7770,*) I,t,x_index/deg2km,erad-erad*exp(maxdepth/(-1*erad))
         !
 !        
 !        
