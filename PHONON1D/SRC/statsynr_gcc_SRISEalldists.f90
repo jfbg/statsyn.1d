@@ -220,7 +220,10 @@ PROGRAM STATSYNR_INTEL
 
 
 
-      OPEN(7770,FILE='Dist_ALL.txt',STATUS='UNKNOWN')
+!      OPEN(7770,FILE='Dist_ALL.txt',STATUS='UNKNOWN')
+      
+      ofile2 = trim(ofile)//'.txt'
+      OPEN(7770,FILE=trim(ofile2),STATUS='UNKNOWN')    !OPEN OUTPUT FILE
 
 
 
