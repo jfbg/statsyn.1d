@@ -7,14 +7,14 @@
 @ t_start      = 0
 @ t_max        = 4500			# 90 minutes
 set d_range    = "0 180 91"
-set n_phonon   = "40000000"
+set n_phonon   = "500000"
 
 # Source attenuation and type
-set dQdfstyle  = 6
+set dQdfstyle  = 3
 set sourcetype = 3    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "1 10 10"  # Energy partioning at source
-set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3), 
+set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3)
 
 # Code Parameters
 set cons_EorA = 2  # Conserve Amplitude (1) or Energy (2) at interfaces (Benchmark works with 2)
@@ -24,21 +24,21 @@ set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
 
 # SCATTERING
 set mx_scat_dp = 30   # Depth of scattering layer
-set bg_scat    = 0.0025   # Global scattering probability (keep low....!)
+set bg_scat    = 0.0   # Global scattering probability (keep low....!)
 set prob_scat  = 1.0    # Scattering Layer scattering probability
 set dsmin      = 0.05   # Min scaterrer length scale
 set dsmax      = 10     # Max scaterrer length scale
 set npow       = -0.5   # Power law factor for scatterer lengthscale
-set velperturb = 0.60
+set velperturb = 0.75
 
-set file_out   = "PSWEBER_064"
-set model_name = "CWEBER_001b"
+set file_out   = "TEST_CJ"
+set model_name = "CVPREM_001"
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
 @ n_depth = 1     ## Number of depths to use
 @ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
 @ n_kern  = 16    ## Number of kernels to use per iteration (simultaneous run)
-@ n_iter  = 5     ## Number of iterations
+@ n_iter  = 1     ## Number of iterations
 
 # Output folder
 set out_dir    = "./OUTPUT"
@@ -59,7 +59,7 @@ set log_dir    = "./LOG"
 while ($l < $n_freq)
 @ l = $l + 1
 
-if ($l == 1) then
+if ($l == 2) then
  set dt = "0.025"
  set period = "40"
 else
@@ -74,10 +74,10 @@ endif
 @ i  =  0
 while ($i < $n_depth)
 @ i = $i + 1
-if ($i == 2) then
- set q_depth = 20
+if ($i == 1) then
+ set q_depth = 0.01
 else if ($i == 1) then
- set q_depth = 20
+ set q_depth = 50
 else
  set q_depth = 1000
 endif

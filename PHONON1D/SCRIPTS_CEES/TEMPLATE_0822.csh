@@ -14,29 +14,30 @@ set dQdfstyle  = 6
 set sourcetype = 3    # delta (1), sine (2), custom (9)
 set customsourcefile = 'LP_0_01t0_5Hz_dt1s.source'
 set rPrSVrSH   = "1 10 10"  # Energy partioning at source
-set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3), 
+set samtype    = 1   # Sampling over takeoff angles (1), or slownesses (2),or BM (3), (4) cosine normalization 
 
 # Code Parameters
 set cons_EorA = 2  # Conserve Amplitude (1) or Energy (2) at interfaces (Benchmark works with 2)
 set Watt      = 1  # With attenuation (1) or without (0)
 set track     = 0  # Yes (1). Produce tracking files (follows phonon throughout)
-                   # This is actually not activated in the code yet.
 
 # SCATTERING
 set mx_scat_dp = 30   # Depth of scattering layer
 set bg_scat    = 0.0025   # Global scattering probability (keep low....!)
 set prob_scat  = 1.0    # Scattering Layer scattering probability
-set dsmin      = 0.05   # Min scaterrer length scale
-set dsmax      = 10     # Max scaterrer length scale
+set dsmin      = 0.05   # Min scaterrer length scale (km)
+set dsmax      = 10     # Max scaterrer length scale (km)
 set npow       = -0.5   # Power law factor for scatterer lengthscale
-set velperturb = 0.60
+set velperturb = 0.60   # MAX VELOCITY AND DENSITY PERTURBATION AT SCATTERERS
 
 set file_out   = "PSWEBER_064"
-set model_name = "CWEBER_001b"
+set model_name = "CWEBER_001b"      #Velocity and density model
 set pfac       = -2     # Density factor for flattening  (factor = pfac -2)
 
+###### 
+
 @ n_depth = 1     ## Number of depths to use
-@ n_freq  = 1     ## Number of frequency bands (40s and 6.66666s)
+@ n_freq  = 2     ## Number of frequency bands (40s and 6.66666s)
 @ n_kern  = 16    ## Number of kernels to use per iteration (simultaneous run)
 @ n_iter  = 5     ## Number of iterations
 
