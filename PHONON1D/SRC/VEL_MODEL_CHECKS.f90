@@ -216,6 +216,10 @@
 				
 				iz2 = 1; !Add new layer under the surface layer.
 				
+   			DO WHILE (receiver_depth >= z_st(iz2+1))      !FIND WHICH LAYER THE SCAT LAYER IS ABOVE
+		  	 iz2 = iz2 +1														  !NEW VEL LAYER WILL BE AT (iz1 + 1)
+			  END DO
+				
 				
 				DO K = 1,nlay !one new layer for the source
 					IF (K <= iz2) THEN
@@ -228,7 +232,7 @@
 					END IF
 					
 					IF (K == iz2 +1) THEN
-					 WRITE(6,*) '     ** Adding velocity layer at the receiver depth:', receiver_depth
+					 WRITE(6,*) '     ** Adding velocity layer at the receiver depth:', receiver_depth, iz2
 							z_s(K) = receiver_depth
 							r_s(K) = erad-receiver_depth
 							vs(K,1) = (vst(K,1)-vst(K-1,1))/(z_st(K) - z_st(K-1)) * (receiver_depth - z_st(K-1)) + vst(K-1,1)
