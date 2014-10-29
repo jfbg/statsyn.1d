@@ -1,9 +1,5 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_2330B_1000km_5Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_2331B_1000km_5Hz.sh
-sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PBASIN_2332B_1000km_5Hz.sh
+qsub CEES_QSUB_SCRIPTS/qsub_PSPACE_B_021_rd025_0000km.sh
 sleep 1
