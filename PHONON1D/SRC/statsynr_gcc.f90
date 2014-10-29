@@ -3146,7 +3146,11 @@ SUBROUTINE REF_TRAN_PROB(p,az,iz_scat,x_sign,ud,iwave,ip,vel_perturb,vf,conv_cou
       r0 = rand()
       theta2 = 2.*pi*(r0-0.5) 
       r0 = rand()
-      phi2   =    pi*(r0-0.5) 
+      phi2 = acos(r0)      !So that cos(phi) is uniformly distributed between 0 and 1
+      										 ! phi is normal to plane, so 90˚ from dip.
+!      phi2   =    pi*(r0-0.5) 
+
+
       
       n1(1) = sin(phi2)*cos(theta2)  
       n1(2) = sin(phi2)*sin(theta2)
