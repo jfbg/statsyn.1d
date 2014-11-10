@@ -5,7 +5,7 @@
 #
 
 @ t_start      = 0
-@ t_max        = 2000			# 90 minutes
+@ t_max        = 1500			# 90 minutes
 set d_range    = "0 180 91"
 set n_phonon   = "5000000"
 
@@ -60,8 +60,8 @@ while ($l < $n_freq)
 @ l = $l + 1
 
 if ($l == 1) then
- set dt = "0.025"
- set period = "40"
+ set dt = "0.2"
+ set period = "5"
 else
  set dt = "0.150"
  set period = "07"
