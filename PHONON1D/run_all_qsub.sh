@@ -1,19 +1,23 @@
 #!/bin/tcsh
 
 
-qsub CEES_QSUB_SCRIPTS/qsub_PSPACE_B_001x_0000km.sh
+qsub CEES_QSUB_SCRIPTS/qsub_NBASIN_SL_sm_0005.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSPACE_B_001x_1000km.sh
+qsub CEES_QSUB_SCRIPTS/qsub_NBASIN_SL_sm_0010.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSPACE_B_021x_0000km.sh
+qsub CEES_QSUB_SCRIPTS/qsub_NBASIN_SL_sm_0015.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSPACE_B_021x_1000km.sh
+qsub CEES_QSUB_SCRIPTS/qsub_NBASIN_SL_sm_0030.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSPACE_B_022x_0000km.sh
+qsub CEES_QSUB_SCRIPTS/qsub_NBASIN_SL_sm_0060.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSPACE_B_022x_1000km.sh
+qsub CEES_QSUB_SCRIPTS/qsub_NBASIN_SL_vp_0005.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_001x_1000km.sh
+qsub CEES_QSUB_SCRIPTS/qsub_NBASIN_SL_vp_0010.sh
 sleep 1
-qsub CEES_QSUB_SCRIPTS/qsub_PSVPREM_001x__0000km.sh
+qsub CEES_QSUB_SCRIPTS/qsub_NBASIN_SL_vp_0015.sh
+sleep 1
+qsub CEES_QSUB_SCRIPTS/qsub_NBASIN_SL_vp_0030.sh
+sleep 1
+qsub CEES_QSUB_SCRIPTS/qsub_NBASIN_SL_vp_0060.sh
 sleep 1

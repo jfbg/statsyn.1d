@@ -3619,7 +3619,7 @@ SUBROUTINE CHECKSCATPROB
 			 ELSEIF (basintype.eq.30) THEN
         ! BASIN003
         !4deg of scat free centered on 20, 40, 60, 80, 100, 120, 140, 160, 180
-        ! Scat only if z_scat < 5km
+        ! Scat only if z_scat < 0.1km
 							basrad = 2.
 							IF (   ((xd.ge.20-basrad).AND.(xd.le.20+basrad)).OR.&
 										&((xd.ge.40-basrad).AND.(xd.le.40+basrad)).OR.&
@@ -3640,7 +3640,7 @@ SUBROUTINE CHECKSCATPROB
 			 ELSEIF (basintype.eq.31) THEN
         ! BASIN003
         !4deg of scat free centered on 20, 40, 60, 80, 100, 120, 140, 160, 180
-        ! Scat only if z_scat < 5km
+        ! Scat only if z_scat < .25km
 							basrad = 2.
 							IF (   ((xd.ge.20-basrad).AND.(xd.le.20+basrad)).OR.&
 										&((xd.ge.40-basrad).AND.(xd.le.40+basrad)).OR.&
@@ -3661,7 +3661,7 @@ SUBROUTINE CHECKSCATPROB
 			 ELSEIF (basintype.eq.32) THEN
         ! BASIN003
         !4deg of scat free centered on 20, 40, 60, 80, 100, 120, 140, 160, 180
-        ! Scat only if z_scat < 5km
+        ! Scat only if z_scat < .5km
 							basrad = 2.
 							IF (   ((xd.ge.20-basrad).AND.(xd.le.20+basrad)).OR.&
 										&((xd.ge.40-basrad).AND.(xd.le.40+basrad)).OR.&
@@ -3703,7 +3703,7 @@ SUBROUTINE CHECKSCATPROB
 			 ELSEIF (basintype.eq.34) THEN
         ! BASIN003
         !4deg of scat free centered on 20, 40, 60, 80, 100, 120, 140, 160, 180
-        ! Scat only if z_scat < 5km
+        ! Scat only if z_scat < 2km
 							basrad = 2.
 							IF (   ((xd.ge.20-basrad).AND.(xd.le.20+basrad)).OR.&
 										&((xd.ge.40-basrad).AND.(xd.le.40+basrad)).OR.&
