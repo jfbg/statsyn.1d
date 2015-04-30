@@ -34,7 +34,7 @@ PROGRAM STATSYNR_INTEL
         
         IMPLICIT NONE
         
-        INTEGER, PARAMETER :: nt0=190000, nx0=1441,ns0=2001,nst0=4000
+        INTEGER, PARAMETER :: nt0=4000, nx0=1441,ns0=2001,nst0=4000
         DOUBLE PRECISION      wf(nx0,nt0,3)        !STACKED DATA
         REAL(8)               w(nt0)
       
