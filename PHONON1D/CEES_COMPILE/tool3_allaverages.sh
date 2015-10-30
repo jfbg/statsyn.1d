@@ -1,1 +1,1 @@
-csh ./AVERAGING_SCRIPTS/PSPACE_B_001_average.csh
+csh ./AVERAGING_SCRIPTS/PBASIN_2301_average.csh

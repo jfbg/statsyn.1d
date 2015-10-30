@@ -1,0 +1,20 @@
+#!/bin/csh
+
+average_output << EOF
+./LISTS/PBASIN_2602.1000.05.lpr.list
+./AVERAGED_OUTPUTS/PBASIN_2602.1000.05.lpr
+0.2000
+EOF
+
+average_output << EOF
+./LISTS/PBASIN_2602.1000.05.lpz.list
+./AVERAGED_OUTPUTS/PBASIN_2602.1000.05.lpz
+0.2000
+EOF
+
+average_output << EOF
+./LISTS/PBASIN_2602.1000.05.lpt.list
+./AVERAGED_OUTPUTS/PBASIN_2602.1000.05.lpt
+0.2000
+EOF
+

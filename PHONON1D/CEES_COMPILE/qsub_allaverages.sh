@@ -1,2 +1,2 @@
 #!/bin/tcsh
-qsub ./QSUB_SCRIPTS/qsub_PSPACE_B_001_average.sh
+qsub ./QSUB_SCRIPTS/qsub_PBASIN_2301_average.sh

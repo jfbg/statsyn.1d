@@ -1,3 +1,1 @@
-csh ./AVERAGING_SCRIPTS/CSIMPLEMOON_lcore300_average.csh
-csh ./AVERAGING_SCRIPTS/CSIMPLEMOON_score300_average.csh
-csh ./AVERAGING_SCRIPTS/CSIMPLEMOON_vlvl_average.csh
+csh ./AVERAGING_SCRIPTS/PBASIN_2602_average.csh

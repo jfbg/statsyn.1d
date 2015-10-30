@@ -3,7 +3,7 @@ clc
 
 %%{    
 % UNCOMMENT TO RETRIEVE OUTPUT FILE LIST FROM CEES SERVER
-!getout
+% !getout
 %}
 % Read OUTPUT list
 fid = fopen('./OUTPUTfileLIST');
@@ -14,7 +14,10 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-    'PSPACE_B_001'
+%     'PBASIN_2302'
+%     'PBASIN_2602'
+    'PBASIN_2301'
+%     'PBASIN_2601'
 % 'CSIMPLEMOON_Q2000'
 % 'CSIMPLEMOON_Q6500'
 % 'CSIMPLEMOON_basic'
@@ -26,11 +29,11 @@ modellist = {...
 
 % depths = .01;
 % depths = [.01 20 30 50 100 150 800 500 750 1000]; % All potential depths
-depths = [.01 1000 30]; % All potential depths
+depths = [1000]; % All potential depths
 % depths = [0.01];
-freqs = [40];%2 5 7 10 20 1];                     % All potential frequencies
-kerns = 10;                 
-iters = 3;
+freqs = [5];%2 5 7 10 20 1];                     % All potential frequencies
+kerns = 16;                 
+iters = 5;
 
 outputfolder = '../OUTPUT/';
 scriptfolder = './AVERAGING_SCRIPTS/';
