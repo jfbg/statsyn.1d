@@ -4,10 +4,10 @@ clc
 %%{    
 % UNCOMMENT TO RETRIEVE OUTPUT FILE LIST FROM CEES SERVER
 % !getout
-!ls ../OUTPUT/ > ./OUTPUTfileLIST_GCC
+% !ls ../OUTPUT/ > ./OUTPUTfileLIST_GCC
 %}
 % Read OUTPUT list
-fid = fopen('./OUTPUTfileLIST_GCC');
+fid = fopen('./OUTPUTfileLIST');
 outputlist = textscan(fid,'%s','delimiter','\n');
 outputlist = outputlist{1};  
 fclose(fid);
@@ -15,15 +15,17 @@ fclose(fid);
 %WRITE list of models for which a averageoutput shell will be written
 
 modellist = {...
-'BMF_EARTHPREM_SPIKE_100km_EXP_noATT_AllPs'
-'BMF_MOON2LAYERS_700km_noATT_AllPs'
+%     'PBASIN_2302'
+%     'PBASIN_2602'
+%     'PBASIN_2301'
+    'PBASIN_2601'
 };
 
 % depths = .01;
 % depths = [.01 20 30 50 100 150 800 500 750 1000]; % All potential depths
-depths = [0.01 30 50 1000 700 100]; % All potential depths
+depths = [1000]; % All potential depths
 % depths = [0.01];
-freqs = [7 1];%2 5 7 10 20 1];                     % All potential frequencies
+freqs = [5];%2 5 7 10 20 1];                     % All potential frequencies
 kerns = 16;                  
 iters = 15;
 
@@ -33,9 +35,9 @@ qsubfolder = './QSUB_SCRIPTS/';
 
 % Open main qsub submission file to run all of the averaging below
 
-fidall =  fopen('matGCC_averagelist.list','w');
-fiddt  =  fopen('matGCC_dt.list','w');
-fidout  = fopen('matGCC_outputs.list','w');
+fidall =  fopen('mat4_averagelist.list','w');
+fiddt  =  fopen('mat4_dt.list','w');
+fidout  = fopen('mat4_outputs.list','w');
 
 
 %% Generate list files + .csh script
